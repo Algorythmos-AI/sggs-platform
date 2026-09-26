@@ -1,4 +1,6 @@
-// The poster kit: one declarative spec -> one large SVG poster + its steps sidecar.
+// The poster kit (version 1): one declarative spec -> one large SVG poster + its steps sidecar.
+// New and redrawn posters use version 2 (posters/kit2.mjs, `kit: 2` in the spec); this file still
+// builds the version-1 specs byte for byte until each is redrawn.
 // Every poster shares this visual language (brand palette, Source Serif titles, node kinds,
 // legend, version stamp, source-of-truth footer) and the walkthrough convention
 // (<g id="step-NN" data-step> groups). The output is committed under docs/diagrams/posters/
@@ -7,6 +9,7 @@
 // Colours are CSS custom properties with brand fallbacks, so the file renders correctly as a plain
 // <img> on GitHub and takes the dark theme when the site inlines it.
 import { BRAND } from '../plugins/brand.mjs';
+import { buildPoster2 } from './kit2.mjs';
 
 export const W = 1600;
 const FONT_SERIF = '"Source Serif 4", Georgia, "Times New Roman", serif';
@@ -119,6 +122,7 @@ function drawEdge(e, byId) {
 }
 
 export function buildPoster(spec) {
+  if (spec.kit === 2) return buildPoster2(spec);   // version 2 (posters/kit2.mjs): legible at the size shown
   const H = spec.height;
   const byId = Object.fromEntries((spec.nodes ?? []).map((n) => [n.id, n]));
   const steps = spec.steps ?? [];

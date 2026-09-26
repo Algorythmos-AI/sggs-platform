@@ -21,8 +21,8 @@ Every published page (docs/**/*.md except docs/reports/archive and docs/design) 
   7b. drift vs the code: every search `mode` literal in webapp/sggs/search.py:do_search is named on
      docs/architecture/search-waterfall.md and in poster 05's steps; the verify thresholds in
      webapp/verify.py appear in poster 07's steps; a generated page still carries its header.
-  7. posters (docs/diagrams/posters/*.svg): the spec in docs/diagrams/README.md (viewBox 1600 wide,
-     <title>+<desc>, brand colours, no brand red, text ≥ 16px, steps sidecar in step, footer
+  7. posters (docs/diagrams/posters/*.svg): the spec in docs/diagrams/README.md (viewBox 1200 wide for kit 2, 1600 for kit 1,
+     <title>+<desc>, brand colours, no brand red, text ≥ 25px (kit 2) or 16px, steps sidecar in step, footer
      naming existing source files).
 Site configuration: docs-site/vercel.json routes /api to the product host (frontend/src/site.ts
 SITE_URL) with git deployments off, and docs-site/sources.lock.json is well-formed.
@@ -469,8 +469,12 @@ def check_posters(tokens_hex: set[str]) -> list[Problem]:
     for svg in sorted(pdir.glob("*.svg")):
         s = svg.read_text(encoding="utf-8")
         head = s[:2000]
-        if not re.search(r'viewBox="0 0 1600 \d+"', head):
-            P.append(Problem(svg, 1, 'poster viewBox must be "0 0 1600 H"'))
+        # kit 2 (docs-site/posters/kit2.mjs) draws on 1200 px with text of at least 25 px, which the
+        # wiki shows at >= 13 px on a 1280-px screen; kit 1 drew on 1600 px with 16-px text (every poster is being redrawn)
+        kit2 = 'data-kit="2"' in head
+        width, min_px = (1200, 25) if kit2 else (1600, 16)
+        if not re.search(rf'viewBox="0 0 {width} \d+"', head):
+            P.append(Problem(svg, 1, f'poster viewBox must be "0 0 {width} H"'))
         if 'width="100%"' not in head or re.search(r'<svg[^>]*\sheight="', head):
             P.append(Problem(svg, 1, 'poster <svg> needs width="100%" and no fixed height'))
         if 'role="img"' not in head:
@@ -482,10 +486,10 @@ def check_posters(tokens_hex: set[str]) -> list[Problem]:
         bad = sorted({h.upper() for h in HEX_RE.findall(s)} - tokens_hex)
         if bad:
             P.append(Problem(svg, 1, f"poster colours must come from docs/brand/tokens.json; not allowed: {', '.join(bad)}"))
-        small = [fs for fs in re.findall(r'font-size="?(\d+(?:\.\d+)?)', s) if float(fs) < 16]
-        small += [fs for fs in re.findall(r"font-size:\s*(\d+(?:\.\d+)?)px", s) if float(fs) < 16]
+        small = [fs for fs in re.findall(r'font-size="?(\d+(?:\.\d+)?)', s) if float(fs) < min_px]
+        small += [fs for fs in re.findall(r"font-size:\s*(\d+(?:\.\d+)?)px", s) if float(fs) < min_px]
         if small:
-            P.append(Problem(svg, 1, f"poster text must be at least 16px (found {sorted(set(small))})"))
+            P.append(Problem(svg, 1, f"poster text must be at least {min_px}px (found {sorted(set(small))})"))
         if "Source of truth:" not in s:
             P.append(Problem(svg, 1, "poster footer must read `Source of truth: <files>`"))
         else:
@@ -494,7 +498,7 @@ def check_posters(tokens_hex: set[str]) -> list[Problem]:
                     name = name.strip()
                     if name and not (ROOT / name).exists() and not name.startswith("Algorythmos-AI/") and not pinned_file(name):
                         P.append(Problem(svg, 1, f"poster footer names a file that does not exist: {name}"))
-        if not re.search(r'<g class="pk-legend">(?:<rect[^>]*/><text[^>]*>[^<]+</text>)+</g>', s):
+        if not re.search(r'<g class="pk-legend">(?:<(?:rect|line)[^>]*/><text[^>]*>[^<]+</text>)+</g>', s):
             P.append(Problem(svg, 1, "poster needs its legend (docs-site/posters/kit.mjs draws it from the node kinds)"))
         if not re.search(r"v\d+\.\d+\.\d+ · verified \d{4}-\d{2}-\d{2} · [0-9a-f]{7}", s):
             P.append(Problem(svg, 1, "poster needs a version stamp `vX.Y.Z · verified YYYY-MM-DD · <sha7>`"))

@@ -8,7 +8,7 @@ sidebar:
 
 The wiki has two kinds of diagram. **Mermaid** fences in any page render to accessible SVG at
 build time in the brand palette (on GitHub, the same fence renders with GitHub's own theme).
-**Posters** are large, step-by-step process pictures, 1600 px wide, that the site turns into a
+**Posters** are large, step-by-step process pictures that the site turns into a
 walkthrough: press *Next* and the picture builds up one step at a time with a caption and a link
 to the page that explains it; *Full size* opens a zoomable, pannable view. Every poster is also a
 plain image on GitHub.
@@ -37,8 +37,11 @@ All thirteen posters of the plan are in place.
 
 A poster is **generated from a small declarative spec**, not drawn by hand:
 `docs-site/posters/NN-slug.mjs` lists the nodes (with a kind, a position and text), the edges,
-the groups and the steps; `docs-site/posters/kit.mjs` turns that into the SVG and the steps
-sidecar under `docs/diagrams/posters/`. The generated files are committed so GitHub and the
+the groups and the steps; the poster kit turns that into the SVG and the steps sidecar under
+`docs/diagrams/posters/`. **Kit 2** (`docs-site/posters/kit2.mjs`, `kit: 2` in the spec) is the
+standard: it draws on a 1200-px canvas for the ~630 px the page gives a poster on a 1280-px
+screen, so its smallest text shows at 13 px or more, and it routes every line at right angles around the boxes. Posters still on
+kit 1 (`kit.mjs`, 1600 px, text that shows at ~7 px) are being redrawn; poster 03 is the first. The generated files are committed so GitHub and the
 `docs_check` gate can read them; CI fails if a committed poster differs from its spec
 (`node scripts/build-posters.mjs --check`).
 
@@ -59,17 +62,23 @@ Node kinds and what they mean — the legend of every poster uses the same words
 | `pin` | dashed grey box | a pin: a reviewed lock file |
 | `ext` | blue-bordered box | an external system |
 | `good` | green block | a proven, verified state |
-| `note` | plain box | an explanation |
+| `note` | plain box with a gold bar | an explanation |
+| `fail` | red-bordered box | an outcome that stops here (kit 2) |
+
+Kit 2's legend also names the two line styles it uses: solid for a flow of data or control,
+dashed for "reads, pins or derives from".
 
 ## The spec every poster meets
 
 Enforced by `tools/docs_check.py` on every pull request:
 
-- `viewBox="0 0 1600 H"`, `width="100%"`, no fixed height; `role="img"` with a `<title>` (the
-  alt text) and a `<desc>` of at least 40 characters.
+- `viewBox="0 0 1200 H"` (kit 2, `data-kit="2"`; kit 1: `0 0 1600 H`), `width="100%"`, no fixed
+  height; `role="img"` with a `<title>` (the alt text) and a `<desc>` of at least 40 characters.
 - Colours only from `docs/brand/tokens.json`, as CSS custom properties with brand fallbacks
   (correct as a plain image, dark-themed when inlined). Brand red never appears; gold is a fill,
-  never text. Text is at least 16 px; Source Serif 4 for the title, the system sans for labels.
+  never text. Text is at least 25 px on kit 2 (13 px as shown; kit 1: 16 px); Source Serif 4 for
+  the title, the system sans for labels. On kit 2 every text-on-fill pair is at least 4.5:1 in
+  both themes, and text on a saturated fill is white by day and ink by night.
 - A title block, a legend, a version stamp (`vX.Y.Z · verified YYYY-MM-DD · <sha7>`) and a
   footer `Source of truth: <files>` naming files that exist.
 - Every step is a `<g id="step-NN" data-step>` group, and the `.steps.json` sidecar lists the
@@ -79,14 +88,5 @@ Enforced by `tools/docs_check.py` on every pull request:
 
 ## Adding a poster
 
-1. Copy an existing spec in `docs-site/posters/` and give it the next number and a slug.
-2. Lay out nodes on the 1600-wide canvas (leave 40 px margins, 120 px for the title, 96 px for
-   the legend and footer). Give each node and edge the step that introduces it; steps build the
-   picture up in order.
-3. Write the steps: a title, a caption a student can read on its own, and the page that explains
-   it. Name the source files the poster was read against in `sources` (a file pinned from a sibling
-   repository is named `sggs-data/<path>`), and the commit in `verified`.
-4. `node scripts/build-posters.mjs`, then embed it in a page as
-   `![Alt text](../diagrams/posters/NN-slug.svg)`.
-5. `make docs-check` and `make docs`; look at it in light and dark, on a phone width, and with
-   the keyboard (Tab to the poster, arrow keys step, *Full size* opens the lightbox, Esc closes).
+The steps, and what kit 2 checks before it will build a poster, are on
+[Adding a poster](../contributing/adding-a-poster.md).
