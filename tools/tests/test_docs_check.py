@@ -185,6 +185,21 @@ class PosterLegend(unittest.TestCase):
         finally:
             svg.write_text(original, encoding="utf-8")
 
+    def test_a_kit2_poster_is_held_to_kit2_sizes(self):
+        svg = dc.DOCS / "diagrams" / "posters" / "03-anatomy-of-a-line-record.svg"
+        original = svg.read_text(encoding="utf-8")
+        self.assertIn('data-kit="2"', original)
+        try:
+            # 18 px passes kit 1's 16-px floor but shows at ~9 px on a kit-2 poster
+            svg.write_text(original.replace('font-size="25"', 'font-size="18"', 1), encoding="utf-8")
+            msgs = [p.msg for p in dc.check_posters(dc.load_tokens_hex()) if p.file == svg]
+            self.assertTrue(any("at least 25px" in m for m in msgs), msgs)
+            svg.write_text(original.replace('viewBox="0 0 1200 ', 'viewBox="0 0 1600 ', 1), encoding="utf-8")
+            msgs = [p.msg for p in dc.check_posters(dc.load_tokens_hex()) if p.file == svg]
+            self.assertTrue(any('"0 0 1200 H"' in m for m in msgs), msgs)
+        finally:
+            svg.write_text(original, encoding="utf-8")
+
     def test_repo_docs_pass(self):
         errors = [str(p) for p in dc.run(ROOT / "db" / "sggs.sqlite") if p.level == "error"]
         self.assertEqual(errors, [])
