@@ -20,7 +20,7 @@ test.describe('the iOS section', () => {
     await page.goto('/ios/nitnem-for-engineers/');
     await expect(page.locator('.sl-markdown-content a[href="/ios/nitnem/spec/"]')).toHaveCount(1);
     await page.goto('/');
-    await expect(page.locator('a[href="/ios/ios/testflight-launch-plan/"]').first()).toBeVisible();
+    await expect(page.locator('main a[href="/ios/ios/testflight-launch-plan/"]').first()).toBeVisible();   // in the page, not the sidebar
   });
 
   for (const path of ['/ios/', '/ios/how-the-app-takes-a-release/', '/ios/contract-and-parity/', '/ios/db-pair-and-launch-integrity/', '/ios/nitnem-for-engineers/', '/ios/ios/testflight-launch-plan/', '/ios/nitnem/spec/']) {

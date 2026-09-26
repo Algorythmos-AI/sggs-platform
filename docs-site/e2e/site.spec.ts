@@ -38,6 +38,35 @@ test.describe('the wiki', () => {
     release();
   });
 
+  test('the sidebar reaches every section: no empty group, this page current, previous and next', async ({ page }, testInfo) => {
+    await mockApi(page);
+    await page.goto('/onboarding/run-it-locally/');
+    const nav = page.locator('nav[aria-label="Main"]');
+    const groups = nav.locator('details');
+    const n = await groups.count();
+    expect(n, 'the sidebar has its sections').toBeGreaterThan(10);
+    for (let i = 0; i < n; i++) {
+      const label = (await groups.nth(i).locator('> summary').innerText()).trim();
+      expect(await groups.nth(i).locator('a').count(), `the "${label}" group links pages`).toBeGreaterThan(0);
+    }
+    await expect(nav.locator('a[aria-current="page"]')).toHaveAttribute('href', '/onboarding/run-it-locally/');
+    await expect(page.locator('.pagination-links a[rel="prev"]')).toContainText('How the repositories fit');
+    await expect(page.locator('.pagination-links a[rel="next"]')).toContainText('Your first pull request');
+    if (testInfo.project.name === 'mobile') await page.getByRole('button', { name: 'Menu' }).click();
+    // a collapsed section opens onto its pages
+    const arch = nav.locator('details', { has: page.locator('> summary', { hasText: /^\s*Architecture\s*$/ }) });
+    await arch.locator('> summary').click();
+    await expect(arch.locator('a', { hasText: 'Request lifecycle' })).toBeVisible();
+  });
+
+  test('a section index is "Overview" in the sidebar and named after its section in previous/next', async ({ page }) => {
+    await mockApi(page);
+    await page.goto('/data/line-record/');
+    await expect(page.locator('.pagination-links a[rel="prev"]')).toContainText('Data overview');
+    // …while the sidebar entry itself stays "Overview" (pagination must not rename it)
+    await expect(page.locator('nav[aria-label="Main"] a[href="/data/"]')).toHaveText(/^\s*Overview\s*$/);
+  });
+
   test('overflowing code and tables are keyboard-scrollable', async ({ page }) => {
     await mockApi(page);
     await page.goto('/process/runbooks/deploy/');

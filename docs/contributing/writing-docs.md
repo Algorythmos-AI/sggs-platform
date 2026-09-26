@@ -9,11 +9,21 @@ sidebar:
 ## Frontmatter and headings
 
 Every page begins with `title` (8–120 characters) and `description` (40–200) and a body whose
-first `# H1` equals the title (GitHub shows it; the site strips it). Order a section's pages with
-`sidebar.order`. Pages under `docs/process/`, `docs/engineering/` and `docs/architecture/` must
+first `# H1` equals the title (GitHub shows it; the site strips it). Pages under `docs/process/`, `docs/engineering/` and `docs/architecture/` must
 carry `verified: {commit, date}` — the commit you last read the page against — and the gate warns
 when code the page cites (a code excerpt, a linked source file, a poster's *Source of truth*)
 changes after that commit; the weekly `docs-freshness` issue lists the same pages.
+
+## Where a page appears in the sidebar
+
+A new page in an existing directory appears in that directory's sidebar group by itself, after the
+directory's `README.md` (listed as "Overview"), ordered by `sidebar.order` and then by title. The
+sidebar shows the title unless the page sets a shorter `sidebar.label`; keep labels to 48
+characters. A page at the top of `docs/`, or a new directory, must be placed in
+[`docs-site/sidebar.mjs`](../../docs-site/sidebar.mjs) — the build fails until it is, because
+every published page must be reachable from the sidebar. `draft: true` or `sidebar.hidden: true`
+leaves a page out. The sidebar is read when the site starts, so restart `make docs-dev` after adding
+or removing a page.
 
 ## Links
 

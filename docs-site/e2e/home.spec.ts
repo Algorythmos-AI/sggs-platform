@@ -69,8 +69,10 @@ test.describe('brand, the API reference and the header', () => {
     await page.goto('/api/');
     // the sidebar is in the DOM on a phone too (inside the menu), so count elements rather than roles
     const api = page.locator('nav[aria-label="Main"] details', { has: page.locator('> summary', { hasText: /^\s*API\s*$/ }) }).first();
-    await expect(api.locator('a', { hasText: 'The JSON API' })).toHaveCount(1);
-    await expect(api.locator('summary', { hasText: 'API reference' })).toHaveCount(1);
+    await expect(api.locator('a[href="/api/"]', { hasText: 'Overview' })).toHaveCount(1);
+    await expect(api.locator('summary', { hasText: /^\s*Reference\s*$/ })).toHaveCount(1);
+    // operations are labelled by their short summary, not a sentence
+    await expect(api.locator('a[href="/api/reference/operations/search/"]')).toContainText('Search the Granth');
     const res = await page.goto('/api/reference/operations/meta/');
     expect(res?.status()).toBe(200);
     await expect(page.locator('h1')).toBeVisible();

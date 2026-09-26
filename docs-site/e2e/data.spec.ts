@@ -75,7 +75,7 @@ test.describe('data & pipeline', () => {
     await expect(page.locator('a.edit-link', { hasText: 'View the version this wiki pins' })).toHaveAttribute('href', /sggs-data\/blob\/[0-9a-f]{40}\/docs\//);
     // the landing page's GitHub link to this document now stays on the wiki
     await page.goto('/');
-    await expect(page.locator('a[href="/data/architecture/database-schema/"]').first()).toBeVisible();
+    await expect(page.locator('main a[href="/data/architecture/database-schema/"]').first()).toBeVisible();   // in the page, not the sidebar
   });
 
   for (const path of ['/data/', '/data/line-record/', '/data/pipeline/', '/data/dataset-pin/', '/data/editorial-ledger/', '/data/architecture/scripture-integrity/', '/engineering/known-issues/']) {

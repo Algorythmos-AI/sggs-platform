@@ -8,8 +8,12 @@ must be served as SVG, and the same-origin /api rewrite must reach the API (/api
 redirects, because a redirect on /api is exactly how the widgets broke before (a trailing-slash
 redirect looping with the product host). Retries while a deployment warms up. Sends the Vercel
 protection-bypass header when VERCEL_DOCS_BYPASS_SECRET is set.
+
+A build announces what it can be held to in <meta name="sggs-docs-features">; "nav2" (every
+published page in the sidebar) adds a check that the sidebar links every page in the sitemap.
+Older builds are not held to it, so docs-watch can keep proving an older production.
 """
-import argparse, json, os, re, sys, time, urllib.error, urllib.request
+import argparse, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
@@ -35,6 +39,30 @@ def poster_path(base, bypass):
     status, _, body = fetch(base, "/architecture/overview/", bypass)
     m = POSTER_RE.search(body) if status == 200 else None
     return m.group(1).decode() if m else None
+
+NAV_PAGE = "/glossary/"   # any docs page carries the full sidebar (the home page may not)
+
+
+def features(html):
+    """The capabilities a build announces (<meta name="sggs-docs-features">). Checks for a newer
+    capability run only on builds that have it, so this script can watch an older production."""
+    m = re.search(r'<meta name="sggs-docs-features" content="([^"]*)"', html)
+    return set(m.group(1).split()) if m else set()
+
+
+def nav_gaps(base, bypass):
+    """Sitemap pages the sidebar does not link to (nav2 builds: every page is in the sidebar)."""
+    status, _, body = fetch(base, "/sitemap-0.xml", bypass)
+    if status != 200:
+        return [f"/sitemap-0.xml -> {status}"]
+    want = {urllib.parse.urlsplit(u).path for u in re.findall(r"<loc>([^<]+)</loc>", body.decode())} - {"/", "/404/"}
+    status, _, body = fetch(base, NAV_PAGE, bypass)
+    html = body.decode("utf-8", "replace")
+    start = html.find('aria-label="Main"')
+    nav = html[start:html.find("</nav>", start)] if start >= 0 else ""
+    have = set(re.findall(r'<a href="(/[^"]*)"', nav))
+    return sorted(want - have)
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -63,6 +91,7 @@ def main():
             print(f"::error::docs smoke: timed out; last: {state}"); return 1
         time.sleep(a.interval)
     print(f"home page serves commit {a.commit[:12]}")
+    built = features(html)
     checks = [("/", "text/html", lambda b: b"Sri Guru Granth Sahib" in b),
               ("/architecture/overview/", "text/html", lambda b: b'data-diagram="mermaid"' in b),
               ("/pagefind/pagefind-entry.json", "application/json", lambda b: json.loads(b).get("version")),
@@ -78,6 +107,13 @@ def main():
         checks.append((poster, "image/svg+xml", lambda b: b.startswith(b"<svg") or b"<svg" in b[:500]))
     else:
         print("  BAD no poster linked as 'open full size' on /architecture/overview/"); bad += 1
+    if "nav2" in built:
+        try:
+            gaps = nav_gaps(a.base_url, bypass)
+        except Exception as e:  # noqa: BLE001 — a smoke check reports, never raises
+            gaps = [f"unreadable ({type(e).__name__})"]
+        print(f"  {'ok ' if not gaps else 'BAD'} sidebar links every page" + (f" — missing {', '.join(gaps[:8])}" if gaps else ""))
+        bad += bool(gaps)
     for path, want_type, ok in checks:
         try:
             status, ctype, body = fetch(a.base_url, path, bypass)
