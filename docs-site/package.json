@@ -15,7 +15,7 @@
     "check:budget": "node scripts/check-budget.mjs dist",
     "lhci": "npx --yes @lhci/cli@0.15.1 autorun",
     "check:links": "node scripts/check-links.mjs dist",
-    "check:all": "npm run check:render && npm run check:mermaid && npm run check:links && npm run check:budget && npm run check:csp",
+    "check:all": "npm run check:render && npm run check:nav && npm run check:mermaid && npm run check:links && npm run check:budget && npm run check:csp",
     "typecheck": "astro check",
     "posters": "node scripts/build-posters.mjs",
     "check:posters": "node scripts/build-posters.mjs --check",
@@ -23,7 +23,8 @@
     "check:csp": "node scripts/csp.mjs --check dist",
     "csp:write": "node scripts/csp.mjs --write dist",
     "test:live": "playwright test -c playwright.live.config.ts",
-    "review-pack": "node scripts/review-pack.mjs"
+    "review-pack": "node scripts/review-pack.mjs",
+    "check:nav": "node scripts/check-nav.mjs dist"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "7.3.1",

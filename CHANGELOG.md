@@ -73,6 +73,20 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   every push to `main` still audit all twenty.
 
 ### Fixed
+- **Every wiki page is in the sidebar again.** Fourteen of the nineteen sidebar groups rendered empty
+  (Start here, Scripture 101, Architecture, Search, the handbook, Process, Brand, Decisions and the
+  pinned groups), so 87 of 148 pages were reachable only through search and had no previous/next
+  links. Starlight's `autogenerate` matches a page's file path under `src/content/docs`, which this
+  site never uses (it reads `../docs` in place). The sidebar is now built from the pages themselves
+  (`docs-site/plugins/nav.mjs`; the layout in `docs-site/sidebar.mjs`): eleven sections, short
+  labels ("0007 · Three repositories" instead of a 70-character title), pinned sibling pages badged
+  in their topic, only *Get started* open by default, and previous/next naming the section
+  ("Data overview"). New gates: `check-nav` in `check:all` (every page in the sidebar, no empty group,
+  the same sidebar on every page, previous/next everywhere — proven red on the v1.3.10 sidebar), a
+  unit test that every published page is placed exactly once, e2e and a live check (on builds that
+  announce `nav2`, so the watch on the older production stays quiet). API operations carry a short
+  `summary` ("Search the Granth") with the sentence as `description`, so the API reference sidebar
+  reads as labels, and its generated pages' *Edit this page* opens `tools/gen_openapi.py`.
 - **Docs match the live mail setup and the submission gates.** `support@gurbanisoul.com` is a Zoho Mail alias
   (MX/SPF/DKIM for Zoho, DMARC `p=none` added 2026-09-26); the website README had described Cloudflare Email
   Routing and a `p=reject` DMARC record that never existed. The brand book records G3 and G4 as closed for the

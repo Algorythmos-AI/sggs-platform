@@ -53,6 +53,7 @@ export default defineConfig({
       locales: { root: { label: 'English', lang: 'en' } },
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Algorythmos-AI/sggs-platform' }],
       lastUpdated: true,
+      routeMiddleware: './src/route-data.ts',
       pagination: true,
       customCss: ['./src/styles/theme.css', './src/styles/widgets.css'],
       components: {
@@ -63,15 +64,18 @@ export default defineConfig({
       },
       head: [
         { tag: 'meta', attrs: { name: 'sggs-docs-commit', content: process.env.PUBLIC_DOCS_COMMIT } },
+        // what this build can be held to (scripts/ci/docs_smoke.py, e2e-live): nav2 = every page is in the sidebar
+        { tag: 'meta', attrs: { name: 'sggs-docs-features', content: 'nav2' } },
       ],
       // the generated API reference sits inside the API group, not after Reference
-      sidebar: SIDEBAR.map((g) => (g.label === 'API' ? { ...g, items: [...g.items, ...openAPISidebarGroups] } : g)),
+      sidebar: SIDEBAR.map((/** @type {any} */ g) => (g.label === 'API' ? { ...g, items: [...g.items, ...openAPISidebarGroups] } : g)),
       plugins: [
         starlightOpenAPI([
           {
             base: 'api/reference',
-            label: 'API reference',
             schema: '../contract/openapi.json',
+            // operation labels are the spec's short `summary` (tools/gen_openapi.py SUMMARIES), with a GET badge
+            sidebar: { label: 'Reference', collapsed: true, operations: { labels: 'summary', badges: true } },
           },
         ]),
       ],

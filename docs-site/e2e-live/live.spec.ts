@@ -26,6 +26,20 @@ test('the status strip reports every health check green', async ({ page }) => {
   expect(problems).toEqual([]);
 });
 
+test('every page is in the sidebar and no section is empty (builds that announce nav2)', async ({ page, request }) => {
+  await page.goto('/glossary/');
+  // read once, without waiting: an older build has no such meta, and a locator would wait for it
+  const features = await page.evaluate(() => document.querySelector('meta[name="sggs-docs-features"]')?.getAttribute('content') ?? '');
+  test.skip(!features.split(/\s+/).includes('nav2'), 'an older build (before the sidebar was built from the pages)');
+  const nav = page.locator('nav[aria-label="Main"]');
+  const groups = nav.locator('details');
+  for (let i = 0; i < await groups.count(); i++) expect(await groups.nth(i).locator('a').count()).toBeGreaterThan(0);
+  const sitemap = await (await request.get('/sitemap-0.xml')).text();
+  const want = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname).filter((p) => p !== '/' && p !== '/404/');
+  const have = new Set(await nav.locator('a[href^="/"]').evaluateAll((as) => as.map((a) => a.getAttribute('href'))));
+  expect(want.filter((p) => !have.has(p))).toEqual([]);
+});
+
 test('the search simulator answers a real query, verbatim with its Ang', async ({ page }) => {
   const problems = watch(page);
   await page.goto('/architecture/search-waterfall/');

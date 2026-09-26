@@ -40,7 +40,9 @@ Regenerate or re-pin; never edit a generated file.
 
 `npm run typecheck` first; `npm run build` renders every Mermaid fence and every poster; then
 `npm run check:all` — `check-render` (every page rendered completely — Astro logs a failed render
-and exits 0), `check-mermaid`, `check-links` (every internal link and fragment in the built HTML),
+and exits 0), `check-nav` (every published page is in the sidebar and marked current on itself, no
+sidebar group is empty, no label is longer than 48 characters, and every page has previous and
+next links), `check-mermaid`, `check-links` (every internal link and fragment in the built HTML),
 `check-budget` (JS per page, largest page) and `check-csp`. Then Playwright with a mocked API on
 desktop and phone, axe on **every page the build produced** (from the sitemap), and Lighthouse — on five representative pages
 for a pull request, on all twenty nightly and on `main`. The e2e server (`scripts/serve-dist.mjs`) sends the headers `docs-site/vercel.json`

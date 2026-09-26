@@ -74,6 +74,8 @@ class VercelApi(unittest.TestCase):
 class _Site(http.server.BaseHTTPRequestHandler):
     COMMIT = "a" * 40
     REDIRECT_API = False
+    FEATURES = None          # e.g. "nav2": the build announces a full sidebar
+    NAV = ("/glossary/", "/data/")   # the pages the sidebar links
 
     def log_message(self, *a):
         pass
@@ -91,7 +93,11 @@ class _Site(http.server.BaseHTTPRequestHandler):
         if self.REDIRECT_API and p.startswith("/api/") and not p.endswith("/"):
             return self._send(308, "text/plain", b"", {"location": p + "/"})
         pages = {
-            "/": ("text/html", f'<meta name="sggs-docs-commit" content="{self.COMMIT}"/>Sri Guru Granth Sahib'.encode()),
+            "/": ("text/html", (f'<meta name="sggs-docs-commit" content="{self.COMMIT}"/>'
+                               + (f'<meta name="sggs-docs-features" content="{self.FEATURES}"/>' if self.FEATURES else "")
+                               + "Sri Guru Granth Sahib").encode()),
+            "/sitemap-0.xml": ("application/xml", "".join(f"<url><loc>https://x{u}</loc></url>" for u in ("/", "/404/", "/glossary/", "/data/")).encode()),
+            "/glossary/": ("text/html", ('<nav aria-label="Main">' + "".join(f'<a href="{u}">x</a>' for u in self.NAV) + "</nav>").encode()),
             "/architecture/overview/": ("text/html", b'<div data-diagram="mermaid"></div><a href="/posters/01-system-landscape.svg">open full size</a>'),
             "/pagefind/pagefind-entry.json": ("application/json", b'{"version":"1.3.0"}'),
             "/api/health": ("application/json", b'{"ok":true}'),
@@ -126,6 +132,19 @@ class DocsSmoke(unittest.TestCase):
         r = self.smoke(self.serve(REDIRECT_API=True))
         self.assertEqual(r.returncode, 1)
         self.assertIn("BAD /api/health -> 308 redirect -> /api/health/", r.stdout)
+
+    def test_a_nav2_build_must_link_every_page_from_the_sidebar(self):
+        r = self.smoke(self.serve(FEATURES="nav2"))
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("ok  sidebar links every page", r.stdout)
+        r = self.smoke(self.serve(FEATURES="nav2", NAV=("/glossary/",)))
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("BAD sidebar links every page — missing /data/", r.stdout)
+
+    def test_an_older_build_is_not_held_to_the_sidebar_check(self):   # docs-watch proves v1.3.10 production
+        r = self.smoke(self.serve(NAV=()))
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertNotIn("sidebar", r.stdout)
 
     def test_the_wrong_commit_times_out(self):
         r = self.smoke(self.serve(), commit="b" * 40)
