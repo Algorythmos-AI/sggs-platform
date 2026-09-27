@@ -155,6 +155,13 @@ sggs-progress { display: block; margin: 0.5rem 0; }
 .release__t { grid-column: 2; grid-row: 1 / span 2; }
 .release__k { font-size: 0.8rem; color: var(--sl-color-gray-3); }
 @media (max-width: 640px) { .release { grid-template-columns: 1fr; } .release__t { grid-column: 1; grid-row: auto; } }
+/* the app's upload ledger (remark-app-builds): scrolls inside its own box on a narrow screen */
+.app-builds-wrap { overflow-x: auto; }
+.app-builds { font-size: 0.875rem; }
+.app-builds caption { text-align: start; font-size: 0.8rem; color: var(--sl-color-gray-3); padding-bottom: 0.4rem; }
+.app-builds__v, .app-builds__nw, .app-builds__c { white-space: nowrap; }
+.app-builds__c { margin-inline-end: 0.6rem; }
+.app-builds__note { display: block; font-size: 0.8rem; color: var(--sl-color-gray-3); }
 .adrs { list-style: none; padding: 0; margin: 0; border-left: 2px solid var(--sl-color-hairline); }
 .adr { position: relative; padding: 0.35rem 0 0.35rem 1.25rem; }
 .adr::before { content: ""; position: absolute; left: -7px; top: 0.85rem; width: 12px; height: 12px; border-radius: 50%; background: var(--sl-color-accent); }

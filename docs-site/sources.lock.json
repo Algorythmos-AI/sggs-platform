@@ -95,7 +95,7 @@
     "gurbani-soul-ios": {
       "repository": "Algorythmos-AI/gurbani-soul-ios",
       "ref": "main",
-      "commit": "941cfdc6225a8e9b569643ec226d315f2013c74f",
+      "commit": "2f89359ca41f0bd1df10acfc0bf8ba5c40c627a4",
       "alias": "ios",
       "include": [
         "docs/ios/*.md",
@@ -114,7 +114,12 @@
         "ios/App/Sources/Data/LaunchIntegrity.swift",
         "ios/App/Sources/Persistence/SavedLine.swift",
         "ios/Packages/GurbaniSearchKit/Sources/GurbaniSearchKit/RomanNorm.swift",
-        "ios/Packages/GurbaniSearchKit/Sources/GurbaniSearchKit/BaniOutline.swift"
+        "ios/Packages/GurbaniSearchKit/Sources/GurbaniSearchKit/BaniOutline.swift",
+        "ios/Packages/GurbaniSearchKit/Package.swift",
+        "ios/App/Sources/Data/CorpusActor.swift",
+        "ios/App/Sources/Navigation/Router.swift",
+        "ios/App/Resources/PrivacyInfo.xcprivacy",
+        "ios/tests/test_ios_gates.py"
       ],
       "files": {
         "CONTRIBUTING.md": {
@@ -134,8 +139,8 @@
           "sha256": "f77e1e820447995af565d3319e23835837d12eefe6d3c5cdafdd23efc49832b8"
         },
         "docs/ios/testflight-test-plan.md": {
-          "blob": "ccb8f984ae6ee36b7b753875164af0b56039c7d5",
-          "sha256": "49de3388f117668cd298418067ff77e65dd776597d4a1b98902c2c68c1bc2d28"
+          "blob": "02985873372963299c1f577f84a83ab412401842",
+          "sha256": "6133e32b28d79d93adc8d94444cf434f645009dc958bcb7aafde772f840ed2cf"
         },
         "docs/nitnem/spec.md": {
           "blob": "1a6968f7cda5c3a4ca0408b49b80862042580caa",
@@ -149,13 +154,29 @@
           "blob": "5f2b411b1932f817609fe1853883c62f74293670",
           "sha256": "5528fe4e601fd45ed9c27b6322ee639ceffb2b752fbc78eaa68dc93dee0857ac"
         },
+        "ios/App/Resources/PrivacyInfo.xcprivacy": {
+          "blob": "a0c644c41144a27e6f8686f17551b7dea8ce0e2d",
+          "sha256": "6ee12603431633dee35f4c47e6e64688d607346f8c8a3ff7acc4ca883cbb287a"
+        },
+        "ios/App/Sources/Data/CorpusActor.swift": {
+          "blob": "17df27a5c55332cc925ea3a2ebbe2b6f5f5987d7",
+          "sha256": "bbadac3c5ea2f2d38c3e92395f517adb8d2a46baa9e135b60f81cdba92eaef09"
+        },
         "ios/App/Sources/Data/LaunchIntegrity.swift": {
           "blob": "d99fe8da185452cf7bb57754fd9d69fa3ea43241",
           "sha256": "73803611a8ab3c7a89c080cbccc54d3240109268833aaec89fb07f5e277f317b"
         },
+        "ios/App/Sources/Navigation/Router.swift": {
+          "blob": "ca7ec7738df20cb8c24156a0b4e979412ce39d03",
+          "sha256": "598865018185b759d969d5d0f9cb4f79e7720c9b19f5d60fb22c2e28a8b3f315"
+        },
         "ios/App/Sources/Persistence/SavedLine.swift": {
           "blob": "6e9e463fb05e86f63f1dd62795ae9955bcb7f962",
           "sha256": "cd5bcdfdce211c2426500967295e906dfc9180aae42d213c863f51ed7577a52e"
+        },
+        "ios/Packages/GurbaniSearchKit/Package.swift": {
+          "blob": "a7e42779d3fc0d15d2770f5942331e21d0bc9752",
+          "sha256": "fbac75e10fa64ea037c842834fee9146344bfb1ff55731be5e33c4d84c83759f"
         },
         "ios/Packages/GurbaniSearchKit/Sources/GurbaniSearchKit/BaniOutline.swift": {
           "blob": "595e0a77d7584601cc2a9b01e410996110879f90",
@@ -168,6 +189,10 @@
         "ios/testflight-builds.json": {
           "blob": "210eb93e54cfe1e92c8b45707ee003a4e610c7e7",
           "sha256": "1bcd07c7a4772c803c866b09bbb362976df870b1dbeef6b4f47cccbe18e3fc92"
+        },
+        "ios/tests/test_ios_gates.py": {
+          "blob": "419b59c5a4fb70b88b949db3d7eb92bb671971c5",
+          "sha256": "c174ae7d4b347d07964c4511a24f6014e3af98714b6f75beaca7b8e2c0fd5bae"
         },
         "ios/tools/appstore_preflight.py": {
           "blob": "9e6b160a4dfd962317f97542b5e36a712871b7c8",

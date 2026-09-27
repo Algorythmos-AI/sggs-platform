@@ -91,6 +91,14 @@
         }
       }
     },
+    "app-builds": {
+      "purpose": "The app's upload history, rendered at build (remark-app-builds) from gurbani-soul-ios's ios/testflight-builds.json at its pinned commit: version and build, date, channel, profile, and the platform and dataset commits. No JavaScript; uploads only, never App Review outcomes.",
+      "attrs": {
+        "limit": {
+          "description": "Show only the newest N uploads."
+        }
+      }
+    },
     "cards": {
       "purpose": "Turns the Markdown list that follows into a grid of cards at build (remark-cards): each item is `[Title](link) — one sentence`. No JavaScript; on GitHub the list itself is the fallback.",
       "attrs": {}
