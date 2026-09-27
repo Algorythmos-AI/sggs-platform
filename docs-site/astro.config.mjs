@@ -20,6 +20,7 @@ import { remarkQuiz } from './plugins/remark-quiz.mjs';
 import { remarkRepoMap } from './plugins/remark-repo-map.mjs';
 import { remarkAdrTimeline } from './plugins/remark-adr-timeline.mjs';
 import { remarkReleases } from './plugins/remark-releases.mjs';
+import { remarkAppBuilds } from './plugins/remark-app-builds.mjs';
 import { remarkCards } from './plugins/remark-cards.mjs';
 import { remarkSwatches } from './plugins/remark-swatches.mjs';
 import { remarkMermaid } from './plugins/remark-mermaid.mjs';
@@ -44,7 +45,7 @@ export default defineConfig({
     // Order matters: links and widgets are rewritten before Starlight's own plugins see the tree;
     // Mermaid renders at the remark stage, before Expressive Code sees code blocks. Links in the
     // built HTML are validated afterwards by scripts/check-links.mjs.
-    processor: unified({ remarkPlugins: [remarkStripTitleH1, remarkAdr, remarkAlerts, remarkRepoLinks, remarkWidgets, remarkCodeExcerpt, remarkApiTry, remarkQuiz, remarkRepoMap, remarkAdrTimeline, remarkReleases, remarkCards, remarkSwatches, remarkTerms, remarkGlossaryAnchors, remarkMermaid, remarkPosters, remarkTaskLists] }),
+    processor: unified({ remarkPlugins: [remarkStripTitleH1, remarkAdr, remarkAlerts, remarkRepoLinks, remarkWidgets, remarkCodeExcerpt, remarkApiTry, remarkQuiz, remarkRepoMap, remarkAdrTimeline, remarkReleases, remarkAppBuilds, remarkCards, remarkSwatches, remarkTerms, remarkGlossaryAnchors, remarkMermaid, remarkPosters, remarkTaskLists] }),
   },
   integrations: [
     starlight({

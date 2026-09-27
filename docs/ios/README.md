@@ -4,8 +4,8 @@ description: "Gurbani Soul for iPhone and iPad lives in its own repository and t
 sidebar:
   order: 0
 verified:
-  commit: 417c92f6
-  date: "2026-09-25"
+  commit: 0f89c40f
+  date: "2026-09-27"
 ---
 # The iOS app
 
@@ -25,6 +25,10 @@ held to the platform's API by the golden contract.
 ## The pages
 
 <!-- sggs:cards -->
+- [What the app does](what-the-app-does.md) — the five tabs screen by screen, the widgets and Live Activity, Siri and deep links, settings, what the public build leaves out, accessibility
+- [App architecture](architecture.md) — the Swift package (a Foundation-only core, a vendored SQLite, a read-only seam), the actor that answers the API's routes on the device, the widget extension, the tests
+- [Privacy and on-device data](privacy-and-on-device-data.md) — what is stored where, what the widgets see, no network, what sharing sends, deletion, the privacy manifest and its tests
+- [Release status](release-status.md) — every upload from the app's ledger (rendered at build) and the first App Store submission's sign-off record
 - [How the app takes a release](how-the-app-takes-a-release.md) — vendor-sync, the one version number, the ledger, and what makes a release *complete* (the flow as a sequence diagram; the tools read from the app repository at its pinned commit)
 - [Contract and parity](contract-and-parity.md) — how the Swift port is proven byte-identical to the API, suite by suite (the Swift fold read from the source)
 - [Database pair and launch integrity](db-pair-and-launch-integrity.md) — the two database profiles, the manifest, the licence gate, the fail-closed launch check, the bookmarks store (poster 12 walkthrough)
