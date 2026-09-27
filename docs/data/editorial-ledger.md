@@ -56,15 +56,16 @@ cannot change between two commits unless a new application entry names that line
 ## How a fidelity concern travels
 
 ```mermaid
-flowchart LR
+flowchart TB
     accTitle: A reported text concern goes through review and the ledger before any dataset changes
-    r[Reader or Granthi reports a concern] --> i[Issue: scripture-fidelity template<br/>Ang · line · photo of the printed page]
-    i --> c{A person compares<br/>with the source edition}
-    c -->|edition difference,<br/>saroop rendering,<br/>transliteration| n[No change · reply with the explanation]
-    c -->|impossible sequence<br/>confirmed| l[Ledger entry + rule · scholar review]
-    l --> b[sggs-data rebuild · gates · new DATASET_VERSION]
-    b --> p[Platform: dataset.lock.json bump]
-    p --> a[App: same pin · re-archive]
+    accDescr: A reader or Granthi reports a concern as a scripture-fidelity issue with the Ang, the line and a photo of the printed page. A person compares it with the source edition. An edition difference, a saroop rendering or a transliteration question gets an explanation and no change. A confirmed impossible sequence becomes a ledger entry and rule, reviewed by a scholar, then an sggs-data rebuild with its gates and a new DATASET_VERSION, a lock bump in the platform and the same pin in the app.
+    r[A reader or Granthi reports a concern] --> i[An issue: Ang, line, photo of the page]
+    i --> c{A person compares it<br/>with the source edition}
+    c -->|an edition difference,<br/>saroop, transliteration| n[No change: an explanation]
+    c -->|an impossible sequence,<br/>confirmed| l[A ledger entry and rule,<br/>scholar review]
+    l --> b[sggs-data: rebuild, gates,<br/>a new DATASET_VERSION]
+    b --> p[Platform: the lock bump]
+    p --> a[App: the same pin, re-archived]
 ```
 
 Most reports are an edition difference, the traditional-saroop rendering (a display choice, the

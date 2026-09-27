@@ -17,19 +17,23 @@ The whole journey, from a branch to production and the App Store, as the pipelin
 ```mermaid
 gitGraph
     accTitle: Branch model
-    accDescr: Feature branches merge into integration, which deploys staging; release merges from integration reach main, which deploys production and is tagged.
+    accDescr: A feature branch from integration is squash-merged back into it as one commit, which deploys staging. A release merges integration into main with a merge commit and is tagged after a verified production deploy. A hotfix branches from main, is squashed into main, and main is merged back into integration.
     commit id: "main"
     branch integration
     commit id: "trunk"
-    branch feature
+    branch feat/change
     commit id: "work"
-    commit id: "more"
+    commit id: "review fixes"
     checkout integration
-    merge feature
-    commit id: "STAGING deploy"
+    commit id: "feat (squashed): staging"
     checkout main
-    merge integration tag: "v1.2.0"
-    commit id: "PROD deploy"
+    merge integration tag: "vX.Y.Z"
+    branch hotfix/urgent
+    commit id: "fix"
+    checkout main
+    commit id: "fix (squashed)" tag: "vX.Y.(Z+1)"
+    checkout integration
+    merge main
 ```
 
 ## Rules

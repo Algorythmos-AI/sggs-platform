@@ -3,6 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { darkStyles } from '../remark-mermaid.mjs';
+import { lineBlocks } from '../remark-mermaid.mjs';
 import { contrast } from '../brand.mjs';
 
 test('light tokens in style lines become their dark twins', () => {
@@ -48,4 +49,11 @@ test('compact path data keeps every number: same count, each within half a hundr
   assert.equal(b.length, a.length, `numbers: ${a.length} before, ${b.length} after — ${out}`);
   a.forEach((x, i) => assert.ok(Math.abs(x - b[i]) <= 0.005 + 1e-9, `#${i}: ${x} became ${b[i]}`));
   assert.ok(out.length < d.length);
+});
+
+test('a label\'s lines are blocks, never <br> (re-serialised as <br></br>, which HTML reads as two breaks)', () => {
+  const svg = '<foreignObject><div><span class="nodeLabel"><p>deploy-production<br>every required check</p></span></div></foreignObject><p>one line</p>';
+  assert.equal(lineBlocks(svg), '<foreignObject><div><span class="nodeLabel"><p><span class="mmd-line">deploy-production</span><span class="mmd-line">every required check</span></p></span></div></foreignObject><p>one line</p>');
+  assert.equal(lineBlocks('<p>a<br/>b</p>'), '<p><span class="mmd-line">a</span><span class="mmd-line">b</span></p>');
+  assert.equal(lineBlocks('<p>a<br></br>b</p>'), '<p><span class="mmd-line">a</span><span class="mmd-line">b</span></p>');
 });

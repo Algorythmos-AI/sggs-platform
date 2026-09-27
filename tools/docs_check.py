@@ -395,7 +395,18 @@ def check_mermaid(path: Path, n: int, src: str, tokens_hex: set[str]) -> list[Pr
         P.append(Problem(path, n, f"Mermaid colours must come from docs/brand/tokens.json; not allowed: {', '.join(bad)}",
                          level="notice" if is_sibling(path) else "error"))
     if "accTitle" not in src:
-        P.append(Problem(path, n, "Mermaid diagram has no `accTitle:` (screen readers get no name)", level="warning"))
+        P.append(Problem(path, n, "Mermaid diagram has no `accTitle:` (screen readers get no name)"))
+    if "accDescr" not in src:
+        P.append(Problem(path, n, "Mermaid diagram has no `accDescr:` (screen readers get no description)"))
+    # a classDef nobody uses is dead palette (and hides which colours a diagram really shows)
+    for name in re.findall(r"^\s*classDef\s+(\w+)", src, re.M):
+        used = re.search(rf"(:::{name}\b)|(^\s*class\s+[\w,]+\s+{name}\b)", src, re.M)
+        if not used:
+            P.append(Problem(path, n, f"Mermaid classDef `{name}` is never used — remove it"))
+    # the page's column is narrow: a left-to-right chart of many nodes scrolls or shrinks unreadably
+    m = re.search(r"^\s*(?:flowchart|graph)\s+(LR|RL)\b", src, re.M)
+    if m and len(set(re.findall(r"^\s*(\w+)[\[\(\{]", src, re.M))) > 6:
+        P.append(Problem(path, n, "a left-to-right Mermaid chart of more than six nodes is too wide for the column — draw it top to bottom (flowchart TB)", level="warning"))
     return P
 
 

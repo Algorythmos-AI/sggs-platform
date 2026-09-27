@@ -181,3 +181,6 @@ h1#_top,
 :root[data-theme="light"] { --sl-color-red: #b33528; }     /* status.negative, light leg */
 div.sl-openapi-section-panel.sl-openapi-section-panel,
 div.sl-openapi-section-panel.sl-openapi-section-panel :is(pre, code) { background-color: var(--sl-color-bg); }
+
+/* a Mermaid label's lines (plugins/remark-mermaid.mjs lineBlocks): one block per line, no <br> */
+.mmd .mmd-line { display: block; }

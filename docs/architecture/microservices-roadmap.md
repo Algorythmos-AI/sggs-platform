@@ -20,12 +20,7 @@ Split the single dispatch ladder into modules behind an app-context object:
 `verify.py`, `static.py`, `http.py` (router). `serve.py` becomes a thin entrypoint.
 Extraction order by coupling (cleanest first):
 
-```mermaid
-flowchart LR
-    accTitle: Order of module extraction
-    accDescr: The order in which bounded contexts are extracted from the monolith on the road to services.
-    verify[Verify] --> timing[Timing] --> analytics[Analytics] --> search[Search] --> reader[Reader]
-```
+verify, then timing (today's knowledge context), analytics (today's insights), search, and reader last.
 
 **Progress.** 2026-09-24 — `api()` is a route table (`serve.ROUTES`): 26 handlers, each tagged with
 its bounded context (reader, search, verify, insights, knowledge). Behaviour proven identical
