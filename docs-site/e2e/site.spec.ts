@@ -110,7 +110,7 @@ test.describe('the wiki', () => {
     await mockApi(page);
     await page.goto('/architecture/overview/');
     const figures = page.locator('figure[data-diagram="mermaid"]');
-    await expect(figures).toHaveCount(3);
+    await expect(figures).toHaveCount(1);   // the deployment diagram (the system and the containers are posters 01 and 02)
     // drawn in both palettes; exactly one is shown (the light one in a light scheme), one title read out
     await expect(figures.first().locator('.mmd--light svg')).toBeVisible();
     await expect(figures.first().locator('.mmd--dark svg')).toBeHidden();

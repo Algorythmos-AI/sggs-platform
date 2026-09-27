@@ -15,69 +15,30 @@ The whole system on one poster — press *Next* on the site to build it up step 
 
 ## System context (C4 level 1)
 
-```mermaid
-flowchart TB
-    accTitle: System context
-    accDescr: Readers and scholars use the web app and the iOS app; both read the stdlib API. The source Bir PDF feeds the reproducible pipeline; the ShabadOS English layer is attached, labelled, to the API.
-    reader([Sikh sangat / student]):::person
-    granthi([Granthi / scholar]):::person
-    subgraph SGGS[SGGS Knowledge Base]
-        web[Astro web app]
-        ios[iOS app]
-        api[Stdlib API server]
-    end
-    pdf[(Source Bir PDF<br/>1,483 pp, offline)]:::ext
-    shabados[(ShabadOS / BaniDB<br/>Khalsa English layer)]:::ext
-
-    reader -->|search, read, study| web
-    reader -->|search, read, offline| ios
-    web -->|/api/*| api
-    pdf -.->|reproducible pipeline<br/>char-exact| SGGS
-    shabados -.->|labelled translation layer| api
-    granthi -.->|reviews flagged text<br/>never edits| SGGS
-    classDef person fill:#8A1538,color:#FFFFFF,stroke:#8A1538;
-    classDef ext fill:#B69A81,color:#201A12,stroke:#B69A81;
-```
+Poster 01 above is the system context: three kinds of people, three surfaces, one read-only API,
+the pinned database, the source Bir and the labelled English layer, and CI as the only way to
+production.
 
 ## Containers (C4 level 2)
 
-```mermaid
-flowchart LR
-    accTitle: Containers across the three repositories
-    accDescr: sggs-data builds the corpus and the SQLite database from the PDF through the reconcile and golden gates; this repository pins that database and serves it through serve.py and the Astro site; gurbani-soul-ios bundles a database built from it and vendors the golden contract.
-    subgraph data[sggs-data — build time]
-      PDF[(Bir PDF)] --> corpus[build_corpus.py<br/>+ sggs_pipeline.py]
-      corpus --> jsonl[corpus/sggs.jsonl<br/>verbatim, SHA-pinned]
-      jsonl -->|reconcile.py + golden_test.py<br/>GATES| db[build_db.py → SQLite/FTS5]
-      db --> enrich[translations · variants · concepts<br/>analytics · vaars · timing]
-      enrich --> sqlite[(db/sggs.sqlite<br/>published by commit + sha256)]
-    end
-    subgraph platform[this repository]
-      lock[dataset.lock.json] -.->|pins| sqlite
-      sqlite -->|fetch_dataset.py<br/>sha256-verified| serve[webapp/serve.py<br/>read-only, mmap]
-      serve --> contract[tools/gen_golden_vectors.py<br/>→ contract/*.ndjson]
-      serve --> static[Astro static MPA]
-      static -->|/api/* same-origin| serve
-    end
-    subgraph ios[gurbani-soul-ios]
-      sqlite --> iosdb[build_ios_db.py<br/>→ ios/Resources/*.sqlite]
-      iosdb --> app[SwiftUI app<br/>GurbaniSearchKit]
-      contract -.->|vendored; byte-parity tests| app
-    end
-    classDef gate fill:#B33528,color:#FFFFFF,stroke:#B33528;
-```
+The containers live in three repositories joined by reviewed lock files — the data repository
+builds and proves the database, this one pins and serves it and publishes the golden contract, the
+app vendors both at a release:
+
+![Poster 02 — three repositories and their pins: sggs-data builds and publishes the database, sggs-platform pins and serves it, gurbani-soul-ios pins the contract and the dataset, one version number](../diagrams/posters/02-three-repositories-and-pins.svg)
 
 ## Deployment (production)
 
 ```mermaid
-flowchart LR
+flowchart TB
     accTitle: Production deployment
-    accDescr: A push to main deploys one Vercel project holding the static frontend and the API as Python functions; /api is rewritten internally to the API functions — today all of it to the all function, from the release after 1.3.10 each bounded context to its own function with all as the catch-all; the Render single API stays deployed as the rollback target; the iOS archive ships through TestFlight to the App Store.
-    dev[git push main] --> vercel[Vercel<br/>static frontend + API functions]
-    vercel -->|/api/* internal rewrite| fn[API functions<br/>1.3.10: all · next release: per context]
-    vercel -.->|rollback: api_platform render| render[Render<br/>the single API, kept deployed]
-    ios2[iOS archive] --> tf[TestFlight / App Store]
-    classDef n fill:#FDF6E3,color:#201A12,stroke:#A87900;
+    accDescr: A release merged into main runs deploy-production in CI. It waits for every required check, deploys the Render single API as the standby and verifies it by commit, then builds one Vercel deployment holding the website and the API as Python functions, proves it unaliased and promotes it to gurbanisoul.com, where /api is rewritten internally to the functions as gateway/routes.json says. The iOS app is archived from the release tag and goes to TestFlight and the App Store.
+    main[A release merged into main] --> gates[deploy-production<br/>every required check]
+    gates --> render[Render: the single API<br/>the standby, verified by commit]
+    render --> build[One Vercel deployment<br/>website + API functions]
+    build -->|proven unaliased, then promoted| site[gurbanisoul.com]
+    site -->|/api/* internal rewrite| fn[The API functions<br/>as gateway/routes.json says]
+    main -.->|the release tag| ios[iOS X.Y.Z build 1<br/>TestFlight, then the App Store]
 ```
 
 The web frontend and API are **same-origin**: the browser calls `/api/*` and Vercel's internal

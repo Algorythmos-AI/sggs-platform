@@ -15,16 +15,16 @@ a gate checks that the bytes are still the bytes the PDF printed. Every gate **f
 it cannot prove the text, nothing ships, nothing is served, or the app refuses to show scripture.
 
 ```mermaid
-flowchart LR
+flowchart TB
     accTitle: The integrity chain, from the source PDF to a screen
-    accDescr: Six stages — build in sggs-data, pin in the platform, serve through the API, watch production, bundle into the app, and verify at launch — each with the gate that proves the text unchanged.
-    pdf[(Source Bir PDF)] --> build[1 Build · sggs-data]
-    build --> pin[2 Pin · dataset.lock.json]
-    pin --> serve[3 Serve · read-only API]
-    serve --> watch[4 Watch · data canary]
-    pin --> bundle[5 Bundle · iOS database]
-    bundle --> launch[6 Launch · LaunchIntegrity]
-    serve --> web[Website and this wiki]
+    accDescr: Six stages, each with the gate that proves the text unchanged — build in sggs-data (reconcile, the golden suite, the ledger), pin in the platform (the sha256 checked at install), serve through the read-only API (health and the contract), watch production (the data canary), bundle into the app (the licence gate and the manifest), and verify at launch (the hash before any line is shown).
+    pdf[(Source Bir PDF)] --> build[1 Build · reconcile, golden, ledger]
+    build --> pin[2 Pin · sha256 checked at install]
+    pin --> serve[3 Serve · health, the contract]
+    serve --> watch[4 Watch · the data canary]
+    pin --> bundle[5 Bundle · licence gate, manifest]
+    bundle --> launch[6 Launch · the hash, then the text]
+    serve --> web[The website and this wiki]
     launch --> phone[Gurbani Soul]
 ```
 

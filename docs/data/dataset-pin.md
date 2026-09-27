@@ -49,18 +49,19 @@ make dataset-check    # the pin agrees with contract/_meta.json, and sggs-data@c
 ```mermaid
 sequenceDiagram
     accTitle: A dataset release travels from sggs-data to production as a lock bump
+    accDescr: sggs-data rebuilds behind its gates, fingerprints the database, sets DATASET_VERSION and tags it. A pull request in this repository bumps dataset.lock.json and regenerates the contract; the scripture-integrity workflow proves the pin and the installed database; the merge deploys, every service installing the same pin; the data canary keeps proving production against it.
     participant D as sggs-data
-    participant P as sggs-platform PR
-    participant CI as scripture-integrity workflow
-    participant S as staging → production
-    D->>D: rebuild · gates · fingerprint · DATASET_VERSION · tag
-    D-->>P: bump dataset.lock.json (commit · sha256 · size)
-    P->>P: regenerate contract/ against the new database
+    participant P as platform PR
+    participant CI as scripture-integrity
+    participant S as staging, production
+    D->>D: rebuild, gates, fingerprint, tag
+    D-->>P: bump dataset.lock.json
+    P->>P: regenerate contract/
     P->>CI: pull request
-    CI->>CI: --check-repo · --check-pin · install · quick_check · 60,658 lines · Angs 1–1430
+    CI->>CI: the pin, the install, 60,658 lines
     CI-->>P: green
-    P->>S: merge → deploy chain (each service installs the same pin)
-    S->>S: data canary every 6 h: sampled lines byte-identical to the pin
+    P->>S: merge, deploy the same pin
+    S->>S: the data canary, every 6 h
 ```
 
 1. sggs-data rebuilds, passes its gates, writes the fingerprint and `DATASET_VERSION`, and

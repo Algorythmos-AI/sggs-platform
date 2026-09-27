@@ -16,21 +16,21 @@ commit. Between the two sits a small, fully mechanical flow in the app repositor
 ```mermaid
 sequenceDiagram
     accTitle: A platform release reaches the App Store as a vendor sync, a tag and one archive
-    participant P as sggs-platform (tag vX.Y.Z)
-    participant A as gurbani-soul-ios PR
-    participant CI as its CI (ci · parity · app · secrets)
+    accDescr: At a platform tag, a pull request in gurbani-soul-ios vendors the contract and sets MARKETING_VERSION; its CI checks the vendor lock, the dataset pin, the versions, the gates, Swift parity and the app build. After the squash merge the app is tagged; make testflight, from a worktree at that tag, stages the database, runs the licence gate, archives, uploads and proves the build, and records it in the ledger, which check_release_complete.py reads.
+    participant P as platform vX.Y.Z
+    participant A as app PR
+    participant CI as app CI
     participant M as make testflight
-    participant L as ledger
-    P-->>A: make vendor-sync-platform REF=vX.Y.Z
-    A->>A: contract/ + contributors vendored · vendor.lock.json (commit, sha256 per file, APP_VERSION)
-    A->>A: MARKETING_VERSION = X.Y.Z in ios/App/project.yml
+    participant L as the ledger
+    P-->>A: vendor-sync at the tag
+    A->>A: MARKETING_VERSION = X.Y.Z
     A->>CI: pull request
-    CI->>CI: vendor_sync.py check --remote · fetch_dataset --check-pin · check_versions.py · ios gates · Swift parity · app build + tests
-    CI-->>A: green → squash merge → tag vX.Y.Z (app)
-    A->>M: from a detached worktree at the tag: make testflight TEAM_ID=… BUILD=1 CHANNEL=appstore UPLOAD=1
-    M->>M: stage DB · licence gate · XcodeGen · archive · upload · prove plist + manifest
-    M->>L: ios/testflight-builds.json += {version, build, platform_commit, dataset_commit, channel, db_sha256, sdk}
-    L-->>P: scripts/release/check_release_complete.py X.Y.Z
+    CI->>CI: pins, versions, parity, build
+    CI-->>A: green, merged, tagged
+    A->>M: from the tag, CHANNEL=appstore
+    M->>M: stage, gate, archive, upload, prove
+    M->>L: record the build
+    L-->>P: check_release_complete.py
 ```
 
 ## 1. Vendor the release

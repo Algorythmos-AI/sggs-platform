@@ -14,18 +14,18 @@ every push to `main` (a merged release PR) or manually via *Run workflow*. Nothi
 reaches users unless every required check on that exact commit is green.
 
 ```mermaid
-flowchart LR
+flowchart TB
     accTitle: The deploy-production job chain
-    accDescr: Gates, preflight and approval, then the API deploy and its verification, the unaliased web deploy with its API functions and their checks, promotion with the public smoke and rollback edge, and the release tag.
-  G[gates: required checks on SHA] --> A[approve]
-  P[preflight: secrets present] --> A
-  A --> DA[deploy-api: Render hook ref=SHA]
-  DA --> VA[verify-api: commit==SHA, health, superset check]
-  VA --> DW[deploy-web: vercel build + deploy --skip-domain]
-  DW --> VW[verify-web: API functions, golden contract, @smoke on unaliased URL]
-  VW --> PR[promote: vercel promote + @smoke on public domain]
-  PR --> R[release: tag vX.Y.Z + GitHub Release]
-  PR -. promote or smoke fails .-> RB[vercel rollback to the deployment that served the domain + incident issue]
+    accDescr: Gates and preflight, then the optional approval; the Render API deploy and its verification by commit; the unaliased web deploy with its API functions, the golden contract and the smoke; promotion with the public smoke, or a rollback to the deployment that served the domain; then the release tag.
+    G[gates: every required check on the SHA] --> A[approve, optional]
+    P[preflight: every secret present] --> A
+    A --> DA[deploy-api: Render hook, ref = SHA]
+    DA --> VA[verify-api: commit, health, superset]
+    VA --> DW[deploy-web: vercel build, unaliased]
+    DW --> VW[verify-web: functions, contract, smoke]
+    VW --> PR[promote, then smoke the domain]
+    PR --> R[release: tag vX.Y.Z]
+    PR -. promote or smoke fails .-> RB[vercel rollback + an incident issue]
 ```
 
 ## What each gate proves

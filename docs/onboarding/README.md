@@ -26,15 +26,13 @@ engineering work. Read it before you touch anything that displays, searches, cop
 ## Five days to a merged change
 
 ```mermaid
-flowchart LR
+flowchart TB
     accTitle: Your first week
     accDescr: Day one read the rule and the map; day two run everything locally; day three read the invariants and trace one request; day four open a small pull request; day five watch it through CI, staging and the owner's merge.
-    d1["Day 1<br/>the rule · the map"] --> d2["Day 2<br/>run it locally"]
-    d2 --> d3["Day 3<br/>invariants · trace a request"]
-    d3 --> d4["Day 4<br/>your first PR"]
-    d4 --> d5["Day 5<br/>CI · staging · merged"]
-    classDef day fill:#FDF6E3,stroke:#A87900,color:#201A12;
-    class d1,d2,d3,d4,d5 day;
+    d1["Day 1 · the rule and the map"] --> d2["Day 2 · run it locally"]
+    d2 --> d3["Day 3 · invariants, trace a request"]
+    d3 --> d4["Day 4 · your first pull request"]
+    d4 --> d5["Day 5 · CI, staging, merged"]
 ```
 
 | Day | Do | Read |

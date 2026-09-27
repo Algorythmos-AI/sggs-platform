@@ -84,7 +84,7 @@ class Mermaid(Fixture):
     def test_palette_and_init(self):
         self.assertTrue(any("not allowed" in e for e in self.errors(FM + "```mermaid\nflowchart LR\n  classDef x fill:#123456\n```\n")))
         self.assertTrue(any("init" in e for e in self.errors(FM + "```mermaid\n%%{init: {'theme':'dark'}}%%\nflowchart LR\n```\n")))
-        self.assertEqual(self.errors(FM + "```mermaid\nflowchart LR\n  accTitle: t\n  classDef x fill:#FDF6E3,color:#201A12\n```\n"), [])
+        self.assertEqual(self.errors(FM + "```mermaid\nflowchart LR\n  accTitle: t\n  accDescr: d\n  a:::x --> b\n  classDef x fill:#FDF6E3,color:#201A12\n```\n"), [])
 
 
 class Scripture(Fixture):
@@ -173,6 +173,30 @@ class Theme(unittest.TestCase):
             msgs = [p.msg for p in dc.check_theme(css, self.tokens())]
             self.assertTrue(any("lacks --sgs-accent" in m for m in msgs))
             self.assertFalse(any("--sgs-paper " in m and "is #" in m for m in msgs))   # paper matches both legs
+
+
+class MermaidAccessibility(Fixture):
+    """A diagram has a title and a description, no dead classDefs, and fits the column."""
+
+    def block(self, body):
+        return FM + "```mermaid\n" + body + "\n```\n"
+
+    def test_title_and_description_are_required(self):
+        ok = "flowchart TB\n    accTitle: T\n    accDescr: D\n    a --> b"
+        self.assertEqual(self.errors(self.block(ok)), [])
+        self.assertTrue(any("no `accDescr:`" in e for e in self.errors(self.block("flowchart TB\n    accTitle: T\n    a --> b"))))
+        self.assertTrue(any("no `accTitle:`" in e for e in self.errors(self.block("flowchart TB\n    accDescr: D\n    a --> b"))))
+
+    def test_an_unused_classdef_is_refused(self):
+        body = "flowchart TB\n    accTitle: T\n    accDescr: D\n    a --> b\n    classDef gate fill:#B33528,color:#FFFFFF,stroke:#B33528;"
+        self.assertTrue(any("classDef `gate` is never used" in e for e in self.errors(self.block(body))))
+        used = body + "\n    class a gate;"
+        self.assertEqual(self.errors(self.block(used)), [])
+
+    def test_a_wide_left_to_right_chart_is_warned(self):
+        body = "flowchart LR\n    accTitle: T\n    accDescr: D\n" + "\n".join(f"    n{i}[N{i}] --> n{i + 1}[N{i + 1}]" for i in range(8))
+        msgs = [p.msg for p in dc.check_page(self.page(self.block(body)), self.tokens, self.widgets, None)]
+        self.assertTrue(any("draw it top to bottom" in m for m in msgs), msgs)
 
 
 class ContractCounts(Fixture):

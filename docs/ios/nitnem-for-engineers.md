@@ -17,14 +17,15 @@ answers all three without ever copying or blending text.
 ## The registry
 
 ```mermaid
-flowchart LR
+flowchart TB
     accTitle: The bani registry points into the verbatim corpus; non-SGGS text is a separate labelled layer
-    banis["banis<br/>key · variant · titleEn"] --> bl["bani_lines<br/>ordered pointers"]
-    bl -->|lines.id| lines[("lines<br/>verbatim, cited by Ang")]
-    bl -.->|no Ang · no English · no FTS · no bookmark| extra[("extra_lines<br/>Sri Dasam Granth · Ardaas<br/>labelled by source")]
-    seed["bani_seed.json · bani_overrides.json<br/>membership from the ShabadOS database"] --> build["build_banis.py"]
-    build --> banis
+    accDescr: build_banis.py reads the seed and the overrides (membership from the ShabadOS database) and writes the banis table and its ordered bani_lines pointers, checked by guard_banis.py and the golden banis vectors. A pointer names a verbatim line of the corpus by id, cited by Ang; non-SGGS text lives in extra_lines, labelled by source, with no Ang, no English, no search and no bookmark.
+    seed["bani_seed.json · bani_overrides.json"] --> build["build_banis.py"]
     build --> guard["guard_banis.py · golden_banis.ndjson"]
+    build --> banis["banis: key · variant · titleEn"]
+    banis --> bl["bani_lines: ordered pointers"]
+    bl -->|lines.id| lines[("lines: verbatim, cited by Ang")]
+    bl -.->|no Ang · no English ·<br/>no search · no bookmark| extra[("extra_lines: Sri Dasam Granth ·<br/>Ardaas, labelled by source")]
 ```
 
 - **A bani is an ordered list of pointers.** For every Sri Guru Granth Sahib Ji line the pointer is

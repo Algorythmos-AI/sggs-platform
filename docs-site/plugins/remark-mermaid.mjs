@@ -102,6 +102,15 @@ export const roundGeometry = (svg) => svg.replace(GEOMETRY, (_, a, v, z) =>
 
 let renderer;
 
+// A label's line break. Mermaid writes <br> inside the label's <p>; after the page's HTML pipeline
+// re-serialises the inline SVG it comes out as <br></br>, and a browser reads the stray </br> as a
+// SECOND break — the label's second line falls below its fixed-height box and is clipped. So a
+// label never carries <br>: each line becomes its own <span class="mmd-line"> (display: block in
+// theme.css), which survives any serialisation.
+const BR = /<br\s*\/?>(?:<\/br>)?/;            // not global: .test() must not carry state between labels
+export const lineBlocks = (svg) => svg.replace(/<p>((?:(?!<\/p>)[\s\S])*?)<\/p>/g, (whole, inner) =>
+  BR.test(inner) ? `<p>${inner.split(new RegExp(BR.source, 'g')).map((line) => `<span class="mmd-line">${line}</span>`).join('')}</p>` : whole);
+
 export function remarkMermaid() {
   return async (tree, file) => {
     const found = [];
@@ -121,7 +130,7 @@ export function remarkMermaid() {
     ]);
     // Mermaid emits width="100%" plus a max-width style, which shrinks a wide diagram to a
     // thumbnail. Give the SVG its drawn size instead: the figure scrolls sideways when needed.
-    const sized = (v) => roundGeometry(v.svg)
+    const sized = (v) => lineBlocks(roundGeometry(v.svg))
       .replace(/<svg([^>]*)\swidth="100%"/, `<svg$1 width="${Math.round(v.width)}" height="${Math.round(v.height)}"`)
       .replace(/<svg([^>]*)\sstyle="max-width:[^"]*"/, '<svg$1');
     light.forEach((r, i) => {
