@@ -67,6 +67,36 @@ test.describe('the wiki', () => {
     await expect(page.locator('nav[aria-label="Main"] a[href="/data/"]')).toHaveText(/^\s*Overview\s*$/);
   });
 
+  test('every page says where it sits and when it last changed; the footer names the site', async ({ page }) => {
+    await mockApi(page);
+    await page.goto('/process/runbooks/rollback/');
+    await expect(page.locator('.page-eyebrow')).toHaveText(/Ship & operate · Runbooks/);
+    const updated = page.locator('.page-meta time');
+    await expect(updated).toHaveAttribute('datetime', /^\d{4}-\d{2}-\d{2}T/);
+    await expect(updated).toHaveText(/^\d{1,2} [A-Z][a-z]+ \d{4}$/);
+    const footer = page.locator('nav.site-footer');
+    await expect(footer.getByRole('link', { name: 'gurbanisoul.com' })).toHaveAttribute('href', 'https://gurbanisoul.com/');
+    await expect(footer).toContainText('quoted verbatim, cited by Ang, and never altered');
+    await expect(page).toHaveTitle('Runbook: Rollback · Sri Guru Granth Sahib Ji — Knowledge Base');   // one name, once
+  });
+
+  test('a pinned page says where it comes from, and its problems are reported there', async ({ page }) => {
+    await mockApi(page);
+    await page.goto('/data/process/runbooks/rebuild-db/');
+    await expect(page.locator('.page-eyebrow')).toContainText('pinned from sggs-data');
+    await expect(page.locator('.page-meta time')).toHaveCount(1);          // dated by when the pin last moved
+    await expect(page.getByRole('link', { name: 'Report a problem with this page' })).toHaveAttribute('href', /github\.com\/Algorythmos-AI\/sggs-data\/issues\/new/);
+  });
+
+  test('"On this page" is left out when a page has fewer than two headings', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop', 'the table of contents is a desktop sidebar');
+    await mockApi(page);
+    await page.goto('/data/answer-protocol/');
+    await expect(page.locator('starlight-toc')).toHaveCount(0);
+    await page.goto('/process/ci-gates/');
+    await expect(page.locator('starlight-toc')).toHaveCount(1);
+  });
+
   test('overflowing code and tables are keyboard-scrollable', async ({ page }) => {
     await mockApi(page);
     await page.goto('/process/runbooks/deploy/');

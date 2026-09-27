@@ -83,16 +83,34 @@ test.describe('posters', () => {
     await expect(dlg).toHaveCount(0);
   });
 
-  test('a kit-2 poster reads at the size shown: no text under 13 px in the page', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== 'desktop', 'measured at the desktop column width');
-    await mockApi(page);
-    await page.goto('/data/line-record/');
-    const smallest = await page.locator('svg[data-kit="2"]').evaluate((svg: SVGSVGElement) => {
-      const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
-      return Math.min(...Array.from(svg.querySelectorAll('text')).map((t) => Number(t.getAttribute('font-size')) * scale));
+  // every poster redrawn on kit 2, measured where it is embedded
+  for (const [path, slug] of [
+    ['/data/line-record/', '03-anatomy-of-a-line-record'],
+    ['/architecture/overview/', '01-system-landscape'],
+    ['/architecture/bounded-contexts-and-gateway/', '09-bounded-contexts-and-gateway'],
+  ]) {
+    test(`poster ${slug} reads at the size shown: no text under 13 px, no two boxes' text overlapping`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== 'desktop', 'measured at the desktop column width');
+      await mockApi(page);
+      await page.goto(path);
+      const svg = page.locator(`figure.poster[data-poster="${slug}"] svg[data-kit="2"]`);
+      await expect(svg).toBeVisible();
+      const { smallest, overlaps } = await svg.evaluate((el: SVGSVGElement) => {
+        const scale = el.getBoundingClientRect().width / el.viewBox.baseVal.width;
+        const texts = Array.from(el.querySelectorAll('.pk-node text')) as SVGTextElement[];
+        const boxes = texts.map((t) => t.getBoundingClientRect());
+        let overlaps = 0;
+        for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+          const [a, b] = [boxes[i], boxes[j]];
+          if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) overlaps++;
+        }
+        const smallest = Math.min(...Array.from(el.querySelectorAll('text')).map((t) => Number(t.getAttribute('font-size')) * scale));
+        return { smallest, overlaps };
+      });
+      expect(smallest).toBeGreaterThanOrEqual(12.9);
+      expect(overlaps, 'text of two lines drawn on top of each other').toBe(0);
     });
-    expect(smallest).toBeGreaterThanOrEqual(12.9);
-  });
+  }
 
   for (const path of ['/architecture/request-lifecycle/', '/architecture/bounded-contexts-and-gateway/', '/diagrams/', '/data/line-record/']) {
     test(`no accessibility violations: ${path}`, async ({ page }) => {

@@ -47,6 +47,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Sri Guru Granth Sahib Ji — Knowledge Base',
+      titleDelimiter: '·',
       description: 'The engineering and domain wiki of the SGGS Knowledge Base and the Gurbani Soul app: how the verbatim scripture corpus is built, proven, searched, verified, served and shipped.',
       favicon: '/favicon.svg',
       defaultLocale: 'root',
@@ -61,6 +62,8 @@ export default defineConfig({
         EditLink: './src/components/EditLink.astro',
         Footer: './src/components/Footer.astro',
         SiteTitle: './src/components/SiteTitle.astro',
+        PageTitle: './src/components/PageTitle.astro',
+        LastUpdated: './src/components/LastUpdated.astro',
       },
       head: [
         { tag: 'meta', attrs: { name: 'sggs-docs-commit', content: process.env.PUBLIC_DOCS_COMMIT } },

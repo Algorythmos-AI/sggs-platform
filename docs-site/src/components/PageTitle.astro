@@ -1,0 +1,71 @@
+---
+// The page title, with where the page sits above it ("Data · Runbooks", and "pinned from
+// sggs-data" for a sibling repository's page) and one quiet line under it: when the page last
+// changed, and for pages that describe code, the commit it was last verified against (frontmatter
+// `verified`, enforced by tools/docs_check.py). The date is the page's own last commit
+// (plugins/git-dates.mjs via src/route-data.ts); Starlight's footer date is not repeated.
+import { originOf } from '../../plugins/paths.mjs';
+
+const route = Astro.locals.starlightRoute;
+type Entry = (typeof route.sidebar)[number];
+/** The labels of the groups that hold the current page, outermost first. */
+function trail(entries: Entry[], above: string[] = []): string[] | null {
+  for (const e of entries) {
+    if (e.type === 'group') {
+      const found = trail(e.entries, [...above, e.label]);
+      if (found) return found;
+    } else if (e.isCurrent) {
+      return above;
+    }
+  }
+  return null;
+}
+const where = trail(route.sidebar) ?? [];
+const filePath = (route.entry as { filePath?: string }).filePath;
+// entry.filePath is relative to docs-site/: ../docs/x.md, or a pinned page under .sources/
+const origin = filePath ? originOf(filePath.startsWith('../') ? filePath.slice(3) : `docs-site/${filePath}`) : null;
+const pinned = origin?.kind === 'sibling' ? origin.repository.split('/')[1] : null;
+const verified = (route.entry.data as { verified?: { commit: string; date: string } }).verified;
+const updated = route.lastUpdated;
+const repo = 'https://github.com/Algorythmos-AI/sggs-platform';
+const day = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+{(where.length > 0 || pinned) && (
+  <p class="page-eyebrow">
+    {where.join(' · ')}{pinned && <span class="page-eyebrow__pinned">{where.length ? ' · ' : ''}pinned from {pinned}</span>}
+  </p>
+)}
+<h1 id="_top">{route.entry.data.title}</h1>
+{(updated || verified) && (
+  <p class="page-meta">
+    {updated && <span>Updated <time datetime={updated.toISOString()}>{day(updated)}</time></span>}
+    {updated && verified && <span aria-hidden="true"> · </span>}
+    {verified && (
+      <span class="page-meta__verified">Verified against <a href={`${repo}/commit/${verified.commit}`}><code>{verified.commit.slice(0, 7)}</code></a> on {verified.date}</span>
+    )}
+  </p>
+)}
+
+<style>
+  @layer starlight.core {
+    h1 {
+      margin-top: 0.25rem;
+      font-size: clamp(1.9rem, 1.35rem + 1.9vw, var(--sl-text-h1));
+      line-height: var(--sl-line-height-headings);
+      font-weight: 600;
+      color: var(--sl-color-white);
+      text-wrap: balance;
+    }
+  }
+  .page-eyebrow {
+    margin: 1rem 0 0;
+    font-size: var(--sl-text-sm);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--sl-color-text-accent);
+  }
+  .page-eyebrow__pinned { font-weight: 500; color: var(--sl-color-gray-3); }
+  .page-meta { margin: 0.5rem 0 0; font-size: var(--sl-text-sm); color: var(--sl-color-gray-3); }
+  .page-meta a { color: inherit; }
+  .page-meta code { font-size: 0.95em; }
+</style>

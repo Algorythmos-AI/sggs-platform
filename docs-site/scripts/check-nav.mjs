@@ -11,7 +11,9 @@
 //   - the sidebar links to every expected page, and marks exactly this page aria-current;
 //   - the sidebar is the same on every page (same links, same labels) — so a page's own data can
 //     never rename a sidebar entry;
-//   - the page has previous and next links (the first and last page in sidebar order excepted).
+//   - the page has previous and next links (the first and last page in sidebar order excepted);
+//   - the page carries its "Updated" date (<time datetime> under the title; plugins/git-dates.mjs) —
+//     the setting was on for a whole release and no page showed one.
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -118,6 +120,7 @@ export function checkSite(dist, { exempt = NAV_EXEMPT } = {}) {
     const pag = html.slice(html.indexOf('pagination-links'));
     if (at > 0 && !/rel="prev"/.test(pag)) problems.push(`${p}: no "Previous" link`);
     if (at >= 0 && at < order.length - 1 && !/rel="next"/.test(pag)) problems.push(`${p}: no "Next" link`);
+    if (!/<time[^>]*\sdatetime="\d{4}-\d{2}-\d{2}T/.test(html)) problems.push(`${p}: no "Updated" date`);
   }
   return problems;
 }
@@ -132,7 +135,7 @@ function main() {
     console.error(`check-nav: ${problems.length} problem(s) across ${pages} pages`);
     process.exit(1);
   }
-  console.log(`check-nav: ${pages} pages — every page is in the sidebar, no empty group, previous/next everywhere`);
+  console.log(`check-nav: ${pages} pages — every page is in the sidebar, no empty group, previous/next and an Updated date everywhere`);
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) main();

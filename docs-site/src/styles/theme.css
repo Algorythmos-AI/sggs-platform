@@ -164,9 +164,6 @@ h1#_top,
 .chip--ok .chip__dot { background: var(--sgs-positive); }
 .chip--bad .chip__dot { background: var(--sgs-negative); }
 
-/* verified-against-commit badge in the page footer */
-.verified { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; margin: 1rem 0 0; font-size: 0.85rem; color: var(--sl-color-gray-3); }
-.verified code { font-size: 0.85em; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }

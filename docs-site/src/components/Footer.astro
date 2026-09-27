@@ -1,15 +1,28 @@
 ---
-// Starlight's footer (edit link, last updated, pagination) plus the page's verification stamp:
-// process and engineering pages say which commit they were last read against (frontmatter
-// `verified`; enforced by tools/docs_check.py).
+// Starlight's footer (edit link, pagination) plus the site's own: where the product lives, what
+// changed, the source, and how to report a problem. The page's date and verified stamp are under
+// its title (src/components/PageTitle.astro).
 import Default from '@astrojs/starlight/components/Footer.astro';
-const { entry } = Astro.locals.starlightRoute;
-const verified = (entry.data as any).verified as { commit: string; date: string } | undefined;
 const repo = 'https://github.com/Algorythmos-AI/sggs-platform';
 ---
-{verified && (
-  <p class="verified">
-    <span>Last verified against <a href={`${repo}/commit/${verified.commit}`}><code>{verified.commit.slice(0, 7)}</code></a> on {verified.date}.</span>
-  </p>
-)}
 <Default><slot /></Default>
+<nav class="site-footer" aria-label="Site">
+  <p class="site-footer__links">
+    <a href="https://gurbanisoul.com/">gurbanisoul.com</a>
+    <a href="/reference/releases/">What changed</a>
+    <a href="/api/">The API</a>
+    <a href={repo}>Source on GitHub</a>
+    <a href={`${repo}/issues/new?labels=documentation`}>Report a problem</a>
+  </p>
+  <p class="site-footer__note">
+    Sri Guru Granth Sahib Ji is quoted verbatim, cited by Ang, and never altered. Built by Algorythmos.
+  </p>
+</nav>
+
+<style>
+  .site-footer { margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--sl-color-hairline); font-size: var(--sl-text-sm); color: var(--sl-color-gray-3); }
+  .site-footer__links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin: 0; }
+  .site-footer__links a { color: var(--sl-color-gray-2); text-decoration: none; }
+  .site-footer__links a:hover { color: var(--sl-color-white); text-decoration: underline; }
+  .site-footer__note { margin: 0.75rem 0 0; }
+</style>
