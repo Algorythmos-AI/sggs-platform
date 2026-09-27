@@ -18,10 +18,10 @@ text first, then correct answers, then being up, then being fast and usable. It 
 flowchart TB
     accTitle: Quality is checked before merge, during deploy, and continuously in production
     accDescr: Before a change merges, the required checks run the unit tests, the scripture integrity check, the golden contract against the local server, and the browser tests. During a deploy, the workflow waits for the API to report the exact commit with every health check true, replays the golden contract and the smoke tests, and rolls production back automatically if the public smoke test fails. In production, scheduled workflows probe uptime every 15 minutes, compare served scripture with the pinned database every six hours, and check the wiki; each opens or updates one GitHub issue when it fails.
-    pr[Before merge: unit tests, integrity,<br/>golden contract, browser tests]
-    pr --> dep[During deploy: commit identity,<br/>contract, smoke, auto-rollback]
-    dep --> run[In production: uptime every 15 min,<br/>data canary every 6 h, wiki watch]
-    run -->|a failure| issue[One GitHub issue per watcher,<br/>updated until green]
+    pr[Before merge:<br/>unit tests, integrity,<br/>golden contract, e2e]
+    pr --> dep[During deploy:<br/>commit identity,<br/>contract, smoke,<br/>auto-rollback]
+    dep --> run[In production:<br/>uptime every 15 min,<br/>data canary every 6 h,<br/>wiki watch]
+    run -->|a failure| issue[One GitHub issue<br/>per watcher,<br/>updated until green]
 ```
 
 ## The qualities, and what enforces them

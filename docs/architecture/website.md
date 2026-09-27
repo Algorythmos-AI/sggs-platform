@@ -21,8 +21,8 @@ flowchart TB
     accTitle: The website is built once and served with the API from one Vercel deployment
     accDescr: Astro builds frontend/ into static pages. For local work the build is synced into webapp/static and served by serve.py together with the API. For staging and production, the deploy workflow generates the API functions, builds with Vercel and deploys one deployment holding the static pages and the functions. A browser loads pages from gurbanisoul.com; each page's scripts call /api on the same origin, and generated rewrites send each path to its context's function, which reads its database slice.
     src[frontend/: Astro pages,<br/>layouts, TypeScript scripts] --> build[astro build:<br/>static HTML in dist/]
-    build --> sync[Local: synced to webapp/static,<br/>served by serve.py with the API]
-    build --> dep[CI: vercel build + the API<br/>functions, one deployment]
+    build --> sync[Local: synced into<br/>webapp/static, served<br/>by serve.py with the API]
+    build --> dep[CI: vercel build<br/>+ the API functions,<br/>one deployment]
     dep --> site[gurbanisoul.com:<br/>pages from the CDN]
     user[A browser] --> site
     site -->|same origin /api| rw[Generated rewrites<br/>from gateway/routes.json]

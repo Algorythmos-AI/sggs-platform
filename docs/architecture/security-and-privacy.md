@@ -20,10 +20,10 @@ that are known and open. To report a vulnerability, follow [SECURITY.md](../../S
 flowchart TB
     accTitle: Defences at each layer between a reader and the database
     accDescr: In the browser, the site sends a content security policy, frame denial, no referrer, HSTS and a restrictive permissions policy, and escapes all API text. The request reaches the API on the same origin over HTTPS, so there is no CORS. The API accepts only GET, bounds every parameter, cleans full-text queries, parameterises all SQL and returns a generic body for any internal error. SQLite is opened read-only, immutable and query-only, and each context can read only the tables it declares. Beside the request path, CI scans for secrets, audits dependencies and deploys only after the required checks pass.
-    b[Browser: CSP, frame denial,<br/>no referrer, HSTS, escaped text]
-    b -->|HTTPS, same origin| api[API: GET only, bounded input,<br/>clean FTS, parameterised SQL]
-    api --> db[(SQLite: read-only, immutable,<br/>query-only, declared tables)]
-    ci[CI: secret scan, npm audit,<br/>gated deploys by commit] -.-> api
+    b[Browser: CSP, HSTS,<br/>frame denial,<br/>no referrer, escaping]
+    b -->|HTTPS, same origin| api[API: GET only,<br/>bounded input,<br/>clean full-text query,<br/>parameterised SQL]
+    api --> db[(SQLite: read-only,<br/>immutable, query-only,<br/>declared tables)]
+    ci[CI: secret scan,<br/>npm audit, deploys<br/>gated by commit] -.-> api
     class ci side
     classDef side stroke-dasharray: 4 3
 ```
