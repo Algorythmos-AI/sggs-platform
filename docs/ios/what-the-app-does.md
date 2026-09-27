@@ -4,7 +4,7 @@ description: "Gurbani Soul screen by screen: the five tabs, widgets and Live Act
 sidebar:
   order: 1
 verified:
-  commit: 0f89c40f
+  commit: 693a8f4b
   date: "2026-09-27"
 ---
 # What the app does
@@ -21,7 +21,7 @@ The app opens on **Nitnem**.
 
 | Tab | What it is for | Main screens |
 |---|---|---|
-| **Nitnem** | The daily prayers: what to read now, today's progress, and the morning, evening, night, popular and ceremony sets. | Nitnem home, bani reader, My Nitnem (reorder, hide or add banis), reminders, the reading journey (a month record of days read) |
+| **Nitnem** | The daily prayers: what to read now, today's progress, and the morning, evening, night, popular and ceremony sets. | Nitnem home, bani reader, My Nitnem (reorder, hide or add banis), reminders, the reading journey (a month record of days read, which you can clear) |
 | **Reader** | The Granth Ang by Ang, 1 to 1430, resuming where you left off. | Ang pages you swipe through, Jump to Ang (type, scrub, step or pick a raag), the Hukam |
 | **Search** | Search and quotation checking. | Modes Auto, Gurmukhi, Roman, English (when the build has it), First letters, Theme and Verify; Verify accepts an optional Ang ("@712") |
 | **Explore** | Study views over the whole Granth. | Index (major compositions, raags, banis and sections, voices), Themes, Lineage (the contributors, compare two voices), Insights (contributors, raags, theme network, resonance, flow), Constellation, Vaars (the salok and pauri structure), the Raag Clock |
@@ -39,7 +39,7 @@ assign to it. It runs in **Fixed** mode (eight three-hour watches from 06:00; th
 and says so) or **Solar** mode, the traditional reckoning: four equal watches of daylight and four
 of night at your location, stretching with the season. Location is asked for only
 when you choose "use my location" (when-in-use only), and only the coordinates rounded to two
-decimal places are kept; you can also type them. A sheet shows where timing traditions disagree.
+decimal places are kept; you can also type them, and "Forget location" removes them. A sheet shows where timing traditions disagree.
 In the Reader, a timing chip on each Ang opens the clock at that raag.
 
 ## Widgets and the Live Activity

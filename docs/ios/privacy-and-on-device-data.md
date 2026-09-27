@@ -4,7 +4,7 @@ description: "What the app stores and where, what the widgets see, why it makes 
 sidebar:
   order: 3
 verified:
-  commit: 0f89c40f
+  commit: 693a8f4b
   date: "2026-09-27"
 ---
 # Privacy and on-device data
@@ -40,7 +40,7 @@ Source: `ios/tests/test_ios_gates.py` in gurbani-soul-ios, read at the pinned co
 | My Nitnem | `nitnem-plan.json` in the App Group | your own sets: order, hidden and added banis |
 | Widget snapshot | `widget-snapshot.json` in the App Group | a Hukam verse and its Ang, the pahar-to-raag tables, the clock mode and coordinates, the set names |
 | Settings | the app's preferences | display and reader settings, the last Ang read, reminder times, and the launch-integrity cache |
-| Clock settings | the App Group's preferences | the clock mode and, in Solar mode, your coordinates rounded to two decimal places (about a kilometre); the exact position is never stored |
+| Clock settings | the App Group's preferences | the clock mode and, in Solar mode, your coordinates rounded to two decimal places (about a kilometre); the exact position is never stored, and "Forget location" removes it |
 | Spotlight | the system index | your saved verses only (Gurmukhi, transliteration, Ang), so system search can find them |
 | Diagnostics | Application Support | MetricKit reports, as above |
 
@@ -48,7 +48,8 @@ The JSON files fall back to the app's own Application Support folder when the Ap
 available. The saved-verses store is opened with SwiftData's default configuration; the code never
 names its file or container. If it fails to open twice in a row, the app deletes and recreates it,
 because a bookmark is a user annotation, never scripture
-([the bookmarks ladder](db-pair-and-launch-integrity.md)).
+([the bookmarks ladder](db-pair-and-launch-integrity.md)), and clears the saved verses' Spotlight
+entries with it, so system search never offers a verse that is gone.
 
 ## What the widgets see
 
@@ -92,19 +93,16 @@ Source: `ios/App/Resources/PrivacyInfo.xcprivacy` in gurbani-soul-ios, read at t
 ## Deleting data
 
 - **A saved verse:** swipe to delete; its Spotlight entry goes with it.
-- **Diagnostics:** More → Delete diagnostics.
-- **My Nitnem:** Reset to default.
+- **Your location:** Raag Clock → Forget location. It goes from the app's settings and from the
+  widgets' snapshot; Solar mode shows the fixed clock until you add one again.
+- **Your reading history:** Reading journey → Clear reading history, after a confirmation. It
+  removes the days you completed and where you stopped in each bani.
 - **A bani's reading position:** Start again (the days completed are kept).
+- **My Nitnem:** Reset to default.
+- **Diagnostics:** More → Delete diagnostics.
 - **Everything:** delete the app. iOS removes its containers; the App Group goes with the last app
   that uses it.
 
-## Known gaps
-
-Found while writing this page; none of them sends data anywhere.
-
-- There is no in-app way to clear the Nitnem completion history or the stored coordinates, short of
-  deleting the app (the coordinates can be overwritten).
-- When the saved-verses store is recreated after two failed opens, its Spotlight entries are not
-  removed, so a search can show a verse that is no longer saved.
-- The App Store review notes say the widget snapshot holds today's Nitnem progress; in the code,
-  progress lives in its own file, which the widgets read directly.
+These controls, and the Spotlight clean-up, came from gaps found while this page was first written
+(gurbani-soul-ios [#26](https://github.com/Algorythmos-AI/gurbani-soul-ios/pull/26)); each has a unit
+test and a UI test in the app repository.
