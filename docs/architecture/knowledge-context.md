@@ -28,7 +28,7 @@ flowchart TB
     accDescr: In sggs-data, seed_timing.py loads timing claims, each tied to a cited source, and derive_bani_forms.py reads composition headings from the verified text and records a form only when a heading states it. guard_scripture.py proves the scripture tables are byte-identical before and after, or the build stops. The knowledge service reads the seven declared tables and answers four routes: the clock, one raag, the divergences, and one composition's forms.
     src[Timing sources:<br/>5, each cited] --> seed[seed_timing.py:<br/>46 attributed claims]
     txt[The verified text:<br/>composition headings] --> der[derive_bani_forms.py:<br/>a form only if stated]
-    seed --> g[guard_scripture.py: scripture<br/>byte-identical, or the build stops]
+    seed --> g[guard_scripture.py:<br/>scripture unchanged,<br/>or the build stops]
     der --> g
     g --> db[(The installed database,<br/>sliced for knowledge)]
     db --> clock[timing/clock<br/>timing/raag]
