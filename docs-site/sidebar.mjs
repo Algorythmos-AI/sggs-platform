@@ -132,6 +132,13 @@ export const LABELS = {
 // Sort order, over a page's frontmatter `sidebar.order` (lower first; unordered pages sort by title,
 // after). Pinned pages carry no frontmatter, so theirs is only here.
 export const ORDER = {
+  'api/quickstart': 1,
+  'api/using-the-api': 2,
+  'api/routes': 3,
+  'api/errors': 4,
+  'api/versioning-and-caching': 5,
+  'api/contract-and-openapi': 6,
+  'api/changelog': 7,
   'architecture/overview': 1,
   'architecture/request-lifecycle': 2,
   'architecture/bounded-contexts-and-gateway': 3,
