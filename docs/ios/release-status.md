@@ -45,8 +45,11 @@ How to read it:
 - **Profile.** Every upload so far is *public*: the English translation layer is not licensed for
   distribution, so no build carrying it has been uploaded
   ([the licence gate](db-pair-and-launch-integrity.md)).
-- **Platform and dataset.** The commits the build was made from; the database hash proves the
-  archive holds exactly that dataset's iOS database.
+- **Built from.** The app, platform and dataset commits the build was made from, and the sha256
+  of the database inside the archive, which proves it holds exactly that dataset's iOS database.
+  The platform and dataset commits are recorded from 1.3.8, when the code split into three
+  repositories. The earliest rows were backfilled from App Store Connect after the fact, so they
+  have no date or commits, and their note says so.
 
 ## How this page stays current
 

@@ -4,7 +4,7 @@ import { parseLedger, appBuildsHtml } from '../remark-app-builds.mjs';
 
 const LEDGER = JSON.stringify({ schema: 1, builds: [
   { version: '1.3.0', build: 5, profile: 'public', db_sha256: 'f30a2fc0aa', uploaded_at: '2026-09-19T19:32:13Z' },
-  { version: '1.3.10', build: 1, profile: 'public', channel: 'appstore', platform_commit: 'b5c6a0d80f92', dataset_commit: 'bc5b0f0c2614', db_sha256: 'b10809c4997b', xcode: '26.5', uploaded_at: '2026-09-25T22:13:11Z' },
+  { version: '1.3.10', build: 1, profile: 'public', channel: 'appstore', source_commit: 'e7a0d8a5531c', platform_commit: 'b5c6a0d80f92', dataset_commit: 'bc5b0f0c2614', db_sha256: 'b10809c4997b', xcode: '26.5', uploaded_at: '2026-09-25T22:13:11Z' },
 ] });
 const PIN = { repository: 'Algorythmos-AI/gurbani-soul-ios', commit: '2f89359abcdef' };
 
@@ -18,12 +18,14 @@ test('the ledger is read newest first, with defaults for older entries', () => {
 
 test('the table links commits, names the pin and marks the channel', () => {
   const html = appBuildsHtml(parseLedger(LEDGER), PIN);
-  assert.match(html, /<strong>1\.3\.10<\/strong> \(1\)/);
+  assert.match(html, /<strong>1\.3\.10<\/strong>&nbsp;\(1\)/);
   assert.match(html, /App Store<\/td>/);
   assert.match(html, /TestFlight<\/td>/);
-  assert.match(html, /sggs-platform\/commit\/b5c6a0d80f92"><code>b5c6a0d<\/code>/);
+  assert.match(html, /platform <a href="https:\/\/github.com\/Algorythmos-AI\/sggs-platform\/commit\/b5c6a0d80f92"[^>]*><code>b5c6a0d<\/code>/);
   assert.match(html, /blob\/2f89359abcdef\/ios\/testflight-builds\.json/);
+  assert.match(html, /app <a href="https:\/\/github.com\/Algorythmos-AI\/gurbani-soul-ios\/commit\/e7a0d8a5531c"[^>]*><code>e7a0d8a<\/code>/);
   assert.match(html, /All 2 uploads\./);
+  assert.match(html, /database <code>b10809c<\/code>/);
   assert.ok(html.indexOf('1.3.10') < html.indexOf('1.3.0<'), 'newest first');
 });
 
@@ -35,7 +37,13 @@ test('limit keeps the newest N and says so', () => {
 
 test('a malformed ledger fails the build', () => {
   assert.throws(() => parseLedger('{}'), /no "builds" array/);
-  assert.throws(() => parseLedger(JSON.stringify({ builds: [{ version: '1.0.0' }] })), /lacks version, build or uploaded_at/);
+  assert.throws(() => parseLedger(JSON.stringify({ builds: [{ version: '1.0.0' }] })), /lacks version or build/);
+});
+
+test('a backfilled row (no upload time, no commits) renders with its note', () => {
+  const html = appBuildsHtml(parseLedger(JSON.stringify({ builds: [{ version: '1.1.3', build: 1, source_commit: null, uploaded_at: null, note: 'backfilled from App Store Connect' }] })), PIN);
+  assert.match(html, /<td class="app-builds__nw">—<\/td>/);
+  assert.match(html, /<td><span class="app-builds__note">backfilled from App Store Connect<\/span><\/td>/);
 });
 
 test('text from the ledger is escaped', () => {
