@@ -25,12 +25,12 @@ service is `webapp/sggs/knowledge.py`; the tables are built by sggs-data's `pipe
 ```mermaid
 flowchart TB
     accTitle: Timing claims and forms are built from cited sources and headings, then served read-only
-    accDescr: In sggs-data, seed_timing.py loads timing claims, each tied to a cited source, and derive_bani_forms.py reads composition headings from the verified text and records a form only when a heading states it. guard_scripture.py proves the scripture tables are byte-identical before and after. The knowledge service reads the seven declared tables and answers four routes: the clock, one raag, the divergences, and one composition's forms.
-    src[Cited sources:<br/>5 traditions and charts] --> seed[seed_timing.py:<br/>46 attributed claims]
+    accDescr: In sggs-data, seed_timing.py loads timing claims, each tied to a cited source, and derive_bani_forms.py reads composition headings from the verified text and records a form only when a heading states it. guard_scripture.py proves the scripture tables are byte-identical before and after, or the build stops. The knowledge service reads the seven declared tables and answers four routes: the clock, one raag, the divergences, and one composition's forms.
+    src[Timing sources:<br/>5, each cited] --> seed[seed_timing.py:<br/>46 attributed claims]
     txt[The verified text:<br/>composition headings] --> der[derive_bani_forms.py:<br/>a form only if stated]
-    seed --> g{guard_scripture.py:<br/>scripture byte-identical?}
+    seed --> g[guard_scripture.py: scripture<br/>byte-identical, or the build stops]
     der --> g
-    g -->|yes| db[(The installed database,<br/>sliced for knowledge)]
+    g --> db[(The installed database,<br/>sliced for knowledge)]
     db --> clock[timing/clock<br/>timing/raag]
     db --> div[timing/divergence]
     db --> forms[forms?comp_id=]
