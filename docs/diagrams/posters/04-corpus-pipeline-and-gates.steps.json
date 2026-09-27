@@ -2,7 +2,7 @@
   {
     "id": "step-01",
     "title": "Pre-flight: the exact inputs",
-    "caption": "The rebuild refuses to start unless there is free disk, the interpreter has PyMuPDF, numpy and scipy, and the source PDF’s sha256 equals the attestation recorded with the committed corpus. The translation sources and the ShabadOS database must be byte-identical to their checksum lists. SOURCE_DATE_EPOCH is the commit time, so the same commit, PDF and toolchain give the same bytes.",
+    "caption": "The rebuild refuses to start unless there is free disk, the interpreter has PyMuPDF, numpy and scipy, and the source PDF’s sha256 equals the attestation recorded with the committed corpus. The translation sources and the ShabadOS database must be byte-identical to their checksum lists. SOURCE_DATE_EPOCH is the commit time, so the same commit, PDF and toolchain give the same bytes — the rebuild is reproducible.",
     "link": "/data/process/runbooks/rebuild-db/"
   },
   {
@@ -44,13 +44,13 @@
   {
     "id": "step-08",
     "title": "6/8 Auxiliary indexes",
-    "caption": "fts_en for English, fts_shabad for cross-line passages, fts_tri for typo-tolerant trigram search and canon_tokens. The trigram tokenizer is a search-tier contract: an SQLite without it must fail the build, never ship a database that silently lacks it.",
+    "caption": "fts_en for English, fts_shabad for cross-line passages, fts_tri (a trigram index — built, though no API route reads it today) and canon_tokens. The trigram tokenizer is a build contract: an SQLite without it must fail the build, never ship a database that silently lacks it.",
     "link": "/architecture/search-waterfall/"
   },
   {
     "id": "step-09",
     "title": "7/8 The Insight Engine",
-    "caption": "Theme network, fingerprints, author and raag analytics, semantic neighbours (exact sparse tf-idf cosine), author resonance and the 22 Vaars, detected by their title headers. Additive tables only.",
+    "caption": "Theme network, fingerprints, author and raag analytics, semantic neighbours (exact sparse tf-idf cosine), author resonance and the 22 Vaars, detected by their title headers. Stages 4 to 7 only ever add tables: the scripture written at stage 1 is never altered after it.",
     "link": "/data/pipeline/"
   },
   {

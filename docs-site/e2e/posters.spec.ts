@@ -88,6 +88,11 @@ test.describe('posters', () => {
     ['/data/line-record/', '03-anatomy-of-a-line-record'],
     ['/architecture/overview/', '01-system-landscape'],
     ['/architecture/bounded-contexts-and-gateway/', '09-bounded-contexts-and-gateway'],
+    ['/architecture/three-repositories-and-pins/', '02-three-repositories-and-pins'],
+    ['/data/pipeline/', '04-corpus-pipeline-and-gates'],
+    ['/architecture/search-waterfall/', '05-search-waterfall'],
+    ['/search/the-roman-fold/', '06-the-fold-in-three-places'],
+    ['/search/verification-engine/', '07-verification-engine'],
   ]) {
     test(`poster ${slug} reads at the size shown: no text under 13 px, no two boxes' text overlapping`, async ({ page }, testInfo) => {
       test.skip(testInfo.project.name !== 'desktop', 'measured at the desktop column width');

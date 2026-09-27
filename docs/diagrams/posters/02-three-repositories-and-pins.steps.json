@@ -2,8 +2,8 @@
   {
     "id": "step-01",
     "title": "The scripture is built and proven in sggs-data",
-    "caption": "The source PDF’s checksum is attested. The pipeline extracts the corpus, reconciles it character for character against the PDF, runs the golden checks, builds the SQLite database and passes the integrity gate. Any editorial repair is registered in a scholar-reviewed ledger. The database is published by commit, sha256 and size.",
-    "link": "/onboarding/how-the-repos-fit/"
+    "caption": "The source PDF’s checksum is attested. The pipeline extracts the corpus, reconciles it character for character against the PDF, runs the golden checks, builds the SQLite database and passes the integrity gate. Any editorial repair is registered in the editorial ledger and approved in a scholar review. The database is published by commit, sha256 and size.",
+    "link": "/data/integrity-chain/"
   },
   {
     "id": "step-02",
@@ -14,19 +14,19 @@
   {
     "id": "step-03",
     "title": "The platform serves and publishes",
-    "caption": "webapp/serve.py and frontend/ serve the API and the website at one version. From the running code, tools/gen_golden_vectors.py records the golden contract: thousands of input/output vectors for the Roman fold, search, verification and the reader, plus the OpenAPI spec.",
-    "link": "/api/reference/"
+    "caption": "webapp/ and frontend/ serve the API and the website at one version. From the running code, tools/gen_golden_vectors.py records the golden contract — thousands of input and output vectors for the Roman fold, search, verification and the reader — and tools/gen_openapi.py the OpenAPI spec.",
+    "link": "/api/contract-and-openapi/"
   },
   {
     "id": "step-04",
     "title": "The app vendors and re-proves",
-    "caption": "gurbani-soul-ios pins the contract at a platform release tag (vendor.lock.json, sha256 per file) and the same dataset pin. It builds its own bundled database pair and runs byte-parity tests so its Swift port equals the Python source of truth. Its MARKETING_VERSION must equal the platform version it vendored.",
+    "caption": "gurbani-soul-ios pins the contract at a platform release tag (vendor.lock.json, a sha256 per file) and the same dataset pin. It builds its own bundled database pair from that pin and runs byte-parity tests so its Swift port equals the Python source of truth. Its MARKETING_VERSION must equal the platform version it vendored.",
     "link": "/adr/0007-three-repositories/"
   },
   {
     "id": "step-05",
     "title": "This wiki pins the sibling docs",
-    "caption": "docs-site/sources.lock.json records, per sibling repository, a commit and the sha256 of every published documentation file; the build installs them under /data/ and /ios/ with a canonical-source banner. A pin bump is a small reviewed pull request.",
+    "caption": "docs-site/sources.lock.json records, per sibling repository, a commit and the sha256 of every published documentation file; the build installs them under /data/ and /ios/ with a banner naming the canonical source. A pin bump is a small reviewed pull request, opened by the weekly docs-pins job.",
     "link": "/adr/0012-docs-site/"
   },
   {
