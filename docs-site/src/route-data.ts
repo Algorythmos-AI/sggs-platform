@@ -1,5 +1,6 @@
 // Starlight route middleware: adjustments to the data every page renders with.
 import { defineRouteMiddleware, type StarlightRouteData } from '@astrojs/starlight/route-data';
+import { commitDates, datedFile } from '../plugins/git-dates.mjs';
 
 type Entry = StarlightRouteData['sidebar'][number];
 type Link = NonNullable<StarlightRouteData['pagination']['prev']>;
@@ -31,4 +32,15 @@ export const onRequest = defineRouteMiddleware(async (context, next) => {
     return section ? { ...link, label: `${section} overview` } : link;
   };
   route.pagination = { prev: named(route.pagination.prev), next: named(route.pagination.next) };
+
+  // "Last updated": the page's own last commit (plugins/git-dates.mjs explains the three sources).
+  const file = datedFile(route.id, (route.entry as { filePath?: string }).filePath);
+  const date = file ? commitDates().get(file) : undefined;
+  if (date) route.lastUpdated = date;
+
+  // "On this page" is noise with nothing to list: hide it when the page has fewer than two headings.
+  if (route.toc) {
+    const count = (items: typeof route.toc.items): number => items.reduce((n, i) => n + (i.slug === '_top' ? 0 : 1) + count(i.children), 0);
+    if (count(route.toc.items) < 2) route.toc = undefined;
+  }
 });
