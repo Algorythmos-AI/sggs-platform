@@ -4,8 +4,8 @@ description: "The two API surfaces and their errors, request ids, which response
 sidebar:
   order: 3
 verified:
-  commit: df4bff43
-  date: "2026-09-26"
+  commit: c761e513
+  date: "2026-09-27"
 ---
 # Versioning and caching
 
@@ -20,8 +20,13 @@ structured envelope:
 { "error": { "code": "not_found", "message": "no such endpoint: /api/v1/nope", "request_id": "…" } }
 ```
 
-`code` is `not_found`, `invalid_request` (a bad parameter → 400) or `error`. New clients should use
-`/api/v1`; the legacy surface stays for the app until it re-vendors.
+`code` is `not_found` (404), `invalid_request` (a bad parameter, 400) or `internal` (500); every
+case is on the [error reference](errors.md). New clients should use `/api/v1`.
+
+**What happens to `/api`.** Nothing is scheduled. The legacy surface is what the golden contract pins
+and what existing clients and the website call, so it keeps answering byte for byte. It has no
+retirement date; if one is ever set, it will be announced in the [API changelog](changelog.md) well
+ahead, and `/api/v1` is already the surface to build on.
 
 <!-- sggs:code file="webapp/serve.py" symbol="_handle_v1" -->
 Source: [`webapp/serve.py` · `H._handle_v1`](../../webapp/serve.py), read at build time.

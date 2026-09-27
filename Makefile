@@ -49,6 +49,7 @@ docs-check: ## docs gates: frontmatter, links, widgets, Mermaid palette, scriptu
 	python3 tools/docs_check.py
 	python3 tools/gen_route_table.py --check
 	python3 tools/gen_data_dictionary.py --check
+	python3 tools/gen_api_errors.py --check
 	python3 tools/gen_contributors.py --check
 	python3 tools/gen_repo_map.py --check
 	python3 scripts/brand/contrast_report.py --check
