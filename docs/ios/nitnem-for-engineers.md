@@ -80,6 +80,8 @@ App Store only after a scholar's review is attested in `ios/Resources/NITNEM-REV
 (`REVIEWED: true`) and the in-app "under scholarly review" label is switched off in the same
 commit. `check_release_license.sh` treats a missing attestation as a warning for a TestFlight
 build and a hard failure for `CHANNEL=appstore`; `make appstore-preflight` refuses to submit a
-build that was not archived on that channel. The full contract — reading steps, frozen XCUITest
+build that was not archived on that channel. The review has been done: all 1,191 non-SGGS lines
+were compared with the SGPC Nitnem Gutka by a Granthi and attested on 2026-09-21, with no
+correction required. The full contract — reading steps, frozen XCUITest
 identifiers, deep links — is the pinned
 [Nitnem spec](https://github.com/Algorythmos-AI/gurbani-soul-ios/blob/main/docs/nitnem/spec.md).

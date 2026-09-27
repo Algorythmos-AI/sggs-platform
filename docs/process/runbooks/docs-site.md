@@ -134,7 +134,7 @@ restores it. The wiki carries no state, so a rollback costs nothing but the newe
 | every night | the `docs` job re-runs on `integration`; issue *docs: nightly wiki build failing* while red |
 | Mondays | `docs-links` checks every external link (issue *docs: broken external links*); `security` scans the history; `docs-pins` opens *docs(wiki): bump the sibling docs pins* when a sibling changed a published file (or issue *docs: the sibling docs changed — bump the pins* until `DOCS_BOT_TOKEN` exists); `docs-freshness` rewrites issue *docs: wiki pages to re-verify* |
 | a page is in *wiki pages to re-verify* | re-read it against the code it cites, fix what drifted, move its `verified` stamp; the issue closes itself when every page is fresh |
-| a scholar review is due (G3) | `make review-pack` writes one PDF — Scripture 101, the glossary's scripture and script sections, the contributors — with a sign-off sheet |
+| a scholar review is due | `make review-pack` writes one PDF — Scripture 101, the glossary's scripture and script sections, the contributors — with a sign-off sheet |
 | a new page | frontmatter, links, the scripture rule and the fallback rule are gated; a poster or a widget follows [the contributing guides](../../contributing/README.md) |
 
 ## 6. Sibling README links
@@ -145,7 +145,7 @@ their docs ([sggs-data#11](https://github.com/Algorythmos-AI/sggs-data/pull/11),
 
 ## 7. Open review items
 
-- The scholar review (gate G3) of [Scripture 101](../../scripture/README.md), the glossary's
+- The scholar review of [Scripture 101](../../scripture/README.md), the glossary's
   scripture terms and the contributors chronology. `make review-pack` builds the PDF with a
   sign-off sheet.
 - Resolved: sggs-data's `database-schema.md` now states the database's counts (4,527 compositions,

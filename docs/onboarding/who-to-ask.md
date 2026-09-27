@@ -25,7 +25,7 @@ explicitly because a mistake in them reaches the scripture or the apps: the data
 the verifier (`webapp/verify.py`) and the CI configuration (`.github/`). Expect a slower, closer
 review on those.
 
-Scripture questions are not answered by engineers. The project keeps a scholarly review gate (G3)
+Scripture questions are not answered by engineers. The project keeps a scholar review
 for anything that changes how the text is extracted, displayed or explained; the
 [answer protocol](https://github.com/Algorythmos-AI/sggs-data/blob/main/Answer-Protocol.md) in
 sggs-data says how a quotation may be shown and how explanation must be labelled.

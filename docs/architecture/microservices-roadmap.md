@@ -100,7 +100,7 @@ The contexts first ran on staging as five free Render services. They now run as 
 the web's own Vercel project — one per context plus `all` — generated at deploy time by
 `tools/build_api_functions.py` and routed internally, so production can move with no new hosting
 (the web is already on Vercel Pro; functions are billed by use from the plan's credit). The trial on a
-separate Vercel project passed the whole golden contract (266 records) on Vercel's Python 3.12 /
+separate Vercel project passed the whole golden contract (266 records at the time) on Vercel's Python 3.12 /
 SQLite 3.40.0, with every function ready at its commit and holding exactly its context; it also
 showed why the functions belong in the web project (one edge and one firewall instead of two, and no
 framework-less static output that would publish the databases).

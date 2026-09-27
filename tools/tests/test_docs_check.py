@@ -175,6 +175,26 @@ class Theme(unittest.TestCase):
             self.assertFalse(any("--sgs-paper " in m and "is #" in m for m in msgs))   # paper matches both legs
 
 
+class ContractCounts(Fixture):
+    """The golden contract's size, wherever a page or poster cites it, is today's."""
+
+    def test_the_count_is_the_http_suites_in_meta(self):
+        import json
+        meta = json.loads((ROOT / "contract" / "_meta.json").read_text(encoding="utf-8"))["files"]
+        suites = ("verify", "search", "reader", "timing", "banis", "analytics")
+        self.assertEqual(dc.contract_http_records(), sum(meta[f"golden_{s}.ndjson"] for s in suites))
+
+    def test_a_stale_count_is_refused_and_a_dated_one_is_not(self):
+        n = dc.contract_http_records()
+        good = self.page(f"The whole golden contract ({n} records) replays through the gateway.\n", "good.md")
+        stale = self.page(f"The whole golden contract ({n - 8} records) replays through the gateway.\n", "stale.md")
+        dated = self.page(f"The trial passed the whole golden contract ({n - 8} records at the time).\n", "dated.md")
+        other = self.page("The table holds 300 records of raag timing claims.\n", "other.md")
+        msgs = [p.msg for p in dc.check_contract_counts([good, stale, dated, other])]
+        self.assertEqual(len(msgs), 1, msgs)
+        self.assertIn(f"cites {n - 8} golden-contract records", msgs[0])
+
+
 class PosterLegend(unittest.TestCase):
     def test_a_poster_without_its_legend_is_refused(self):
         svg = dc.DOCS / "diagrams" / "posters" / "01-system-landscape.svg"

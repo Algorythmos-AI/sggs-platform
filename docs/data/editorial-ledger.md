@@ -33,9 +33,9 @@ The eleven applications, one per affected line:
 |---|---|---|---|
 | E001 · E002 | R1 | 573 · 586 | documented from the start |
 | E003 | R3 | 727 | documented from the start |
-| E004 | R2 | 1354 | approved 2026-09-24 (gate G3) |
-| E005 · E006 | R4 | 1358 · 1387 | approved 2026-09-24 (gate G3) |
-| E007 – E011 | R1 | 1398 · 1402 · 1406 · 1408 · 1409 | approved 2026-09-24 (gate G3) |
+| E004 | R2 | 1354 | approved 2026-09-24 (scholar review) |
+| E005 · E006 | R4 | 1358 · 1387 | approved 2026-09-24 (scholar review) |
+| E007 – E011 | R1 | 1398 · 1402 · 1406 · 1408 · 1409 | approved 2026-09-24 (scholar review) |
 
 The three earliest applications were itemised when the pipeline was written; the other eight were
 applied by the same rules and itemised on 2026-09-23, then reviewed and approved by a scholar on
@@ -61,7 +61,7 @@ flowchart LR
     r[Reader or Granthi reports a concern] --> i[Issue: scripture-fidelity template<br/>Ang · line · photo of the printed page]
     i --> c{A person compares<br/>with the source edition}
     c -->|edition difference,<br/>saroop rendering,<br/>transliteration| n[No change · reply with the explanation]
-    c -->|impossible sequence<br/>confirmed| l[Ledger entry + rule · scholar review G3]
+    c -->|impossible sequence<br/>confirmed| l[Ledger entry + rule · scholar review]
     l --> b[sggs-data rebuild · gates · new DATASET_VERSION]
     b --> p[Platform: dataset.lock.json bump]
     p --> a[App: same pin · re-archive]
