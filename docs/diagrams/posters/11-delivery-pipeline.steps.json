@@ -43,20 +43,20 @@
   },
   {
     "id": "step-08",
-    "title": "The API, verified by commit",
-    "caption": "deploy-api triggers the Render deploy hook with ref=SHA and waits until /api/health.commit equals the commit and the health checks are all true. verify-api then samples compositions and proves exact lines, present headings and 404 on the permanent comp_id gaps. The web is untouched until this passes.",
+    "title": "The Render standby, verified by commit",
+    "caption": "deploy-api triggers the Render deploy hook with ref=SHA and waits until /api/health.commit equals the commit and the health checks are all true; verify-api then samples compositions and proves exact lines, present headings and 404 on the permanent comp_id gaps. Since 1.3.10 production’s /api is answered by the API functions in the web deployment; the Render API is kept deployed and proven as the standby. The web is untouched until this passes.",
     "link": "/process/runbooks/deploy/"
   },
   {
     "id": "step-09",
-    "title": "The web, built unaliased and smoked",
-    "caption": "vercel build and deploy with --skip-domain produce a deployment nobody can reach yet; the @smoke tests run against it. A failure here leaves users on the previous deployment.",
+    "title": "The web and the API functions, built unaliased and proven",
+    "caption": "vercel build and deploy with --skip-domain produce a deployment nobody can reach yet: the website and the API functions together. Its functions are checked at the commit, the golden contract is replayed against it and the @smoke tests run. A failure here leaves users on the previous deployment.",
     "link": "/process/runbooks/deploy/"
   },
   {
     "id": "step-10",
     "title": "Promote — with a way back",
-    "caption": "vercel promote puts the deployment on gurbanisoul.com, the CDN cache is purged so no stale API body outlives its dataset, and the @smoke tests run against the public domain. If they fail, the job runs vercel rollback to the recorded previous deployment and opens an incident issue. The API rolls back from Render’s previous deploy; a dataset rolls back by reverting the lock bump.",
+    "caption": "vercel promote puts the deployment on gurbanisoul.com, the CDN cache is purged so no stale API body outlives its dataset, and the @smoke tests run against the public domain. If they fail, the job runs vercel rollback to the recorded previous deployment — the website and the API functions go back together — and opens an incident issue. Sending the API to the Render standby is a routing change in gateway/routes.json; a dataset rolls back by reverting the lock bump.",
     "link": "/process/runbooks/rollback/"
   },
   {

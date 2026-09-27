@@ -210,7 +210,7 @@ class PosterLegend(unittest.TestCase):
         original = svg.read_text(encoding="utf-8")
         self.assertIn('data-kit="2"', original)
         try:
-            # 18 px passes kit 1's 16-px floor but shows at ~9 px on a kit-2 poster
+            # 18-px text would show at ~9 px
             svg.write_text(original.replace('font-size="25"', 'font-size="18"', 1), encoding="utf-8")
             msgs = [p.msg for p in dc.check_posters(dc.load_tokens_hex()) if p.file == svg]
             self.assertTrue(any("at least 25px" in m for m in msgs), msgs)

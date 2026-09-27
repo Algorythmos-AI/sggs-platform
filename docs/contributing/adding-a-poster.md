@@ -8,14 +8,14 @@ sidebar:
 
 Posters are the wiki's large step-through pictures. Each is generated from a spec in
 `docs-site/posters/NN-slug.mjs` into an SVG and a steps sidecar under `docs/diagrams/posters/`;
-the generated files are committed and checked for drift. New and redrawn posters use **kit 2**
-(`docs-site/posters/kit2.mjs`, `kit: 2` in the spec), which draws for the size the wiki shows a
+the generated files are committed and checked for drift. The poster kit
+(`docs-site/posters/kit.mjs`; a spec declares `kit: 2`) draws for the size the wiki shows a
 poster — about 630 px wide on a 1280-px laptop screen — and refuses a poster that would be hard to read. The full visual spec
 and the node kinds are on [Diagrams and posters](../diagrams/README.md).
 
 ## Steps
 
-1. Copy the nearest kit-2 spec (poster 03 is the reference); take the next number and a slug.
+1. Copy the nearest spec (poster 03 is a good reference); take the next number and a slug.
 2. Lay out `nodes` on the 1200-wide canvas: content between y = 170 and your `height`, 40 px
    margins. Each node has `x, y, w, h`, a `kind` (box, store, actor, gate, fail, pin, ext, good,
    note) and at most three `lines` — a title and two lines of detail, at least 25 px (the smallest
@@ -36,7 +36,7 @@ and the node kinds are on [Diagrams and posters](../diagrams/README.md).
    cd docs-site && node scripts/build-posters.mjs --check
    ```
 
-   Kit 2 refuses to build a poster whose text would show under 13 px, whose text overflows its
+   The kit refuses to build a poster whose text would show under 13 px, whose text overflows its
    box, whose line crosses a box, a group title, a label or another line's track, whose last run
    is too short for its arrowhead, whose two arrows land on one point, whose boxes overlap or
    straddle a group, or whose text is under 4.5:1 on its fill in either theme — and it says which

@@ -8,7 +8,8 @@ test.describe('posters', () => {
     await page.goto('/architecture/request-lifecycle/');
     const poster = page.locator('figure.poster[data-poster="08-request-lifecycle"]');
     await expect(poster.locator('svg[role="img"]')).toBeVisible();
-    await expect(poster.locator('svg title')).toHaveCount(1);
+    await expect(poster.locator('svg > title')).toHaveCount(1);              // the poster's accessible name
+    await expect(poster.locator('g.pk-node > title').first()).toBeAttached();  // and each box's own tooltip
     await expect(poster.locator('g[data-step]')).toHaveCount(8);
     await expect(poster.locator('figcaption a[href="/posters/08-request-lifecycle.svg"]')).toBeVisible();
   });
@@ -21,14 +22,14 @@ test.describe('posters', () => {
     await wt.locator('.wt__next').click();
     await expect(wt.locator('.wt__counter')).toHaveText('Step 1 of 8');
     await expect(wt.locator('.wt__caption')).toContainText('Same-origin call');
-    await expect(wt.locator('g[data-step].is-dim')).toHaveCount(7);
+    await expect(wt.locator('g[data-step].is-future')).toHaveCount(7);   // poster 08 is on kit 2: later steps are faint
     await expect(wt.locator('g[data-step].is-active')).toHaveCount(1);
     await wt.focus();
     await page.keyboard.press('ArrowRight');
     await expect(wt.locator('.wt__counter')).toHaveText('Step 2 of 8');
     await page.keyboard.press('Home');
     await expect(wt.locator('.wt__counter')).toHaveText('8 steps');
-    await expect(wt.locator('g[data-step].is-dim')).toHaveCount(0);
+    await expect(wt.locator('g[data-step].is-future')).toHaveCount(0);
     await wt.locator('.wt__item').nth(4).click();
     await expect(wt.locator('.wt__caption a.wt__link')).toHaveAttribute('href', '/engineering/invariants/');
   });
@@ -48,7 +49,7 @@ test.describe('posters', () => {
     await expect(wt.locator('.wt__zoom')).toBeFocused();
   });
 
-  test('a kit-2 poster keeps earlier steps half-lit and later ones faint; the lightbox steps with its caption', async ({ page }) => {
+  test('a poster keeps earlier steps half-lit and later ones faint; the lightbox steps with its caption', async ({ page }) => {
     await mockApi(page);
     await page.goto('/data/line-record/');
     const wt = page.locator('sggs-walkthrough[data-poster="03-anatomy-of-a-line-record"]');
@@ -60,7 +61,6 @@ test.describe('posters', () => {
     await expect(wt.locator('g[data-step].is-past')).toHaveCount(1);
     await expect(wt.locator('g[data-step].is-active')).toHaveCount(1);
     await expect(wt.locator('g[data-step].is-future')).toHaveCount(6);
-    await expect(wt.locator('g[data-step].is-dim')).toHaveCount(0);  // kit 1's state is not used on kit 2
     // each node names itself (its own tooltip)
     await expect(wt.locator('g.pk-node[data-node="units"] > title')).toHaveText(/segment_units/);
 
@@ -93,6 +93,11 @@ test.describe('posters', () => {
     ['/architecture/search-waterfall/', '05-search-waterfall'],
     ['/search/the-roman-fold/', '06-the-fold-in-three-places'],
     ['/search/verification-engine/', '07-verification-engine'],
+    ['/architecture/request-lifecycle/', '08-request-lifecycle'],
+    ['/process/ci-gates/', '10-ci-gates-map'],
+    ['/process/branching/', '11-delivery-pipeline'],
+    ['/ios/db-pair-and-launch-integrity/', '12-ios-release-and-integrity'],
+    ['/scripture/structure/', '13-structure-of-the-granth'],
   ]) {
     test(`poster ${slug} reads at the size shown: no text under 13 px, no two boxes' text overlapping`, async ({ page }, testInfo) => {
       test.skip(testInfo.project.name !== 'desktop', 'measured at the desktop column width');

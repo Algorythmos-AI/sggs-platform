@@ -1,9 +1,9 @@
-// posters/kit2.mjs: a poster reads at the size the wiki shows it, and the kit refuses one that
+// posters/kit.mjs: a poster reads at the size the wiki shows it, and the kit refuses one that
 // would not — each rule is shown catching the defect it exists for (several were live on kit 1).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { KINDS, MIN_TEXT, ROLES, SHOWN, W, buildPoster2, lint, route } from '../../posters/kit2.mjs';
+import { KINDS, MIN_TEXT, ROLES, SHOWN, W, buildPoster, lint, route } from '../../posters/kit.mjs';
 import { BRAND, BRAND_DARK, contrast } from '../brand.mjs';
 import poster03 from '../../posters/03-anatomy-of-a-line-record.mjs';
 
@@ -100,7 +100,7 @@ test('routing: boxes sharing a column get one straight line; others bend through
 
 test('poster 03 is built on kit 2 and meets every rule', () => {
   assert.deepEqual(lint(poster03), []);
-  const { svg, steps } = buildPoster2(poster03);
+  const { svg, steps } = buildPoster(poster03);
   assert.match(svg, /viewBox="0 0 1200 \d+"/);
   assert.match(svg, /data-kit="2"/);
   assert.equal(steps.length, 8);
@@ -112,5 +112,5 @@ test('poster 03 is built on kit 2 and meets every rule', () => {
 });
 
 test('a kit-2 build fails loudly, naming the node and the rule', () => {
-  assert.throws(() => buildPoster2(base({ nodes: [box('a', 40, 200, 300, 96, { lines: ['Title', { text: 'x', size: 12 }] })] })), /test:\n {2}a: "x" is 12px/);
+  assert.throws(() => buildPoster(base({ nodes: [box('a', 40, 200, 300, 96, { lines: ['Title', { text: 'x', size: 12 }] })] })), /test:\n {2}a: "x" is 12px/);
 });

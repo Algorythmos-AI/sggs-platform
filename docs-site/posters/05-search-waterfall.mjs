@@ -1,5 +1,5 @@
 // Poster 05 — /api/search as coded (webapp/sggs/search.py:do_search): the order the tiers are tried.
-// Kit 2 (posters/kit2.mjs): the three steps every query takes, then auto mode forks by script —
+// Layout (posters/kit.mjs): the three steps every query takes, then auto mode forks by script —
 // Gurmukhi on the left, the Roman waterfall below it as a two-column zig-zag, one tier per box.
 const V = { version: '1.3.10', date: '2026-09-27', commit: 'd85c2adc' };
 export default {
