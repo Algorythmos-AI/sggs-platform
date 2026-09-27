@@ -29,7 +29,7 @@ flowchart TB
     llm[Reviewed loanword spellings] --> rules
     rules --> v[(variants, canon_tokens)]
     lex[Platform: SEEKER_LEXICON<br/>in search.py] --> q
-    v --> q[Auto mode, Roman query:<br/>transliteration, then lexicon,<br/>then variants]
+    v --> q[A Roman query in auto:<br/>transliteration,<br/>then the lexicon,<br/>then variants]
     class lex,q platform
     classDef platform stroke-dasharray: 4 3
 ```

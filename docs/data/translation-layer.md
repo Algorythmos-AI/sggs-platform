@@ -19,7 +19,7 @@ is never presented as the original ([invariants](../engineering/invariants.md)).
 flowchart TB
     accTitle: The English layer travels beside the scripture, never inside it
     accDescr: The translation files live in a private release in sggs-source and are verified against committed checksums before a rebuild may start. load_translations.py matches each translation to its line on the same or a neighbouring Ang and writes the translations table, the sources table and the fts_en index. The API attaches the English as a separate en field; the website shows it under an EN label; the App Store build's public profile leaves the layer out.
-    src[Private release in sggs-source:<br/>translation files, checksummed] --> load[load_translations.py:<br/>match each line, exact,<br/>skeleton or fuzzy]
+    src[sggs-source, private:<br/>translation files,<br/>checksummed] --> load[load_translations.py:<br/>match each line, exact,<br/>skeleton or fuzzy]
     load --> t[(translations, sources,<br/>fts_en)]
     t --> api[API: a separate en field<br/>on each line]
     api --> web[Website: shown under<br/>an EN label]

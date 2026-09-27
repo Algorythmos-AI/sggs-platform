@@ -19,11 +19,11 @@ flowchart TB
     accTitle: The debugging loop for a search result
     accDescr: Reproduce the query against the API and note the mode, which names the tier that answered. Inspect that tier in process: the fold, the variants and the lexicon for the words. Decide where the fix belongs: the lexicon in the platform, or spellings in sggs-data. Measure the harnesses before and after, add the query to the golden contract, and open a pull request only if recall holds corpus-wide.
     r[Reproduce: the API,<br/>note mode] --> t[Which tier answered,<br/>and why?]
-    t --> f{Where does the fix belong?}
+    t --> f[Where does<br/>the fix belong?]
     f -->|a phrase people type| lex[Platform:<br/>the seeker lexicon]
     f -->|a spelling of a word| data[sggs-data:<br/>variant rules or lists]
     f -->|tier order or ranking| code[Platform:<br/>the waterfall, with care]
-    lex --> p[Harnesses before and after,<br/>a golden case, make contract]
+    lex --> p[Harnesses before<br/>and after, a golden<br/>case, make contract]
     data --> p
     code --> p
 ```
