@@ -42,9 +42,9 @@ export const LAYOUT = [
     group('Runbooks', [pages('ios/process/runbooks', { from: APP })]),
   ]),
   group('Ship & operate', [
-    pages('engineering'),
     pages('process'),
     group('Runbooks', [pages('process/runbooks')]),
+    group('Engineering handbook', [pages('engineering')]),
   ]),
   group('Brand', [pages('brand')]),
   group('Decisions', [
@@ -69,7 +69,6 @@ export const LAYOUT = [
 // Short sidebar labels for pages whose title is long, or reads badly out of context. The page title
 // (and so the H1, the browser tab and search) is unchanged. At most LABEL_MAX characters (tested).
 export const LABELS = {
-  'engineering': 'Engineering handbook',
   'learning-paths/platform-engineer': 'Platform engineer',
   'learning-paths/data-engineer': 'Data engineer',
   'learning-paths/ios-engineer': 'iOS engineer',
@@ -84,7 +83,7 @@ export const LABELS = {
   'onboarding/reverence-checklist': 'Working with sacred text',
   'scripture/answer-protocol-for-engineers': 'The Answer Protocol for engineers',
   'data/answer-protocol': 'The Answer Protocol (full text)',
-  'architecture/overview': 'Overview',
+  'architecture/overview': 'The system on one page',
   'architecture/microservices-roadmap': 'Microservices roadmap',
   'data/integrity-chain': 'The integrity chain',
   'data/architecture/database-schema': 'Database schema',

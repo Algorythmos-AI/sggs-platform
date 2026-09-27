@@ -23,12 +23,11 @@ flowchart LR
     start --> rs[Reviewer or scholar<br/>what to check, where, and how to say no]
 ```
 
-| Path | For | Time |
-|---|---|---|
-| [Platform engineer](platform-engineer.md) | someone who will change the API, the website or the pipeline that ships them | about two days |
-| [Data engineer](data-engineer.md) | someone who will work on the corpus, the database, the gates or a dataset release | about two days |
-| [iOS engineer](ios-engineer.md) | someone who will change the app | about a day and a half |
-| [Reviewer or scholar](reviewer-scholar.md) | a Granthi, a scholar or a maintainer who reviews changes and never writes code | half a day |
+<!-- sggs:cards -->
+- [Platform engineer](platform-engineer.md) — someone who will change the API, the website or the pipeline that ships them (about two days)
+- [Data engineer](data-engineer.md) — someone who will work on the corpus, the database, the gates or a dataset release (about two days)
+- [iOS engineer](ios-engineer.md) — someone who will change the app (about a day and a half)
+- [Reviewer or scholar](reviewer-scholar.md) — a Granthi, a scholar or a maintainer who reviews changes and never writes code (half a day)
 
 Each exercise on a path is runnable with `make` targets alone and says what output to expect;
 the [exercises index](../exercises/README.md) lists them all.
