@@ -9,7 +9,7 @@ verified:
 ---
 # Transliteration and the fold
 
-> **Explanation, not scripture — scholar review pending (gate G3).** These pages explain the
+> **Explanation, not scripture — scholar review pending.** These pages explain the
 > scripture to engineers and students. Every quoted line is verbatim from the pinned database and
 > cited by Ang; everything else is explanation, written by engineers and awaiting a Granthi's
 > review. Where this page and the scripture differ, the scripture is right.

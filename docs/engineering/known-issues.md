@@ -4,8 +4,8 @@ description: "The releases that explain today's invariants, in order, with what 
 sidebar:
   order: 5
 verified:
-  commit: f25ab970
-  date: "2026-09-25"
+  commit: d2f2e415
+  date: "2026-09-27"
 ---
 # Release timeline & known issues
 
@@ -28,6 +28,8 @@ and live verification passes live under [reports](../reports/README.md).
 | **v1.0.0** | 2026-09-06 | Version strings reset to one unified baseline ahead of the first public release; no code, corpus or DB change. | One version number across web, API and app ([ADR-0004](../adr/0004-unified-semver.md)). |
 | **v1.1.0 – v1.1.5** | 2026-09 | `comp_id` groups a heading run with its composition (post-pass 1b); v1.1.4 demoted 233 verses mis-flagged as headings; CI-gated deploys; Soul Gold brand. | No body line ever changes `comp_id`; deploys only through CI. |
 | **v1.3.8** | 2026-09-24 | Three repositories: data, platform, app ([ADR-0007](../adr/0007-three-repositories.md)); the database arrives by pin ([ADR-0008](../adr/0008-dataset-by-pin.md)). | `dataset.lock.json` is the only way a dataset changes here; the editorial ledger is 4 rules, 11 applications. |
+| **v1.3.9** | 2026-09-25 | Every bounded context runs as its own service on staging behind a gateway generated from the route table ([ADR-0010](../adr/0010-services-behind-a-generated-gateway.md)); `/api/v1/*` with strict errors beside a byte-identical legacy `/api/*`; request ids; continuous production verification. | Routing is generated, never hand-written; legacy `/api/*` stays byte-identical (the golden contract pins it). |
+| **v1.3.10** | 2026-09-25 | The API runs as Python functions inside the Vercel web project in production ([ADR-0011](../adr/0011-api-as-functions-in-the-web-project.md)), replayed against the golden contract before it goes live; the Render API keeps deploying as the rollback; this wiki launches at docs.gurbanisoul.com. | The website and the API deploy — and roll back — together. |
 
 ## Still open
 
@@ -35,10 +37,12 @@ and live verification passes live under [reports](../reports/README.md).
 |---|---|---|
 | Analytics-chart accessibility: the D3 charts are mouse-driven; the theme network has a data-table alternative, the others do not yet | open | web |
 | One line with an empty `translit_norm` (id 35328, Ang 829) | fixes on the next rebuild; tracked row by row in sggs-data's data-quality baseline | data |
-| 21 source-faithful lines with a vowel sign that has no base consonant (Angs 214, 342, 695, 698, 699, 897, 1203, 1205) | flagged for scholarly review; never silently changed (the Ang 1354/1358/1387 rows were resolved by the G3-approved editorial corrections) | scholar (G3) |
-| Saroop rendering vs the printed Bir's deep-subscript ya | pending a Granthi/scholar's review; an exact match needs a licensed or commissioned font | scholar (G3) |
+| 21 source-faithful lines with a vowel sign that has no base consonant (Angs 214, 342, 695, 698, 699, 897, 1203, 1205) | flagged for scholarly review; never silently changed (the Ang 1354/1358/1387 rows were resolved by the editorial corrections approved in the scholar review of 2026-09-24) | scholar review |
 | Japji `author = null`: author filters for Guru Nanak miss it | known, deferred | data |
 | `comp_type` mislabelled in places | suppressed at the display layer; prefer `comp_id`/`section` | data |
-| `Validation-Report.md` lags the code | banner-flagged superseded; archived | docs |
 
 What each of these means for the text is on [the editorial ledger](../data/editorial-ledger.md) page.
+
+Closed since the last list: the traditional saroop rendering was accepted as the app's default at the
+brand sensitivity gate on 2026-09-26 (an exact match to the printed Bir's deep-subscript ya would still
+need a licensed or commissioned font); `Validation-Report.md` is archived.

@@ -544,11 +544,54 @@ def verify_thresholds() -> dict[str, str]:
     return dict(re.findall(r"^(_THRESH_[A-Z]+)\s*=\s*([0-9.]+)", src, re.M))
 
 
+CONTRACT_HTTP_PY = ROOT / "tools" / "contract_http.py"
+CONTRACT_META = ROOT / "contract" / "_meta.json"
+# "the golden contract (274 records", "274-record golden contract", "274 records via the gateway"
+RECORDS_RE = re.compile(r"\b(\d{2,4})[ -]records?\b(?![^.\n]{0,40}at the time)")
+
+
+def contract_http_records() -> int | None:
+    """How many golden records `tools/contract_http.py` replays over HTTP — the number the pages cite
+    as "the whole golden contract": the record counts in contract/_meta.json of its HTTP_SUITES."""
+    if not (CONTRACT_HTTP_PY.exists() and CONTRACT_META.exists()):
+        return None
+    m = re.search(r"HTTP_SUITES\s*=\s*\(([^)]*)\)", CONTRACT_HTTP_PY.read_text(encoding="utf-8"))
+    files = json.loads(CONTRACT_META.read_text(encoding="utf-8")).get("files", {})
+    if not m:
+        return None
+    suites = re.findall(r"['\"]([a-z_]+)['\"]", m.group(1))
+    return sum(files.get(f"golden_{s}.ndjson", 0) for s in suites)
+
+
+def check_contract_counts(files: list[Path] | None = None) -> list[Problem]:
+    """A page or poster citing the golden contract's size must cite today's (ADRs record the number
+    of their day and are not checked; a historical figure says "at the time")."""
+    P: list[Problem] = []
+    want = contract_http_records()
+    if want is None:
+        return P
+    if files is None:
+        files = [p for p in published_pages() if "adr" not in p.relative_to(ROOT).parts]
+        files += sorted((DOCS / "diagrams" / "posters").glob("*.steps.json"))
+    for f in files:
+        text = f.read_text(encoding="utf-8")
+        for m in RECORDS_RE.finditer(text):
+            window = text[max(0, m.start() - 120): m.end() + 120].lower()
+            if "contract" in window and int(m.group(1)) != want:
+                line = text.count("\n", 0, m.start()) + 1
+                P.append(Problem(f, line, f"cites {m.group(1)} golden-contract records; the HTTP suites hold {want} today (tools/contract_http.py, contract/_meta.json)"))
+    return P
+
+
 def check_drift() -> list[Problem]:
     """The pages and posters that describe the engines must name what the code names."""
     P: list[Problem] = []
     page = DOCS / "architecture" / "search-waterfall.md"
     sidecar = DOCS / "diagrams" / "posters" / "05-search-waterfall.steps.json"
+    # a moved or deleted page would silently switch these checks off: refuse that instead
+    for need in (page, sidecar, DOCS / "diagrams" / "posters" / "07-verification-engine.steps.json"):
+        if not need.exists():
+            P.append(Problem(need, 1, "the drift check reads this file and it is missing — move the check with the page"))
     if SEARCH_PY.exists() and page.exists():
         text = page.read_text(encoding="utf-8")
         steps = " ".join(f"{s.get('title', '')} {s.get('caption', '')}" for s in json.loads(sidecar.read_text(encoding="utf-8"))) if sidecar.exists() else ""
@@ -750,6 +793,7 @@ def run(db_path: Path | None = None) -> list[Problem]:
         problems += check_page(page, tokens_hex, widgets, db)
     problems += check_posters(tokens_hex)
     problems += check_drift()
+    problems += check_contract_counts()
     problems += check_site_config()
     problems += check_theme()
     return problems

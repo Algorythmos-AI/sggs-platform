@@ -60,7 +60,7 @@ nothing generated is committed.
 - `build_api_functions.py --verify-output`: each function bundles only its entry, the API code and
   its own database slice.
 - `X-Service` probes: each routed context answers its own routes; `/api/nope` falls through to `all`.
-- The whole golden contract (266 records) replays through the gateway on the staging site.
+- The whole golden contract (274 records: the six suites `tools/contract_http.py` replays) replays through the gateway on the staging site.
 
 Reversal is one line: remove a context from `gateway/routes.json` and `all` answers it again on the
 next deploy. Production changes only when the move is released through the normal pipeline, and

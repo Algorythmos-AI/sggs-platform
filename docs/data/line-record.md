@@ -84,8 +84,8 @@ compositions, flagged for scholarly review; a verse that merely contains a raag 
 `translit_norm`, `fl_g`, `fl_r` and `skeleton`, tokenised so [[Gurmukhi]] signs and `ੴ` stay inside
 tokens. `do_search` ranks with `bm25` and column weights **10 · 5 · 4 · 3 · 3 · 1** in that order: a
 hit in the verbatim text outranks a transliteration hit, which outranks a first-letter or skeleton
-hit. Beside it, `fts_en` serves the English tier, `fts_shabad` cross-line passages and `fts_tri`
-the trigram typo tier. How the tiers cascade is the [search waterfall](../architecture/search-waterfall.md).
+hit. Beside it, `fts_en` serves the English tier and `fts_shabad` cross-line passages; the database
+also carries a trigram index, `fts_tri`, which no route reads. How the tiers cascade is the [search waterfall](../architecture/search-waterfall.md).
 
 The English translations (Dr. Sant Singh Khalsa via ShabadOS) are a **separate table**, attached to
 a line as `en` by the API and labelled as a translation everywhere; they are never blended into the

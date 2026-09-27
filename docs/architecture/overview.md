@@ -99,7 +99,7 @@ every release still deploys as the rollback target until it is retired. See
 
 ## The five layers
 1. **Scripture core** — `lines` (60,658 verbatim rows), raags, sections, authors, vaars.
-2. **Search indexes** — [[FTS5]] (`fts`, `fts_en`, `fts_shabad`, `fts_tri`), `variants`, `word_freq`.
+2. **Search indexes** — [[FTS5]] (`fts`, `fts_en`, `fts_shabad`; `fts_tri` is built but no route reads it), `variants`, `word_freq`.
 3. **Translations** — the Khalsa English layer, a separate labelled table (never blended into [[Gurmukhi]]).
 4. **Analytics / Insight Engine** — theme network, stylometry, resonance, semantic neighbours.
 5. **Knowledge layer** — attributed raag-timing claims (divergence preserved, never adjudicated).
