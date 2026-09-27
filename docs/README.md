@@ -1,10 +1,10 @@
 ---
-title: "SGGS Knowledge Base — Engineering Wiki"
+title: "The engineering wiki"
 description: "Start here: what the SGGS Knowledge Base is, how its three repositories fit together, and where to read next."
 sidebar:
   order: 0
 ---
-# SGGS Knowledge Base — Engineering Wiki
+# The engineering wiki
 
 An offline, sovereign, zero-dependency study application over the complete
 **Sri Guru Granth Sahib Ji** (Angs 1–1430). A reproducible pipeline extracts the

@@ -1,7 +1,8 @@
 ---
 // Starlight's <head> plus: the page's Open Graph card (prerendered by src/pages/og/[...id].png.ts for
 // every collection page; the generated API reference and the 404 page fall back to the landing card)
-// and the widget bundle (one script, loaded once per page, deferred by Astro).
+// and the widget bundle (one script, loaded once per page, deferred by Astro). Starlight already emits
+// twitter:card; this adds the image, the theme colours and the home-screen icon.
 import Default from '@astrojs/starlight/components/Head.astro';
 import { getEntry } from 'astro:content';
 const { id } = Astro.locals.starlightRoute;
@@ -14,8 +15,11 @@ const ogImage = `${site}/og/${ogId}.png`;
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:image" content={ogImage} />
+<!-- the browser chrome takes the page's colour in each theme; the home-screen icon is the product's -->
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBF7F0" />
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#171412" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <script>
   import '../widgets/index.ts';
 </script>

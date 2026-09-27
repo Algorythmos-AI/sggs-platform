@@ -26,7 +26,9 @@ if (id === 'api/reference' || id.startsWith('api/reference/')) {
     editUrl = `https://github.com/${PLATFORM_REPO}/edit/${PLATFORM_REF}/${repoRel}`;
   }
 }
-const issueUrl = `https://github.com/${PLATFORM_REPO}/issues/new?title=${encodeURIComponent(`docs: ${id || 'index'}`)}&labels=documentation`;
+// a problem with a pinned page is reported where the page is written
+const issueRepo = pinnedUrl ? sourceLabel : PLATFORM_REPO;
+const issueUrl = `https://github.com/${issueRepo}/issues/new?title=${encodeURIComponent(`docs: ${id || 'index'}`)}&labels=documentation`;
 ---
 {editUrl && <a href={editUrl} class="sl-flex edit-link"><span aria-hidden="true">✎</span> Edit this page <span class="sr-only">(in {sourceLabel})</span></a>}
 {pinnedUrl && <a href={pinnedUrl} class="sl-flex edit-link">View the version this wiki pins</a>}

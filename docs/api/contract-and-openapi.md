@@ -4,13 +4,15 @@ description: "contract/openapi.json is generated from real responses and checked
 sidebar:
   order: 2
 verified:
-  commit: 7a343c62
-  date: "2026-09-25"
+  commit: d2f2e415
+  date: "2026-09-27"
 ---
 # Contract and OpenAPI
 
 The API's shape is not written by hand. `tools/gen_openapi.py` declares each route once (tag,
-summary, parameters, limits, sample requests) and then **infers the response schemas from real
+a one-sentence description, parameters, limits, sample requests, plus a short verb-first
+`summary` in `SUMMARIES` — "Search the Granth" — that the reference's sidebar and headings show)
+and then **infers the response schemas from real
 responses** of the in-process API on the pinned database, so the spec cannot describe a field the
 server does not return. The result, `contract/openapi.json`, drives the [API reference](reference/)
 on this site and the [routes page](routes.md).
@@ -64,7 +66,8 @@ app — see [One version number](../adr/0004-unified-semver.md).
 
 1. Add or change the handler in the bounded context module and its entry in `serve.py:ROUTES`.
 2. Declare it in `tools/gen_openapi.py:ROUTES` with parameters, limits and at least one sample
-   request; regenerate the spec.
+   request, and give it a short label in `SUMMARIES` (at most 32 characters; a test holds both
+   tables to the same routes); regenerate the spec.
 3. Regenerate the golden vectors (`make contract`) and review the diff line by line.
 4. Regenerate the [routes page](routes.md) (`python3 tools/gen_route_table.py`) and, if the route
    belongs to a context that runs as its own function on staging, the gateway

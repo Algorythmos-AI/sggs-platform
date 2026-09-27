@@ -48,7 +48,8 @@ function fakeDist(pages) {
     const nav = `<nav aria-label="Main"><details open><summary><span>Group</span></summary><ul>${links}</ul></details></nav>`;
     const pag = `<div class="pagination-links">${o.prev ? '<a rel="prev" href="#">p</a>' : ''}${o.next ? '<a rel="next" href="#">n</a>' : ''}</div>`;
     mkdirSync(path.join(dist, p), { recursive: true });
-    writeFileSync(path.join(dist, p, 'index.html'), `<html><body>${nav}<main></main>${pag}</body></html>`);
+    const date = o.undated ? '' : '<p class="page-meta">Updated <time datetime="2026-09-27T00:00:00.000Z">27 September 2026</time></p>';
+    writeFileSync(path.join(dist, p, 'index.html'), `<html><body>${nav}<main>${date}</main>${pag}</body></html>`);
   }
   return dist;
 }
@@ -74,4 +75,9 @@ test('a page missing from the sidebar, or without previous/next, fails', () => {
 test('a sidebar entry renamed on one page fails (pagination must never rename the sidebar)', () => {
   const dist = fakeDist({ '/a/': { next: true }, '/b/': { prev: true, next: true, rename: { '/a/': 'Section overview' } }, '/c/': { prev: true } });
   assert.deepEqual(checkSite(dist, { exempt: {} }), ['/b/: the sidebar labels /a/ "Section overview" here but "Page /a/" on /a/']);
+});
+
+test('a page without its "Updated" date fails', () => {
+  const dist = fakeDist({ '/a/': { next: true }, '/b/': { prev: true, next: true, undated: true }, '/c/': { prev: true } });
+  assert.deepEqual(checkSite(dist, { exempt: {} }), ['/b/: no "Updated" date']);
 });
