@@ -48,6 +48,7 @@ ci: check-versions dataset-check test-web contract docs-check ## run the gates C
 docs-check: ## docs gates: frontmatter, links, widgets, Mermaid palette, scripture rule, posters, drift vs code, site config, sibling pin, generated pages
 	python3 tools/docs_check.py
 	python3 tools/gen_route_table.py --check
+	python3 tools/gen_data_dictionary.py --check
 	python3 tools/gen_contributors.py --check
 	python3 tools/gen_repo_map.py --check
 	python3 scripts/brand/contrast_report.py --check

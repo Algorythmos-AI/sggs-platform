@@ -19,7 +19,9 @@ that every deploy and the iOS app replay.
 - [Modes and tiers](modes-and-tiers.md) — Each `mode` you can ask for, each tier's entry condition, what it queries, what it reports (The same simulator, focused on modes)
 - [The Roman fold](the-roman-fold.md) — The five steps of `roman_norm` and why it lives in three repositories (Poster 06 · the function read from the source)
 - [Verification engine](verification-engine.md) — The verdict ladder, the thresholds, the Ang modifier (Poster 07 · a playground over `/api/verify`)
-- [Harnesses and golden vectors](harnesses-and-golden-vectors.md) — What roundtrip, casual-quote and chaos measure; what `make contract` pins (The contract files and their counts)
+- [Harnesses and golden vectors](harnesses-and-golden-vectors.md) — What roundtrip, casual-quote and chaos measure; what `make contract` pins (The contract files and their counts · today's numbers)
+- [Variants and the seeker lexicon](variants-and-lexicon.md) — How Roman spellings reach the right word: the variant index built in sggs-data and the hand-kept lexicon (How each is built, used and changed)
+- [Debugging a search result](debugging-a-search-result.md) — A playbook: reproduce, read the tier, find the cause, fix it in the right place, prove it (The debugging loop)
 
 Search is the `search` bounded context (`/api/search`, `/api/word`); verification is the `verify`
 context (`/api/verify`). Both are read-only over the immutable database — see the
