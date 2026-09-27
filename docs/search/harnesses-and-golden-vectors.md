@@ -4,8 +4,8 @@ description: "What keeps search and verification honest: three regression harnes
 sidebar:
   order: 4
 verified:
-  commit: 7a343c62
-  date: "2026-09-25"
+  commit: aced1a01
+  date: "2026-09-27"
 ---
 # Harnesses and golden vectors
 
@@ -26,6 +26,30 @@ The first two run `do_search` in-process and write per-line JSONL under `qa/resu
 `make harnesses` runs both. Re-run them before and after any change to a tier, a weight or the
 fold, and compare the summaries: the waterfall is tuned corpus-wide, and a local improvement
 often costs recall elsewhere.
+
+## Where the numbers stand
+
+Measured on the pinned dataset at `integration` `aced1a01` (2026-09-27). Use these as the baseline
+a change is compared with:
+
+| Harness | Scope | pass@1 | pass@3 |
+|---|---|--:|--:|
+| round-trip | all 55,510 verse lines, their own transliteration (15 s) | 55,114 (99.3%) | 55,490 (100.0%) |
+| casual-quote | 600 lines, seed 7 (1 s) | 585 (97.5%) | 596 (99.3%) |
+| chaos | 200 attacks against a running server | — | 156 (78%) |
+
+- **Round-trip:** most of the lines not at rank 1 are refrains printed several times; the weakest
+  Ang range is 1401–1430 (97.9% at rank 1).
+- **Chaos, by behaviour:** 20/20 for bilingual, emoji, honorific, fragment, substitution and SMS
+  queries; grammar 18/20; sound-alike spelling 14/20; voice-to-text 3/20; keyboard-smash 1/10 with
+  spaces and 0/10 without. The committed `qa/chaos/chaos_FINAL.jsonl` records 159/200 (the first
+  run, `chaos_baseline.jsonl`, 73/200); today's run is three below it, and the cause has not been
+  traced.
+
+**None of the three gates CI on a threshold.** `casual_quote_harness.py` runs in the `python` job
+and fails it only if it crashes; the round-trip harness runs with `|| true`; the chaos harness is
+not run by any workflow and expects the server on port 7777. The golden contract below is what
+blocks a change.
 
 ## The golden contract
 
