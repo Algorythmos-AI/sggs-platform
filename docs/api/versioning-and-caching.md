@@ -53,8 +53,9 @@ answered afresh and a health check is never stale. The rule is the same on both 
 <!-- sggs:code file="webapp/serve.py" symbol="_CACHEABLE" -->
 Source: [`webapp/serve.py`](../../webapp/serve.py) — the cacheable set, read at build time.
 
-A dataset change is a new deploy (the pin is baked into the image), and the release runbook purges
-the CDN so no cached body outlives the database it came from.
+A dataset change is a new deploy (the pin is baked into the image), and the deploy workflows purge
+the CDN after each promotion (`vercel cache purge`, in `deploy-production` and `deploy-staging`), so
+no cached body outlives the database it came from.
 
 ## Headers on every response
 

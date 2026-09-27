@@ -19,7 +19,7 @@ verified:
 | `version-consistency` | all 5 platform version strings unified (the dataset versions in sggs-data; the iOS app keeps its own match); `main` PRs come from `integration`/`hotfix` | — |
 | `security` | gitleaks; bandit; semgrep OSS; actionlint; **blocking** `npm audit --audit-level=high` on `frontend/` and `docs-site/` (job `deps`) | — |
 | `pr-hygiene` | conventional-commit PR title | — |
-| `e2e · playwright` | Ang 712 heading smoke, search → panel heading, axe WCAG on the home page (desktop project) | serve.py + pinned DB |
+| `e2e · playwright` | Ang 712 heading smoke, search → panel heading, axe WCAG (serious and critical) on `/`, `/search`, `/features`, `/watch` and `/learn` (desktop project) | serve.py + pinned DB |
 | `web-ci · api-image` | Docker image builds; the running container reports the build commit **and honours the golden contract over HTTP** | Docker |
 | `deploy-verify` (on Vercel `deployment_status`, previews only) | preview `/api/health` all-true (passes with a notice without the repo-level bypass secret) | — |
 | `release` (manual fallback) | idempotent tag + GitHub Release on `main`; normal releases are cut by `deploy-production` after a verified deploy | — |

@@ -4,7 +4,7 @@ description: "How the SGGS Knowledge Base is built: three repositories, one read
 sidebar:
   order: 0
 verified:
-  commit: 364c4520
+  commit: 05086f58
   date: "2026-09-27"
 ---
 # Architecture
@@ -34,6 +34,11 @@ In three sentences:
 - [Bounded contexts and the gateway](bounded-contexts-and-gateway.md) — the five contexts, how a function serves a slice of the database, and how routing is generated so it cannot drift (poster 09).
 - [Three repositories and pins](three-repositories-and-pins.md) — every hand-off between data, platform and app as a reviewed lock file (poster 02).
 - [Search waterfall](search-waterfall.md) — how a query becomes results, tier by tier (poster 05); part of [Search & verification](../search/README.md).
+- [The insights context](insights-context.md) — theme networks, author and raag emphasis, Vaars and related verses: every number precomputed, descriptive only.
+- [The knowledge context](knowledge-context.md) — raag-timing claims credited to their sources, disagreement kept, and forms taken only from headings.
+- [The website](website.md) — a static Astro site with no framework runtime, two layouts, and the API on the same origin.
+- [Security and privacy](security-and-privacy.md) — the defences at each layer, what is collected about readers, and the known gaps.
+- [Quality and observability](quality-and-observability.md) — each quality, how it is measured and gated, how production is watched, and what is not yet wired.
 - [Microservices roadmap](microservices-roadmap.md) — how the monolith became modules, then functions, and what is left.
 
 ## Read next
