@@ -19,7 +19,7 @@ test.describe('the iOS section', () => {
     await expect(page.locator('aside.canonical')).toContainText('gurbani-soul-ios/docs/nitnem/spec.md');
     await page.goto('/ios/nitnem-for-engineers/');
     await expect(page.locator('.sl-markdown-content a[href="/ios/nitnem/spec/"]')).toHaveCount(1);
-    await page.goto('/');
+    await page.goto('/ios/');
     await expect(page.locator('main a[href="/ios/ios/testflight-launch-plan/"]').first()).toBeVisible();   // in the page, not the sidebar
   });
 
