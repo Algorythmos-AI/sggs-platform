@@ -1,5 +1,5 @@
 // Poster 09 — the five bounded contexts, module slicing, and the gateway generated from the code.
-// Kit 2 (posters/kit2.mjs): three bands top to bottom — the contexts, the routing that is generated
+// Layout (posters/kit.mjs): three bands top to bottom — the contexts, the routing that is generated
 // from them, and what proves it — then the one-line rollback. Route lists live in the captions.
 const V = { version: '1.3.10', date: '2026-09-27', commit: 'd2f2e415' };
 export default {

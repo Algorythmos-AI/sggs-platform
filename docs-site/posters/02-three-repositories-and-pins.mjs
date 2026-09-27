@@ -1,5 +1,5 @@
 // Poster 02 — three repositories joined by pinned, checksummed artifacts (ADR-0007/0008).
-// Kit 2 (posters/kit2.mjs): one band per repository, top to bottom in the order the text flows —
+// Layout (posters/kit.mjs): one band per repository, top to bottom in the order the text flows —
 // data, platform, app — with each pin directly under what it pins, so every "pins" line runs straight.
 const V = { version: '1.3.10', date: '2026-09-27', commit: 'd85c2adc' };
 export default {

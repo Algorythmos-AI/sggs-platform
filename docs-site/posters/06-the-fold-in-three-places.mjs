@@ -1,5 +1,5 @@
 // Poster 06 — roman_norm, the one fold that must be byte-identical in three repositories.
-// Kit 2 (posters/kit2.mjs): the five steps as a zig-zag, then the three homes side by side, all
+// Layout (posters/kit.mjs): the five steps as a zig-zag, then the three homes side by side, all
 // bound to one set of golden vectors.
 const V = { version: '1.3.10', date: '2026-09-27', commit: 'd85c2adc' };
 export default {

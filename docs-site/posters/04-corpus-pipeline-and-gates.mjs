@@ -1,5 +1,5 @@
 // Poster 04 — the reproducible rebuild, stage by stage, and the gates that stop it (sggs-data: pipeline/rebuild_all.sh).
-// Kit 2 (posters/kit2.mjs): three bands — the corpus, the database, install and prove — each a
+// Layout (posters/kit.mjs): three bands — the corpus, the database, install and prove — each a
 // two-column zig-zag in stage order; the detail of each stage is in its caption.
 const V = { version: '1.3.10', date: '2026-09-27', commit: 'd85c2adc' };
 export default {

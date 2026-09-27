@@ -1,5 +1,5 @@
 // Poster 03 — one Ang, one unit, one row of the `lines` table (sggs-data: build_corpus.py, build_db.py).
-// Kit 2 (posters/kit2.mjs): left, the pipeline that makes a row; right, the row's column families;
+// Layout (posters/kit.mjs): left, the pipeline that makes a row; right, the row's column families;
 // below, the full-text index built over it. Left-to-right connectors use three lanes in the gutter.
 const V = { version: '1.3.10', date: '2026-09-27', commit: '017091b1' };
 export default {

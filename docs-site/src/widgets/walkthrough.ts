@@ -83,15 +83,11 @@ export class SggsWalkthrough extends HTMLElement {
     if (i >= 0) { this.stop(); this.show(i); }
   }
 
-  /**
-   * Light step i in a poster (and in its full-size copy). Version-2 posters (data-kit="2") keep the
-   * steps already shown half-lit and the ones to come faint; version 1 dims only the ones to come.
-   */
+  /** Light step i in a poster (and in its full-size copy): steps shown so far half-lit, the steps to come faint. */
   private paint(svg: SVGSVGElement, i: number) {
-    const v2 = svg.dataset.kit === '2';
     svg.querySelectorAll<SVGGElement>('g[data-step]').forEach((g, gi) => {
-      g.classList.toggle(v2 ? 'is-future' : 'is-dim', i >= 0 && gi > i);
-      if (v2) g.classList.toggle('is-past', i >= 0 && gi < i);
+      g.classList.toggle('is-past', i >= 0 && gi < i);
+      g.classList.toggle('is-future', i >= 0 && gi > i);
       g.classList.toggle('is-active', i >= 0 && gi === i);
     });
   }

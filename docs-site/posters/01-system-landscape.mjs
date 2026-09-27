@@ -1,5 +1,5 @@
 // Poster 01 — the system landscape (C4 level 1, with the pieces a newcomer meets in week one).
-// Kit 2 (posters/kit2.mjs): people on top, the three surfaces, the platform (API and database),
+// Layout (posters/kit.mjs): people on top, the three surfaces, the platform (API and database),
 // where the text comes from, and the only path to production. The lock file and the source PDF are
 // named inside the boxes they belong to; the captions carry the detail.
 const V = { version: '1.3.10', date: '2026-09-27', commit: 'd2f2e415' };

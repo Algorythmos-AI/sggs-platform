@@ -1,5 +1,5 @@
 // Poster 07 — /api/verify (webapp/verify.py): from a claimed quotation to a verdict, rung by rung.
-// Kit 2 (posters/kit2.mjs): the claim's three steps across the top, the verdict ladder as full-width
+// Layout (posters/kit.mjs): the claim's three steps across the top, the verdict ladder as full-width
 // rungs from the strongest verdict down, then the Ang modifier, the answer and the thresholds.
 const V = { version: '1.3.10', date: '2026-09-27', commit: 'd85c2adc' };
 export default {
