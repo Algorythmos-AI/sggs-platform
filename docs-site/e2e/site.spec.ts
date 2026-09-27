@@ -152,6 +152,57 @@ test.describe('the wiki', () => {
     await expect(page.locator('dialog .pagefind-ui__result-link').first()).toBeVisible({ timeout: 15_000 });
   });
 
+  // axe beyond the default view: the dark theme, the phone menu open, the search dialog open
+  for (const path of ['/', '/data/line-record/', '/adr/0007-three-repositories/', '/process/runbooks/rollback/']) {
+    test(`no accessibility violations in the dark theme: ${path}`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: 'dark' });
+      await mockApi(page);
+      await page.goto(path);
+      await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
+      const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+      expect(results.violations, JSON.stringify(results.violations, null, 1)).toEqual([]);
+    });
+  }
+
+  test('no accessibility violations with the phone menu open', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'the menu is the phone sidebar');
+    await mockApi(page);
+    await page.goto('/data/line-record/');
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await expect(page.locator('nav[aria-label="Main"] a[aria-current="page"]')).toBeVisible();
+    const results = await new AxeBuilder({ page }).include('nav[aria-label="Main"]').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 1)).toEqual([]);
+  });
+
+  test('no accessibility violations with the search dialog open', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the search dialog is exercised on desktop');
+    await mockApi(page);
+    await page.goto('/');
+    const open = page.locator('button[data-open-modal]');
+    await expect(open).toBeEnabled({ timeout: 15_000 });
+    await open.click();
+    await page.locator('dialog input[type="search"], dialog input.pagefind-ui__search-input').first().fill('rollback');
+    await expect(page.locator('dialog .pagefind-ui__result-link').first()).toBeVisible({ timeout: 15_000 });
+    // Pagefind's own result markup is third-party; the dialog, its input and the site around it are ours
+    const results = await new AxeBuilder({ page }).include('dialog').exclude('.pagefind-ui__results-area').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 1)).toEqual([]);
+  });
+
+  test('search finds a runbook and a data page by name', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the search dialog is exercised on desktop');
+    await mockApi(page);
+    await page.goto('/');
+    const open = page.locator('button[data-open-modal]');
+    await expect(open).toBeEnabled({ timeout: 15_000 });
+    for (const [q, href] of [['rollback', '/process/runbooks/rollback/'], ['dataset pin', '/data/dataset-pin/']]) {
+      await open.click();
+      const input = page.locator('dialog input[type="search"], dialog input.pagefind-ui__search-input').first();
+      await input.fill(q);
+      await expect(page.locator(`dialog .pagefind-ui__result-link[href^="${href}"]`).first()).toBeVisible({ timeout: 15_000 });
+      await page.keyboard.press('Escape');
+    }
+  });
+
   test('dark and light themes both set an explicit page background', async ({ page }) => {
     await mockApi(page);
     await page.goto('/');

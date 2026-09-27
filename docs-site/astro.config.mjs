@@ -8,6 +8,8 @@ import { unified } from '@astrojs/markdown-remark';
 import starlight from '@astrojs/starlight';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
 import { remarkStripTitleH1 } from './plugins/remark-strip-title-h1.mjs';
+import { remarkAdr } from './plugins/remark-adr.mjs';
+import { remarkAlerts } from './plugins/remark-alerts.mjs';
 import { remarkRepoLinks } from './plugins/remark-repo-links.mjs';
 import { remarkWidgets } from './plugins/remark-widgets.mjs';
 import { remarkCodeExcerpt } from './plugins/remark-code-excerpt.mjs';
@@ -42,7 +44,7 @@ export default defineConfig({
     // Order matters: links and widgets are rewritten before Starlight's own plugins see the tree;
     // Mermaid renders at the remark stage, before Expressive Code sees code blocks. Links in the
     // built HTML are validated afterwards by scripts/check-links.mjs.
-    processor: unified({ remarkPlugins: [remarkStripTitleH1, remarkRepoLinks, remarkWidgets, remarkCodeExcerpt, remarkApiTry, remarkQuiz, remarkRepoMap, remarkAdrTimeline, remarkReleases, remarkCards, remarkSwatches, remarkTerms, remarkGlossaryAnchors, remarkMermaid, remarkPosters, remarkTaskLists] }),
+    processor: unified({ remarkPlugins: [remarkStripTitleH1, remarkAdr, remarkAlerts, remarkRepoLinks, remarkWidgets, remarkCodeExcerpt, remarkApiTry, remarkQuiz, remarkRepoMap, remarkAdrTimeline, remarkReleases, remarkCards, remarkSwatches, remarkTerms, remarkGlossaryAnchors, remarkMermaid, remarkPosters, remarkTaskLists] }),
   },
   integrations: [
     starlight({

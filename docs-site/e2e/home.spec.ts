@@ -15,13 +15,27 @@ test.describe('the home page', () => {
     await mockApi(page);
     await page.goto('/');
     await expect(page.locator('figure.poster').first()).toBeVisible();
-    const cards = page.locator('ul.sggs-cards > li.sggs-card');
+    const cards = page.locator('ul.sggs-cards').first().locator('> li.sggs-card');
     await expect(cards).toHaveCount(4);
     await expect(cards.locator('a.sggs-card__title')).toHaveText(['Platform engineer', 'Data engineer', 'iOS engineer', 'Reviewer or scholar']);
     await expect(cards.first()).not.toContainText('—');                 // the Markdown dash stays on GitHub only
     const releases = page.locator('sggs-releases[limit="3"] .release');
     await expect(releases).toHaveCount(3);
     await expect(page.locator('sggs-releases[limit="3"] input')).toHaveCount(0);
+  });
+
+  test('the sections are one grid of cards, each a page that exists', async ({ page }) => {
+    await mockApi(page);
+    await page.goto('/');
+    const sections = page.locator('ul.sggs-cards').nth(1).locator('> li.sggs-card a.sggs-card__title');
+    await expect(sections).toHaveCount(10);
+    for (const href of await sections.evaluateAll((as) => as.map((a) => a.getAttribute('href')))) {
+      expect((await page.request.get(href!)).status(), href!).toBe(200);
+    }
+    // the GitHub fallback sentences are not shown on the site
+    const fallbacks = page.locator('.sggs-fallback');
+    expect(await fallbacks.count()).toBeGreaterThan(0);
+    for (let i = 0; i < await fallbacks.count(); i++) await expect(fallbacks.nth(i)).toBeHidden();
   });
 
   test('the whole card is the link', async ({ page }) => {

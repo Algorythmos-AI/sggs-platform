@@ -186,3 +186,14 @@ sggs-progress { display: block; margin: 0.5rem 0; }
 .swatches__group td { white-space: nowrap; }
 .swatch { display: inline-block; width: 1.6rem; height: 1.1rem; margin-right: 0.5rem; vertical-align: -0.2rem; border-radius: 4px; border: 1px solid var(--sl-color-hairline); }
 .swatch__ratio { font-size: 0.8rem; color: var(--sl-color-gray-3); }
+
+/* a widget's GitHub fallback text ("On the rendered wiki this is…", plugins/remark-widgets.mjs) is
+   for GitHub readers; the site shows the widget (which says so itself if the API is unreachable).
+   Never shown-then-hidden on load: that would shift the page. */
+.sggs-fallback { display: none; }
+
+/* a decision record's status line (plugins/remark-adr.mjs) */
+.sl-markdown-content .adr-status { display: inline-block; margin: 0.25rem 0 0.5rem; padding: 0.2rem 0.75rem; border-radius: 999px; border: 1px solid var(--sl-color-hairline); background: var(--sl-color-bg-nav); font-size: var(--sl-text-sm); }
+.sl-markdown-content .adr-status strong { color: var(--sl-color-gray-2); font-weight: 600; }
+.sl-markdown-content .adr-status--accepted { border-color: var(--sl-color-green); }
+.sl-markdown-content .adr-status--superseded, .sl-markdown-content .adr-status--deprecated { border-color: var(--sl-color-orange); }

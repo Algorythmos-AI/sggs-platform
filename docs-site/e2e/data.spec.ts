@@ -73,8 +73,8 @@ test.describe('data & pipeline', () => {
     // GitHub edits only on a branch: the edit link goes to the lock's ref, a second link to the pinned commit
     await expect(page.locator('a.edit-link', { hasText: 'Edit this page' })).toHaveAttribute('href', /sggs-data\/edit\/main\/docs\//);
     await expect(page.locator('a.edit-link', { hasText: 'View the version this wiki pins' })).toHaveAttribute('href', /sggs-data\/blob\/[0-9a-f]{40}\/docs\//);
-    // the landing page's GitHub link to this document now stays on the wiki
-    await page.goto('/');
+    // the Data section's GitHub link to this document now stays on the wiki
+    await page.goto('/data/');
     await expect(page.locator('main a[href="/data/architecture/database-schema/"]').first()).toBeVisible();   // in the page, not the sidebar
   });
 
