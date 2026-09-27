@@ -10,10 +10,13 @@ The public web property is one Astro static site (`frontend/`) served on the pro
 **`gurbanisoul.com`**. It carries two distinct things, deliberately kept separate (see
 [Brand & domains](../engineering/brand.md)):
 
-- **`/`** — the **Gurbani Soul** landing page: the marketing home for the iOS app.
-- **everything else** (`/search`, `/reader`, `/themes`, `/lineage`, `/insights`, the raag clock,
-  `/privacy`, `/support`, …) — the **Sri Guru Granth Sahib Ji Knowledge Base**, the scholarly
-  study site. It keeps its own name, header and theme; the landing has its own layout.
+- **The Gurbani Soul pages** — `/`, `/features`, `/watch`, `/learn` and its articles, `/privacy`
+  and `/support` — use the marketing layout (`Marketing.astro`): the product's home, its policy
+  pages and the Learn articles.
+- **The Knowledge Base** — `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`,
+  `/trail`, `/analytics` (Insights), `/constellation`, `/raag-clock`, `/divergence` — uses
+  `Base.astro`: the **Sri Guru Granth Sahib Ji Knowledge Base**, the scholarly study site, with
+  its own name, header and theme.
 
 Both are built by `astro build` into `frontend/dist/`, synced to `webapp/static/`, and served by
 the stdlib Python server locally and by Vercel in production. There is no second site and no
@@ -87,8 +90,8 @@ The `SeoInvariants` gate checks every built page's canonical/description/`og:ima
   is a **fixed** ISO date (never `Date.now()`) so the sitemap is byte-deterministic.
 - **`frontend/src/pages/sitemap.xml.ts`** emits `/sitemap.xml` over the manifest, each URL
   self-referencing its `en` + `x-default` hreflang alternates (no `pa` pages ship yet).
-- **`frontend/src/pages/rss.xml.ts`** emits `/rss.xml` ("Gurbani Soul — Learn") with an **empty**
-  item list for now; PR3 fills it. `RssInvariants` checks it parses and links to the site.
+- **`frontend/src/pages/rss.xml.ts`** emits `/rss.xml` ("Gurbani Soul — Learn"): every
+  non-draft Learn article, newest first. `RssInvariants` checks it parses and links to the site.
 - The old `frontend/public/sitemap.xml` was deleted (Astro forbids a public file colliding with a
   page route).
 
@@ -163,7 +166,7 @@ Vercel Production + Preview envs — see [runbook: newsletter](../process/runboo
 - **`Strict-Transport-Security`** (2-year, `includeSubDomains; preload`),
   **`Permissions-Policy`** (`camera=(), microphone=(), geolocation=(self), payment=()`), and
   **`Cross-Origin-Opener-Policy: same-origin`**.
-- Long-lived immutable `Cache-Control` for `/og/:path*` and `/icons/:path*`.
+- Long-lived immutable `Cache-Control` for `/og/*`, `/icons/*`, `/_astro/*` and `/fonts/*`.
 
 ### Fonts & PWA
 
@@ -334,7 +337,7 @@ is a nav destination, add it to the `Base.astro` nav with a `data-path`. Build +
 ## What protects the site
 - **Repo gates** (`webapp/tests/test_repo_gates.py`, run by the required `python` check):
   `LandingPage` (verse verbatim, honest copy, alt text, SEO head, page-weight budget),
-  `SubmissionUrlsAreLive`, `InAppLinksMatchTheListing`, and `DocsHygiene` (this doc set is the only
+  `SubmissionUrlsAreLive`, and `DocsHygiene` (this doc set is the only
   place the legacy `vercel.app` alias may be named); plus the PR1 web-foundations gates
   `SeoInvariants`, `SitemapInvariants`, `RssInvariants`, `ExternalRequestAllowlist`,
   `SmartBannerConsistency`, `NoSecretsInFrontend`, and `WebThemeMatchesTokens`; plus the PR4
@@ -344,5 +347,6 @@ is a nav destination, add it to the `Base.astro` nav with a `data-path`. Build +
 - **`@smoke` Playwright** (`frontend/e2e/landing.spec.ts`, run in the production deploy gate against
   `https://gurbanisoul.com`): landing renders, verse present, exactly one App-Store slot, canonical
   host, axe serious/critical = 0.
-- **`uptime.yml`**: `/` (200 + "Gurbani Soul"), `/search`, `/privacy`, `/support` on the canonical host.
+- **`uptime.yml`** (every 15 minutes): `/api/health` all-true, `/` ("Gurbani Soul"), `/privacy`
+  ("Data Not Collected") and `/support` (a `mailto:` link) on the canonical host, plus the wiki.
 - **`sggs-verify-prod`**: after each release, proves the running commit and the no-redirect guard.

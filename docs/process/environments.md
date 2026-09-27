@@ -13,7 +13,7 @@ verified:
 |---|---|---|---|
 | Branch | working tree | `integration` | `main` |
 | Web | `serve.py` on :7777 | `sggs-staging.vercel.app` (SSO-protected; open logged in) | **`gurbanisoul.com`** (canonical) |
-| API | same process | Vercel functions in the web project, one per context + `all` (ADR-0011) | Vercel functions in the web project, every `/api` path answered by `all` (Render `sggs-knowledge-base.onrender.com` kept as rollback) |
+| API | same process | Vercel functions in the web project, one per context + `all` (ADR-0011) | Vercel functions in the web project: v1.3.10 answers every `/api` path with `all`; `integration` routes each context to its own function, as staging does (Render `sggs-knowledge-base.onrender.com` kept as rollback) |
 | iOS | simulator | TestFlight **Internal** | TestFlight **External** / App Store |
 | DB profile | full | full | full (public profile until the English licence is recorded) |
 | Who deploys | you | `deploy-staging.yml` on push to integration | `deploy-production.yml` on push to main |
