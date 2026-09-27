@@ -58,12 +58,12 @@ comes from — press *Next* on the site to build it up step by step:
 
 <!-- sggs:cards -->
 - [Scripture 101](scripture/README.md) — what the Granth is, its structure, the script and its Unicode, and how answers about it are given.
-- [Architecture](architecture/overview.md) — the system on one page: who uses it, the containers across three repositories, how production runs.
+- [Architecture](architecture/README.md) — three repositories, one read-only API in five contexts, a pinned database: the system and how its parts fit.
 - [Data](data/README.md) — a line record, the corpus pipeline and its gates, the dataset pin, the editorial ledger, the integrity chain.
 - [Search & verification](search/README.md) — the search waterfall, the Roman fold, the verification engine and the harnesses that hold them.
 - [The API](api/README.md) — 26 read-only routes, the contract that pins them, versioning and caching, and a reference to try.
 - [The iOS app](ios/README.md) — Gurbani Soul: how it takes a release, its parity with the API, its launch-integrity check, Nitnem.
-- [Ship & operate](engineering/README.md) — branching, environments, the CI gates, releases and the runbooks for when something goes wrong.
+- [Ship & operate](process/README.md) — branching, environments, the CI gates, releases and the runbooks for when something goes wrong.
 - [Decisions](adr/README.md) — why the system is the way it is, one decision record at a time.
 - [Glossary](glossary.md) — every term the wiki uses, from Ang to X-Service.
 - [Writing these docs](contributing/README.md) — how a page, a diagram, a poster or a widget gets onto this site, and the gates it passes.

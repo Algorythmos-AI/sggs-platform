@@ -24,12 +24,11 @@ held to the platform's API by the golden contract.
 
 ## The pages
 
-| Page | What you learn | Interactive |
-|---|---|---|
-| [How the app takes a release](how-the-app-takes-a-release.md) | vendor-sync, the one version number, the ledger, and what makes a release *complete* | the flow as a sequence diagram; the tools read from the app repository at its pinned commit |
-| [Contract and parity](contract-and-parity.md) | how the Swift port is proven byte-identical to the API, suite by suite | the Swift fold read from the source |
-| [Database pair and launch integrity](db-pair-and-launch-integrity.md) | the two database profiles, the manifest, the licence gate, the fail-closed launch check, the bookmarks store | poster 12 walkthrough |
-| [Nitnem for engineers](nitnem-for-engineers.md) | the bani registry as pointers over the verbatim corpus, the separate non-SGGS layer, variants, numbering, the review gate | the registry as a diagram |
+<!-- sggs:cards -->
+- [How the app takes a release](how-the-app-takes-a-release.md) — vendor-sync, the one version number, the ledger, and what makes a release *complete* (the flow as a sequence diagram; the tools read from the app repository at its pinned commit)
+- [Contract and parity](contract-and-parity.md) — how the Swift port is proven byte-identical to the API, suite by suite (the Swift fold read from the source)
+- [Database pair and launch integrity](db-pair-and-launch-integrity.md) — the two database profiles, the manifest, the licence gate, the fail-closed launch check, the bookmarks store (poster 12 walkthrough)
+- [Nitnem for engineers](nitnem-for-engineers.md) — the bani registry as pointers over the verbatim corpus, the separate non-SGGS layer, variants, numbering, the review gate (the registry as a diagram)
 
 ## Pinned from gurbani-soul-ios
 

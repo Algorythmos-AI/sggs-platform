@@ -13,12 +13,11 @@ A read-only JSON API over the verbatim corpus, served by a Python standard-libra
 (`webapp/serve.py`) from a database opened read-only and immutable. Every scripture line comes back
 exactly as printed with its [[Ang]]; English is a separate, labelled layer; nothing is ever written.
 
-| Page | What you learn |
-|---|---|
-| [API routes](routes.md) | every route, its bounded context, parameters and cache policy — **generated from the code** |
-| [API reference](reference/) | the full reference with response schemas, generated from `contract/openapi.json` |
-| [Contract and OpenAPI](contract-and-openapi.md) | how the spec and the golden vectors are produced from real responses and enforced |
-| [Versioning and caching](versioning-and-caching.md) | `/api` vs `/api/v1`, errors, request ids, caching and ETags, the `X-Service` header |
+<!-- sggs:cards -->
+- [API routes](routes.md) — every route, its bounded context, parameters and cache policy — **generated from the code**
+- [API reference](reference/) — the full reference with response schemas, generated from `contract/openapi.json`
+- [Contract and OpenAPI](contract-and-openapi.md) — how the spec and the golden vectors are produced from real responses and enforced
+- [Versioning and caching](versioning-and-caching.md) — `/api` vs `/api/v1`, errors, request ids, caching and ETags, the `X-Service` header
 
 ## Try any route
 
