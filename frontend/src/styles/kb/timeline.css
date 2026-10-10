@@ -1,5 +1,7 @@
 /* ============================== contributor timeline ============================== */
+/* --k is the kind's colour (rules, dots, tints); --kt is that colour as TEXT, deepened toward the ink so it reads on its own tint */
 .kind-guru { --k:var(--accent); } .kind-bhagat { --k:#5b8cff; } .kind-bhatt { --k:#b07cff; } .kind-gursikh { --k:#23b3a1; }
+.kind-guru, .kind-bhagat, .kind-bhatt, .kind-gursikh { --kt:color-mix(in srgb, var(--k) 50%, var(--ink)); }
 .timeline { position:relative; margin-top:6px; }
 .timeline::before { content:''; position:absolute; top:10px; bottom:10px; left:80px; width:2px;
   background:linear-gradient(180deg, transparent, var(--line-strong) 6%, var(--line-strong) 94%, transparent); }
@@ -13,12 +15,12 @@
   box-shadow:var(--shadow); transition:transform .15s, box-shadow .15s, border-color .15s; }
 .tl-node:hover .tl-card { transform:translateX(3px); border-color:color-mix(in srgb, var(--k) 45%, transparent); box-shadow:0 12px 30px color-mix(in srgb, var(--k) 22%, transparent); }
 .tl-med { flex:0 0 auto; width:42px; height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center;
-  font-size:14px; font-weight:800; letter-spacing:.2px; color:var(--k); background:color-mix(in srgb, var(--k) 15%, var(--card));
+  font-size:14px; font-weight:800; letter-spacing:.2px; color:var(--kt); background:color-mix(in srgb, var(--k) 15%, var(--card));
   border:1px solid color-mix(in srgb, var(--k) 38%, transparent); box-shadow:inset 0 0 14px color-mix(in srgb, var(--k) 12%, transparent); }
 .tl-main { flex:1 1 auto; min-width:0; }
 .tl-row { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
 .tl-name { font-size:16px; font-weight:700; letter-spacing:-.01em; }
-.tl-kind { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--k); white-space:nowrap; }
+.tl-kind { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--kt); white-space:nowrap; }
 .tl-era { font-size:11.5px; color:var(--soft); margin-top:1px; }
 .tl-bar { display:block; height:5px; border-radius:99px; background:var(--chip); margin:8px 0 5px; overflow:hidden; }
 .tl-bar i { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg, var(--k), color-mix(in srgb, var(--k) 55%, var(--gold))); }
@@ -32,7 +34,7 @@
 .ld-chips { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:12px; }
 .ld-chip { font-size:11px; font-weight:600; padding:3px 11px; border-radius:999px; background:var(--chip); color:var(--soft); }
 .ld-chip.kind-guru, .ld-chip.kind-bhagat, .ld-chip.kind-bhatt, .ld-chip.kind-gursikh {
-  background:color-mix(in srgb, var(--k) 16%, transparent); color:var(--k); }
+  background:color-mix(in srgb, var(--k) 16%, transparent); color:var(--kt); }
 .ld-blurb { font-size:14px; line-height:1.6; color:var(--ink); margin-bottom:12px; }
 .ld-span { font-size:12.5px; color:var(--soft); }
 .ld-terms { margin-top:14px; }

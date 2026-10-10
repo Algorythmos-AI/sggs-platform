@@ -30,18 +30,44 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   solves the tint strength per theme, and refuses to write if any text pair is under 4.5:1. The
   stored choice (`sggs_accent`, `sggs_reader_tone`, the app's key names) is applied before first
   paint, follows you across tabs, and falls back to the default if unknown or if storage is
-  blocked. The picker arrives with the new shell; until then the default theme shows.
+  blocked. A theme is chosen in the display sheet (below).
 - **Colour contrast: every Knowledge Base page passes in the default theme, light and dark, and the
   base text pairs are proven for all thirteen.** The old palette used its accent as text at about
   3:1; `--accent` is now the accent's text colour and filled controls use `--accent-fill` with
   `--on-accent` text. Chips sit on a wash the accent text is proven readable on; search highlights
   keep the text ink; faded captions use a readable muted ink instead of opacity. The recorded
   contrast failures in `kb-shell.spec.ts` went from eleven page-and-theme entries to none (every
-  page, default theme), `kb-themes.spec.ts` checks the Reader in all 26 combinations, and the
-  generator proves accent, soft and faint text on six surfaces per mode for every theme. Not yet
-  in that proof: text on a tint layered over another tint (a chip on the second background, the
-  Raag Clock dial's arcs, the contributor-kind chips), which dips to 4.2–4.5:1 in the twelve themes
-  that cannot be chosen until the picker ships. Those composites join the generator before it does.
+  page, default theme), and the generator proves every text colour on six surfaces per mode for
+  every theme — and the neutral inks on a chip over each of them, because a chip is a translucent
+  wash and pages stack them. The soft and faint inks are a shade deeper so that this holds without
+  weakening any theme's tint. The accent's edge colour (`--accent-ui`) holds 3:1 on every tint, the
+  cloth's motif included: it is the accent itself except for Saffron and Gold, which are deepened
+  toward their text colour by day. `kb-contrast.spec.ts` then measures the pages themselves: every
+  visible text node on every Knowledge Base state — and with a composition, a contributor, Saved and
+  the display sheet open — in all thirteen themes, by day, on warm paper and by night, including
+  text over a gradient, text under a faded ancestor and SVG text, which axe reports as "cannot
+  tell". What it found is fixed: the Raag Clock dial's wedge text is ink, the Vaar ladder's pauri
+  numbers are ink on a tint ringed in the author's colour, contributor-kind labels use the kind's
+  colour deepened toward the ink, the landing flash on a verse is the accent wash, and no caption
+  is dimmed with opacity.
+- **Display, in one place.** "Aa" in the top bar opens a sheet on every Knowledge Base page (a
+  panel under the bar on a wide screen, a sheet from the bottom edge on a phone): the thirteen
+  colour themes in their three collections, each a fold of cloth in its two colours; the appearance
+  (system, light, dark); the paper tone, by day; the Gurmukhi text size; and the traditional-saroop
+  switch, which moved here from the bar. A choice applies at once to the page behind the sheet and
+  is kept under the keys the privacy page already names; the sheet shows what is in force after a
+  change made by the theme button, the Reader's size buttons or another tab. The theme button stays
+  in the bar.
+- **One overlay stack** (`scripts/overlay.ts`) under the composition panel, Saved and the display
+  sheet: Escape closes the top one only, Tab stays inside it, and closing returns focus to what
+  opened it. While anything is open the Reader's arrow keys and Sehaj's Escape stand down (an
+  arrow pressed with focus inside the composition used to turn the Ang behind it; one Escape used
+  to close Saved and leave Sehaj mode together). A composition opened again from inside itself
+  ("Another ↻") keeps its first opener, and one that arrives after its panel was closed, or after
+  another was asked for, is dropped instead of replacing the newer one.
+- **The browser's own chrome has the right colour from the first frame.** The inline boot script
+  sets `theme-color` to the header's colour for the stored theme and appearance; it used to start
+  as the default's cream and change once the scripts had loaded.
 - Two gates: every key the site keeps in the browser must be named on the privacy page
   (`StoredKeysAreDisclosed`), and a companion colour may never be used for text.
 - **The wiki's front door.** The home page opens on the system-landscape poster, then *Ten minutes to

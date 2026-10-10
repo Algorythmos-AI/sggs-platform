@@ -1,9 +1,11 @@
 // panel.ts — the shared composition modal (#panel) loaded on every page:
-// renders a full shabad/composition, the Hukam-style random draw, focus-trap + a11y.
+// renders a full shabad/composition and the Hukam-style random draw. Escape, the Tab trap and
+// the return of focus are the overlay stack's (./overlay).
 // Logic is ported 1:1 from the original index.html (only the "Open Ang" action is
 // adapted to MPA navigation via goReader instead of in-page nav()/ang()).
 import { $, esc, api, guard, prefersReducedMotion } from './core';
 import { pinButtonHTML } from './store';
+import { overlayOpened, overlayClosed } from './overlay';
 
 function panelLines(lines: any[]): string {
   return lines.map((l: any) => `<div class="sline ${l.is_rahao ? 'rahao' : ''}${l.is_header ? '' : ' haspin'}"${l.is_header ? '' : ` data-line-id="${l.id}"`}>
@@ -41,17 +43,22 @@ function titleBlock(lines: any[]): string {
     ${t.sub ? `<div class="pt-sub">${esc(t.sub)}</div>` : ''}</div>`;
 }
 
-// ---- open / close with focus save+restore ----
-let _panelTrigger: any = null;
+// ---- open / close (focus moves into the dialog, and back to the trigger on close) ----
+// What the panel is waiting for. A composition that arrives after the panel was closed, or after
+// another was asked for, is dropped: it must not replace the newer one or move the focus.
+let panelReq = 0;
 export function openPanel() {
-  _panelTrigger = document.activeElement;                          // remember where focus was
-  $('#panel')?.classList.add('on');
-  setTimeout(() => { const x = $('#panel .x'); if (x) x.focus(); }, 0); // move focus into the dialog
+  const p = $('#panel') as HTMLElement | null;
+  if (!p) return;
+  p.classList.add('on');
+  overlayOpened(p, closePanel, { focus: $('#panel .x') as HTMLElement | null });
 }
 export function closePanel() {
-  $('#panel')?.classList.remove('on');
-  if (_panelTrigger && _panelTrigger.focus) _panelTrigger.focus();  // return focus to the trigger
-  _panelTrigger = null;
+  const p = $('#panel') as HTMLElement | null;
+  if (!p || !p.classList.contains('on')) return;
+  panelReq++;
+  p.classList.remove('on');
+  overlayClosed(p);
 }
 
 const setP = (title: string, body: string) => {
@@ -62,8 +69,10 @@ const setP = (title: string, body: string) => {
 // ---- a full composition by composition id (hi kept for signature parity; unused) ----
 export const shabad = guard(async (cid: number, hi?: number) => {
   openPanel();
+  const req = ++panelReq;
   setP('Loading…', '<div class="hint">Loading composition…</div>');
   const d = await api('shabad/' + cid);
+  if (req !== panelReq) return;
   const ang = (d.lines[0] || {}).ang || '';
   const first = d.lines.find((l: any) => !l.is_header) || d.lines[0];
   const line = hi || (first ? first.id : 0);
@@ -96,9 +105,11 @@ export const randomShabad = guard(async () => {
   if (randomLoading) return;                                       // ignore rapid 'Another' taps
   randomLoading = true;
   openPanel();
+  const req = ++panelReq;
   setP('Loading…', '<div class="hint">Drawing a composition…</div>');
   try {
     const d = await api('random');
+    if (req !== panelReq) return;
     const ang = (d.lines[0] || {}).ang || '';
     const first = d.lines.find((l: any) => !l.is_header) || d.lines[0];
     setP(`Hukam-style random · Ang ${ang}`,
@@ -109,25 +120,7 @@ export const randomShabad = guard(async () => {
 });
 
 // ---- wire panel interactions (every page) ----
-const panel = $('#panel');
-if (panel) {
-  panel.addEventListener('click', (e: any) => { if (e.target.id === 'panel') closePanel(); });
-  // focus trap: keep Tab inside the dialog while it is open (WCAG 2.1.2)
-  panel.addEventListener('keydown', (e: any) => {
-    if (e.key !== 'Tab' || !panel.classList.contains('on')) return;
-    const inner = panel.querySelector('.inner');
-    if (!inner) return;
-    const f = Array.from(inner.querySelectorAll('button,[href],input,[tabindex]:not([tabindex="-1"])'))
-      .filter((el: any) => el.offsetParent !== null) as HTMLElement[];
-    if (!f.length) return;
-    const first = f[0], last = f[f.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  });
-}
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && $('#panel')?.classList.contains('on')) closePanel();
-});
+$('#panel')?.addEventListener('click', (e: any) => { if (e.target.id === 'panel') closePanel(); });
 
 // Hukam-style random button lives in the shared nav on every page.
 const rb = document.getElementById('randomBtn');

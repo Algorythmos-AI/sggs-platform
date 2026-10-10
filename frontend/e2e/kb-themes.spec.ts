@@ -1,5 +1,4 @@
 import { test, expect, type Page } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -7,18 +6,19 @@ import { dirname, resolve } from 'node:path';
 // The Knowledge Base's colour themes (html[data-accent]) and paper tone (html[data-tone]): a
 // stored choice is on the page before first paint and survives a reload; a value we do not know,
 // or blocked storage, falls back to the stylesheet's defaults; a change made in another tab
-// arrives here; the browser chrome follows; and every theme, in light and dark, keeps its text
-// readable. The themes are generated from docs/brand/web-themes.json.
+// arrives here; and the browser chrome follows. That every theme keeps its text readable, on every
+// page, is kb-contrast.spec.ts. The themes are generated from docs/brand/web-themes.json.
 
 const here = dirname(fileURLToPath(import.meta.url));
 const KB = JSON.parse(readFileSync(resolve(here, '../src/generated/kb-themes.json'), 'utf8')) as {
-  default: string; themes: { id: string; name: string; swatch: { light: string[]; dark: string[] } }[];
+  default: string;
+  themes: { id: string; name: string; swatch: { light: string[]; dark: string[] }; chrome: { light: string; dark: string } }[];
 };
 const token = (page: Page, name: string) =>
   page.evaluate((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), name);
 const ready = (page: Page) => expect(page.locator('#ver')).not.toBeEmpty({ timeout: 15_000 });
 
-test('a stored colour theme and paper tone are applied before paint and survive a reload', async ({ page }) => {
+test('a stored colour theme and paper tone are on the page and survive a reload', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('theme', 'light'); localStorage.setItem('sggs_accent', 'azur'); localStorage.setItem('sggs_reader_tone', 'warm');
   });
@@ -33,6 +33,37 @@ test('a stored colour theme and paper tone are applied before paint and survive 
   await ready(page);
   await expect(html).toHaveAttribute('data-accent', 'azur');
   await expect(html).toHaveAttribute('data-tone', 'warm');
+});
+
+// The proof that it is BEFORE paint: with every script file refused, only the inline script in the
+// <head> can have done it. (Take that script out and this fails; the test above would not.)
+test('the stored appearance, theme, tone and browser-chrome colour are set by the inline boot script alone', async ({ page }) => {
+  await page.route(/\/_astro\/.*\.js(\?.*)?$/, (r) => r.abort());
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.addInitScript(() => {
+    localStorage.setItem('theme', 'dark'); localStorage.setItem('sggs_accent', 'azur'); localStorage.setItem('sggs_reader_tone', 'warm');
+  });
+  await page.goto('/search', { waitUntil: 'domcontentloaded' });
+  const html = page.locator('html');
+  await expect(html).toHaveAttribute('data-theme', 'dark');
+  await expect(html).toHaveAttribute('data-accent', 'azur');
+  await expect(html).toHaveAttribute('data-tone', 'warm');
+  const azur = KB.themes.find((t) => t.id === 'azur')!;
+  // the header's colour, by night, in this theme: no flash of the default's cream on the way in
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', azur.chrome.dark);
+  expect((await token(page, '--chrome')).toUpperCase()).toBe(azur.chrome.dark);
+  expect(await page.locator('#ver').textContent(), 'no module script ran').toBe('');
+});
+
+test('with nothing stored, the browser chrome is the default theme\'s for the system appearance', async ({ page }) => {
+  await page.route(/\/_astro\/.*\.js(\?.*)?$/, (r) => r.abort());
+  const def = KB.themes.find((t) => t.id === KB.default)!;
+  for (const scheme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.goto('/search', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('html')).toHaveAttribute('data-theme', scheme);
+    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', def.chrome[scheme]);
+  }
 });
 
 test('a theme name we do not know is ignored, and the default theme needs no attribute', async ({ page }) => {
@@ -76,20 +107,3 @@ test('a theme chosen in another tab arrives here, and the browser chrome follows
   await expect(meta).toHaveAttribute('content', after);
   expect(await page.evaluate(() => (window as any).__changes)).toBeGreaterThan(0);
 });
-
-// Colour does not depend on the engine, so the per-theme proof runs once, on the desktop project.
-for (const t of KB.themes) {
-  for (const mode of ['light', 'dark'] as const) {
-    test(`${t.name} (${mode}): its tokens are live and the Reader's text passes contrast`, async ({ page }, testInfo) => {
-      test.skip(testInfo.project.name !== 'desktop', 'colour is engine-independent; proven once');
-      await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.addInitScript(([m, id]) => { localStorage.setItem('theme', m); localStorage.setItem('sggs_accent', id); }, [mode, t.id]);
-      await page.goto('/reader?ang=712');
-      await expect(page.locator('#angCtx .timechip')).toBeVisible({ timeout: 15_000 });
-      await page.evaluate(() => document.fonts.ready);
-      expect((await token(page, '--accent-fill')).toUpperCase()).toBe(t.swatch[mode][0]);
-      const results = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze();
-      expect(results.violations.flatMap((v) => v.nodes.map((n) => String(n.target))), `contrast on the Reader in ${t.name} (${mode})`).toEqual([]);
-    });
-  }
-}

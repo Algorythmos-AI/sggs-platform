@@ -1,0 +1,78 @@
+/* ============================== the display sheet ==============================
+   How the page looks, in one place: appearance, colour theme, paper tone, Gurmukhi text size and
+   the traditional-saroop switch (scripts/display.ts). A panel under the top bar on a wide screen,
+   a sheet from the bottom edge on a phone. The scrim is clear on a wide screen and light on a
+   phone, so a colour is chosen while looking at the page it changes. Every text pair here is one
+   the theme generator proves: inks on the raised surface and on a chip over it, the text of a fill
+   on that fill. A swatch is decoration; the chosen theme is marked by a ring and a heavier name. */
+.ds-scrim { position:fixed; inset:0; z-index:60; display:none; }
+.ds-scrim.on { display:block; }
+.ds { position:fixed; z-index:61; top:calc(var(--nav-h) + 8px); right:max(12px, env(safe-area-inset-right, 0px)); width:372px;
+  max-height:calc(100dvh - var(--nav-h) - 24px); overflow-y:auto; overscroll-behavior:contain; padding:12px 16px 18px;
+  color:var(--ink); background:var(--surface-raised); border:1px solid var(--line-strong); border-radius:18px; box-shadow:var(--shadow);
+  opacity:0; visibility:hidden; transform:translateY(-6px);
+  transition:opacity .16s ease, transform .2s cubic-bezier(.2,.8,.2,1), visibility 0s linear .2s; }
+.ds.on { opacity:1; visibility:visible; transform:none; transition-delay:0s; }
+.ds-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.ds-head h2 { font-family:var(--font-serif); font-size:21px; font-weight:600; letter-spacing:-.01em; margin:0; }
+.ds-x { width:44px; height:44px; margin-right:-8px; display:grid; place-items:center; font:inherit; font-size:24px; line-height:1; color:var(--soft);
+  background:transparent; border:0; border-radius:12px; cursor:pointer; }
+.ds-x:hover { background:var(--chip); color:var(--ink); }
+.ds-set { border:0; margin:10px 0 0; padding:12px 0 0; min-width:0; border-top:1px solid var(--line); }
+.ds-set > legend, .ds-legend { padding:0; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--soft); }
+.ds-set > legend { float:left; width:100%; margin-bottom:9px; }      /* a floated legend sits inside the fieldset's own padding */
+.ds-set > legend + * { clear:both; }
+.ds-note { margin:8px 0 0; font-size:12.5px; line-height:1.5; color:var(--faint); }
+.ds input[type="radio"] { position:absolute; opacity:0; pointer-events:none; }
+
+/* a choice of two or three: one filled segment */
+.ds-seg { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:3px; padding:3px; border-radius:13px; background:var(--chip); }
+.ds-seg label { display:block; cursor:pointer; }
+.ds-seg span { display:grid; place-items:center; min-height:44px; padding:0 8px; border-radius:10px; font-size:14px; font-weight:600; color:var(--soft); }
+.ds-seg label:hover span { color:var(--ink); }
+.ds-seg input:checked + span { color:var(--on-accent); background:var(--accent-fill); box-shadow:var(--fill-edge); }
+.ds-seg input:focus-visible + span { outline:2px solid var(--accent-text); outline-offset:2px; }
+
+/* the themes: a fold of cloth each — the accent, and its companion as the hem */
+.ds-coll-name { margin:10px 3px 5px; font-size:12.5px; font-weight:600; color:var(--faint); }
+.ds-coll:first-of-type .ds-coll-name { margin-top:0; }
+.ds-themes { display:grid; grid-template-columns:repeat(var(--n, 4), minmax(0, 1fr)); gap:8px 4px; }      /* a collection is one row */
+.ds-theme { position:relative; display:block; padding:4px 3px; min-height:44px; cursor:pointer; --a:var(--la); --b:var(--lb); }   /* a swatch shows the theme as it is by day or by night */
+:root[data-theme="dark"] .ds-theme { --a:var(--da); --b:var(--db); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) .ds-theme { --a:var(--da); --b:var(--db); } }
+.ds-swatch { display:block; height:42px; border-radius:11px; background:linear-gradient(135deg, var(--a) 0 62%, var(--b) 62% 100%);
+  box-shadow:inset 0 0 0 1px var(--line-strong); transition:transform .12s; }
+.ds-theme:hover .ds-swatch { transform:translateY(-1px); }
+.ds-name { display:block; margin-top:6px; font-size:11.5px; font-weight:600; line-height:1.25; text-align:center; color:var(--soft); }
+.ds-theme input:checked ~ .ds-swatch { box-shadow:inset 0 0 0 1px var(--line-strong), 0 0 0 2px var(--surface-raised), 0 0 0 4px var(--ink); }
+.ds-theme input:checked ~ .ds-name { font-weight:750; color:var(--ink); }
+.ds-theme input:focus-visible ~ .ds-swatch { outline:2px solid var(--accent-text); outline-offset:6px; }
+
+/* the paper tone is a daytime choice: by night the page is warm ink */
+:root[data-theme="dark"] .ds-tone { display:none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) .ds-tone { display:none; } }
+
+.ds-size { display:flex; align-items:center; gap:10px; min-height:66px; margin-top:9px; }
+.ds-size button { flex:none; width:48px; height:44px; font:inherit; font-size:15px; font-weight:700; color:var(--ink); background:var(--chip);
+  border:1px solid var(--line-strong); border-radius:12px; cursor:pointer; }
+.ds-size button[aria-disabled="true"] { color:var(--faint); border-color:var(--line); cursor:default; }
+.ds-sample { flex:1 1 auto; min-width:0; overflow:hidden; white-space:nowrap; text-align:center; font-size:var(--gsize); line-height:1.5; color:var(--ink); }
+.ds-size-val { flex:none; min-width:42px; text-align:right; font-size:12.5px; font-variant-numeric:tabular-nums; color:var(--soft); }
+
+.ds-row { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+.ds-row .ds-note { margin-top:5px; }
+.ds-switch { flex:none; width:52px; height:44px; display:grid; place-items:center; padding:0; background:transparent; border:0; border-radius:14px; cursor:pointer; }
+.ds-switch span { position:relative; display:block; width:52px; height:30px; border-radius:999px; background:var(--chip); box-shadow:inset 0 0 0 1px var(--line-strong);
+  transition:background .15s; }
+.ds-switch span::after { content:''; position:absolute; top:4px; left:4px; width:22px; height:22px; border-radius:50%; background:var(--soft); transition:transform .18s cubic-bezier(.2,.8,.2,1); }
+.ds-switch.on span { background:var(--accent-fill); box-shadow:var(--fill-edge); }
+.ds-switch.on span::after { transform:translateX(22px); background:var(--on-accent); }
+.ds-x:focus-visible, .ds-size button:focus-visible, .ds-switch:focus-visible { outline:2px solid var(--accent-text); outline-offset:2px; }
+
+@media (max-width:840px) {
+  .ds-scrim { background:color-mix(in srgb, #05070d 22%, transparent); }
+  .ds { top:auto; right:0; left:0; bottom:0; width:auto; max-height:min(80dvh, 660px); border-radius:22px 22px 0 0; border-width:1px 0 0;
+    padding:8px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    transform:translateY(24px); }
+  .ds::before { content:''; display:block; width:38px; height:4px; margin:0 auto 4px; border-radius:999px; background:var(--line-strong); }
+}

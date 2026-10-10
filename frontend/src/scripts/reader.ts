@@ -2,6 +2,7 @@
 // Ported 1:1 from the original; deep-links via ?ang=<n>&raag=<name>.
 import { $, esc, api, guard, meta, store, validAng, syncToolbarTop, relChip, failHTML, stepFontSize } from './core';
 import { pinButtonHTML } from './store';
+import { overlayOpen } from './overlay';
 import { loadClock, claimsFor } from './timing';
 import { paharLabel, paharRange } from './pahar.js';
 
@@ -258,10 +259,11 @@ function sehaj() {
   syncToolbarTop();                          // nav is hidden in focus mode → re-measure sticky offset
 }
 
-// arrow-key paging + Esc to leave focus mode (skip while the modal is open or while typing)
+// arrow-key paging + Esc to leave focus mode — not while anything is open over the page (the
+// composition, Saved, the display sheet: their keys are their own) and not while typing
 document.addEventListener('keydown', (e: any) => {
-  if (e.key === 'Escape' && document.body.classList.contains('focus-mode') && !$('#panel')?.classList.contains('on')) { sehaj(); return; }
-  if ($('#panel')?.classList.contains('on')) return;
+  if (overlayOpen()) return;
+  if (e.key === 'Escape' && document.body.classList.contains('focus-mode')) { sehaj(); return; }
   if (e.target.tagName === 'INPUT') return;
   if (e.key === 'ArrowRight') step(1);
   if (e.key === 'ArrowLeft') step(-1);

@@ -1,6 +1,6 @@
 /* ---- precision landing: one-shot flash on the verse a deep link / modal asked for ---- */
 @keyframes verse-focus-fade {
-  0%   { background: color-mix(in srgb, var(--accent) 28%, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
+  0%   { background: var(--accent-wash); box-shadow: 0 0 0 4px var(--accent-wash), 0 0 0 5px var(--accent-ui); }
   100% { background: transparent; box-shadow: none; }
 }
 .sline.verse-focus { animation: verse-focus-fade 1.6s ease-out forwards; border-radius: 10px; }
@@ -9,7 +9,7 @@
 .cont-slot { min-height: 34px; margin: 6px 0 10px; }              /* reserved: no layout shift */
 .cont.cont-next { margin-left: auto; }
 @media (prefers-reduced-motion: reduce) {
-  .sline.verse-focus { animation: none; background: color-mix(in srgb, var(--accent) 18%, transparent); }
+  .sline.verse-focus { animation: none; background: var(--accent-wash); box-shadow: 0 0 0 4px var(--accent-wash); }
 }
 
 /* ---- ambient chrome (Reader): slide nav + toolbar away while reading downwards ---- */

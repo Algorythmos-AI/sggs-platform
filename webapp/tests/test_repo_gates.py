@@ -235,6 +235,7 @@ class LandingPage(unittest.TestCase):
             self.assertNotIn("data-topbar", html, f"{route}: KB top bar present")
             self.assertNotIn('class="kb-tabs"', html, f"{route}: KB tab bar present")
             self.assertNotIn('id="saroopBtn"', html, f"{route}: KB saroop toggle present")
+            self.assertNotIn('id="displaySheet"', html, f"{route}: KB display sheet present")
             self.assertNotIn('id="randomBtn"', html, f"{route}: KB random button present")
             self.assertIn('id="mnav"', html, f"{route}: marketing nav #mnav missing")
 
@@ -366,6 +367,51 @@ class WebThemesAreGeneratedAndReadable(unittest.TestCase):
             self.assertIn(t["status"], ("approved", "review", "held"), t["id"])
             self.assertIn(t["collection"], self.src["collections"], t["id"])
 
+    def test_an_ink_on_a_chip_is_part_of_the_proof(self):
+        # a chip is a translucent wash: an ink that reads on a surface can fail on a chip over it
+        import copy
+        bad = copy.deepcopy(self.src)
+        bad["surfaces"]["light"]["chip"] = "rgba(43,26,5,.30)"
+        _, fails = self.gen.derive(bad)
+        self.assertTrue(any("light faint ink on a chip on card" in f for f in fails), fails)
+
+    def test_the_accent_edge_holds_on_every_tint_and_is_the_accent_where_it_can_be(self):
+        # --accent-ui edges a filled control and marks the current page: 3:1 on every surface it meets,
+        # the cloth's motif included. It is the theme's own accent unless a tint needs it deeper.
+        themes, fails = self.gen.derive(self.src)
+        self.assertEqual(fails, [])
+        raw = {t["id"]: t for t in self.src["themes"]}
+        deepened = []
+        for t in themes:
+            for mode in ("light", "dark"):
+                ui = t[mode]["accent-ui"]
+                for surface in ("canvas", "tile1", "tile2"):
+                    self.assertGreaterEqual(self.gen.ratio(ui, t[mode][surface]), 3.0, f"{t['id']} {mode} edge on {surface}")
+                if ui.upper() != raw[t["id"]][mode]["accent"].upper():
+                    deepened.append(f"{t['id']} {mode}")
+        self.assertNotIn("soul light", deepened)
+        self.assertNotIn("soul dark", deepened)
+        self.assertLessEqual(len(deepened), 4, f"an edge is the accent itself except where a tint forbids it: {deepened}")
+
+    def test_the_motif_strength_is_the_generated_one(self):
+        # the cloth's text is proved on the motif at the strength in web-themes.json: a stylesheet
+        # that paints it stronger would outrun the proof
+        kb = ROOT / "frontend" / "src" / "styles" / "kb"
+        css = "".join(p.read_text(encoding="utf-8") for p in sorted(kb.glob("*.css")) if p.name != "themes.css")
+        painted = re.findall(r"background:var\(--co\);\s*opacity:([^;]+);", css)
+        self.assertTrue(painted, "the motif layer was not found")
+        self.assertEqual(set(painted), {"var(--motif)"})
+
+    def test_accent_text_is_never_set_on_a_chip(self):
+        # not in the proof (see the generator): accent text sits on --accent-wash instead
+        kb = ROOT / "frontend" / "src" / "styles" / "kb"
+        bad = []
+        for p in sorted(kb.glob("*.css")):
+            for block in re.findall(r"\{([^{}]*)\}", p.read_text(encoding="utf-8")):
+                if "background:var(--chip)" in block and re.search(r"(?<![-\w])color\s*:\s*var\(--(accent|gold|accent-text)\)", block):
+                    bad.append(f"{p.name}: {block.strip()[:80]}")
+        self.assertEqual(bad, [])
+
     def test_a_companion_colour_is_never_a_text_colour(self):
         # companions are decorative (hem, motif, tile wash): no rule may set text in --co
         kb = ROOT / "frontend" / "src" / "styles" / "kb"
@@ -425,6 +471,12 @@ class KbStylesheetIsOrderedPartials(unittest.TestCase):
     """
 
     STYLES = ROOT / "frontend" / "src" / "styles"
+    # The cascade, in full. Equal-specificity rules are settled by this order (a phone rule in
+    # responsive.css over a component rule before it, phone-controls.css over everything), so a
+    # partial moved or inserted is a visual change: it is made here too, deliberately.
+    ORDER = ["theme", "tokens", "themes", "base", "shell", "search", "reader", "tiles", "panel", "display", "insights",
+             "reader-related", "trail", "sehaj", "timeline", "study-trail", "responsive", "contributors", "raag-timing",
+             "reader-chrome", "nitnem", "library", "print", "phone-controls"]
 
     def test_entry_lists_every_partial_once_in_order(self):
         text = re.sub(r"/\*.*?\*/", "", (self.STYLES / "global.css").read_text(encoding="utf-8"), flags=re.S)
@@ -438,8 +490,7 @@ class KbStylesheetIsOrderedPartials(unittest.TestCase):
         on_disk = sorted(p.stem for p in (self.STYLES / "kb").glob("*.css"))
         self.assertEqual(sorted(imported), on_disk, "every styles/kb/*.css is imported exactly once")
         self.assertEqual(len(imported), len(set(imported)), "a partial is imported twice")
-        self.assertEqual(imported[0], "theme")
-        self.assertEqual(imported[-1], "phone-controls")
+        self.assertEqual(imported, self.ORDER, "the import order is the cascade: change it on purpose, and here")
 
 
 class ScriptureDisplayInSource(unittest.TestCase):

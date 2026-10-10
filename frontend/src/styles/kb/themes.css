@@ -4,14 +4,15 @@
    html[data-accent]. The original variable names (--bg, --accent, …) are aliases in tokens.css. */
 :root, :root[data-theme="light"] {
   color-scheme:light;
+  --motif:.07;
   --surface-card:#FFFFFF;
   --surface-raised:#FFFFFF;
   --paper:#FBF7F0;
   --ink:#201A12;
-  --soft:#6B5E4B;
-  --faint:#6F6250;
+  --soft:#5E5241;
+  --faint:#665A48;
   --cloth-ink:#201A12;
-  --cloth-soft:#6B5E4B;
+  --cloth-soft:#5E5241;
   --line:rgba(43,26,5,.12);
   --line-strong:rgba(43,26,5,.20);
   --chip:rgba(43,26,5,.05);
@@ -19,27 +20,28 @@
   --negative:#B33528;
   --negative-bg:rgba(179,53,40,.08);
   --canvas:#F7F1E5;
-  --surface-2:#F3EAD8;
+  --surface-2:#F2EAD7;
   --accent-ui:#A87900;
   --accent-text:#8A6100;
   --accent-fill:#FFBC0D;
   --on-accent:#2B1A05;
   --accent-deep:#FFB81C;
   --co:#FFB81C;
-  --cloth:linear-gradient(90deg,#F3EAD8 0%,#F3EAD8 38%,#FCEDCE 100%);
-  --tile1:#F3EAD8;
+  --cloth:linear-gradient(90deg,#F2EAD7 0%,#F2EAD7 38%,#FCEDCE 100%);
+  --tile1:#F2EAD7;
   --tile2:#FCEDCE;
-  --chrome:#F3EAD8;
+  --chrome:#F2EAD7;
   --glow:rgba(168,121,0,.16);
 }
 :root[data-theme="dark"] {
   color-scheme:dark;
+  --motif:.07;
   --surface-card:#1E1A17;
   --surface-raised:#282320;
   --paper:#171412;
   --ink:#F3ECDD;
   --soft:#B9AC95;
-  --faint:#A49885;
+  --faint:#B0A492;
   --cloth-ink:#F7F1E3;
   --cloth-soft:#EDE5D3;
   --line:rgba(255,255,255,.10);
@@ -65,12 +67,13 @@
 @media (prefers-color-scheme: dark) {            /* no-JS fallback only */
   :root:not([data-theme]) {
     color-scheme:dark;
+    --motif:.07;
     --surface-card:#1E1A17;
     --surface-raised:#282320;
     --paper:#171412;
     --ink:#F3ECDD;
     --soft:#B9AC95;
-    --faint:#A49885;
+    --faint:#B0A492;
     --cloth-ink:#F7F1E3;
     --cloth-soft:#EDE5D3;
     --line:rgba(255,255,255,.10);
@@ -101,23 +104,23 @@
 /* Saffron — Kesri */
 :root[data-accent="saffron"] {
   --canvas:#FAF1E6;
-  --surface-2:#F8E7D4;
-  --accent-ui:#E06E09;
+  --surface-2:#F8E6D3;
+  --accent-ui:#C66309;
   --accent-text:#A0530A;
   --accent-fill:#E06E09;
   --on-accent:#2B1A05;
   --accent-deep:#B07D12;
   --co:#B07D12;
-  --cloth:linear-gradient(90deg,#F8E7D4 0%,#F8E7D4 38%,#F2E8D5 100%);
-  --tile1:#F8E7D4;
-  --tile2:#F2E8D5;
-  --chrome:#F8E7D4;
+  --cloth:linear-gradient(90deg,#F8E6D3 0%,#F8E6D3 38%,#F2E8D4 100%);
+  --tile1:#F8E6D3;
+  --tile2:#F2E8D4;
+  --chrome:#F8E6D3;
   --glow:rgba(224,110,9,.16);
 }
 :root[data-theme="dark"][data-accent="saffron"] {
   --canvas:#151210;
   --surface-2:#171412;
-  --accent-ui:#FF8F2E;
+  --accent-ui:#FF993F;
   --accent-text:#FFA24F;
   --accent-fill:#FF8F2E;
   --on-accent:#2B1A05;
@@ -133,15 +136,15 @@
 :root[data-accent="gold"] {
   --canvas:#F8F2E6;
   --surface-2:#F1E7D3;
-  --accent-ui:#B07D12;
+  --accent-ui:#9C6F10;
   --accent-text:#7E5A0C;
   --accent-fill:#B07D12;
   --on-accent:#2B1A05;
   --accent-deep:#8A5E0B;
   --co:#8A5E0B;
-  --cloth:linear-gradient(90deg,#F1E7D3 0%,#F1E7D3 38%,#EBE2D0 100%);
+  --cloth:linear-gradient(90deg,#F1E7D3 0%,#F1E7D3 38%,#E9DFCD 100%);
   --tile1:#F1E7D3;
-  --tile2:#EBE2D0;
+  --tile2:#E9DFCD;
   --chrome:#F1E7D3;
   --glow:rgba(176,125,18,.16);
 }
@@ -170,9 +173,9 @@
   --on-accent:#FFFFFF;
   --accent-deep:#36349B;
   --co:#36349B;
-  --cloth:linear-gradient(90deg,#E4E2EB 0%,#E4E2EB 38%,#E5E2E7 100%);
+  --cloth:linear-gradient(90deg,#E4E2EB 0%,#E4E2EB 38%,#E2DFE5 100%);
   --tile1:#E4E2EB;
-  --tile2:#E5E2E7;
+  --tile2:#E2DFE5;
   --chrome:#E4E2EB;
   --glow:rgba(74,85,201,.16);
 }
@@ -201,9 +204,9 @@
   --on-accent:#FFFFFF;
   --accent-deep:#0A5C68;
   --co:#0A5C68;
-  --cloth:linear-gradient(90deg,#DCE7E0 0%,#DCE7E0 38%,#DEE4E0 100%);
+  --cloth:linear-gradient(90deg,#DCE7E0 0%,#DCE7E0 38%,#DAE2DE 100%);
   --tile1:#DCE7E0;
-  --tile2:#DEE4E0;
+  --tile2:#DAE2DE;
   --chrome:#DCE7E0;
   --glow:rgba(14,126,116,.16);
 }
@@ -232,9 +235,9 @@
   --on-accent:#FFFFFF;
   --accent-deep:#5A3A99;
   --co:#C2603A;
-  --cloth:linear-gradient(90deg,#EAE2EA 0%,#EAE2EA 38%,#F2E0D5 100%);
+  --cloth:linear-gradient(90deg,#EAE2EA 0%,#EAE2EA 38%,#F2DFD3 100%);
   --tile1:#EAE2EA;
-  --tile2:#F2E0D5;
+  --tile2:#F2DFD3;
   --chrome:#EAE2EA;
   --glow:rgba(123,82,192,.16);
 }
@@ -263,9 +266,9 @@
   --on-accent:#FFFFFF;
   --accent-deep:#8A3A1B;
   --co:#3E6B5A;
-  --cloth:linear-gradient(90deg,#F2E2D6 0%,#F2E2D6 38%,#E2E5DC 100%);
+  --cloth:linear-gradient(90deg,#F2E2D6 0%,#F2E2D6 38%,#DFE2DA 100%);
   --tile1:#F2E2D6;
-  --tile2:#E2E5DC;
+  --tile2:#DFE2DA;
   --chrome:#F2E2D6;
   --glow:rgba(181,83,43,.16);
 }
@@ -380,17 +383,17 @@
 /* Bougainvillea — Èze walls against the sea */
 :root[data-accent="bougainvillea"] {
   --canvas:#F8EEEB;
-  --surface-2:#F2DEE2;
+  --surface-2:#F2DCE1;
   --accent-ui:#B4287A;
   --accent-text:#A01E6C;
   --accent-fill:#B4287A;
   --on-accent:#FFFFFF;
   --accent-deep:#8A1A5C;
   --co:#2A7FB8;
-  --cloth:linear-gradient(90deg,#F2DEE2 0%,#F2DEE2 38%,#DCE5E8 100%);
-  --tile1:#F2DEE2;
-  --tile2:#DCE5E8;
-  --chrome:#F2DEE2;
+  --cloth:linear-gradient(90deg,#F2DCE1 0%,#F2DCE1 38%,#DAE4E7 100%);
+  --tile1:#F2DCE1;
+  --tile2:#DAE4E7;
+  --chrome:#F2DCE1;
   --glow:rgba(180,40,122,.16);
 }
 :root[data-theme="dark"][data-accent="bougainvillea"] {

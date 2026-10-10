@@ -11,7 +11,7 @@
   border:1px dashed var(--line-strong); letter-spacing:.01em;
 }
 .ctx a.timechip:hover { color:var(--accent); border-color:color-mix(in srgb, var(--accent) 55%, transparent); }
-.timechip .tc-i { font-size:11px; opacity:.75; }
+.timechip .tc-i { font-size:11px; }
 .timechip .tc-sep { opacity:.5; }
 body.hide-timing .timechip { display:none; }
 
@@ -69,13 +69,14 @@ body.hide-timing .timechip { display:none; }
 .raagdial .arc-sel   { stroke:var(--accent); stroke-width:3.5; filter:drop-shadow(0 0 10px var(--glow)); }
 .raagdial .arc:focus-visible { stroke:var(--accent); stroke-width:3.5; }
 .raagdial .pnum   { font-size:24px; font-weight:750; fill:var(--ink); }
-.raagdial .prange { font-size:10.5px; fill:var(--faint); letter-spacing:.02em; }
-.raagdial .pcount { font-size:12px; font-weight:600; fill:var(--soft); }
+/* the wedge's own text is ink: a wedge is a tint of the accent, and brightens on hover */
+.raagdial .prange { font-size:10.5px; fill:var(--ink); letter-spacing:.02em; }
+.raagdial .pcount { font-size:12px; font-weight:600; fill:var(--ink); }
 .raagdial .bead   { fill:var(--accent); opacity:.9; }
 .raagdial .arc-night ~ * .bead, .raagdial .bead { }
 .raagdial .bead-var { fill:none; stroke:var(--faint); stroke-width:1.4; }
-.raagdial .quiet-star { font-size:16px; fill:#8d97c0; }
-.raagdial .quiet-sub  { font-size:11px; fill:#6b769c; letter-spacing:.02em; }
+.raagdial .quiet-star { font-size:16px; fill:#aab3d6; }        /* the quiet wedge is dark in both appearances */
+.raagdial .quiet-sub  { font-size:11px; fill:#c3cae6; letter-spacing:.02em; }
 .raagdial .arc-season { cursor:pointer; transition:opacity .18s; }
 .raagdial .arc-season0 { fill:color-mix(in srgb, #2f9e62 32%, var(--card)); }
 .raagdial .arc-season1 { fill:color-mix(in srgb, #2a7fb8 32%, var(--card)); }
@@ -137,7 +138,7 @@ body.hide-timing .timechip { display:none; }
 /* badges shared by panel + explorer */
 .cbadge { font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; padding:2px 8px; border-radius:999px; }
 .cb-primary { background:var(--accent-wash); color:var(--accent); }
-.cb-variant { background:color-mix(in srgb, #8d97c0 20%, transparent); color:var(--soft); border:1px dashed var(--line-strong); }
+.cb-variant { background:color-mix(in srgb, #8d97c0 20%, transparent); color:var(--ink); border:1px dashed var(--line-strong); }
 .cb-seasonal { background:color-mix(in srgb, #2f9e62 18%, transparent); color:color-mix(in srgb, #2f9e62 50%, var(--ink)); }
 .cb-ceremonial { background:var(--accent-wash); color:var(--gold); }
 .conf { font-size:10px; padding:2px 8px; border-radius:999px; }

@@ -3,7 +3,7 @@
 .haspin .g { padding-right:48px; }   /* clear the 36px pin button (right:8px) so long Gurmukhi verses never run underneath it */
 .pin-btn { position:absolute; top:8px; right:8px; z-index:3; width:36px; height:36px; border-radius:10px;
   border:1px solid var(--line); background:var(--card); font-size:13px; line-height:1; cursor:pointer;
-  display:inline-flex; align-items:center; justify-content:center; opacity:.42; filter:grayscale(.4) saturate(.7);
+  display:inline-flex; align-items:center; justify-content:center; opacity:.62; filter:grayscale(.4) saturate(.7);
   transition:opacity .15s, transform .12s, border-color .15s, background .15s; }
 .haspin:hover .pin-btn, .pin-btn:focus-visible { opacity:.9; }
 .pin-btn:hover { transform:scale(1.12); border-color:var(--accent); }
