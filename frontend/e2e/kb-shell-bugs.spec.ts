@@ -7,23 +7,25 @@ import { test, expect, type Page } from '@playwright/test';
 // straight to Search, and every page carries its icons.
 
 const mobile = (page: Page) => (page.viewportSize()?.width ?? 1280) <= 840;
+// "Saved" opens the drawer: in the top bar on a wide screen, in the tab bar on a phone
+const saved = (page: Page) => page.locator('[data-open-saved]:visible');
 
 test('the closed drawer is inert, and closing it returns focus to the button that opened it', async ({ page }) => {
   await page.goto('/search');
   const drawer = page.locator('#trailDrawer');
   await expect(drawer).toHaveAttribute('inert', '');
   if (!mobile(page)) {                                     // Tab from the button must skip the closed drawer
-    await page.locator('#trailFab').focus();
+    await saved(page).focus();
     await page.keyboard.press('Tab');
     expect(await page.evaluate(() => !!document.activeElement?.closest('#trailDrawer'))).toBe(false);
   }
-  await page.locator('#trailFab').click();
+  await saved(page).click();
   await expect(drawer).toHaveClass(/\bon\b/);
   await expect(drawer).not.toHaveAttribute('inert', '');
   await expect(page.locator('#trailClose')).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(drawer).toHaveAttribute('inert', '');
-  await expect(page.locator('#trailFab')).toBeFocused();
+  await expect(saved(page)).toBeFocused();
 });
 
 for (const path of ['/search', '/reader?ang=1', '/nitnem', '/analytics', '/constellation', '/raag-clock']) {

@@ -332,7 +332,8 @@ later, self-host the official SVG unmodified per Apple's App Store marketing gui
 Create `frontend/src/pages/<name>.astro` using `Base.astro` (Knowledge Base) or `Marketing.astro`
 (Gurbani Soul). Add its route to `frontend/src/routes.ts` (the sitemap and OG default derive from
 it — the `SitemapInvariants` gate fails if the manifest and the built HTML routes disagree). If it
-is a nav destination, add it to the `Base.astro` nav with a `data-path`. Build + sync.
+is a destination, add it to its place in `PLACES` in `Base.astro` (its path, and its entry in the place's `pages` if it
+should appear in the second row), and give it a state in `frontend/e2e/kb-shell.spec.ts`. Build + sync.
 
 ---
 

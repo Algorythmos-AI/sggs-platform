@@ -26,7 +26,7 @@
   --on-accent:#2B1A05;
   --accent-deep:#FFB81C;
   --co:#FFB81C;
-  --cloth:linear-gradient(120deg,#F3EAD8 0%,#F3EAD8 38%,#FCEDCE 100%);
+  --cloth:linear-gradient(90deg,#F3EAD8 0%,#F3EAD8 38%,#FCEDCE 100%);
   --tile1:#F3EAD8;
   --tile2:#FCEDCE;
   --chrome:#F3EAD8;
@@ -56,7 +56,7 @@
   --on-accent:#2B1A05;
   --accent-deep:#C08B00;
   --co:#C08B00;
-  --cloth:linear-gradient(150deg,#171412 0%,#2A2118 55%,#3D2E12 100%);
+  --cloth:linear-gradient(90deg,#171412 0%,#2A2118 55%,#3D2E12 100%);
   --tile1:#342A16;
   --tile2:#2E2515;
   --chrome:#171412;
@@ -87,7 +87,7 @@
     --on-accent:#2B1A05;
     --accent-deep:#C08B00;
     --co:#C08B00;
-    --cloth:linear-gradient(150deg,#171412 0%,#2A2118 55%,#3D2E12 100%);
+    --cloth:linear-gradient(90deg,#171412 0%,#2A2118 55%,#3D2E12 100%);
     --tile1:#342A16;
     --tile2:#2E2515;
     --chrome:#171412;
@@ -108,7 +108,7 @@
   --on-accent:#2B1A05;
   --accent-deep:#B07D12;
   --co:#B07D12;
-  --cloth:linear-gradient(120deg,#F8E7D4 0%,#F8E7D4 38%,#F2E8D5 100%);
+  --cloth:linear-gradient(90deg,#F8E7D4 0%,#F8E7D4 38%,#F2E8D5 100%);
   --tile1:#F8E7D4;
   --tile2:#F2E8D5;
   --chrome:#F8E7D4;
@@ -123,7 +123,7 @@
   --on-accent:#2B1A05;
   --accent-deep:#D9A93C;
   --co:#D9A93C;
-  --cloth:linear-gradient(150deg,#2A1406 0%,#5C2C08 55%,#8A430A 100%);
+  --cloth:linear-gradient(90deg,#2A1406 0%,#5C2C08 55%,#8A430A 100%);
   --tile1:#342619;
   --tile2:#31281B;
   --chrome:#2A1406;
@@ -139,7 +139,7 @@
   --on-accent:#2B1A05;
   --accent-deep:#8A5E0B;
   --co:#8A5E0B;
-  --cloth:linear-gradient(120deg,#F1E7D3 0%,#F1E7D3 38%,#EBE2D0 100%);
+  --cloth:linear-gradient(90deg,#F1E7D3 0%,#F1E7D3 38%,#EBE2D0 100%);
   --tile1:#F1E7D3;
   --tile2:#EBE2D0;
   --chrome:#F1E7D3;
@@ -154,7 +154,7 @@
   --on-accent:#2B1A05;
   --accent-deep:#B08A2E;
   --co:#B08A2E;
-  --cloth:linear-gradient(150deg,#1F1606 0%,#44310A 55%,#6B4D0F 100%);
+  --cloth:linear-gradient(90deg,#1F1606 0%,#44310A 55%,#6B4D0F 100%);
   --tile1:#31281B;
   --tile2:#2D2519;
   --chrome:#1F1606;
@@ -170,7 +170,7 @@
   --on-accent:#FFFFFF;
   --accent-deep:#36349B;
   --co:#36349B;
-  --cloth:linear-gradient(120deg,#E4E2EB 0%,#E4E2EB 38%,#E5E2E7 100%);
+  --cloth:linear-gradient(90deg,#E4E2EB 0%,#E4E2EB 38%,#E5E2E7 100%);
   --tile1:#E4E2EB;
   --tile2:#E5E2E7;
   --chrome:#E4E2EB;
@@ -185,7 +185,7 @@
   --on-accent:#11133A;
   --accent-deep:#6D6FD6;
   --co:#6D6FD6;
-  --cloth:linear-gradient(150deg,#11133A 0%,#232874 55%,#36349B 100%);
+  --cloth:linear-gradient(90deg,#11133A 0%,#232874 55%,#36349B 100%);
   --tile1:#29262D;
   --tile2:#26222A;
   --chrome:#11133A;
@@ -201,7 +201,7 @@
   --on-accent:#FFFFFF;
   --accent-deep:#0A5C68;
   --co:#0A5C68;
-  --cloth:linear-gradient(120deg,#DCE7E0 0%,#DCE7E0 38%,#DEE4E0 100%);
+  --cloth:linear-gradient(90deg,#DCE7E0 0%,#DCE7E0 38%,#DEE4E0 100%);
   --tile1:#DCE7E0;
   --tile2:#DEE4E0;
   --chrome:#DCE7E0;
@@ -216,7 +216,7 @@
   --on-accent:#062A26;
   --accent-deep:#2E9AA8;
   --co:#2E9AA8;
-  --cloth:linear-gradient(150deg,#062A26 0%,#0A4A44 55%,#0A5C68 100%);
+  --cloth:linear-gradient(90deg,#062A26 0%,#0A4A44 55%,#0A5C68 100%);
   --tile1:#212B27;
   --tile2:#202726;
   --chrome:#062A26;
@@ -232,7 +232,7 @@
   --on-accent:#FFFFFF;
   --accent-deep:#5A3A99;
   --co:#C2603A;
-  --cloth:linear-gradient(120deg,#EAE2EA 0%,#EAE2EA 38%,#F2E0D5 100%);
+  --cloth:linear-gradient(90deg,#EAE2EA 0%,#EAE2EA 38%,#F2E0D5 100%);
   --tile1:#EAE2EA;
   --tile2:#F2E0D5;
   --chrome:#EAE2EA;
@@ -247,7 +247,7 @@
   --on-accent:#1C1035;
   --accent-deep:#8E6FD6;
   --co:#F0946A;
-  --cloth:linear-gradient(150deg,#1F1438 0%,#3A2569 55%,#5B3F94 100%);
+  --cloth:linear-gradient(90deg,#1F1438 0%,#3A2569 55%,#5B3F94 100%);
   --tile1:#2D272D;
   --tile2:#33261F;
   --chrome:#1F1438;
@@ -263,7 +263,7 @@
   --on-accent:#FFFFFF;
   --accent-deep:#8A3A1B;
   --co:#3E6B5A;
-  --cloth:linear-gradient(120deg,#F2E2D6 0%,#F2E2D6 38%,#E2E5DC 100%);
+  --cloth:linear-gradient(90deg,#F2E2D6 0%,#F2E2D6 38%,#E2E5DC 100%);
   --tile1:#F2E2D6;
   --tile2:#E2E5DC;
   --chrome:#F2E2D6;
@@ -278,7 +278,7 @@
   --on-accent:#33140A;
   --accent-deep:#C96F47;
   --co:#8CC2AE;
-  --cloth:linear-gradient(150deg,#2B120A 0%,#5A2613 55%,#8A3A1B 100%);
+  --cloth:linear-gradient(90deg,#2B120A 0%,#5A2613 55%,#8A3A1B 100%);
   --tile1:#33261F;
   --tile2:#292B26;
   --chrome:#2B120A;
@@ -294,7 +294,7 @@
   --on-accent:#FFFFFF;
   --accent-deep:#3C561D;
   --co:#C9962B;
-  --cloth:linear-gradient(120deg,#E5E6D6 0%,#E5E6D6 38%,#F3E7D0 100%);
+  --cloth:linear-gradient(90deg,#E5E6D6 0%,#E5E6D6 38%,#F3E7D0 100%);
   --tile1:#E5E6D6;
   --tile2:#F3E7D0;
   --chrome:#E5E6D6;
@@ -309,7 +309,7 @@
   --on-accent:#17240A;
   --accent-deep:#7FA850;
   --co:#E3BC5F;
-  --cloth:linear-gradient(150deg,#141F0B 0%,#2A3F16 55%,#405E21 100%);
+  --cloth:linear-gradient(90deg,#141F0B 0%,#2A3F16 55%,#405E21 100%);
   --tile1:#2C2C20;
   --tile2:#322A1E;
   --chrome:#141F0B;
@@ -325,7 +325,7 @@
   --on-accent:#FFFFFF;
   --accent-deep:#364154;
   --co:#B07D12;
-  --cloth:linear-gradient(120deg,#E4E3E0 0%,#E4E3E0 38%,#EFE3CC 100%);
+  --cloth:linear-gradient(90deg,#E4E3E0 0%,#E4E3E0 38%,#EFE3CC 100%);
   --tile1:#E4E3E0;
   --tile2:#EFE3CC;
   --chrome:#E4E3E0;
@@ -340,7 +340,7 @@
   --on-accent:#141A26;
   --accent-deep:#8090AD;
   --co:#D9A93C;
-  --cloth:linear-gradient(150deg,#10141D 0%,#222B3B 55%,#364154 100%);
+  --cloth:linear-gradient(90deg,#10141D 0%,#222B3B 55%,#364154 100%);
   --tile1:#2C2A29;
   --tile2:#31281B;
   --chrome:#10141D;
@@ -356,7 +356,7 @@
   --on-accent:#FFFFFF;
   --accent-deep:#4B448F;
   --co:#E8955A;
-  --cloth:linear-gradient(120deg,#E8E4E8 0%,#E8E4E8 38%,#F8E7D8 100%);
+  --cloth:linear-gradient(90deg,#E8E4E8 0%,#E8E4E8 38%,#F8E7D8 100%);
   --tile1:#E8E4E8;
   --tile2:#F8E7D8;
   --chrome:#E8E4E8;
@@ -371,7 +371,7 @@
   --on-accent:#15123A;
   --accent-deep:#7F78D0;
   --co:#F2A774;
-  --cloth:linear-gradient(150deg,#1A1838 0%,#2F2B63 55%,#4D4690 100%);
+  --cloth:linear-gradient(90deg,#1A1838 0%,#2F2B63 55%,#4D4690 100%);
   --tile1:#2C282C;
   --tile2:#332820;
   --chrome:#1A1838;
@@ -387,7 +387,7 @@
   --on-accent:#FFFFFF;
   --accent-deep:#8A1A5C;
   --co:#2A7FB8;
-  --cloth:linear-gradient(120deg,#F2DEE2 0%,#F2DEE2 38%,#DCE5E8 100%);
+  --cloth:linear-gradient(90deg,#F2DEE2 0%,#F2DEE2 38%,#DCE5E8 100%);
   --tile1:#F2DEE2;
   --tile2:#DCE5E8;
   --chrome:#F2DEE2;
@@ -402,7 +402,7 @@
   --on-accent:#3A0A25;
   --accent-deep:#D0609A;
   --co:#7FB8E6;
-  --cloth:linear-gradient(150deg,#2E0B22 0%,#5A123F 55%,#8A1A5C 100%);
+  --cloth:linear-gradient(90deg,#2E0B22 0%,#5A123F 55%,#8A1A5C 100%);
   --tile1:#332427;
   --tile2:#282A2C;
   --chrome:#2E0B22;
@@ -418,7 +418,7 @@
   --on-accent:#FFFFFF;
   --accent-deep:#0A5C80;
   --co:#E08A4A;
-  --cloth:linear-gradient(120deg,#DCE7E7 0%,#DCE7E7 38%,#F7E6D5 100%);
+  --cloth:linear-gradient(90deg,#DCE7E7 0%,#DCE7E7 38%,#F7E6D5 100%);
   --tile1:#DCE7E7;
   --tile2:#F7E6D5;
   --chrome:#DCE7E7;
@@ -433,7 +433,7 @@
   --on-accent:#062838;
   --accent-deep:#2E9AC4;
   --co:#F0A56E;
-  --cloth:linear-gradient(150deg,#062433 0%,#0A4460 55%,#0E6388 100%);
+  --cloth:linear-gradient(90deg,#062433 0%,#0A4460 55%,#0E6388 100%);
   --tile1:#242B2C;
   --tile2:#332820;
   --chrome:#062433;
@@ -449,7 +449,7 @@
   --on-accent:#FFFFFF;
   --accent-deep:#86304F;
   --co:#5E8468;
-  --cloth:linear-gradient(120deg,#F2E0DF 0%,#F2E0DF 38%,#E2E5DA 100%);
+  --cloth:linear-gradient(90deg,#F2E0DF 0%,#F2E0DF 38%,#E2E5DA 100%);
   --tile1:#F2E0DF;
   --tile2:#E2E5DA;
   --chrome:#F2E0DF;
@@ -464,7 +464,7 @@
   --on-accent:#3B0F1F;
   --accent-deep:#D06A8A;
   --co:#9CC2A6;
-  --cloth:linear-gradient(150deg,#2E0D1A 0%,#5A1C33 55%,#86304F 100%);
+  --cloth:linear-gradient(90deg,#2E0D1A 0%,#5A1C33 55%,#86304F 100%);
   --tile1:#332626;
   --tile2:#2B2B25;
   --chrome:#2E0D1A;

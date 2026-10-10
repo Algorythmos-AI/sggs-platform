@@ -116,7 +116,7 @@ export function stepFontSize(d: number) {
 
 // ---- sticky reader toolbar below the (wrapping) nav ----
 export function syncToolbarTop() {
-  const n = document.querySelector('nav');
+  const n = document.querySelector('[data-topbar]');
   if (n) document.documentElement.style.setProperty('--nav-h', (n as HTMLElement).getBoundingClientRect().height + 'px');
 }
 
@@ -158,6 +158,8 @@ syncChromeColor();
 document.addEventListener('themechange', syncChromeColor);
 applyPrefs();
 markNav();
+// the row of a place's pages scrolls sideways on a phone: bring the current one into view
+document.querySelector('.kb-sub a[aria-current]')?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'instant' });
 syncToolbarTop();
 window.addEventListener('resize', syncToolbarTop);
 initFooter();

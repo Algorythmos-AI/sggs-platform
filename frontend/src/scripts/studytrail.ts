@@ -14,7 +14,7 @@ function toast(msg: string) {
   if (!t) {
     t = document.createElement('div'); t.id = 'sggs-toast';
     t.setAttribute('role', 'status'); t.setAttribute('aria-live', 'polite');
-    t.style.cssText = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%);z-index:9999;'
+    t.style.cssText = 'position:fixed;left:50%;bottom:calc(30px + var(--kb-bottom, 0px));transform:translateX(-50%);z-index:9999;'
       + 'background:rgba(20,22,30,.95);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;'
       + 'max-width:80vw;text-align:center;box-shadow:0 10px 34px rgba(0,0,0,.45);opacity:0;transition:opacity .2s;';
     document.body.appendChild(t);
@@ -37,7 +37,7 @@ document.addEventListener('click', (e: any) => {
   if (r === 'cap' || r === 'quota') {            // save failed → keep the button truthful + tell the user
     btn.classList.remove('pinned'); btn.setAttribute('aria-pressed', 'false');
     toast(r === 'cap'
-      ? `Study trail is full (max ${MAX_PINS}) — unpin a verse to add more.`
+      ? `Saved verses are full (max ${MAX_PINS}) — unpin a verse to add more.`
       : 'Could not save — your browser storage is full.');
     return;
   }
@@ -78,7 +78,7 @@ function closeDrawer() {
   d.setAttribute('inert', '');
   $('#trailScrim')?.classList.remove('on');
   document.body.classList.remove('drawer-open');
-  (drawerOpener && document.contains(drawerOpener) ? drawerOpener : $('#trailFab'))?.focus();
+  (drawerOpener && document.contains(drawerOpener) ? drawerOpener : savedButton())?.focus();
   drawerOpener = null;
 }
 
@@ -93,12 +93,15 @@ function showTab(which: 'pinned' | 'insights') {
 }
 
 /* ---------- renderers ---------- */
+// "Saved" is in the top bar on a wide screen and in the tab bar on a phone: both open the
+// drawer and both carry the count. Only one of the two is displayed at a time.
+const savedButton = () =>
+  (Array.from(document.querySelectorAll('[data-open-saved]')) as HTMLElement[]).find((b) => b.offsetParent !== null) || null;
 function fabBadge() {
   const n = count();
-  const fab = $('#trailFab'); if (!fab) return;
-  fab.setAttribute('data-n', String(n));
-  fab.classList.toggle('has', n > 0);
-  const b = $('#trailFabN'); if (b) b.textContent = String(n);
+  document.querySelectorAll('[data-saved-count]').forEach((b: any) => { b.textContent = String(n); b.hidden = n === 0; });
+  document.querySelectorAll('[data-open-saved]').forEach((b) =>
+    b.setAttribute('aria-label', n ? `Saved: ${n} pinned verse${n === 1 ? '' : 's'}` : 'Saved verses'));
 }
 
 function verseRow(p: Pin): string {
@@ -208,7 +211,7 @@ new MutationObserver((muts) => {
       if (n.nodeType === 1 && ((n as Element).matches('.pin-btn') || (n as Element).querySelector('.pin-btn'))) { markPins(); return; }
 }).observe(document.body, { childList: true, subtree: true });
 repairPins().then(markPins);              // heal pins captured from painted DOM by older builds
-$('#trailFab')?.addEventListener('click', openDrawer);
+document.addEventListener('click', (e: any) => { if (e.target?.closest?.('[data-open-saved]')) openDrawer(); });
 $('#trailClose')?.addEventListener('click', closeDrawer);
 $('#trailScrim')?.addEventListener('click', closeDrawer);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#trailDrawer')?.classList.contains('on')) closeDrawer(); });

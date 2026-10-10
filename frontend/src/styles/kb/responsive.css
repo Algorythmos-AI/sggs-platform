@@ -1,8 +1,7 @@
 @media (prefers-reduced-motion: reduce) { *{ transition:none !important; scroll-behavior:auto !important; } }
 @media (max-width:620px) {
-  main { padding:18px 14px 92px; }
+  main { padding:16px 14px 32px; }
   .shabad { padding:16px 18px 18px; }
-  nav.site a, nav.site button { min-height:42px; }
   .modes span { min-height:36px; display:inline-flex; align-items:center; }
   .searchbar button { min-height:46px; }
 }

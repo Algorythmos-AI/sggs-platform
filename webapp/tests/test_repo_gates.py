@@ -232,7 +232,8 @@ class LandingPage(unittest.TestCase):
             if not f.exists():
                 continue
             html = f.read_text(encoding="utf-8")
-            self.assertNotIn("Sri Guru Granth Sahib Ji — Knowledge Base</h1>", html, f"{route}: KB <h1> present")
+            self.assertNotIn("data-topbar", html, f"{route}: KB top bar present")
+            self.assertNotIn('class="kb-tabs"', html, f"{route}: KB tab bar present")
             self.assertNotIn('id="saroopBtn"', html, f"{route}: KB saroop toggle present")
             self.assertNotIn('id="randomBtn"', html, f"{route}: KB random button present")
             self.assertIn('id="mnav"', html, f"{route}: marketing nav #mnav missing")

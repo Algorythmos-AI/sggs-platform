@@ -6,7 +6,7 @@ import { test, expect, type Page } from '@playwright/test';
 //                            for labels), never an accent, gold or status colour;
 //   scripture (verse lines and their headings) — exactly ink; no letter-spacing; inside an
 //                            element marked class="gm" and lang="pa".
-// The ੴ mark in the header and the ਯ label of the saroop button are a mark and a control, not text.
+// The ੴ mark in the top bar and the ਯ label of the saroop button are a mark and a control, not text.
 
 type Hit = { rule: string; where: string; text: string };
 
@@ -24,7 +24,7 @@ const scan = (page: Page) => page.evaluate(() => {
     if (!GM.test(n.data)) continue;
     const el = n.parentElement;
     if (!el || el.closest('script, style, noscript') || !el.getClientRects().length) continue;
-    if (el.closest('header.site .onkar, #saroopBtn')) continue;
+    if (el.closest('.kb-mark, #saroopBtn')) continue;
     const cs = getComputedStyle(el);
     if (cs.visibility === 'hidden') continue;
     const name = (e: Element) => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '')
@@ -63,7 +63,7 @@ const VIEWS: { name: string; path: string; ready?: string; act?: (page: Page) =>
   { name: 'reader with related verses', path: '/reader?ang=712', ready: '#angOut .sline',
     act: async (page) => { await page.locator('#angOut .sline.tap .g').first().dispatchEvent('click'); await expect(page.locator('#angOut .related .relcard').first()).toBeVisible({ timeout: 15_000 }); } },
   { name: 'pinned verses drawer', path: '/reader?ang=712', ready: '#angOut .sline',
-    act: async (page) => { await page.locator('#angOut .pin-btn').first().dispatchEvent('click'); await page.locator('#trailFab').dispatchEvent('click'); await expect(page.locator('#tab-pinned').locator('.gm').first()).toBeVisible({ timeout: 15_000 }); } },
+    act: async (page) => { await page.locator('#angOut .pin-btn').first().dispatchEvent('click'); await page.locator('[data-open-saved]').first().dispatchEvent('click'); await expect(page.locator('#tab-pinned').locator('.gm').first()).toBeVisible({ timeout: 15_000 }); } },
   { name: 'nitnem list', path: '/nitnem', ready: '.bani-tile' },
   { name: 'nitnem bani', path: '/nitnem?bani=rehras', ready: '#baniOut .sline' },
   { name: 'index', path: '/browse', ready: '.tile' },

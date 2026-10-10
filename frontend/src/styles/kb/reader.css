@@ -13,7 +13,7 @@
   border:1.5px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink); }
 .toolbar input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--glow); }
 .toolbar .of { font-size:12px; color:var(--soft); white-space:nowrap; }
-.toolbar .right { display:flex; align-items:center; gap:9px; }
+.toolbar .right { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
 .tgl { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--soft); cursor:pointer; user-select:none; }
 .tgl .sw { width:36px; height:21px; border-radius:999px; background:var(--chip); border:1px solid var(--line); position:relative; transition:all .15s; }
 .tgl .sw::after { content:''; position:absolute; top:2px; left:2px; width:15px; height:15px; border-radius:50%; background:var(--soft); transition:all .18s; }

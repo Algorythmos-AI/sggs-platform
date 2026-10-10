@@ -15,7 +15,7 @@ const put = (host: HTMLElement, html: string, was: string) => { if (html !== was
 const renderNow = guard(async () => {
   const host = $('#hubNow'); if (!host) return;
   const clock = await loadClock();
-  if (!clock?.available) return;
+  if (!clock?.available) { host.hidden = true; return; }
   const st = currentPahar();
   const raags = raagsForPahar(clock, st.pahar);
   nowHTML = put(host, `<p class="hub-eyebrow"><b>${esc(paharLabel(st.pahar))}</b>${st.mode === 'fixed' ? ' · ' + esc(paharRange(st.pahar)) : ' · solar'}
