@@ -12,7 +12,7 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
-  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Sant Lipi", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-gm: "Sant Lipi", "Mukta Mahee", "Gurmukhi MN", "Gurmukhi Sangam MN", "Noto Sans Gurmukhi", "Raavi", sans-serif;
   --color-saffron: #ff9933;
   --color-gold: #ffd24a;
@@ -93,8 +93,7 @@ header.site::after {                       /* warm glow + hairline saffron under
 }
 header.site .glow { position:absolute; inset:-40% 30% auto; height:340px;
   background:radial-gradient(closest-side, color-mix(in srgb, var(--accent) 26%, transparent), transparent); filter:blur(20px); pointer-events:none; }
-header.site .onkar { position:relative; font-size:50px; line-height:1; color:var(--gold);
-  text-shadow:0 0 24px color-mix(in srgb, var(--gold) 55%, transparent); }
+header.site .onkar { position:relative; font-size:50px; line-height:1; color:var(--gold); }   /* the mark: flat, one colour */
 header.site h1 { position:relative; font-size:22px; font-weight:700; margin-top:8px; letter-spacing:-.01em; }
 header.site p { position:relative; font-size:12.5px; opacity:.74; margin-top:6px; font-weight:450; }
 
@@ -184,13 +183,14 @@ footer.site a:hover { color:var(--ink); }
 .meta { display:flex; gap:7px; flex-wrap:wrap; margin-top:11px; }
 .meta span { font-size:11px; font-weight:500; background:var(--chip); color:var(--soft); padding:3px 11px; border-radius:999px; }
 .meta .ang { background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--accent); font-weight:650; }
-.meta .rahao { background:var(--rahao-bg); color:var(--rahao); font-weight:650; }
+.meta .rahao { box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); font-weight:650; }
 .themedesc { background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, transparent), transparent);
   border:1px solid color-mix(in srgb, var(--accent) 32%, transparent); border-radius:14px; padding:13px 17px; font-size:13px; color:var(--ink); margin-bottom:14px; }
 .more { display:block; margin:14px auto 0; background:var(--chip); border:1px solid var(--line); color:var(--ink);
   padding:11px 30px; border-radius:14px; cursor:pointer; font-size:13.5px; font-weight:550; transition:all .15s; }
 .more:hover { border-color:var(--accent); color:var(--accent); }
 mark { background:color-mix(in srgb, var(--accent) 32%, transparent); color:inherit; border-radius:4px; padding:0 2px; }
+.gm mark { padding:0; }
 
 /* ============================== reader ============================== */
 .toolbar {
@@ -216,7 +216,7 @@ mark { background:color-mix(in srgb, var(--accent) 32%, transparent); color:inhe
 
 .ctx { display:flex; gap:7px; flex-wrap:wrap; justify-content:center; margin:0 0 16px; }
 .ctx span { font-size:12px; background:var(--chip); color:var(--soft); padding:4px 13px; border-radius:999px; }
-.ctx .raagchip { background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--accent); font-weight:650; }
+.ctx .raagchip { background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--ink); font-weight:650; }
 
 .raagbanner { background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, transparent), color-mix(in srgb, var(--accent) 3%, transparent));
   border:1px solid color-mix(in srgb, var(--accent) 26%, transparent); border-radius:20px; padding:18px 22px; text-align:center; margin-bottom:18px; }
@@ -228,15 +228,14 @@ mark { background:color-mix(in srgb, var(--accent) 32%, transparent); color:inhe
 .cont:hover { color:var(--accent); border-color:var(--accent); }
 
 .shabad { background:var(--card); border:1px solid var(--line); border-radius:22px; padding:20px 28px 22px; margin-bottom:18px; box-shadow:var(--shadow); }
-.shabad .hdr { text-align:center; color:var(--gold); font-weight:650; font-size:calc(var(--gsize) - 4px); line-height:1.95; padding:2px 0 10px; border-bottom:1px solid var(--line); margin-bottom:12px; }
+.shabad .hdr { text-align:center; font-weight:650; font-size:calc(var(--gsize) - 4px); line-height:1.95; padding:2px 0 10px; border-bottom:1px solid var(--line); margin-bottom:12px; }
 .shabad .hdr .t { font-size:12px; color:var(--soft); font-weight:400; font-style:italic; }
-.invoc { font-size:calc(var(--gsize) + 9px); font-weight:700; line-height:1.8; padding:6px 0 4px; color:var(--gold); letter-spacing:.2px;
-  text-shadow:0 0 22px color-mix(in srgb, var(--gold) 35%, transparent); }
+.invoc { font-size:calc(var(--gsize) + 9px); font-weight:700; line-height:1.8; padding:6px 0 4px; }
 .sline { padding:9px 2px; }
 .sline .g { font-size:var(--gsize); line-height:2; }
 .sline .t { font-size:13px; color:var(--soft); font-style:italic; margin-top:2px; }
-.sline.rahao { background:var(--rahao-bg); border-left:3px solid var(--rahao); border-radius:10px; padding-left:13px; margin:7px 0; }
-.sline.rahao .g { color:var(--rahao); }
+/* Gurmukhi is always ink: the refrain is marked by a rule in the margin, never by colouring the verse */
+.sline.rahao { border-left:3px solid var(--accent); border-radius:0; padding-left:13px; margin:7px 0; }
 .en { font-size:13px; color:var(--accent); margin-top:4px; line-height:1.55; }
 .en::before { content:'EN · '; font-size:10px; opacity:.7; letter-spacing:.5px; font-weight:600; }
 body.hide-t .t { display:none; }
@@ -274,6 +273,11 @@ body.hide-t .t { display:none; }
 .panel .x { position:absolute; top:10px; right:12px; width:44px; height:44px; display:flex; align-items:center; justify-content:center;
   font-size:24px; cursor:pointer; color:var(--soft); background:none; border:none; border-radius:12px; transition:all .15s; }
 .panel .x:hover { background:var(--chip); color:var(--ink); }
+.ptitle { text-align:center; margin:0 0 18px; padding-bottom:14px; border-bottom:1px solid var(--line); }
+.ptitle .pt-main { font-size:20px; font-weight:600; }
+.ptitle .pt-sub { color:var(--soft); font-size:12.5px; margin-top:4px; }
+.panel .ph { text-align:center; }
+.panel .g.ph { font-weight:600; }
 .panel h3 { font-size:12.5px; color:var(--soft); font-weight:700; margin-bottom:14px; text-transform:uppercase; letter-spacing:.7px; }
 
 /* ============================== verdict ============================== */
@@ -318,6 +322,7 @@ body.hide-t .t { display:none; }
   background:var(--bg-2); color:var(--ink); border:1px solid var(--line-strong); border-radius:12px; padding:9px 12px; box-shadow:var(--shadow); transition:opacity .12s; }
 .viz-tip b { color:var(--accent); }
 .viz-tip span { color:var(--soft); }
+.viz-tip .gm { font-style:normal; color:var(--ink); }
 .radar-wrap { position:relative; height:440px; max-width:560px; margin:4px auto 0; }
 .viz-foot { font-size:11.5px; color:var(--soft); margin-top:10px; text-align:center; line-height:1.5; }
 .chord-stage { min-height:540px; display:flex; align-items:center; justify-content:center; }
@@ -794,7 +799,7 @@ body.hide-timing .timechip { display:none; }
 .raagdial .hourmark { font-size:10px; fill:var(--faint); letter-spacing:.1em; }
 .raagdial .handline { stroke:var(--accent); stroke-width:2.5; stroke-linecap:round; opacity:.9; }
 .raagdial .handdot { fill:var(--accent); }
-.raagdial .dialtitle { font-size:30px; fill:var(--gold); }
+.raagdial .dialtitle { font-size:30px; fill:var(--ink); }
 .raagdial .dialsub { font-size:9.5px; fill:var(--faint); letter-spacing:.16em; }
 .raagdial .dialhint { font-size:10px; fill:color-mix(in srgb, var(--accent) 80%, var(--faint)); letter-spacing:.04em; }
 

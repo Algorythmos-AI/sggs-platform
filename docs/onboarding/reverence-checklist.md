@@ -43,7 +43,10 @@ It applies to everyone, whatever their own beliefs.
 - Cite as **Sri Guru Granth Sahib Ji · Ang N** — everywhere, in every surface. "Gurbani Soul" is
   the app's name, never the text's.
 - Gurmukhi is rendered in Sant Lipi, ink-coloured, never in the brand gold or red, never as
-  decoration.
+  decoration. On the Knowledge Base a test proves it on every view, in light and dark
+  (`frontend/e2e/reverence.spec.ts`): scripture lines and their headings are exactly ink, with no
+  shadow and no letter-spacing; the refrain is marked by a rule in the margin, never by colouring
+  the verse; a line is never cut short; a search highlight never splits a word.
 - Explanation, summary or interpretation is always labelled as such and kept apart from the
   quotation ([answer protocol](https://github.com/Algorythmos-AI/sggs-data/blob/main/Answer-Protocol.md)).
 - Screenshots and marketing images show real, verbatim, cited lines or none.

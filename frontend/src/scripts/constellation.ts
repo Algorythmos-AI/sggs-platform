@@ -72,7 +72,7 @@ async function constellation() {
           .style('cursor', 'pointer')
           .on('mouseover focus', (ev: any) => {
             const r = host.getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect();
-            tip.html(`<b>${esc(titleCase(c))} ✦ ${esc(titleCase(cl.co))}</b><br><span>Ang ${v.ang}</span><br>${esc((v.gurmukhi || '').slice(0, 64))}`)
+            tip.html(`<b>${esc(titleCase(c))} ✦ ${esc(titleCase(cl.co))}</b><br><span>Ang ${v.ang}</span><br><i class="gm" lang="pa">${esc(v.gurmukhi || '')}</i>`)
               .style('opacity', 1).style('left', (b.left - r.left + 12) + 'px').style('top', (b.top - r.top + 12) + 'px');
             d3.select(ev.currentTarget).attr('r', 4.6);
           })

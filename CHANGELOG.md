@@ -73,6 +73,19 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   every push to `main` still audit all twenty.
 
 ### Fixed
+- **On the Knowledge Base, Gurmukhi is ink everywhere, and a test now proves it.** The pages
+  coloured scripture: composition headings and the ੴ invocation were gold (the invocation with a
+  glow and extra letter-spacing), refrain lines were orange on a tinted band, and the composition
+  panel set gold inline. Headings and verses are now ink; the refrain is marked by a 3px rule in
+  the margin, as in the app. Three more display faults went with them: the constellation tooltip cut
+  a verse at 64 characters and set it in a system font (it shows the whole line in Sant Lipi); a
+  Gurmukhi search highlight could end inside a word, parting a vowel sign from its consonant (whole
+  words are marked); and Gurmukhi outside a `.gm` element — an author's name, a chip, a button —
+  fell back to a system font (Sant Lipi now leads the interface font stack, scoped to the Gurmukhi
+  block). `frontend/e2e/reverence.spec.ts` walks every rendered Gurmukhi text node on 18 views in
+  light and dark, on desktop and phone: 23 distinct faults before, none after. A source gate
+  (`ScriptureDisplayInSource`) forbids slicing a line or colouring Gurmukhi inline. No scripture
+  text, corpus or API output changes; this is colour and typography only.
 - **Nine shell faults on the Knowledge Base, each with a test that failed before the fix**
   (`frontend/e2e/kb-shell-bugs.spec.ts`, desktop and phone). The closed pinned-verses drawer was
   still in the Tab order and closing it dropped focus (it is `inert` until opened, and focus goes
