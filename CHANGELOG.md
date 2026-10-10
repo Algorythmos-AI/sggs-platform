@@ -34,8 +34,8 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   theme. What is red today is written down in the spec per page — the pages that scroll sideways
   (`test.fail`) and the axe rule ids each page violates — and both lists can only shrink. The
   overflow baseline is per platform, because the Knowledge Base sets its Latin text in the system
-  font: it is enforced on macOS (the font an iPhone renders) and reported as a warning on the Linux
-  runners until a Linux baseline is recorded.
+  font: it has a macOS baseline (the font an iPhone renders) and a Linux one per project, recorded
+  from the first CI run, so the runners enforce it too.
   `npm run shots` (`frontend/scripts/shots.mjs`) takes a route × width × theme screenshot matrix for
   review. Report-only for now: `web-ci · frontend` compares the committed `webapp/static` with the
   build's text assets (`scripts/ci/check_static_fresh.py`), and `e2e · kb-lighthouse` runs mobile

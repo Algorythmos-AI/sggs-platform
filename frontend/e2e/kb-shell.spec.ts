@@ -73,12 +73,28 @@ const STATES: State[] = [
 // macOS shows the spread: the Reader overflows in every font (411–465px); Lineage fits in
 // Arial-width fonts and overflows in San Francisco, Tahoma and Verdana (377–409px); Search fits in
 // all of them except Verdana-width fonts (381–385px). macOS is the reference: its system font is
-// the one an iPhone renders. A platform with no baseline here — the Linux runners, until one is
-// recorded from a CI run — measures, reports an overflow as a warning, and asserts nothing.
-const OVERFLOWS_TODAY: Partial<Record<NodeJS.Platform, Record<string, string>>> = {
+// the one an iPhone renders. The Linux baseline is what the runners measured on the first CI run,
+// per project ('*' = every project) because the two engines pick different fonts there. A platform
+// with no baseline measures, reports an overflow as a warning, and asserts nothing.
+const OVERFLOWS_TODAY: Partial<Record<NodeJS.Platform, Record<string, Record<string, string>>>> = {
   darwin: {
-    '/reader?ang=712': 'the Reader toolbar (.toolbar .right, ending at #sehajBtn) does not wrap: scrollWidth 425 (Chromium) / 421 (WebKit)',
-    '/lineage': 'the filter legend (#tlFilter) and the View group (#linGroup) are 2px wider than the phone: scrollWidth 377',
+    '*': {
+      '/reader?ang=712': 'the Reader toolbar (.toolbar .right, ending at #sehajBtn) does not wrap: scrollWidth 425 (Chromium) / 421 (WebKit)',
+      '/lineage': 'the filter legend (#tlFilter) and the View group (#linGroup) are 2px wider than the phone: scrollWidth 377',
+    },
+  },
+  linux: {
+    desktop: {
+      '/reader?ang=712': 'the Reader toolbar does not wrap: scrollWidth 415',
+      '/search': 'the runner\'s wider system font: scrollWidth 388',
+      '/search?q=sochai+soch+na+hovee': 'the runner\'s wider system font: scrollWidth 388',
+    },
+    mobile: {
+      '/reader?ang=712': 'the Reader toolbar does not wrap: scrollWidth 444',
+      '/lineage': 'the filter legend and the View group are wider than the phone: scrollWidth 408',
+      '/search': 'the runner\'s wider system font: scrollWidth 402',
+      '/search?q=sochai+soch+na+hovee': 'the runner\'s wider system font: scrollWidth 402',
+    },
   },
 };
 
@@ -130,7 +146,10 @@ test('every Knowledge Base route in the manifest has a state here', () => {
   const covered = new Set(STATES.map((s) => s.route));
   expect(KB_ROUTES.filter((p) => !covered.has(p)), 'KB routes with no state in STATES').toEqual([]);
   const urls = new Set(STATES.map((s) => s.url));
-  const listed = [...Object.values(OVERFLOWS_TODAY).flatMap((b) => Object.keys(b)), ...Object.keys(KNOWN_AXE)];
+  const listed = [
+    ...Object.values(OVERFLOWS_TODAY).flatMap((byProject) => Object.values(byProject).flatMap((b) => Object.keys(b))),
+    ...Object.keys(KNOWN_AXE),
+  ];
   expect(listed.filter((u) => !urls.has(u)), 'known-failure entries for a URL that is not in STATES').toEqual([]);
 });
 
@@ -139,10 +158,11 @@ test('every Knowledge Base route in the manifest has a state here', () => {
 test.describe('at 375px', () => {
   test.use({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
 
-  const baseline = OVERFLOWS_TODAY[process.platform];
+  const forPlatform = OVERFLOWS_TODAY[process.platform];
 
   for (const s of STATES) {
     test(`${s.url} does not scroll sideways on a 375px phone`, async ({ page }, testInfo) => {
+      const baseline = forPlatform && (forPlatform[testInfo.project.name] ?? forPlatform['*']);
       test.fail(!!baseline && s.url in baseline, baseline?.[s.url]);
       await open(page, s);
       const { scrollWidth, clientWidth } = await page.evaluate(() => ({

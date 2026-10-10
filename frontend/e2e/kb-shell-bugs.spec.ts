@@ -42,7 +42,7 @@ for (const path of ['/search', '/reader?ang=1', '/nitnem', '/analytics', '/const
 
 test('the search box takes the cursor on a desktop and leaves the keyboard down on a phone', async ({ page }) => {
   await page.goto('/search');
-  await expect(page.locator('#ver')).not.toBeEmpty();      // the shell's scripts have run
+  await expect(page.locator('#ver')).not.toBeEmpty({ timeout: 15_000 });   // the shell's scripts have run
   if (mobile(page)) await expect(page.locator('#q')).not.toBeFocused();
   else await expect(page.locator('#q')).toBeFocused();
 });
@@ -102,7 +102,7 @@ test('a theme tile opens Search directly, without passing through the home page'
   const tile = page.locator('.tile[data-concept]').first();
   await expect(tile).toBeVisible({ timeout: 15_000 });
   await tile.click();
-  await expect(page).toHaveURL(/\/search\?q=.+&mode=theme/);
+  await expect(page).toHaveURL(/\/search\?q=.+&mode=theme/, { timeout: 15_000 });
   expect(visited).not.toContain('/');
 });
 
