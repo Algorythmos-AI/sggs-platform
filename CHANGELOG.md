@@ -73,6 +73,19 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   every push to `main` still audit all twenty.
 
 ### Fixed
+- **Nine shell faults on the Knowledge Base, each with a test that failed before the fix**
+  (`frontend/e2e/kb-shell-bugs.spec.ts`, desktop and phone). The closed pinned-verses drawer was
+  still in the Tab order and closing it dropped focus (it is `inert` until opened, and focus goes
+  back to the button that opened it). Controls under 16px made iOS zoom the page on focus (the Ang
+  field, the chart selectors, the Raag Clock search). The search box took focus on arrival, which
+  raised the keyboard on a phone (desktop only now). The browser's own chrome and native controls
+  followed the OS appearance rather than the page's (one `theme-color` meta that follows the page
+  theme; `color-scheme` set per theme). The Raag Clock could show a stale pahar after Back or a tab
+  switch (it repaints on `pageshow` and when the tab returns). The theme network swallowed the
+  wheel and one-finger drags, trapping the page (a plain wheel and one finger scroll the page; pinch
+  or Ctrl/⌘ + wheel zooms). Load errors asked the public whether `serve.py` was running. Theme
+  links went to `/?q=…`, loading the marketing home before being forwarded (they go straight to
+  `/search`). Knowledge Base pages had no favicon link, and no page had an `apple-touch-icon`.
 - **The Reader no longer loses the page you are on, and Nitnem keeps your place.** Five faults,
   each reproduced by a test before the fix (`frontend/e2e/reader-nitnem.spec.ts`, desktop and phone):
   on a weak connection a request for an Ang you had already paged past could fail late and replace

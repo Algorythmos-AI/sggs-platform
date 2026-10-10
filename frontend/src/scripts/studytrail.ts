@@ -54,18 +54,32 @@ function markPins() {
   });
 }
 
-/* ---------- drawer open / close ---------- */
+/* ---------- drawer open / close ----------
+   Closed, the drawer is only moved off-screen, so it is `inert` until opened: Tab and screen
+   readers skip it. Closing returns focus to whatever opened it. */
+let drawerOpener: HTMLElement | null = null;
 function openDrawer() {
-  $('#trailDrawer')?.classList.add('on');
+  const d = $('#trailDrawer');
+  if (d && !d.classList.contains('on')) {            // Safari does not focus a button on click
+    const a = document.activeElement as HTMLElement | null;
+    drawerOpener = a && a !== document.body ? a : null;
+  }
+  d?.removeAttribute('inert');
+  d?.classList.add('on');
   $('#trailScrim')?.classList.add('on');
   document.body.classList.add('drawer-open');
   renderAll();
   setTimeout(() => ($('#trailClose') as HTMLElement | null)?.focus(), 0);
 }
 function closeDrawer() {
-  $('#trailDrawer')?.classList.remove('on');
+  const d = $('#trailDrawer');
+  if (!d || !d.classList.contains('on')) return;
+  d.classList.remove('on');
+  d.setAttribute('inert', '');
   $('#trailScrim')?.classList.remove('on');
   document.body.classList.remove('drawer-open');
+  (drawerOpener && document.contains(drawerOpener) ? drawerOpener : $('#trailFab'))?.focus();
+  drawerOpener = null;
 }
 
 /* ---------- tabs ---------- */

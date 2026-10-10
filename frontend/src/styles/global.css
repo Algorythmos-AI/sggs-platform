@@ -38,8 +38,8 @@
   --accent:#e8730c; --accent-2:#ff9933; --accent-ink:#ffffff;
   --gold:#b07d12; --rahao:#c2410c; --rahao-bg:rgba(234,88,12,.08); --chip:rgba(18,24,40,.05);
   --glow:rgba(232,115,12,.16); --shadow:0 10px 34px rgba(40,44,66,.10);
-  --header-from:#1b2452; --header-to:#274079;
-  --gsize:22px; --nav-h:60px;
+  --header-from:#1b2452; --header-to:#274079; --chrome:#1b2452;
+  --gsize:22px; --nav-h:60px; color-scheme:light;
 }
 /* ---------- palette: DARK ---------- */
 :root[data-theme="dark"] {
@@ -49,7 +49,7 @@
   --accent:#ff9933; --accent-2:#ffb454; --accent-ink:#1c1303;
   --gold:#ffd24a; --rahao:#ff8a5b; --rahao-bg:rgba(255,122,71,.11); --chip:rgba(255,255,255,.06);
   --glow:rgba(255,153,51,.30); --shadow:0 14px 44px rgba(0,0,0,.50);
-  --header-from:#131a3c; --header-to:#0b1020;
+  --header-from:#131a3c; --header-to:#0b1020; --chrome:#131a3c; color-scheme:dark;
 }
 @media (prefers-color-scheme: dark) {            /* no-JS fallback only */
   :root:not([data-theme]) {
@@ -59,7 +59,7 @@
     --accent:#ff9933; --accent-2:#ffb454; --accent-ink:#1c1303;
     --gold:#ffd24a; --rahao:#ff8a5b; --rahao-bg:rgba(255,122,71,.11); --chip:rgba(255,255,255,.06);
     --glow:rgba(255,153,51,.30); --shadow:0 14px 44px rgba(0,0,0,.50);
-    --header-from:#131a3c; --header-to:#0b1020;
+    --header-from:#131a3c; --header-to:#0b1020; --chrome:#131a3c; color-scheme:dark;
   }
 }
 
@@ -525,7 +525,7 @@ body.focus-mode main, body.focus-mode .toolbar { position:relative; z-index:2; }
 .trail-tabs button { font:inherit; font-size:13px; font-weight:600; padding:7px 15px; border-radius:999px; cursor:pointer; color:var(--soft); background:transparent; border:1px solid transparent; transition:all .15s; }
 .trail-tabs button:hover { color:var(--ink); }
 .trail-tabs button.on { color:var(--accent-ink); background:linear-gradient(135deg, var(--accent-2), var(--accent)); }
-.trail-dbody { flex:1 1 auto; overflow:auto; padding:14px 18px 28px; }
+.trail-dbody { flex:1 1 auto; overflow:auto; overscroll-behavior:contain; padding:14px 18px 28px; }
 .trail-empty { text-align:center; color:var(--soft); font-size:13px; padding:44px 12px; line-height:1.7; }
 .trail-empty span { font-size:12px; color:var(--faint); }
 .trail-empty.small { padding:18px 8px; }
@@ -952,3 +952,9 @@ body.chrome-hidden .toolbar { transform: translateY(calc(-100% - var(--nav-h) - 
 .nitnem-reader .sline .cite { font-size:11px; color:var(--faint); margin-top:2px; }
 .nitnem-reader .sline.extra { border-left:2px solid var(--line); padding-left:10px; }
 .nitnem-reader .vbtn { font-size:12px; margin-left:6px; }
+
+/* iOS zooms the page when a control under 16px takes focus. Last in the file so it wins over
+   the per-component sizes above. */
+@media (max-width:620px), (pointer:coarse) {
+  input, select, textarea, .toolbar input, .viz-sel, .exp-search { font-size:16px; }
+}

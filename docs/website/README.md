@@ -69,10 +69,12 @@ SEO/social/PWA block is a shared component, **`frontend/src/components/Seo.astro
 
 - `<link rel="canonical">` and `og:url` built from `SITE_URL` + the path (bare apex host);
 - `description`, `og:title/description/type/image/site_name`, `twitter:card=summary_large_image`;
-- `theme-color` — the Knowledge Base (`themeColor="auto"`) gets one per OS colour scheme; the
-  light-first marketing shell (`themeColor="light"`) gets a single `#themeColorMeta` that
-  `scripts/theme.ts` keeps in step with the *page* theme; `apple-mobile-web-app-title`, `<link rel="manifest">`, an SVG
-  favicon, and — once the app is live (`APP_STORE_LIVE`) — the `apple-itunes-app` Smart App Banner.
+- `theme-color` — always one meta that follows the *page* theme, never the OS. The Knowledge Base
+  (`themeColor="page"`, the default) gets `id="kbThemeColor"`, which `scripts/core.ts` keeps equal
+  to the header's colour (`--chrome`); the light-first marketing shell (`themeColor="light"`) gets
+  `id="themeColorMeta"`, pinned to paper and rewritten by `scripts/theme.ts` on toggle.
+- `apple-mobile-web-app-title`, `<link rel="manifest">`, an `apple-touch-icon`, an SVG favicon, and —
+  once the app is live (`APP_STORE_LIVE`) — the `apple-itunes-app` Smart App Banner.
 
 `og:image` defaults to the page's OG card (`/og/<slug>.png`, see **OG images** below).
 `frontend/public/robots.txt` points crawlers at the canonical host and names `/sitemap.xml`, which

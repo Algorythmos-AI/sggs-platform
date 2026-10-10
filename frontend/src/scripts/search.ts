@@ -125,4 +125,6 @@ const doVerify = guard(async (qIn: string) => {
   const VALID = ['auto', 'gurmukhi', 'roman', 'english', 'first', 'theme', 'verify'];
   if (mp && VALID.includes(mp)) syncMode(mp);
   if (qp) { ($('#q') as HTMLInputElement).value = qp; go(0); }
+  // the cursor waits in the box on a desktop; on a phone that would raise the keyboard on arrival
+  if (matchMedia('(min-width: 841px) and (hover: hover) and (pointer: fine)').matches) ($('#q') as HTMLInputElement | null)?.focus();
 })();

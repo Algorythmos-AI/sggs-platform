@@ -23,7 +23,7 @@ test('a late failure of a superseded Ang never replaces the Ang on screen', asyn
   await page.waitForTimeout(1600);                         // past the moment Ang 900 fails
   await expect(page.locator('#angIn')).toHaveValue('901');
   await expect(page.locator('#angOut .sline').first()).toBeVisible();
-  await expect(page.locator('#angOut')).not.toContainText('could not be loaded');
+  await expect(page.locator('#angOut .load-fail')).toHaveCount(0);
 });
 
 test('an Ang that is already being prefetched is fetched once', async ({ page }) => {

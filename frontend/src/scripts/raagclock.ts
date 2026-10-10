@@ -418,7 +418,10 @@ guard(async () => {
   initModeToggle();
   renderNow();
   nowTimer = setInterval(renderNow, 60000);
-  window.addEventListener('beforeunload', () => clearInterval(nowTimer));
+  // a page restored from the back/forward cache, or a tab brought back to the front, has a timer
+  // that was frozen or throttled: show the current pahar at once rather than up to a minute late
+  window.addEventListener('pageshow', (e) => { if (e.persisted) renderNow(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) renderNow(); });
 
   // deep link: /raag-clock?raag=<roman|gurmukhi> opens that raag's pahar
   const q = new URLSearchParams(location.search).get('raag');

@@ -3,7 +3,7 @@
 // All data comes from the existing offline analytics endpoints; nothing is computed client-side.
 import * as d3 from 'd3';
 import Chart from 'chart.js/auto';
-import { $, esc, api, meta, prefersReducedMotion, guard, failHTML } from './core';
+import { $, esc, api, meta, prefersReducedMotion, guard, failHTML, goSearchTheme } from './core';
 
 const titleCase = (k: string) => k.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -35,7 +35,13 @@ async function themeNetwork() {
     .attr('aria-label', 'Theme co-occurrence network: an interactive graph of how scriptural themes appear together. The same relationships are summarised in the caption above; each theme is also searchable.')
     .style('cursor', 'grab');
   const g = svg.append('g');
-  svg.call(d3.zoom<SVGSVGElement, unknown>().scaleExtent([0.3, 4]).on('zoom', (ev) => g.attr('transform', ev.transform)) as any);
+  // the chart must never trap the page: a plain wheel and a one-finger drag scroll the page;
+  // pinch (two fingers, or Ctrl/⌘ + wheel) zooms, and a mouse drag pans
+  svg.style('touch-action', 'pan-y');
+  svg.call(d3.zoom<SVGSVGElement, unknown>().scaleExtent([0.3, 4])
+    .filter((ev: any) => ev.type === 'wheel' ? (ev.ctrlKey || ev.metaKey)
+      : ev.type.startsWith('touch') ? ev.touches.length > 1 : !ev.button)
+    .on('zoom', (ev) => g.attr('transform', ev.transform)) as any);
 
   let edges = edgesAll.slice();
   const nodeSet = new Set<string>();
@@ -83,13 +89,13 @@ async function themeNetwork() {
         tip.style('left', (ev.clientX - r.left + 14) + 'px').style('top', (ev.clientY - r.top + 12) + 'px');
       })
       .on('mouseout', (ev: any) => { tip.style('opacity', 0); d3.select(ev.currentTarget).attr('stroke-opacity', 0.5).attr('stroke-width', 1); })
-      .on('click', (_ev: any, d: any) => { location.href = '/?q=' + encodeURIComponent(d.id) + '&mode=theme'; })
+      .on('click', (_ev: any, d: any) => goSearchTheme(d.id))
       // keyboard operability: each node is a focusable button; Enter/Space searches its theme,
       // focus mirrors the hover highlight + tooltip (positioned at the node).
       .attr('tabindex', 0).attr('role', 'button')
       .attr('aria-label', (d: any) => `${titleCase(d.id)}, ${(size[d.id] || 0).toLocaleString()} lines. Press Enter to search this theme.`)
       .on('keydown', (ev: any, d: any) => {
-        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); location.href = '/?q=' + encodeURIComponent(d.id) + '&mode=theme'; }
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); goSearchTheme(d.id); }
       })
       .on('focus', (ev: any, d: any) => {
         const r = host.getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect();
