@@ -70,8 +70,9 @@ SEO/social/PWA block is a shared component, **`frontend/src/components/Seo.astro
 - `<link rel="canonical">` and `og:url` built from `SITE_URL` + the path (bare apex host);
 - `description`, `og:title/description/type/image/site_name`, `twitter:card=summary_large_image`;
 - `theme-color` — always one meta that follows the *page* theme, never the OS. The Knowledge Base
-  (`themeColor="page"`, the default) gets `id="kbThemeColor"`, which `scripts/core.ts` keeps equal
-  to the header's colour (`--chrome`); the light-first marketing shell (`themeColor="light"`) gets
+  (`themeColor="page"`, the default) gets `id="kbThemeColor"`: the inline boot script in
+  `Base.astro` sets it to the header's colour for the stored theme before first paint, and
+  `scripts/core.ts` keeps it equal to `--chrome` afterwards; the light-first marketing shell (`themeColor="light"`) gets
   `id="themeColorMeta"`, pinned to paper and rewritten by `scripts/theme.ts` on toggle.
 - `apple-mobile-web-app-title`, `<link rel="manifest">`, an `apple-touch-icon`, an SVG favicon, and —
   once the app is live (`APP_STORE_LIVE`) — the `apple-itunes-app` Smart App Banner.

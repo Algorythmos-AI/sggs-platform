@@ -5,6 +5,7 @@
 // live only in sitemap.xml until the `pa` pages exist.
 import { SITE_URL, APP_STORE_ID, APP_STORE_LIVE } from "../site";
 import { ogForPath } from "../routes";
+import kbThemes from "../generated/kb-themes.json";
 
 export interface Props {
   title: string;
@@ -14,8 +15,9 @@ export interface Props {
   type?: string;         // og:type, default "website"
   // Browser-chrome colour: always ONE meta that follows the PAGE theme, never the OS, so a
   // dark-OS visitor never gets dark browser chrome over a light page (or the reverse).
-  // "page" (default, the Knowledge Base) = id="kbThemeColor", the header's colour, kept current by
-  // scripts/core.ts. "light" (the light-first marketing shell) = id="themeColorMeta", pinned to
+  // "page" (default, the Knowledge Base) = id="kbThemeColor", the header's colour: the default
+  // theme's by day here, corrected before first paint by Base.astro's boot script and kept current
+  // by scripts/core.ts. "light" (the light-first marketing shell) = id="themeColorMeta", pinned to
   // paper and rewritten by scripts/theme.ts on toggle.
   themeColor?: "page" | "light";
 }
@@ -24,6 +26,7 @@ const { title, description, path, ogImage, type = "website", themeColor = "page"
 const canonical = new URL(path, SITE_URL).href;
 const ogPath = ogImage ?? `/og/${ogForPath(path)}.png`;
 const ogAbsolute = new URL(ogPath, SITE_URL).href;
+const kbChrome = kbThemes.themes.find((t) => t.id === kbThemes.default)!.chrome.light;
 ---
 <link rel="canonical" href={canonical} />
 <meta name="description" content={description} />
@@ -42,7 +45,7 @@ const ogAbsolute = new URL(ogPath, SITE_URL).href;
 
 {themeColor === "light"
   ? <meta name="theme-color" content="#FBF7F0" id="themeColorMeta" />
-  : <meta name="theme-color" content="#F3EAD8" id="kbThemeColor" />}
+  : <meta name="theme-color" content={kbChrome} id="kbThemeColor" />}
 
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />

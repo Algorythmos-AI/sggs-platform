@@ -54,7 +54,12 @@ repository gate fails if the sitemap and the built pages disagree.
 - **Tailwind CSS 4**, CSS-first (`@import "tailwindcss"` in `global.css`, which lists the ordered partials in `styles/kb/`; `@theme` is in `kb/theme.css`, no config
   file). The marketing pages take their colours from the brand tokens (a gate checks `theme.ts` against
   them). The Knowledge Base has its own theme set, generated from `docs/brand/web-themes.json` by
-  `scripts/brand/gen_web_themes.py`, which proves every text pair before it writes anything.
+  `scripts/brand/gen_web_themes.py`, which proves every text pair before it writes anything. A
+  theme, the appearance, the paper tone, the text size and the saroop switch are chosen in the
+  display sheet (`scripts/display.ts`), on every Knowledge Base page.
+- **One overlay stack.** The composition panel, Saved and the display sheet register with
+  `scripts/overlay.ts`: Escape closes the top one, Tab stays inside it, focus returns to the opener,
+  and a page's own keys (the Reader's arrow paging) ask `overlayOpen()` first.
 - **Fonts are self-hosted.** Sant Lipi (SIL OFL) renders Gurmukhi and is limited by
   `unicode-range` to the Gurmukhi block, so it never downloads for an English-only page; the
   marketing pages add Source Serif 4. Both are preloaded.

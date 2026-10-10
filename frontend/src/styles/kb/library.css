@@ -3,7 +3,7 @@
 .hub-continue:empty, .hub-now[hidden] { display:none; }
 /* the canopy: the cloth of the bar carried down over the title, ending in the hem */
 .hub-canopy { position:relative; isolation:isolate; color:var(--cloth-ink); background:var(--cloth); padding:10px 18px 30px; }
-.hub-canopy::before { content:''; position:absolute; inset:0; z-index:-1; background:var(--co); opacity:.07; pointer-events:none;
+.hub-canopy::before { content:''; position:absolute; inset:0; z-index:-1; background:var(--co); opacity:var(--motif); pointer-events:none;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px; }
 .hub-canopy::after { content:''; position:absolute; left:0; right:0; bottom:0; height:4px;

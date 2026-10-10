@@ -3,6 +3,7 @@
 // gravity + semantic echoes). Pin buttons everywhere are handled here in the CAPTURE phase
 // so a pin click never fires the underlying verse card's own onclick.
 import { $, esc, api } from './core';
+import { overlayOpened, overlayClosed } from './overlay';
 import {
   getPins, count, isPinned, togglePin, removePin, clearPins, subscribe, mostRecent,
   enrichThemes, centerOfGravity, label, toJSON, toText, MAX_PINS, pinButtonHTML, repairPins, type Pin,
@@ -57,29 +58,26 @@ function markPins() {
 /* ---------- drawer open / close ----------
    Closed, the drawer is only moved off-screen, so it is `inert` until opened: Tab and screen
    readers skip it. Closing returns focus to whatever opened it. */
-let drawerOpener: HTMLElement | null = null;
 function openDrawer() {
-  const d = $('#trailDrawer');
-  if (d && !d.classList.contains('on')) {            // Safari does not focus a button on click
-    const a = document.activeElement as HTMLElement | null;
-    drawerOpener = a && a !== document.body ? a : null;
-  }
-  d?.removeAttribute('inert');
-  d?.classList.add('on');
+  const d = $('#trailDrawer') as HTMLElement | null;
+  if (!d) return;
+  d.removeAttribute('inert');
+  d.classList.add('on');
   $('#trailScrim')?.classList.add('on');
   document.body.classList.add('drawer-open');
   renderAll();
-  setTimeout(() => ($('#trailClose') as HTMLElement | null)?.focus(), 0);
+  // Escape, the Tab trap and the return of focus are the overlay stack's; where the opener has
+  // gone (or was never focused: Safari does not focus a button on click), the Saved button
+  overlayOpened(d, closeDrawer, { focus: $('#trailClose') as HTMLElement | null, fallback: savedButton });
 }
 function closeDrawer() {
-  const d = $('#trailDrawer');
+  const d = $('#trailDrawer') as HTMLElement | null;
   if (!d || !d.classList.contains('on')) return;
   d.classList.remove('on');
   d.setAttribute('inert', '');
   $('#trailScrim')?.classList.remove('on');
   document.body.classList.remove('drawer-open');
-  (drawerOpener && document.contains(drawerOpener) ? drawerOpener : savedButton())?.focus();
-  drawerOpener = null;
+  overlayClosed(d);
 }
 
 /* ---------- tabs ---------- */
@@ -214,18 +212,6 @@ repairPins().then(markPins);              // heal pins captured from painted DOM
 document.addEventListener('click', (e: any) => { if (e.target?.closest?.('[data-open-saved]')) openDrawer(); });
 $('#trailClose')?.addEventListener('click', closeDrawer);
 $('#trailScrim')?.addEventListener('click', closeDrawer);
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#trailDrawer')?.classList.contains('on')) closeDrawer(); });
-// focus trap while the drawer is open (WCAG 2.1.2) — mirrors panel.ts's dialog trap
-$('#trailDrawer')?.addEventListener('keydown', (e: any) => {
-  const d = $('#trailDrawer');
-  if (e.key !== 'Tab' || !d || !d.classList.contains('on')) return;
-  const f = Array.from(d.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'))
-    .filter((el: any) => el.offsetParent !== null) as HTMLElement[];
-  if (!f.length) return;
-  const first = f[0], last = f[f.length - 1];
-  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-});
 document.querySelectorAll('#trailTabs [data-tab]').forEach((t: any) => t.onclick = () => showTab(t.dataset.tab));
 (window as any).openStudyTrail = openDrawer;
 fabBadge(); markPins();

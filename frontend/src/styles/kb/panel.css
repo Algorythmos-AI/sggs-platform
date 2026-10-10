@@ -17,7 +17,7 @@
 /* ============================== verdict ============================== */
 .verdict { border-radius:18px; padding:20px 24px; margin:6px 0 18px; border:1px solid var(--line); }
 .verdict .vv { font-weight:800; font-size:17px; letter-spacing:.3px; }
-.verdict .vc { font-size:12.5px; opacity:.85; margin-top:3px; }
+.verdict .vc { font-size:12.5px; margin-top:3px; }
 .verdict .vh { font-size:13px; margin-top:9px; }
 .v-ok { background:#e8f6e6; border-color:#9ed094; color:#1d5e22; }
 .v-no { background:#fdebeb; border-color:#e6a3a3; color:#8a1f1f; }

@@ -14,7 +14,7 @@ body { padding-bottom:var(--kb-bottom); }
   padding:env(safe-area-inset-top, 0px) 0 4px;              /* the last 4px are the hem */
 }
 .kb-chrome::before {                      /* a faint Phulkari motif woven into the cloth, never behind scripture */
-  content:''; position:absolute; inset:0; z-index:-1; background:var(--co); opacity:.07; pointer-events:none;
+  content:''; position:absolute; inset:0; z-index:-1; background:var(--co); opacity:var(--motif); pointer-events:none;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px;
 }
@@ -44,9 +44,8 @@ body { padding-bottom:var(--kb-bottom); }
   color:var(--cloth-ink); background:transparent; border:1px solid transparent; border-radius:13px; transition:background .15s, transform .12s; }
 .kb-ibtn:hover { background:color-mix(in srgb, var(--cloth-ink) 9%, transparent); }
 .kb-ibtn:active { transform:scale(.94); }
-/* traditional-saroop toggle (display-only feature) */
-#saroopBtn { font-family:var(--font-gm); font-size:20px; font-weight:600; }
-#saroopBtn.on { background:color-mix(in srgb, var(--cloth-ink) 12%, transparent); border-color:color-mix(in srgb, var(--cloth-ink) 38%, transparent); }
+.kb-aa { font-family:var(--font-serif); font-size:17px; font-weight:600; letter-spacing:-.01em; }   /* opens the display sheet (display.css) */
+.kb-aa[aria-expanded="true"] { background:color-mix(in srgb, var(--cloth-ink) 12%, transparent); border-color:color-mix(in srgb, var(--cloth-ink) 38%, transparent); }
 .kb-count { min-width:18px; height:18px; padding:0 5px; border-radius:999px; font-size:11px; font-weight:700; line-height:18px; text-align:center;
   background:var(--accent-fill); color:var(--on-accent); box-shadow:var(--fill-edge); }
 

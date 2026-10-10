@@ -1,5 +1,5 @@
 {
-  "_note": "Knowledge Base colour themes (the website's own theme set). The five 'app' themes copy the iOS accent palettes exactly; the 'italia' and 'midi' themes are web-only. Companion colours are decorative (hem, motif, tile wash) and are never used for text. scripts/brand/gen_web_themes.py derives the tinted surfaces, proves every text pair, and writes frontend/src/styles/kb/themes.css and frontend/src/generated/kb-themes.json. status: approved | review (awaiting scholar review, shipped) | held (not shipped).",
+  "_note": "Knowledge Base colour themes (the website's own theme set). The five 'app' themes copy the iOS accent palettes exactly; the 'italia' and 'midi' themes are web-only. Companion colours are decorative (hem, motif, tile wash) and are never used for text. scripts/brand/gen_web_themes.py derives the tinted surfaces and the accent's edge colour (the accent, deepened only where a tint needs it for 3:1), proves every text pair — the neutral inks also on a chip over each surface — and writes frontend/src/styles/kb/themes.css and frontend/src/generated/kb-themes.json. status: approved | review (awaiting scholar review, shipped) | held (not shipped).",
   "ios_source": {
     "repo": "Algorythmos-AI/gurbani-soul-ios",
     "commit": "5bfd12c0",
@@ -18,8 +18,8 @@
       "card": "#FFFFFF",
       "raised": "#FFFFFF",
       "ink": "#201A12",
-      "inkSoft": "#6B5E4B",
-      "inkFaint": "#6F6250",
+      "inkSoft": "#5E5241",
+      "inkFaint": "#665A48",
       "line": "rgba(43,26,5,.12)",
       "lineStrong": "rgba(43,26,5,.20)",
       "chip": "rgba(43,26,5,.05)",
@@ -34,7 +34,7 @@
       "paper": "#171412",
       "ink": "#F3ECDD",
       "inkSoft": "#B9AC95",
-      "inkFaint": "#A49885",
+      "inkFaint": "#B0A492",
       "clothInk": "#F7F1E3",
       "clothSoft": "#EDE5D3",
       "line": "rgba(255,255,255,.10)",
@@ -50,7 +50,8 @@
     "silk": 0.13,
     "silkCompanion": 0.16,
     "darkCanvas": 0.035,
-    "darkTile": 0.1
+    "darkTile": 0.1,
+    "motif": 0.07
   },
   "themes": [
     {
