@@ -34,7 +34,7 @@
 .lin-group-l { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--faint); padding:0 8px 0 9px; }
 .lin-group button { font:inherit; font-size:12.5px; font-weight:600; padding:6px 13px; border-radius:999px; cursor:pointer; color:var(--soft); background:transparent; border:none; transition:all .15s; }
 .lin-group button:hover { color:var(--ink); }
-.lin-group button.on { color:var(--accent-ink); background:linear-gradient(135deg, var(--accent-2), var(--accent)); box-shadow:0 4px 12px var(--glow); }
+.lin-group button.on { color:var(--accent-ink); background:var(--accent-fill); box-shadow:var(--fill-edge), 0 4px 12px var(--glow); }
 .lin-group button.lin-cmp { color:var(--accent); margin-left:2px; }
 .lin-group button.lin-cmp.on { color:var(--accent-ink); }
 
@@ -43,7 +43,7 @@
 .tl-band-n { font-size:11px; color:var(--faint); white-space:nowrap; }
 
 .tl-pick { position:absolute; top:-7px; right:-7px; width:22px; height:22px; border-radius:50%; display:none; align-items:center; justify-content:center;
-  font-size:12px; font-weight:800; color:#fff; background:linear-gradient(135deg, var(--accent-2), var(--accent)); box-shadow:0 2px 8px var(--glow); }
+  font-size:12px; font-weight:800; color:var(--accent-ink); background:var(--accent-fill); box-shadow:var(--fill-edge), 0 2px 8px var(--glow); }
 .tl-node.cmp-on .tl-card { border-color:var(--accent); box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 65%, transparent), var(--shadow); }
 .tl-node.cmp-on .tl-pick { display:flex; }
 body.cmp-mode .tl-card { cursor:copy; }
@@ -107,9 +107,9 @@ body.cmp-mode .tl-node:hover .tl-card { border-color:color-mix(in srgb, var(--ac
    Calibrated from true cosine; replaces the old raw "%". */
 .relband { display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:700; letter-spacing:.2px; padding:3px 10px; border-radius:999px; white-space:nowrap; }
 .relband i { width:7px; height:7px; border-radius:50%; flex:0 0 auto; }
-.relband .pct { font-weight:600; opacity:.66; }
-.relband-strong { color:var(--accent); background:color-mix(in srgb, var(--accent) 16%, transparent); }
-.relband-strong i { background:linear-gradient(135deg, var(--accent-2), var(--accent)); box-shadow:0 0 7px var(--glow); }
+.relband .pct { font-weight:600; }
+.relband-strong { color:var(--accent); background:var(--accent-wash); }
+.relband-strong i { background:var(--accent-fill); box-shadow:var(--fill-edge), 0 0 7px var(--glow); }
 .relband-mid { color:var(--soft); background:var(--chip); }
 .relband-mid i { background:color-mix(in srgb, var(--accent) 65%, var(--soft)); }
 .relband-faint { color:var(--faint); background:var(--chip); }

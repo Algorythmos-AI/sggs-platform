@@ -100,25 +100,9 @@ const OVERFLOWS_TODAY: Partial<Record<NodeJS.Platform, Record<string, Record<str
 
 // Serious/critical axe rule ids each page violates today, per theme. Unlisted page or theme = clean.
 const KNOWN_AXE: Record<string, { light?: string[]; dark?: string[] }> = {
-  '/search?q=sochai+soch+na+hovee': {
-    light: ['color-contrast', 'nested-interactive'],
-    dark: ['color-contrast', 'nested-interactive'],
-  },
-  '/reader?ang=712': { light: ['color-contrast'] },
-  '/nitnem': { light: ['color-contrast'] },
-  '/nitnem?bani=aarti': { light: ['color-contrast'], dark: ['color-contrast'] },
-  '/browse': { light: ['color-contrast'] },
-  '/themes': { light: ['color-contrast'] },
-  '/trail?line_id=30729': {
-    light: ['aria-prohibited-attr', 'color-contrast'],
-    dark: ['aria-prohibited-attr', 'color-contrast'],
-  },
-  '/analytics': {
-    light: ['color-contrast', 'nested-interactive'],
-    dark: ['color-contrast', 'nested-interactive'],
-  },
-  '/raag-clock': { light: ['color-contrast'], dark: ['color-contrast'] },
-  '/divergence': { light: ['color-contrast'], dark: ['color-contrast'] },
+  '/search?q=sochai+soch+na+hovee': { light: ['nested-interactive'], dark: ['nested-interactive'] },
+  '/trail?line_id=30729': { light: ['aria-prohibited-attr'], dark: ['aria-prohibited-attr'] },
+  '/analytics': { light: ['nested-interactive'], dark: ['nested-interactive'] },
 };
 
 // UTC plus the state's pinned clock make the one time-dependent page (the Raag Clock) render the

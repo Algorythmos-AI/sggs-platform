@@ -11,7 +11,7 @@
   border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 0 10px var(--glow); }
 
 .trail-fab { position:fixed; right:18px; bottom:52px; z-index:45; width:54px; height:54px; border-radius:50%;
-  border:1px solid var(--line-strong); background:linear-gradient(135deg, var(--accent-2), var(--accent)); color:var(--accent-ink);
+  border:1px solid var(--accent-ui); background:var(--accent-fill); color:var(--accent-ink);
   font-size:20px; cursor:pointer; box-shadow:0 10px 30px var(--glow); display:flex; align-items:center; justify-content:center; transition:transform .15s; }
 .trail-fab:hover { transform:translateY(-2px) scale(1.05); }
 .trail-fab-n { position:absolute; top:-4px; right:-4px; min-width:20px; height:20px; padding:0 5px; border-radius:999px;
@@ -33,7 +33,7 @@
 .trail-tabs { display:flex; gap:8px; padding:0 20px 12px; border-bottom:1px solid var(--line); }
 .trail-tabs button { font:inherit; font-size:13px; font-weight:600; padding:7px 15px; border-radius:999px; cursor:pointer; color:var(--soft); background:transparent; border:1px solid transparent; transition:all .15s; }
 .trail-tabs button:hover { color:var(--ink); }
-.trail-tabs button.on { color:var(--accent-ink); background:linear-gradient(135deg, var(--accent-2), var(--accent)); }
+.trail-tabs button.on { color:var(--accent-ink); background:var(--accent-fill); box-shadow:var(--fill-edge); }
 .trail-dbody { flex:1 1 auto; overflow:auto; overscroll-behavior:contain; padding:14px 18px 28px; }
 .trail-empty { text-align:center; color:var(--soft); font-size:13px; padding:44px 12px; line-height:1.7; }
 .trail-empty span { font-size:12px; color:var(--faint); }
@@ -46,7 +46,7 @@ body.drawer-open { overflow:hidden; }
 .pv { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:10px; }
 .pv-g { font-size:calc(var(--gsize) - 4px); line-height:1.7; }
 .pv-meta { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:8px; }
-.pv-ang { font-size:10.5px; font-weight:700; color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, transparent); padding:2px 9px; border-radius:999px; }
+.pv-ang { font-size:10.5px; font-weight:700; color:var(--accent); background:var(--accent-wash); padding:2px 9px; border-radius:999px; }
 .pv-th { font-size:10.5px; color:var(--soft); background:var(--chip); padding:2px 9px; border-radius:999px; }
 .pv-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:9px; }
 .pv-open { background:none; border:1px solid var(--line); color:var(--accent); font-size:11.5px; font-weight:600; padding:5px 12px; border-radius:9px; cursor:pointer; }
@@ -59,7 +59,7 @@ body.drawer-open { overflow:hidden; }
 .cg-row { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
 .cg-label { width:148px; font-size:12px; color:var(--ink); flex:0 0 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .cg-track { flex:1 1 auto; height:8px; background:var(--chip); border-radius:999px; overflow:hidden; }
-.cg-track i { display:block; height:100%; border-radius:999px; background:linear-gradient(90deg, var(--accent-2), var(--accent)); }
+.cg-track i { display:block; height:100%; border-radius:999px; background:var(--accent-fill); }
 .cg-pct { width:40px; text-align:right; font-size:12px; font-weight:700; color:var(--accent); }
 .cg-foot { font-size:11px; color:var(--faint); margin-top:10px; line-height:1.5; }
 .echo-head { font-size:12.5px; font-weight:700; color:var(--ink); margin:6px 0 10px; }

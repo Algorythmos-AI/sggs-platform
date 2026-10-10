@@ -52,7 +52,9 @@ repository gate fails if the sitemap and the built pages disagree.
   is plain TypeScript in `frontend/src/scripts/`, one controller per page. The charts use D3 and
   Chart.js, loaded only on the pages that draw them.
 - **Tailwind CSS 4**, CSS-first (`@import "tailwindcss"` in `global.css`, which lists the ordered partials in `styles/kb/`; `@theme` is in `kb/theme.css`, no config
-  file). Colours come from the brand tokens; a repository gate checks they match.
+  file). The marketing pages take their colours from the brand tokens (a gate checks `theme.ts` against
+  them). The Knowledge Base has its own theme set, generated from `docs/brand/web-themes.json` by
+  `scripts/brand/gen_web_themes.py`, which proves every text pair before it writes anything.
 - **Fonts are self-hosted.** Sant Lipi (SIL OFL) renders Gurmukhi and is limited by
   `unicode-range` to the Gurmukhi block, so it never downloads for an English-only page; the
   marketing pages add Source Serif 4. Both are preloaded.

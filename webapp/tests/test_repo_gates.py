@@ -325,6 +325,96 @@ def _strip_dark_scope(css):
     return "".join(out)
 
 
+def _load_script(rel):
+    """Import a repo script by path (scripts/ is not a package)."""
+    import importlib.util
+    path = ROOT / rel
+    spec = importlib.util.spec_from_file_location(path.stem, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class WebThemesAreGeneratedAndReadable(unittest.TestCase):
+    """The Knowledge Base colour themes: generated files current, every text pair above its floor."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.gen = _load_script("scripts/brand/gen_web_themes.py")
+        cls.src = json.loads((ROOT / "docs/brand/web-themes.json").read_text(encoding="utf-8"))
+
+    def test_generated_files_are_current_and_every_pair_passes(self):
+        import contextlib, io
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = self.gen.main(["--check"])
+        self.assertEqual(code, 0, out.getvalue())
+
+    def test_a_pair_below_its_floor_is_caught(self):
+        import copy
+        bad = copy.deepcopy(self.src)
+        bad["themes"][0]["light"]["accentText"] = "#E0C36A"          # a pale gold: unreadable on paper
+        _, fails = self.gen.derive(bad)
+        self.assertTrue(any("light accent text" in f for f in fails), fails)
+
+    def test_the_default_theme_exists_and_ids_are_unique(self):
+        ids = [t["id"] for t in self.src["themes"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertIn(self.src["default"], ids)
+        for t in self.src["themes"]:
+            self.assertIn(t["status"], ("approved", "review", "held"), t["id"])
+            self.assertIn(t["collection"], self.src["collections"], t["id"])
+
+    def test_a_companion_colour_is_never_a_text_colour(self):
+        # companions are decorative (hem, motif, tile wash): no rule may set text in --co
+        kb = ROOT / "frontend" / "src" / "styles" / "kb"
+        bad = [p.name for p in sorted(kb.glob("*.css")) if re.search(r"(?<![-\w])color\s*:\s*var\(--co\)", p.read_text(encoding="utf-8"))]
+        self.assertEqual(bad, [], f"text set in the companion colour in: {bad}")
+
+
+class StoredKeysAreDisclosed(unittest.TestCase):
+    """Every key the site keeps in the browser is named on the privacy page.
+
+    A new key must be added here with the words the policy uses for it; the test then requires
+    those words in frontend/src/pages/privacy.astro. None marks a cached copy of public data.
+    """
+
+    DISCLOSED = {
+        "theme": "theme", "sggs_accent": "colour theme", "sggs_reader_tone": "paper tone",
+        "gsize": "text size", "show_t": "transliteration", "sggs_saroop": "traditional-rendering toggle",
+        "show_timing": "raag-timing label", "sehaj": "focus mode",
+        "sggs_bani_pos_": "Nitnem reading positions", "sggs_rehras_variant": "Rehras choice",
+        "sggs_pins": "pin", "pahar_mode": "Raag Clock setting", "pahar_loc": "Location",
+        "sggs_trail": "Semantic Trail",
+        "sggs_meta": None, "sggs_timing_v": None,
+    }
+    PATTERNS = (
+        r"(?:localStorage|sessionStorage)\.(?:getItem|setItem|removeItem)\(\s*['\"]([^'\"]+)['\"]",
+        r"\bstore\.(?:get|set)\(\s*['\"]([^'\"]+)['\"]",
+        r"\b[A-Z_]*KEY[A-Z_]*\s*=\s*['\"]([^'\"]+)['\"]",
+        r"['\"](sggs_[a-z_]+)['\"]",
+    )
+
+    def _keys(self):
+        src = ROOT / "frontend" / "src"
+        files = list((src / "scripts").glob("*.ts")) + list((src / "scripts").glob("*.js")) + list((src / "layouts").glob("*.astro"))
+        found = set()
+        for p in files:
+            text = p.read_text(encoding="utf-8")
+            for pat in self.PATTERNS:
+                found.update(re.findall(pat, text))
+        return found
+
+    def test_every_stored_key_is_known_and_disclosed(self):
+        found = self._keys()
+        self.assertGreaterEqual(len(found), 10, "the scan found too few keys to be working")
+        unknown = sorted(found - set(self.DISCLOSED))
+        self.assertEqual(unknown, [], f"new browser-storage keys: {unknown} — disclose them on the privacy page and add them here")
+        policy = (ROOT / "frontend" / "src" / "pages" / "privacy.astro").read_text(encoding="utf-8")
+        missing = sorted(k for k in found if self.DISCLOSED[k] and self.DISCLOSED[k] not in policy)
+        self.assertEqual(missing, [], f"keys the privacy page does not name: {missing}")
+
+
 class KbStylesheetIsOrderedPartials(unittest.TestCase):
     """frontend/src/styles/global.css only lists the Knowledge Base partials (styles/kb/*.css).
 

@@ -13,6 +13,7 @@
 @import "tailwindcss";
 @import "./kb/theme.css";
 @import "./kb/tokens.css";
+@import "./kb/themes.css";
 @import "./kb/base.css";
 @import "./kb/shell.css";
 @import "./kb/search.css";

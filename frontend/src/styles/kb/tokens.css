@@ -10,35 +10,26 @@
   unicode-range: U+0964-0965, U+0A00-0A7F, U+200C-200D, U+FE00-FE0F;
 }
 
-/* ---------- palette: LIGHT (default) ---------- */
-:root, :root[data-theme="light"] {
-  --bg:#f5f6fb; --bg-2:#eef0f7; --card:#ffffff; --card-hover:#ffffff;
-  --ink:#161b29; --soft:#566079; --faint:#8a92a8;
-  --line:rgba(18,24,40,.09); --line-strong:rgba(18,24,40,.16);
-  --accent:#e8730c; --accent-2:#ff9933; --accent-ink:#ffffff;
-  --gold:#b07d12; --rahao:#c2410c; --rahao-bg:rgba(234,88,12,.08); --chip:rgba(18,24,40,.05);
-  --glow:rgba(232,115,12,.16); --shadow:0 10px 34px rgba(40,44,66,.10);
-  --header-from:#1b2452; --header-to:#274079; --chrome:#1b2452;
-  --gsize:22px; --nav-h:60px; color-scheme:light;
+/* Source Serif 4 (SIL OFL 1.1), Latin subset: page titles only. Licence at /fonts/OFL-SourceSerif4.txt. */
+@font-face {
+  font-family: "Source Serif 4";
+  src: url("/fonts/SourceSerif4-latin.woff2") format("woff2");
+  font-weight: 400 700; font-style: normal; font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2010-2015, U+2018-201D, U+2020-2022, U+2026, U+2039-203A, U+00B7;
 }
-/* ---------- palette: DARK ---------- */
-:root[data-theme="dark"] {
-  --bg:#070b16; --bg-2:#0b1020; --card:#111726; --card-hover:#161d31;
-  --ink:#eef1f8; --soft:#93a0bd; --faint:#5c6883;
-  --line:rgba(255,255,255,.07); --line-strong:rgba(255,255,255,.13);
-  --accent:#ff9933; --accent-2:#ffb454; --accent-ink:#1c1303;
-  --gold:#ffd24a; --rahao:#ff8a5b; --rahao-bg:rgba(255,122,71,.11); --chip:rgba(255,255,255,.06);
-  --glow:rgba(255,153,51,.30); --shadow:0 14px 44px rgba(0,0,0,.50);
-  --header-from:#131a3c; --header-to:#0b1020; --chrome:#131a3c; color-scheme:dark;
-}
-@media (prefers-color-scheme: dark) {            /* no-JS fallback only */
-  :root:not([data-theme]) {
-    --bg:#070b16; --bg-2:#0b1020; --card:#111726; --card-hover:#161d31;
-    --ink:#eef1f8; --soft:#93a0bd; --faint:#5c6883;
-    --line:rgba(255,255,255,.07); --line-strong:rgba(255,255,255,.13);
-    --accent:#ff9933; --accent-2:#ffb454; --accent-ink:#1c1303;
-    --gold:#ffd24a; --rahao:#ff8a5b; --rahao-bg:rgba(255,122,71,.11); --chip:rgba(255,255,255,.06);
-    --glow:rgba(255,153,51,.30); --shadow:0 14px 44px rgba(0,0,0,.50);
-    --header-from:#131a3c; --header-to:#0b1020; --chrome:#131a3c; color-scheme:dark;
-  }
+
+/* ---------- colour ----------
+   The colours themselves are generated (themes.css, from docs/brand/web-themes.json): surfaces and
+   inks per light/dark, and one accent set per theme. The names this stylesheet was written with are
+   kept here as aliases, so a rule that says var(--accent) follows the chosen theme.
+   --accent is the accent's TEXT colour (4.5:1 on every surface); a filled control uses --accent-fill
+   with --on-accent text and an --accent-ui edge. */
+:root {
+  --gsize:22px; --nav-h:60px;
+  --font-serif:"Source Serif 4", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --bg:var(--canvas); --bg-2:var(--surface-2); --card:var(--surface-card); --card-hover:var(--surface-raised);
+  --accent:var(--accent-text); --accent-2:var(--accent-fill); --accent-ink:var(--on-accent); --gold:var(--accent-text);
+  --rahao:var(--negative); --rahao-bg:var(--negative-bg);
+  --fill-edge:inset 0 0 0 1px var(--accent-ui);
+  --accent-wash:var(--tile1);                 /* a tint the accent text is proven readable on */
 }

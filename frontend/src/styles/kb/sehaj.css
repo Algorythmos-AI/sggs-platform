@@ -1,5 +1,5 @@
 /* ============================== sehaj / focus reading mode ============================== */
-#sehajBtn.on { color:var(--accent-ink); background:linear-gradient(135deg, var(--accent-2), var(--accent)); border-color:transparent; }
+#sehajBtn.on { color:var(--accent-ink); background:var(--accent-fill); border-color:var(--accent-ui); }
 body.focus-mode header.site, body.focus-mode nav.site, body.focus-mode footer.site { display:none; }
 body.focus-mode { background:
   radial-gradient(1200px 720px at 50% 18%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%),
