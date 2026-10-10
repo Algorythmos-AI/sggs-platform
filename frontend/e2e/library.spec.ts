@@ -77,6 +77,70 @@ test('the Reader remembers the Ang after a page turn, not after a lookup, and re
   await expect(page.locator('#angIn')).toHaveValue('6', { timeout: 15_000 });
 });
 
+test('turning pages quickly still keeps the last one, and a jump to the next number is a lookup', async ({ page }) => {
+  await page.goto('/reader?ang=5');
+  await rendered(page);
+  // three turns before any of them has drawn: Angs 6 and 7 are skipped, and 8 must be kept
+  await page.evaluate(() => { const w = window as any; w.step(1); w.step(1); w.step(1); });
+  await expect(page).toHaveURL(/ang=8/, { timeout: 15_000 });
+  await expect(page.locator('#angIn')).toHaveValue('8');
+  await expect.poll(() => stored(page, 'sggs_last_ang'), { timeout: 15_000 }).toBe('8');
+  await page.evaluate(() => (window as any).ang(9));                    // the number box, one Ang on
+  await expect(page).toHaveURL(/ang=9/, { timeout: 15_000 });
+  await rendered(page);
+  expect(await stored(page, 'sggs_last_ang')).toBe('8');                // still a lookup
+  await page.locator('#angOut .endnav button').last().click();          // "Ang 10 ›" at the foot is a turn
+  await expect(page).toHaveURL(/ang=10/, { timeout: 15_000 });
+  await expect.poll(() => stored(page, 'sggs_last_ang'), { timeout: 15_000 }).toBe('10');
+});
+
+test('a stored Ang that is not exactly 1–1430 is ignored, on the home page and in the Reader', async ({ page }) => {
+  await page.goto('/library');
+  await expect(page.locator('#ver')).not.toBeEmpty({ timeout: 15_000 });
+  for (const bad of ['12abc', '1431', '0', '-3', '7e2', '12.9', ' 12', '0x1F', '99999999999', '']) {
+    await page.evaluate((v) => localStorage.setItem('sggs_last_ang', v), bad);
+    await page.reload();
+    await expect(page.locator('nav.doors .door').first()).toBeVisible();
+    await expect(page.locator('#ver')).not.toBeEmpty({ timeout: 15_000 });
+    await expect(page.locator('#hubContinue .hub-cont'), `stored ${JSON.stringify(bad)}`).toHaveCount(0);
+  }
+  await page.evaluate(() => localStorage.setItem('sggs_last_ang', '12abc'));
+  await page.goto('/reader');
+  await expect(page.locator('#angIn'), 'the Reader opens Ang 1, not a guess at 12').toHaveValue('1', { timeout: 15_000 });
+  await rendered(page);
+  await page.evaluate(() => localStorage.setItem('sggs_last_ang', '1430'));   // the last Ang is a real place
+  await page.goto('/library');
+  await expect(page.locator('#hubContinue .hub-cont').first()).toContainText('Ang 1430');
+});
+
+test('coming back to the home page shows the place as it is now', async ({ page }) => {
+  await page.addInitScript(() => { if (!localStorage.getItem('sggs_last_ang')) localStorage.setItem('sggs_last_ang', '712'); });
+  await page.goto('/library');
+  const cont = page.locator('#hubContinue .hub-cont').first();
+  await expect(cont).toContainText('Ang 712');
+  // the reader went on to Ang 715 elsewhere; returning to this tab must not offer 712 again
+  await page.evaluate(() => { localStorage.setItem('sggs_last_ang', '715'); document.dispatchEvent(new Event('visibilitychange')); });
+  await expect(cont).toContainText('Ang 715');
+  await expect(cont).toHaveAttribute('href', '/reader?ang=715');
+  // and a page restored from the back/forward cache is drawn again too
+  await page.evaluate(() => {
+    localStorage.setItem('sggs_last_ang', '716');
+    window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+  });
+  await expect(cont).toContainText('Ang 716');
+});
+
+test.describe('touch targets on the home page', () => {
+  test.use({ timezoneId: 'UTC', viewport: { width: 375, height: 812 } });
+  test('the Raag Clock link beside the raags is at least 44px tall', async ({ page }) => {
+    await page.clock.setFixedTime(new Date('2026-01-15T07:30:00Z'));
+    await page.goto('/library');
+    const more = page.locator('#hubNow .hub-more');
+    await expect(more).toBeVisible({ timeout: 15_000 });
+    expect((await more.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  });
+});
+
 test('an installed copy opens on the Knowledge Base home', async ({ request }) => {
   const manifest = await (await request.get('/site.webmanifest')).json();
   expect(manifest.start_url).toBe('/library');

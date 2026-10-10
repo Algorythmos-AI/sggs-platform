@@ -1,7 +1,9 @@
 /* ============================== search ============================== */
 .searchbar { display:flex; gap:10px; margin:6px 0 12px; }
+/* min-width:0 — a flex item will not shrink below its content width, and an <input>'s is 20
+   characters of the system font: in a wide one it pushed the Search button off a 375px phone. */
 .searchbar input {
-  flex:1; padding:15px 20px; font-size:17px; color:var(--ink); border-radius:16px; outline:none;
+  flex:1; min-width:0; padding:15px 20px; font-size:17px; color:var(--ink); border-radius:16px; outline:none;
   background:var(--card); border:1.5px solid var(--line); box-shadow:var(--shadow);
   transition:border-color .15s, box-shadow .15s;
 }

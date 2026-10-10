@@ -1,12 +1,11 @@
 // reader.ts — the Reader page (/reader) : the Ang-by-Ang viewer.
 // Ported 1:1 from the original; deep-links via ?ang=<n>&raag=<name>.
-import { $, esc, api, guard, meta, store, syncToolbarTop, relChip, failHTML, stepFontSize } from './core';
+import { $, esc, api, guard, meta, store, validAng, syncToolbarTop, relChip, failHTML, stepFontSize } from './core';
 import { pinButtonHTML } from './store';
 import { loadClock, claimsFor } from './timing';
 import { paharLabel, paharRange } from './pahar.js';
 
 let curAng = 1;
-let lastShown = 0;                            // the Ang on screen before this one (0 = none yet)
 let raagCtx: any = null;
 
 function groupShabads(lines: any[]) {
@@ -48,8 +47,12 @@ function putCache(n: number, d: any) {
 }
 // verse to scroll to after the next render (from ?line= / ?comp= or the modal's "Open Ang")
 let focusLine: number | null = null, focusComp: number | null = null;
-const ang = guard(async (n: number) => {
+// `turn`: the reader turned a page to get here (‹ ›, the arrow keys, the links at the foot of an
+// Ang), as against looking one up (a deep link, a search result, the number box, Back/Forward).
+const ang = guard(async (n: number, turn = false) => {
+  const from = curAng;
   curAng = Math.max(1, Math.min(1430, n)); ($('#angIn') as HTMLInputElement).value = String(curAng);
+  const turned = turn && curAng !== from;
   const myReq = ++angReq;
   angAbort?.abort(); angAbort = null;
   let d = angCache.get(curAng);
@@ -89,7 +92,7 @@ const ang = guard(async (n: number) => {
   ($('#raagBanner') as HTMLElement).innerHTML = banner;
   // continued-from pill
   let h = '';
-  if (d.continued_from) h += `<div class="cont" onclick="ang(${d.continued_from})">‹ this composition continues from Ang ${d.continued_from}</div>`;
+  if (d.continued_from) h += `<div class="cont" onclick="ang(${d.continued_from}, ${d.continued_from === curAng - 1})">‹ this composition continues from Ang ${d.continued_from}</div>`;
   // shabad groups
   for (const g of groupShabads(d.lines)) {
     const cid = (g.body[0] || g.headers[0] || {}).comp_id;
@@ -109,15 +112,16 @@ const ang = guard(async (n: number) => {
   const next = angCache.get(curAng + 1);
   const continuesOn = !!(next && next.continued_from != null && next.continued_from <= curAng);
   h += `<div class="cont-slot">${continuesOn
-    ? `<div class="cont cont-next" onclick="ang(${curAng + 1})">this composition continues on Ang ${curAng + 1} ›</div>` : ''}</div>`;
+    ? `<div class="cont cont-next" onclick="ang(${curAng + 1}, true)">this composition continues on Ang ${curAng + 1} ›</div>` : ''}</div>`;
   const prevL = curAng > 1 ? `‹ Ang ${curAng - 1}` : '‹ Beginning', nextL = curAng < 1430 ? `Ang ${curAng + 1} ›` : 'End ›';
-  h += `<div class="endnav"><button onclick="ang(${curAng - 1})" ${curAng <= 1 ? 'disabled' : ''}>${prevL}</button>
-      <button onclick="ang(${curAng + 1})" ${curAng >= 1430 ? 'disabled' : ''}>${nextL}</button></div>`;
+  h += `<div class="endnav"><button onclick="ang(${curAng - 1}, true)" ${curAng <= 1 ? 'disabled' : ''}>${prevL}</button>
+      <button onclick="ang(${curAng + 1}, true)" ${curAng >= 1430 ? 'disabled' : ''}>${nextL}</button></div>`;
   ($('#angOut') as HTMLElement).innerHTML = h;
   // remember the place only when the reader turned a page: opening an Ang from a search result
-  // or jumping by number is a lookup, and must not move a place being kept in a long reading
-  if (lastShown && Math.abs(curAng - lastShown) === 1) store.set('sggs_last_ang', curAng);
-  lastShown = curAng;
+  // or jumping by number is a lookup, and must not move a place being kept in a long reading.
+  // The turn is carried from the control that made it, not inferred from the Ang drawn before:
+  // turning quickly skips the pages in between, and the last one must still be kept.
+  if (turned) store.set('sggs_last_ang', curAng);
   window.scrollTo({ top: 0, behavior: 'instant' });
   showChrome();                                                // a page turn always restores the chrome
   // keep the URL honest (bookmarkable/shareable, Back stays on this page) without piling
@@ -138,7 +142,7 @@ const ang = guard(async (n: number) => {
     if (!nd || myReq !== angReq || next) return;                   // stale, or pill already rendered
     if (nd.continued_from != null && nd.continued_from <= thisAng) {
       const slot = $('#angOut .cont-slot');
-      if (slot) slot.innerHTML = `<div class="cont cont-next" onclick="ang(${thisAng + 1})">this composition continues on Ang ${thisAng + 1} ›</div>`;
+      if (slot) slot.innerHTML = `<div class="cont cont-next" onclick="ang(${thisAng + 1}, true)">this composition continues on Ang ${thisAng + 1} ›</div>`;
     }
   });
 }, () => { const o = $('#angOut'); if (o) o.innerHTML = failHTML('This Ang'); });
@@ -183,7 +187,7 @@ function onScroll() {
 window.addEventListener('scroll', onScroll, { passive: true });
 document.addEventListener('keydown', showChrome);
 document.addEventListener('pointerdown', (e) => { if (e.clientY < 72) showChrome(); });
-const step = (d: number) => ang(curAng + d);
+const step = (d: number) => ang(curAng + d, true);
 window.addEventListener('popstate', () => {
   const p = new URLSearchParams(location.search);
   const n = parseInt(p.get('ang') || '', 10);
@@ -325,7 +329,8 @@ $('#angOut')?.addEventListener('keydown', (e: any) => {
   }
   const p = new URLSearchParams(location.search);
   // no ?ang: resume at the Ang last being read (or Ang 1)
-  const n = Math.max(1, Math.min(1430, parseInt(p.get('ang') || store.get('sggs_last_ang', '1')) || 1));
+  const asked = p.get('ang');
+  const n = asked ? Math.max(1, Math.min(1430, parseInt(asked, 10) || 1)) : (validAng(store.get('sggs_last_ang', '')) ?? 1);
   focusLine = parseInt(p.get('line') || '', 10) || null;          // ?line=Y → land on that verse
   focusComp = focusLine ? null : (parseInt(p.get('comp') || '', 10) || null);
   const raagName = p.get('raag');

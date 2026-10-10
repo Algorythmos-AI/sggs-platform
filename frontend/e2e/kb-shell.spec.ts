@@ -72,8 +72,10 @@ const STATES: State[] = [
 //
 // Per platform, because the system font decides whether a tight row fits. Swapping the UI font on
 // macOS shows the spread: the Reader overflows in every font (411–465px); Lineage fits in
-// Arial-width fonts and overflows in San Francisco, Tahoma and Verdana (377–409px); Search fits in
-// all of them except Verdana-width fonts (381–385px). macOS is the reference: its system font is
+// Arial-width fonts and overflows in San Francisco, Tahoma and Verdana (377–409px). The search bar
+// (Search and the Library) used to overflow in Verdana-width fonts — 388px in Chromium, 402px in
+// WebKit on the runners — because its <input> would not shrink below 20 characters of the system
+// font; `.searchbar input { min-width:0 }` fixed it in every font. macOS is the reference: its system font is
 // the one an iPhone renders. The Linux baseline is what the runners measured on the first CI run,
 // per project ('*' = every project) because the two engines pick different fonts there. A platform
 // with no baseline measures, reports an overflow as a warning, and asserts nothing.
@@ -87,14 +89,10 @@ const OVERFLOWS_TODAY: Partial<Record<NodeJS.Platform, Record<string, Record<str
   linux: {
     desktop: {
       '/reader?ang=712': 'the Reader toolbar does not wrap: scrollWidth 415',
-      '/search': 'the runner\'s wider system font: scrollWidth 388',
-      '/search?q=sochai+soch+na+hovee': 'the runner\'s wider system font: scrollWidth 388',
     },
     mobile: {
       '/reader?ang=712': 'the Reader toolbar does not wrap: scrollWidth 444',
       '/lineage': 'the filter legend and the View group are wider than the phone: scrollWidth 408',
-      '/search': 'the runner\'s wider system font: scrollWidth 402',
-      '/search?q=sochai+soch+na+hovee': 'the runner\'s wider system font: scrollWidth 402',
     },
   },
 };
@@ -136,6 +134,15 @@ test('every Knowledge Base route in the manifest has a state here', () => {
     ...Object.keys(KNOWN_AXE),
   ];
   expect(listed.filter((u) => !urls.has(u)), 'known-failure entries for a URL that is not in STATES').toEqual([]);
+});
+
+// The Study Trail drawer waits off the right edge of every KB page. Closed, it must not paint
+// into the page: its shadow once reached 80px back in, a grey band on a light paper.
+test('the closed Study Trail drawer casts no shadow onto the page', async ({ page }) => {
+  await open(page, STATES.find((s) => s.route === '/library')!);
+  const drawer = page.locator('#trailDrawer');
+  await expect(drawer).not.toHaveClass(/(^|\s)on(\s|$)/);
+  expect(await drawer.evaluate((el) => getComputedStyle(el).boxShadow)).toBe('none');
 });
 
 // The phone-width check owns its viewport, on both engines: 375×812 with mobile emulation (the

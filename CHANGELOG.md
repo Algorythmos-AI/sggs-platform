@@ -14,7 +14,11 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   on it (`start_url`).
 - **The Reader remembers the Ang you were reading.** `/reader` with no Ang resumes there. The place
   is saved only when a page is turned: opening an Ang from a search result, or jumping by number,
-  is a lookup and leaves it alone (`sggs_last_ang`, named on the privacy page).
+  is a lookup and leaves it alone (`sggs_last_ang`, named on the privacy page). The turn is carried
+  from the control that made it (‹ ›, the arrow keys, the links at the foot of an Ang), so turning
+  quickly keeps the last page even though the ones between were never drawn. A stored value that
+  is not exactly an integer from 1 to 1430 is ignored on the home page and in the Reader alike
+  (`validAng`), and the home page redraws the place and the pahar when it is come back to.
 - **The Knowledge Base has thirteen colour themes, on warm paper.** The five accents of the app, with
   its exact values (Soul Gold, the default, Saffron, Gold, Indigo, Teal), four from Italy (Glicine,
   Siena, Toscana, Pietra Serena) and four from the south of France (Lavande, Bougainvillea, Azur,
@@ -120,6 +124,14 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   every push to `main` still audit all twenty.
 
 ### Fixed
+- **The search bar fits a 375px phone in every font.** Its `<input>` would not shrink below 20
+  characters of the system font, which pushed the Search button off the page in wider fonts: 388px
+  (Chromium) and 402px (WebKit) on the Linux runners, on Search and on the new home page.
+  `.searchbar input { min-width:0 }`; the two recorded Linux overflows for Search are gone.
+- **The closed Study Trail drawer no longer shades the page.** Its shadow was cast from off-screen
+  and reached 80px back in — unseen on the old dark page, a grey band down the right edge of every
+  Knowledge Base page on paper. The shadow now belongs to the open drawer only.
+- The Raag Clock link beside the home page's raags has a full 44px touch target.
 - **On the Knowledge Base, Gurmukhi is ink everywhere, and a test now proves it.** The pages
   coloured scripture: composition headings and the ੴ invocation were gold (the invocation with a
   glow and extra letter-spacing), refrain lines were orange on a tinted band, and the composition
