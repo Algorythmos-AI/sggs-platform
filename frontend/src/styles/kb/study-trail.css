@@ -23,9 +23,11 @@
 .trail-scrim.on { opacity:1; pointer-events:auto; }
 .trail-drawer { position:fixed; top:0; right:0; bottom:0; z-index:56; width:min(424px, 93vw); display:flex; flex-direction:column;
   background:color-mix(in srgb, var(--bg-2) 92%, transparent); backdrop-filter:saturate(160%) blur(16px); -webkit-backdrop-filter:saturate(160%) blur(16px);
-  border-left:1px solid var(--line-strong); box-shadow:-20px 0 60px rgba(0,0,0,.42);
-  transform:translateX(101%); transition:transform .28s cubic-bezier(.4,0,.2,1); }
-.trail-drawer.on { transform:translateX(0); }
+  border-left:1px solid var(--line-strong);
+  transform:translateX(101%); transition:transform .28s cubic-bezier(.4,0,.2,1), box-shadow .28s; }
+/* The shadow belongs to the open drawer only: cast from off-screen it reached 80px back into the
+   page, a grey band down the right edge of every page on a light paper. */
+.trail-drawer.on { transform:translateX(0); box-shadow:-20px 0 60px rgba(0,0,0,.42); }
 .trail-dhead { display:flex; align-items:center; justify-content:space-between; padding:18px 20px 12px; }
 .trail-dtitle { font-size:16px; font-weight:700; letter-spacing:-.01em; }
 .trail-close { background:none; border:none; color:var(--soft); font-size:24px; cursor:pointer; width:40px; height:40px; border-radius:10px; }
@@ -59,7 +61,7 @@ body.drawer-open { overflow:hidden; }
 .cg-row { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
 .cg-label { width:148px; font-size:12px; color:var(--ink); flex:0 0 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .cg-track { flex:1 1 auto; height:8px; background:var(--chip); border-radius:999px; overflow:hidden; }
-.cg-track i { display:block; height:100%; border-radius:999px; background:var(--accent-fill); }
+.cg-track i { display:block; height:100%; border-radius:999px; background:var(--accent-fill); box-shadow:var(--fill-edge); }
 .cg-pct { width:40px; text-align:right; font-size:12px; font-weight:700; color:var(--accent); }
 .cg-foot { font-size:11px; color:var(--faint); margin-top:10px; line-height:1.5; }
 .echo-head { font-size:12.5px; font-weight:700; color:var(--ink); margin:6px 0 10px; }

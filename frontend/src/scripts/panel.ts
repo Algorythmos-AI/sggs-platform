@@ -132,6 +132,7 @@ document.addEventListener('keydown', (e) => {
 // Hukam-style random button lives in the shared nav on every page.
 const rb = document.getElementById('randomBtn');
 if (rb) rb.onclick = () => randomShabad();
+document.addEventListener('click', (e: any) => { if (e.target?.closest?.('[data-random]')) randomShabad(); });
 
 // expose for inline onclick in dynamically-rendered HTML + cross-page modal reuse
 (window as any).shabad = shabad;

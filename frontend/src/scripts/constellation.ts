@@ -89,10 +89,12 @@ async function constellation() {
     });
 
     // centre concept star
-    svg.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 30).attr('fill', cssVar('--accent') || '#ff9933')
-      .attr('fill-opacity', 0.92).attr('stroke', cssVar('--gold') || '#ffd24a').attr('stroke-width', 2);
+    // a filled control: the fill token with its edge, and the text colour proven on that fill
+    // (--accent is the accent as *text*, dark by day — a dark label on it was 3.8:1)
+    svg.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 30).attr('fill', cssVar('--accent-fill') || '#FFBC0D')
+      .attr('stroke', cssVar('--accent-ui') || '#A87900').attr('stroke-width', 2);
     svg.append('text').attr('x', cx).attr('y', cy).attr('dy', '.35em').attr('text-anchor', 'middle')
-      .attr('font-size', 13).attr('font-weight', 800).attr('fill', '#15171f').text(titleCase(c));
+      .attr('font-size', 13).attr('font-weight', 800).attr('fill', cssVar('--on-accent') || '#2B1A05').text(titleCase(c));
 
     // accessible text equivalent: clusters + Ang links (keyboard/AT path, mirrors the stars)
     const items = clusters.map((cl: any) =>

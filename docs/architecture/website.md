@@ -39,7 +39,7 @@ The build holds two properties that are deliberately kept apart
 | | Layout | Pages | Scripts it loads |
 |---|---|---|---|
 | **Gurbani Soul** (the app's home) | `Marketing.astro` | `/`, `/features`, `/watch`, `/learn/*`, `/privacy`, `/support` | `landing.ts` only (it never imports the Knowledge Base code), Vercel Web Analytics on `gurbanisoul.com` |
-| **Sri Guru Granth Sahib Ji Knowledge Base** | `Base.astro` | `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`, `/trail`, `/analytics`, `/constellation`, `/raag-clock`, `/divergence`, `/404` | `core`, `panel`, `studytrail`, `saroop` on every page, plus the page's own controller; no analytics |
+| **Sri Guru Granth Sahib Ji Knowledge Base** | `Base.astro` | `/library` (its home), `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`, `/trail`, `/analytics`, `/constellation`, `/raag-clock`, `/divergence`, `/404` | `core`, `panel`, `studytrail`, `saroop` on every page, plus the page's own controller; no analytics |
 
 `frontend/src/routes.ts` is the single list of public routes; the sitemap is built from it, and a
 repository gate fails if the sitemap and the built pages disagree.
@@ -89,7 +89,7 @@ The Gurbani Soul pages make no API calls.
   display markup). It is on by default and remembers an explicit choice.
 - **The pinned verse is read from the API model.** The Study Trail pins verbatim text from the
   API (`data-gm`), never from the rendered glyphs, which saroop may have changed.
-- **State stays in the browser.** Preferences (theme, transliteration, text size, saroop, raag
+- **State stays in the browser.** Preferences (theme, colour theme, paper tone, transliteration, text size, saroop, raag
   clock mode), reading positions and pinned verses (at most 500) live in `localStorage`; the
   `meta` and timing responses and the Semantic Trail path live in `sessionStorage`. There are no
   cookies and no accounts; the [privacy policy](../../frontend/src/pages/privacy.astro) describes

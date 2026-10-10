@@ -43,7 +43,7 @@
 /* Gurmukhi is always ink: the refrain is marked by a rule in the margin, never by colouring the verse */
 .sline.rahao { border-left:3px solid var(--accent); border-radius:0; padding-left:13px; margin:7px 0; }
 .en { font-size:13px; color:var(--accent); margin-top:4px; line-height:1.55; }
-.en::before { content:'EN · '; font-size:10px; opacity:.7; letter-spacing:.5px; font-weight:600; }
+.en::before { content:'EN · '; font-size:10px; color:var(--faint); letter-spacing:.5px; font-weight:600; }
 body.hide-t .t { display:none; }
 .endnav { display:flex; justify-content:space-between; gap:10px; margin-top:20px; }
 .endnav button { border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:14px; padding:11px 22px; cursor:pointer; font-size:14px; font-weight:550; transition:all .15s; }

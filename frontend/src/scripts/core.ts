@@ -13,6 +13,11 @@ export const store = {
   set: (k: string, v: any) => { try { localStorage.setItem(k, String(v)); } catch {} },
 };
 
+// A stored Ang is believed only when it is exactly an integer from 1 to 1430. parseInt would take
+// "12abc" for 12 and "7e2" for 7; a value this code did not write is ignored, never repaired.
+export const validAng = (s: unknown): number | null =>
+  typeof s === 'string' && /^[1-9]\d{0,3}$/.test(s) && +s <= 1430 ? +s : null;
+
 let toastTimer: any = null;
 export function toast(msg: string) {
   const t = $('#toast'); if (!t) return;

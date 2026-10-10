@@ -383,6 +383,7 @@ class StoredKeysAreDisclosed(unittest.TestCase):
         "theme": "theme", "sggs_accent": "colour theme", "sggs_reader_tone": "paper tone",
         "gsize": "text size", "show_t": "transliteration", "sggs_saroop": "traditional-rendering toggle",
         "show_timing": "raag-timing label", "sehaj": "focus mode",
+        "sggs_last_ang": "Ang you last read",
         "sggs_bani_pos_": "Nitnem reading positions", "sggs_rehras_variant": "Rehras choice",
         "sggs_pins": "pin", "pahar_mode": "Raag Clock setting", "pahar_loc": "Location",
         "sggs_trail": "Semantic Trail",

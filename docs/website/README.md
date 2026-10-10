@@ -13,7 +13,7 @@ The public web property is one Astro static site (`frontend/`) served on the pro
 - **The Gurbani Soul pages** — `/`, `/features`, `/watch`, `/learn` and its articles, `/privacy`
   and `/support` — use the marketing layout (`Marketing.astro`): the product's home, its policy
   pages and the Learn articles.
-- **The Knowledge Base** — `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`,
+- **The Knowledge Base** — `/library` (its home), `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`,
   `/trail`, `/analytics` (Insights), `/constellation`, `/raag-clock`, `/divergence` — uses
   `Base.astro`: the **Sri Guru Granth Sahib Ji Knowledge Base**, the scholarly study site, with
   its own name, header and theme.

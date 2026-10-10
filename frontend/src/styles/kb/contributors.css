@@ -14,7 +14,7 @@
 .lin-headline { font-size:23px; font-weight:800; letter-spacing:-.02em; margin:5px 0 0; }
 .lin-lede { font-size:13px; color:var(--soft); line-height:1.65; max-width:74ch; margin:9px 0 0; }
 .lin-lede b { color:var(--ink); font-weight:650; }
-.lin-lede-note { display:block; margin-top:6px; font-size:.9em; opacity:.62; }
+.lin-lede-note { display:block; margin-top:6px; font-size:.9em; color:var(--faint); }
 .lin-stats { display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
 .lin-stat { flex:1 1 140px; min-width:118px; background:color-mix(in srgb, var(--card) 70%, transparent); border:1px solid var(--line); border-radius:14px; padding:11px 14px; }
 .lin-stat-v { display:block; font-size:21px; font-weight:800; letter-spacing:-.01em; color:var(--ink); }
