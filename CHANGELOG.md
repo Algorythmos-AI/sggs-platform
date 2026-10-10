@@ -27,6 +27,19 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   (`tools/docs_check.py --freshness`). Every one keeps a single issue, closed when green.
 - `make review-pack`: the G3 scholar-review pack as one PDF with a sign-off sheet; `make docs-live`,
   `make docs-freshness`, `make docs-pins`.
+- **A phone safety net for the Knowledge Base, ahead of its redesign.** The `playwright` check now runs
+  the whole suite on the phone project too (iPhone 13, WebKit) as a second step of the same job.
+  `frontend/e2e/kb-shell.spec.ts` covers every Knowledge Base route and the 404 page: no sideways
+  scroll at 375 px, unique ids, a viewport that still pinch-zooms, and axe in the light and the dark
+  theme. What is red today is written down in the spec per page — the pages that scroll sideways
+  (`test.fail`) and the axe rule ids each page violates — and both lists can only shrink. The
+  overflow baseline is per platform, because the Knowledge Base sets its Latin text in the system
+  font: it is enforced on macOS (the font an iPhone renders) and reported as a warning on the Linux
+  runners until a Linux baseline is recorded.
+  `npm run shots` (`frontend/scripts/shots.mjs`) takes a route × width × theme screenshot matrix for
+  review. Report-only for now: `web-ci · frontend` compares the committed `webapp/static` with the
+  build's text assets (`scripts/ci/check_static_fresh.py`), and `e2e · kb-lighthouse` runs mobile
+  Lighthouse on three Knowledge Base pages.
 
 ### Changed
 - **The wiki names both routing states after #205.** `integration` routes production's five API

@@ -91,3 +91,10 @@ jobs:
           npx astro check || true   # informational until types are clean
           npm run build
           npm run test:pahar
+      - name: webapp/static is this commit's build (report-only)
+        # The tracked webapp/static must be the build of the commit it sits in: text assets, byte
+        # for byte, built like this job builds (no PUBLIC_* variable set). Report-only until a copy
+        # built on macOS is proven identical to this Linux build; to enforce it, delete
+        # continue-on-error and `--annotate warning`.
+        continue-on-error: true
+        run: python3 scripts/ci/check_static_fresh.py --annotate warning

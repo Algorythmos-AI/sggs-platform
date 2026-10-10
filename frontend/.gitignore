@@ -8,6 +8,9 @@ dist/
 playwright-report/
 test-results/
 
+# Lighthouse CI reports (.lighthouserc.json)
+.lighthouseci/
+
 # The API functions, generated at deploy time by tools/build_api_functions.py (never committed)
 api/svc/
 _sggs/
