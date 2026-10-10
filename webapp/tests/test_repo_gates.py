@@ -325,6 +325,31 @@ def _strip_dark_scope(css):
     return "".join(out)
 
 
+class KbStylesheetIsOrderedPartials(unittest.TestCase):
+    """frontend/src/styles/global.css only lists the Knowledge Base partials (styles/kb/*.css).
+
+    Their order is the cascade, so every partial is imported exactly once and the phone rule that
+    must win over the per-component sizes stays last.
+    """
+
+    STYLES = ROOT / "frontend" / "src" / "styles"
+
+    def test_entry_lists_every_partial_once_in_order(self):
+        text = re.sub(r"/\*.*?\*/", "", (self.STYLES / "global.css").read_text(encoding="utf-8"), flags=re.S)
+        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+        self.assertEqual(lines[0], '@import "tailwindcss";')
+        imported = []
+        for ln in lines[1:]:
+            m = re.fullmatch(r'@import "\./kb/([a-z0-9-]+)\.css";', ln)
+            self.assertIsNotNone(m, f"global.css may hold only kb/ imports, found: {ln}")
+            imported.append(m.group(1))
+        on_disk = sorted(p.stem for p in (self.STYLES / "kb").glob("*.css"))
+        self.assertEqual(sorted(imported), on_disk, "every styles/kb/*.css is imported exactly once")
+        self.assertEqual(len(imported), len(set(imported)), "a partial is imported twice")
+        self.assertEqual(imported[0], "theme")
+        self.assertEqual(imported[-1], "phone-controls")
+
+
 class ScriptureDisplayInSource(unittest.TestCase):
     """Knowledge Base source never cuts a verse short and never colours Gurmukhi inline.
 

@@ -1,0 +1,5 @@
+/* iOS zooms the page when a control under 16px takes focus. Last in the file so it wins over
+   the per-component sizes above. */
+@media (max-width:620px), (pointer:coarse) {
+  input, select, textarea, .toolbar input, .viz-sel, .exp-search { font-size:16px; }
+}

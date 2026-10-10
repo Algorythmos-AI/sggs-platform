@@ -42,6 +42,11 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   Lighthouse on three Knowledge Base pages.
 
 ### Changed
+- **The Knowledge Base stylesheet is twenty ordered partials** (`frontend/src/styles/kb/*.css`);
+  `global.css` only lists them. A move, not a restyle: the built stylesheet is byte-identical (same
+  hashed file, same sha256) and `webapp/static` is unchanged. A gate
+  (`KbStylesheetIsOrderedPartials`) keeps every partial imported once, in order, with the phone
+  control-size rule last.
 - **The wiki names both routing states after #205.** `integration` routes production's five API
   contexts to their own functions; production (v1.3.10) still answers every path with `all` until
   the first release after the app is live, which moves all five at once. The architecture overview,

@@ -1,0 +1,51 @@
+/* ============================== reader ============================== */
+.toolbar {
+  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  position:sticky; top:calc(var(--nav-h) + 6px); z-index:25; margin:6px 0 16px; padding:10px 13px; border-radius:18px;
+  background:color-mix(in srgb, var(--card) 86%, transparent); border:1px solid var(--line); box-shadow:var(--shadow);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+.toolbar .nav { display:flex; align-items:center; gap:8px; }
+.toolbar button { border:1px solid var(--line); background:var(--chip); color:var(--ink);
+  border-radius:12px; padding:8px 14px; cursor:pointer; font-size:14px; transition:all .15s; }
+.toolbar button:hover { border-color:var(--accent); color:var(--accent); }
+.toolbar input { width:78px; text-align:center; padding:8px 4px; font-size:15px; font-weight:650;
+  border:1.5px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink); }
+.toolbar input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--glow); }
+.toolbar .of { font-size:12px; color:var(--soft); white-space:nowrap; }
+.toolbar .right { display:flex; align-items:center; gap:9px; }
+.tgl { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--soft); cursor:pointer; user-select:none; }
+.tgl .sw { width:36px; height:21px; border-radius:999px; background:var(--chip); border:1px solid var(--line); position:relative; transition:all .15s; }
+.tgl .sw::after { content:''; position:absolute; top:2px; left:2px; width:15px; height:15px; border-radius:50%; background:var(--soft); transition:all .18s; }
+.tgl.on .sw { background:linear-gradient(135deg, var(--accent-2), var(--accent)); border-color:transparent; }
+.tgl.on .sw::after { left:17px; background:#fff; }
+
+.ctx { display:flex; gap:7px; flex-wrap:wrap; justify-content:center; margin:0 0 16px; }
+.ctx span { font-size:12px; background:var(--chip); color:var(--soft); padding:4px 13px; border-radius:999px; }
+.ctx .raagchip { background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--ink); font-weight:650; }
+
+.raagbanner { background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, transparent), color-mix(in srgb, var(--accent) 3%, transparent));
+  border:1px solid color-mix(in srgb, var(--accent) 26%, transparent); border-radius:20px; padding:18px 22px; text-align:center; margin-bottom:18px; }
+.raagbanner .rn { font-size:27px; font-weight:700; }
+.raagbanner .rr { font-size:12.5px; color:var(--soft); margin-top:4px; }
+
+.cont { display:flex; width:fit-content; align-items:center; gap:7px; font-size:12.5px; color:var(--soft);
+  background:var(--chip); border:1px dashed var(--line-strong); border-radius:999px; padding:6px 16px; margin:0 auto 16px; cursor:pointer; transition:all .15s; }
+.cont:hover { color:var(--accent); border-color:var(--accent); }
+
+.shabad { background:var(--card); border:1px solid var(--line); border-radius:22px; padding:20px 28px 22px; margin-bottom:18px; box-shadow:var(--shadow); }
+.shabad .hdr { text-align:center; font-weight:650; font-size:calc(var(--gsize) - 4px); line-height:1.95; padding:2px 0 10px; border-bottom:1px solid var(--line); margin-bottom:12px; }
+.shabad .hdr .t { font-size:12px; color:var(--soft); font-weight:400; font-style:italic; }
+.invoc { font-size:calc(var(--gsize) + 9px); font-weight:700; line-height:1.8; padding:6px 0 4px; }
+.sline { padding:9px 2px; }
+.sline .g { font-size:var(--gsize); line-height:2; }
+.sline .t { font-size:13px; color:var(--soft); font-style:italic; margin-top:2px; }
+/* Gurmukhi is always ink: the refrain is marked by a rule in the margin, never by colouring the verse */
+.sline.rahao { border-left:3px solid var(--accent); border-radius:0; padding-left:13px; margin:7px 0; }
+.en { font-size:13px; color:var(--accent); margin-top:4px; line-height:1.55; }
+.en::before { content:'EN · '; font-size:10px; opacity:.7; letter-spacing:.5px; font-weight:600; }
+body.hide-t .t { display:none; }
+.endnav { display:flex; justify-content:space-between; gap:10px; margin-top:20px; }
+.endnav button { border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:14px; padding:11px 22px; cursor:pointer; font-size:14px; font-weight:550; transition:all .15s; }
+.endnav button:hover:not([disabled]) { border-color:var(--accent); color:var(--accent); transform:translateY(-1px); }
+.endnav button[disabled] { opacity:.4; cursor:default; }

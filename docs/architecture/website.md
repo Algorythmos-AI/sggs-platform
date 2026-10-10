@@ -51,7 +51,7 @@ repository gate fails if the sitemap and the built pages disagree.
 - **No islands.** There are no UI-framework components and no `client:` directives. Interactivity
   is plain TypeScript in `frontend/src/scripts/`, one controller per page. The charts use D3 and
   Chart.js, loaded only on the pages that draw them.
-- **Tailwind CSS 4**, CSS-first (`@import "tailwindcss"` and `@theme` in `global.css`, no config
+- **Tailwind CSS 4**, CSS-first (`@import "tailwindcss"` in `global.css`, which lists the ordered partials in `styles/kb/`; `@theme` is in `kb/theme.css`, no config
   file). Colours come from the brand tokens; a repository gate checks they match.
 - **Fonts are self-hosted.** Sant Lipi (SIL OFL) renders Gurmukhi and is limited by
   `unicode-range` to the Gurmukhi block, so it never downloads for an English-only page; the

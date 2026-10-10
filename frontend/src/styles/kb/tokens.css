@@ -1,0 +1,44 @@
+/* ---------- Gurmukhi scripture webfont: Sant Lipi (SIL OFL 1.1), bundled so the Granth
+   renders identically on every device. unicode-range scopes it to the Gurmukhi block (+ dandas),
+   so transliteration/English keep the system Latin font even inside a .gm element. Display only —
+   the verbatim corpus/DB is never touched. FE00–FE0F are included so the optional, default-off
+   "traditional saroop" shaping run (Sant Lipi Variation-Selector markup) stays inside the font. */
+@font-face {
+  font-family: "Sant Lipi";
+  src: url("/fonts/SantLipi-VF.woff2") format("woff2");
+  font-weight: 100 900; font-style: normal; font-display: swap;
+  unicode-range: U+0964-0965, U+0A00-0A7F, U+200C-200D, U+FE00-FE0F;
+}
+
+/* ---------- palette: LIGHT (default) ---------- */
+:root, :root[data-theme="light"] {
+  --bg:#f5f6fb; --bg-2:#eef0f7; --card:#ffffff; --card-hover:#ffffff;
+  --ink:#161b29; --soft:#566079; --faint:#8a92a8;
+  --line:rgba(18,24,40,.09); --line-strong:rgba(18,24,40,.16);
+  --accent:#e8730c; --accent-2:#ff9933; --accent-ink:#ffffff;
+  --gold:#b07d12; --rahao:#c2410c; --rahao-bg:rgba(234,88,12,.08); --chip:rgba(18,24,40,.05);
+  --glow:rgba(232,115,12,.16); --shadow:0 10px 34px rgba(40,44,66,.10);
+  --header-from:#1b2452; --header-to:#274079; --chrome:#1b2452;
+  --gsize:22px; --nav-h:60px; color-scheme:light;
+}
+/* ---------- palette: DARK ---------- */
+:root[data-theme="dark"] {
+  --bg:#070b16; --bg-2:#0b1020; --card:#111726; --card-hover:#161d31;
+  --ink:#eef1f8; --soft:#93a0bd; --faint:#5c6883;
+  --line:rgba(255,255,255,.07); --line-strong:rgba(255,255,255,.13);
+  --accent:#ff9933; --accent-2:#ffb454; --accent-ink:#1c1303;
+  --gold:#ffd24a; --rahao:#ff8a5b; --rahao-bg:rgba(255,122,71,.11); --chip:rgba(255,255,255,.06);
+  --glow:rgba(255,153,51,.30); --shadow:0 14px 44px rgba(0,0,0,.50);
+  --header-from:#131a3c; --header-to:#0b1020; --chrome:#131a3c; color-scheme:dark;
+}
+@media (prefers-color-scheme: dark) {            /* no-JS fallback only */
+  :root:not([data-theme]) {
+    --bg:#070b16; --bg-2:#0b1020; --card:#111726; --card-hover:#161d31;
+    --ink:#eef1f8; --soft:#93a0bd; --faint:#5c6883;
+    --line:rgba(255,255,255,.07); --line-strong:rgba(255,255,255,.13);
+    --accent:#ff9933; --accent-2:#ffb454; --accent-ink:#1c1303;
+    --gold:#ffd24a; --rahao:#ff8a5b; --rahao-bg:rgba(255,122,71,.11); --chip:rgba(255,255,255,.06);
+    --glow:rgba(255,153,51,.30); --shadow:0 14px 44px rgba(0,0,0,.50);
+    --header-from:#131a3c; --header-to:#0b1020; --chrome:#131a3c; color-scheme:dark;
+  }
+}

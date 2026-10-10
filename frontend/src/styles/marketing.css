@@ -6,7 +6,7 @@
    Landing.astro, moved out verbatim so the page renders identically (redesign is PR2). */
 
 /* Sant Lipi for the ੴ mark and any verbatim Gurmukhi (display only) — rule + unicode-range copied
-   from frontend/src/styles/global.css so the two shells stay in step. */
+   from frontend/src/styles/kb/tokens.css so the two shells stay in step. */
 @font-face {
   font-family: "Sant Lipi";
   src: url("/fonts/SantLipi-VF.woff2") format("woff2");

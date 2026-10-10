@@ -1,0 +1,19 @@
+/* ============================== grids / tiles ============================== */
+.gridtitle { font-size:12.5px; font-weight:700; color:var(--soft); text-transform:uppercase; letter-spacing:.9px; margin:22px 4px 12px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(255px, 1fr)); gap:12px; }
+.tile { position:relative; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px 18px; cursor:pointer;
+  box-shadow:var(--shadow); transition:transform .16s, box-shadow .16s, border-color .16s, background .16s; overflow:hidden; }
+.tile::before { content:''; position:absolute; inset:0 0 auto 0; height:3px; background:linear-gradient(90deg, var(--accent), var(--gold)); opacity:0; transition:opacity .18s; }
+.tile:hover { transform:translateY(-4px); background:var(--card-hover); border-color:color-mix(in srgb, var(--accent) 45%, transparent); box-shadow:0 18px 44px var(--glow); }
+.tile:hover::before { opacity:1; }
+.tile .seq { font-size:10px; color:var(--faint); letter-spacing:1px; font-weight:600; text-transform:uppercase; }
+.tile .n { font-size:19px; font-weight:700; margin-top:2px; letter-spacing:-.01em; }
+.tile .r { font-size:12px; color:var(--accent); font-style:italic; font-weight:500; margin-top:1px; }
+.tile .s { font-size:11.5px; color:var(--soft); margin-top:6px; line-height:1.5; }
+#themesOut .gridtitle { margin:28px 0 13px; font-size:14px; color:var(--ink); text-transform:none; letter-spacing:-.01em; opacity:1; font-weight:700; }
+#themesOut .gridtitle:first-child { margin-top:6px; }
+#themesOut .gridtitle .ct { color:var(--soft); font-weight:450; letter-spacing:0; font-size:12.5px; }
+.theme-tile { display:flex; flex-direction:column; }
+.theme-tile .s { flex:1 1 auto; }
+.theme-tile .explore { margin-top:12px; font-size:11px; font-weight:700; color:var(--accent); letter-spacing:.2px; transition:transform .15s; }
+.theme-tile:hover .explore, .theme-tile:focus-visible .explore { transform:translateX(3px); }
