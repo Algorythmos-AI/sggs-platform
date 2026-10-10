@@ -53,6 +53,7 @@ const scan = (page: Page) => page.evaluate(() => {
 
 // Views that need a tap act through the DOM: on a phone today's sticky header covers the first lines.
 const VIEWS: { name: string; path: string; ready?: string; act?: (page: Page) => Promise<void> }[] = [
+  { name: 'home', path: '/library', ready: '#hubNow .hub-eyebrow' },
   { name: 'search results', path: '/search?q=waheguru', ready: '#results .card' },
   { name: 'theme search', path: '/search?q=naam&mode=theme', ready: '#results .card' },
   { name: 'Gurmukhi search with highlights', path: '/search?q=' + encodeURIComponent('ਨਾਮ') + '&mode=gurmukhi', ready: '#results .card mark' },

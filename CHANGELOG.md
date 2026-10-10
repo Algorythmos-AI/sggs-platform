@@ -6,6 +6,15 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 ## [Unreleased]
 
 ### Added
+- **The Knowledge Base has a home: `/library`.** The current pahar with the raags the timing layer
+  records for it ("traditional timing, sources differ"), a search box, the places this browser was
+  last reading, a Hukam-style random draw, and a door into each of the nine tools. Search and the
+  doors are plain HTML, so the page works before its script loads. "Home" in the Knowledge Base
+  navigation goes there (the footer links to the Gurbani Soul app page), and an installed copy opens
+  on it (`start_url`).
+- **The Reader remembers the Ang you were reading.** `/reader` with no Ang resumes there. The place
+  is saved only when a page is turned: opening an Ang from a search result, or jumping by number,
+  is a lookup and leaves it alone (`sggs_last_ang`, named on the privacy page).
 - **The Knowledge Base has thirteen colour themes, on warm paper.** The five accents of the app, with
   its exact values (Soul Gold, the default, Saffron, Gold, Indigo, Teal), four from Italy (Glicine,
   Siena, Toscana, Pietra Serena) and four from the south of France (Lavande, Bougainvillea, Azur,

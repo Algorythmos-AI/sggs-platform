@@ -5,10 +5,10 @@
 // per raag. Everything here is METADATA about raags — scripture rendering is
 // untouched; all API text passes esc() before innerHTML.
 import { $, esc, guard, store, toast, prefersReducedMotion, goReader, failHTML } from './core';
-import { loadClock as loadClockShared } from './timing';
+import { loadClock as loadClockShared, currentPahar, getMode, getLoc, type Mode } from './timing';
 import {
   paharFromMinutes, paharWindow, paharLabel, paharRange, fmt12,
-  sunTimes, paharSolar, nextPaharBoundary, raagsForPahar, minutesOf,
+  nextPaharBoundary, raagsForPahar, minutesOf,
 } from './pahar.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -248,25 +248,6 @@ function positionHand(svg?: any) {
 // =============================================================================
 // "What raag is it now?"
 // =============================================================================
-type Mode = 'fixed' | 'solar';
-function getMode(): Mode { return (store.get('pahar_mode', 'fixed') === 'solar' ? 'solar' : 'fixed'); }
-function getLoc(): { lat: number; lon: number } | null {
-  try { const s = store.get('pahar_loc', ''); return s ? JSON.parse(s) : null; } catch { return null; }
-}
-function currentPahar(): { pahar: number; mode: Mode; sun?: any; note?: string } {
-  const now = new Date(); const m = minutesOf(now);
-  if (getMode() === 'solar') {
-    const loc = getLoc();
-    if (loc) {
-      if (Math.abs(loc.lat) > 60) return { pahar: paharFromMinutes(m), mode: 'fixed', note: 'Above 60° latitude solar watches degenerate — using fixed clock.' };
-      const sun = sunTimes(now, loc.lat, loc.lon);
-      if (!sun.polar) return { pahar: paharSolar(m, sun.sunrise, sun.sunset), mode: 'solar', sun };
-      return { pahar: paharFromMinutes(m), mode: 'fixed', note: 'Polar day/night here right now — using fixed clock.' };
-    }
-    return { pahar: paharFromMinutes(m), mode: 'fixed', note: 'Location not set — using fixed clock.' };
-  }
-  return { pahar: paharFromMinutes(m), mode: 'fixed' };
-}
 const hhmm = (min: number) => fmt12(`${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`);
 function renderNow() {
   const body = $('#nowBody'); if (!body || !CLOCK) return;

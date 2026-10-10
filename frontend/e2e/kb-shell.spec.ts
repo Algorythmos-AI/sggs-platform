@@ -44,6 +44,7 @@ interface State {
 // bani (Aarti: short, and it carries both SGGS lines and the separate Sri Dasam Granth layer).
 // /trail starts from a fixed verse (a line of Ang 712), because the bare URL draws a random one.
 const STATES: State[] = [
+  { route: '/library', url: '/library', clock: '2026-01-15T07:30:00Z', ready: ['#hubNow .hub-eyebrow', 'nav.doors .door'] },
   { route: '/search', url: '/search', ready: ['#q'] },
   { route: '/search', url: '/search?q=sochai+soch+na+hovee', ready: ['#results .card mark'] },
   { route: '/reader', url: '/reader?ang=712', ready: ['#angOut .sline', '#angCtx .timechip'] },

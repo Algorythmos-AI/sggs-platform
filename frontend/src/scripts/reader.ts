@@ -6,6 +6,7 @@ import { loadClock, claimsFor } from './timing';
 import { paharLabel, paharRange } from './pahar.js';
 
 let curAng = 1;
+let lastShown = 0;                            // the Ang on screen before this one (0 = none yet)
 let raagCtx: any = null;
 
 function groupShabads(lines: any[]) {
@@ -113,6 +114,10 @@ const ang = guard(async (n: number) => {
   h += `<div class="endnav"><button onclick="ang(${curAng - 1})" ${curAng <= 1 ? 'disabled' : ''}>${prevL}</button>
       <button onclick="ang(${curAng + 1})" ${curAng >= 1430 ? 'disabled' : ''}>${nextL}</button></div>`;
   ($('#angOut') as HTMLElement).innerHTML = h;
+  // remember the place only when the reader turned a page: opening an Ang from a search result
+  // or jumping by number is a lookup, and must not move a place being kept in a long reading
+  if (lastShown && Math.abs(curAng - lastShown) === 1) store.set('sggs_last_ang', curAng);
+  lastShown = curAng;
   window.scrollTo({ top: 0, behavior: 'instant' });
   showChrome();                                                // a page turn always restores the chrome
   // keep the URL honest (bookmarkable/shareable, Back stays on this page) without piling
@@ -319,7 +324,8 @@ $('#angOut')?.addEventListener('keydown', (e: any) => {
     syncToolbarTop();
   }
   const p = new URLSearchParams(location.search);
-  const n = Math.max(1, Math.min(1430, parseInt(p.get('ang') || '1') || 1));
+  // no ?ang: resume at the Ang last being read (or Ang 1)
+  const n = Math.max(1, Math.min(1430, parseInt(p.get('ang') || store.get('sggs_last_ang', '1')) || 1));
   focusLine = parseInt(p.get('line') || '', 10) || null;          // ?line=Y → land on that verse
   focusComp = focusLine ? null : (parseInt(p.get('comp') || '', 10) || null);
   const raagName = p.get('raag');
