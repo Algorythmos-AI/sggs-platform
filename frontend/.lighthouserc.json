@@ -1,0 +1,25 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "cd ../webapp && SGGS_OPEN_BROWSER=0 SGGS_PORT=7777 PYTHONUNBUFFERED=1 python3 serve.py",
+      "startServerReadyPattern": "serving at",
+      "url": [
+        "http://127.0.0.1:7777/search",
+        "http://127.0.0.1:7777/reader?ang=1",
+        "http://127.0.0.1:7777/nitnem"
+      ],
+      "numberOfRuns": 3,
+      "settings": {
+        "skipAudits": [
+          "uses-http2",
+          "is-on-https",
+          "redirects-http"
+        ]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": ".lighthouseci"
+    }
+  }
+}

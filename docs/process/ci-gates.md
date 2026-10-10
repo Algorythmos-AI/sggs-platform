@@ -14,12 +14,13 @@ verified:
 | Workflow · job | Proves | Needs |
 |---|---|---|
 | `web-ci · python` | ruff clean; server + repo-gate unit tests; the **golden contract replayed over HTTP** (`tools/contract_http.py`); `contract/openapi.json` is current and covers every dispatcher route; `/api/health` all-true; the **shabad-heading regression** (`api_superset_check`); search harnesses; **contract does not drift** | pinned DB |
-| `web-ci · frontend` | Astro builds; `pahar` vectors pass | Node 22 |
+| `web-ci · frontend` | Astro builds; `pahar` vectors pass; **report-only:** the committed `webapp/static` equals the build's text assets byte for byte (`scripts/ci/check_static_fresh.py` — a warning, not yet a gate) | Node 22 |
 | `scripture-integrity` | dataset pin: `dataset.lock.json` ↔ `contract/_meta.json`, and sggs-data publishes that object at the pinned commit; the installed DB passes `quick_check` with 60,658 lines over Angs 1–1430 (the scripture gates themselves run in sggs-data) | pinned DB |
 | `version-consistency` | all 5 platform version strings unified (the dataset versions in sggs-data; the iOS app keeps its own match); `main` PRs come from `integration`/`hotfix` | — |
 | `security` | gitleaks; bandit; semgrep OSS; actionlint; **blocking** `npm audit --audit-level=high` on `frontend/` and `docs-site/` (job `deps`) | — |
 | `pr-hygiene` | conventional-commit PR title | — |
-| `e2e · playwright` | Ang 712 heading smoke, search → panel heading, axe WCAG (serious and critical) on `/`, `/search`, `/features`, `/watch` and `/learn` (desktop project) | serve.py + pinned DB |
+| `e2e · playwright` | Ang 712 heading smoke, search → panel heading, axe WCAG (serious and critical) on `/`, `/search`, `/features`, `/watch` and `/learn`; the Knowledge Base shell on every KB route and the 404 page (`frontend/e2e/kb-shell.spec.ts`): unique ids, a viewport that still pinch-zooms, and axe in the light and the dark theme against a per-page list of known violations that can only shrink; sideways scroll on a 375 px phone is measured and **reported as a warning** — the Knowledge Base sets its Latin text in the system font, so that baseline is per platform, enforced on macOS today and on the Linux runners once a Linux baseline is recorded in the spec. One job, two steps: the desktop project (Chromium), then the phone project (iPhone 13, WebKit) | serve.py + pinned DB |
+| `e2e · kb-lighthouse` (report-only, never blocks) | Lighthouse with mobile emulation on `/search`, `/reader?ang=1` and `/nitnem`, served by `serve.py`; three runs each, no assertions (`frontend/.lighthouserc.json`); the reports are the `kb-lighthouse` artifact | serve.py + pinned DB, Chrome |
 | `web-ci · api-image` | Docker image builds; the running container reports the build commit **and honours the golden contract over HTTP** | Docker |
 | `deploy-verify` (on Vercel `deployment_status`, previews only) | preview `/api/health` all-true (passes with a notice without the repo-level bypass secret) | — |
 | `release` (manual fallback) | idempotent tag + GitHub Release on `main`; normal releases are cut by `deploy-production` after a verified deploy | — |
