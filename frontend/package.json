@@ -10,7 +10,8 @@
     "rollback": "node scripts/sync-to-webapp.mjs --rollback",
     "build:deploy": "astro build && node scripts/sync-to-webapp.mjs",
     "test:pahar": "node scripts/test-pahar.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "shots": "node scripts/shots.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "8.0.1",

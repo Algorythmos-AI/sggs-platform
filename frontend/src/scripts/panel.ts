@@ -8,8 +8,8 @@ import { pinButtonHTML } from './store';
 function panelLines(lines: any[]): string {
   return lines.map((l: any) => `<div class="sline ${l.is_rahao ? 'rahao' : ''}${l.is_header ? '' : ' haspin'}"${l.is_header ? '' : ` data-line-id="${l.id}"`}>
       ${l.is_header ? '' : pinButtonHTML(l.id, l.ang, l.comp_id, l.gurmukhi)}
-      <div class="g gm ${l.is_header && l.gurmukhi.startsWith('ੴ') ? 'invoc' : ''}" lang="pa" style="${l.is_header ? 'color:var(--gold);font-weight:600;text-align:center' : ''}">${esc(l.gurmukhi)}</div>
-      <div class="t" style="${l.is_header ? 'text-align:center' : ''}">${esc(l.translit)}</div>
+      <div class="g gm${l.is_header ? ' ph' : ''}${l.is_header && l.gurmukhi.startsWith('ੴ') ? ' invoc' : ''}" lang="pa">${esc(l.gurmukhi)}</div>
+      <div class="t${l.is_header ? ' ph' : ''}">${esc(l.translit)}</div>
       ${l.en ? `<div class="en" lang="en">${esc(l.en)}</div>` : ''}</div>`).join('');
 }
 // Synthesize a composition title from the metadata every line carries — robust for ALL
@@ -36,9 +36,9 @@ function titleBlock(lines: any[]): string {
     l.is_header && !String(l.gurmukhi || '').startsWith('ੴ'));
   if (hasTitleHeader) t.main = '';
   if (!t.main && !t.sub) return '';
-  return `<div style="text-align:center;margin:0 0 18px;padding-bottom:14px;border-bottom:1px solid var(--line)">
-    ${t.main ? `<div class="gm" style="color:var(--gold);font-size:20px;font-weight:600">${esc(t.main)}</div>` : ''}
-    ${t.sub ? `<div style="color:var(--soft);font-size:12.5px;margin-top:4px">${esc(t.sub)}</div>` : ''}</div>`;
+  return `<div class="ptitle">
+    ${t.main ? `<div class="pt-main gm" lang="pa">${esc(t.main)}</div>` : ''}
+    ${t.sub ? `<div class="pt-sub">${esc(t.sub)}</div>` : ''}</div>`;
 }
 
 // ---- open / close with focus save+restore ----

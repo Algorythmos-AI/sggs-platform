@@ -325,6 +325,31 @@ def _strip_dark_scope(css):
     return "".join(out)
 
 
+class ScriptureDisplayInSource(unittest.TestCase):
+    """Knowledge Base source never cuts a verse short and never colours Gurmukhi inline.
+
+    The rendered result is proven by the e2e reverence walker (frontend/e2e/reverence.spec.ts);
+    this catches the two source patterns it cannot reach, such as a hover tooltip.
+    """
+
+    SRC = ROOT / "frontend" / "src"
+
+    def _sources(self):
+        files = sorted((self.SRC / "scripts").glob("*.ts")) + sorted((self.SRC / "pages").glob("*.astro"))
+        files.append(self.SRC / "layouts" / "Base.astro")
+        return [(p.relative_to(ROOT).as_posix(), p.read_text(encoding="utf-8")) for p in files]
+
+    def test_a_verse_is_never_truncated(self):
+        cut = re.compile(r"gurmukhi[^;\n]{0,40}\.(?:slice|substring|substr)\(")
+        bad = [name for name, text in self._sources() if cut.search(text)]
+        self.assertEqual(bad, [], f"a Gurmukhi line is sliced in: {bad}")
+
+    def test_gurmukhi_is_never_coloured_inline(self):
+        inline = re.compile(r'class="[^"]*\bgm\b[^"]*"[^>]*style="[^"]*\bcolor\s*:')
+        bad = [name for name, text in self._sources() if inline.search(text)]
+        self.assertEqual(bad, [], f"inline colour on a Gurmukhi element in: {bad}")
+
+
 class BrandDisciplineInSource(unittest.TestCase):
     """The Soul-Gold brand rules, enforced on the marketing CSS + components + landing scoped CSS."""
 

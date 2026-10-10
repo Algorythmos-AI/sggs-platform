@@ -27,6 +27,19 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   (`tools/docs_check.py --freshness`). Every one keeps a single issue, closed when green.
 - `make review-pack`: the G3 scholar-review pack as one PDF with a sign-off sheet; `make docs-live`,
   `make docs-freshness`, `make docs-pins`.
+- **A phone safety net for the Knowledge Base, ahead of its redesign.** The `playwright` check now runs
+  the whole suite on the phone project too (iPhone 13, WebKit) as a second step of the same job.
+  `frontend/e2e/kb-shell.spec.ts` covers every Knowledge Base route and the 404 page: no sideways
+  scroll at 375 px, unique ids, a viewport that still pinch-zooms, and axe in the light and the dark
+  theme. What is red today is written down in the spec per page — the pages that scroll sideways
+  (`test.fail`) and the axe rule ids each page violates — and both lists can only shrink. The
+  overflow baseline is per platform, because the Knowledge Base sets its Latin text in the system
+  font: it has a macOS baseline (the font an iPhone renders) and a Linux one per project, recorded
+  from the first CI run, so the runners enforce it too.
+  `npm run shots` (`frontend/scripts/shots.mjs`) takes a route × width × theme screenshot matrix for
+  review. Report-only for now: `web-ci · frontend` compares the committed `webapp/static` with the
+  build's text assets (`scripts/ci/check_static_fresh.py`), and `e2e · kb-lighthouse` runs mobile
+  Lighthouse on three Knowledge Base pages.
 
 ### Changed
 - **The wiki names both routing states after #205.** `integration` routes production's five API
@@ -73,6 +86,45 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   every push to `main` still audit all twenty.
 
 ### Fixed
+- **On the Knowledge Base, Gurmukhi is ink everywhere, and a test now proves it.** The pages
+  coloured scripture: composition headings and the ੴ invocation were gold (the invocation with a
+  glow and extra letter-spacing), refrain lines were orange on a tinted band, and the composition
+  panel set gold inline. Headings and verses are now ink; the refrain is marked by a 3px rule in
+  the margin, as in the app. Three more display faults went with them: the constellation tooltip cut
+  a verse at 64 characters and set it in a system font (it shows the whole line in Sant Lipi); a
+  Gurmukhi search highlight could end inside a word, parting a vowel sign from its consonant (whole
+  words are marked); and Gurmukhi outside a `.gm` element — an author's name, a chip, a button —
+  fell back to a system font (Sant Lipi now leads the interface font stack, scoped to the Gurmukhi
+  block). `frontend/e2e/reverence.spec.ts` walks every rendered Gurmukhi text node on 18 views in
+  light and dark, on desktop and phone: 23 distinct faults before, none after. A source gate
+  (`ScriptureDisplayInSource`) forbids slicing a line or colouring Gurmukhi inline. No scripture
+  text, corpus or API output changes; this is colour and typography only.
+- **Nine shell faults on the Knowledge Base, each with a test that failed before the fix**
+  (`frontend/e2e/kb-shell-bugs.spec.ts`, desktop and phone). The closed pinned-verses drawer was
+  still in the Tab order and closing it dropped focus (it is `inert` until opened, and focus goes
+  back to the button that opened it). Controls under 16px made iOS zoom the page on focus (the Ang
+  field, the chart selectors, the Raag Clock search). The search box took focus on arrival, which
+  raised the keyboard on a phone (desktop only now). The browser's own chrome and native controls
+  followed the OS appearance rather than the page's (one `theme-color` meta that follows the page
+  theme; `color-scheme` set per theme). The Raag Clock could show a stale pahar after Back or a tab
+  switch (it repaints on `pageshow` and when the tab returns). The theme network swallowed the
+  wheel and one-finger drags, trapping the page (a plain wheel and one finger scroll the page; pinch
+  or Ctrl/⌘ + wheel zooms). Load errors asked the public whether `serve.py` was running. Theme
+  links went to `/?q=…`, loading the marketing home before being forwarded (they go straight to
+  `/search`). Knowledge Base pages had no favicon link, and no page had an `apple-touch-icon`.
+- **The Reader no longer loses the page you are on, and Nitnem keeps your place.** Five faults,
+  each reproduced by a test before the fix (`frontend/e2e/reader-nitnem.spec.ts`, desktop and phone):
+  on a weak connection a request for an Ang you had already paged past could fail late and replace
+  the Ang on screen with an error (a superseded request is now cancelled and can never paint); an
+  Ang already being prefetched was fetched a second time when you turned to it; a link to a verse
+  (`/reader?ang=…&line=…`) landed with the navigation and toolbar hidden, because the landing scroll
+  itself — or the page settling as a chip or the font arrived — counted as reading downwards (only a
+  wheel or touch scroll hides them now, and landing is an instant jump); reopening a bani put the
+  saved line in the middle of the screen and then saved the line above it, so the place crept back a
+  few lines every time (saving and resuming now share one anchor, just under the toolbar); and the
+  Gurmukhi size was written inline on every page even when you had never chosen one, which
+  overrode the stylesheet (it is written only once chosen; Reader and Nitnem now share one size
+  control and one range, 16–40px). No change to how any page looks.
 - **Every wiki page is in the sidebar again.** Fourteen of the nineteen sidebar groups rendered empty
   (Start here, Scripture 101, Architecture, Search, the handbook, Process, Brand, Decisions and the
   pinned groups), so 87 of 148 pages were reachable only through search and had no previous/next

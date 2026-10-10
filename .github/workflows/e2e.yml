@@ -28,15 +28,57 @@ jobs:
         run: |
           npm ci
           npm run build:deploy
-      - name: Install Playwright (chromium)
+      - name: Install Playwright (chromium + webkit)
         working-directory: frontend
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium webkit
       - name: Run e2e (Playwright starts serve.py)
+        id: desktop
         working-directory: frontend
         run: npx playwright test --project=desktop
+      - name: Run e2e on the phone project (iPhone 13, WebKit)
+        # A second step, never a matrix or a second job: both deploys wait for a check called
+        # exactly `playwright` (scripts/ci/wait_for_checks.py). It runs even when the desktop step
+        # failed, so one run reports both projects.
+        if: ${{ !cancelled() && steps.desktop.outcome != 'skipped' }}
+        working-directory: frontend
+        run: npx playwright test --project=mobile
       - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-report
           path: frontend/playwright-report/
+          retention-days: 7
+  kb-lighthouse:
+    # Report-only. Lighthouse's default mobile emulation on three Knowledge Base pages, served by
+    # serve.py from the pinned database (frontend/.lighthouserc.json: three runs each, no
+    # assertions). Nothing requires this job and no deploy waits for it; read the artifact.
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/fetch-dataset
+        with: { token: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build the site + sync into webapp/static
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build:deploy
+      - name: Lighthouse, mobile (lhci starts serve.py)
+        working-directory: frontend
+        run: npx --yes @lhci/cli@0.15.1 autorun
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: kb-lighthouse
+          path: frontend/.lighthouseci/
+          include-hidden-files: true
           retention-days: 7

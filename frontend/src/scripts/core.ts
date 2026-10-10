@@ -19,10 +19,13 @@ export function toast(msg: string) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 3200);
 }
 
-export async function api(p: string): Promise<any> {
+export async function api(p: string, init?: RequestInit): Promise<any> {
   let r: Response;
-  try { r = await fetch('/api/' + p); }
-  catch (e) { toast('Cannot reach the app — is serve.py still running?'); throw e; }
+  try { r = await fetch('/api/' + p, init); }
+  catch (e) {
+    if (init?.signal?.aborted) throw e;        // cancelled on purpose (superseded) — nothing to report
+    toast('Can’t reach the server. Check your connection and try again.'); throw e;
+  }
   if (!r.ok) {
     let m = 'Request failed (' + r.status + ')';
     try { m = (await r.json()).error || m; } catch {}
@@ -36,7 +39,7 @@ export async function api(p: string): Promise<any> {
 export const guard = (fn: (...a: any[]) => Promise<any>, onFail?: (e: any) => void) =>
   async (...a: any[]) => { try { return await fn(...a); } catch (e) { console.error(e); try { onFail?.(e); } catch {} } };
 export const failHTML = (what = 'This section') =>
-  `<div class="hint">${what} could not be loaded — is serve.py still running? Reload to try again.</div>`;
+  `<div class="hint load-fail">${what} couldn’t be loaded. Check your connection, then reload to try again.</div>`;
 
 // Honour the OS "reduce motion" setting for JS-driven animation (D3 transitions / force
 // layout). The global CSS rule only covers CSS transitions; D3 runs its own animation loop.
@@ -77,7 +80,7 @@ export function goReader(ang: number, raag?: string, opts?: { line?: number; com
   location.href = u;
 }
 export function goSearchTheme(concept: string) {
-  location.href = '/?q=' + encodeURIComponent(concept) + '&mode=theme';
+  location.href = '/search?q=' + encodeURIComponent(concept) + '&mode=theme';
 }
 
 // ---- per-page nav active state ----
@@ -94,7 +97,15 @@ function markNav() {
 export function applyPrefs() {
   if (store.get('show_t', '1') === '0') document.body.classList.add('hide-t');
   if (store.get('show_timing', '1') === '0') document.body.classList.add('hide-timing');  // raag timing chip, default ON
-  const gs = parseInt(store.get('gsize', '22')); if (gs) document.documentElement.style.setProperty('--gsize', gs + 'px');
+  // only a size the reader chose is written inline; with nothing stored the stylesheet's default applies
+  const gs = parseInt(store.get('gsize', ''), 10); if (gs) document.documentElement.style.setProperty('--gsize', gs + 'px');
+}
+// one step (2px) larger or smaller Gurmukhi, from the size showing now — shared by Reader and Nitnem
+export function stepFontSize(d: number) {
+  const cur = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gsize'), 10) || 22;
+  const next = Math.max(16, Math.min(40, cur + d * 2));
+  document.documentElement.style.setProperty('--gsize', next + 'px');
+  store.set('gsize', next);
 }
 
 // ---- sticky reader toolbar below the (wrapping) nav ----
@@ -126,8 +137,18 @@ document.addEventListener('click', (e: any) => {
   }
 });
 
+// ---- the browser's own chrome (address bar, status bar) follows the page theme, not the OS:
+// its colour is the header's, read from the stylesheet whenever the theme changes ----
+function syncChromeColor() {
+  const m = document.getElementById('kbThemeColor');
+  const c = getComputedStyle(document.documentElement).getPropertyValue('--chrome').trim();
+  if (m && c) m.setAttribute('content', c);
+}
+
 // shared init (module scripts are deferred → DOM is ready)
 initTheme();
+syncChromeColor();
+new MutationObserver(syncChromeColor).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 applyPrefs();
 markNav();
 syncToolbarTop();
