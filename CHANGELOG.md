@@ -68,6 +68,14 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 - **The browser's own chrome has the right colour from the first frame.** The inline boot script
   sets `theme-color` to the header's colour for the stored theme and appearance; it used to start
   as the default's cream and change once the scripts had loaded.
+- **Moving between Knowledge Base pages, the cloth stays and the paper changes.** The top bar and
+  the phone tab bar are held while the page under them cross-fades (the browser's cross-document
+  view transition: no client router, every page still loads as a page, and a browser without it
+  simply navigates). Only with motion allowed; opacity only; a bar is not held while a panel is
+  open over the page. Navigation links are fetched ahead, on hover on a wide screen and at the
+  touch in the phone tab bar. A page brought back by Back or Forward takes up the appearance, text
+  size and saved verses chosen since, and Saved follows a change made in another tab. A gate reads
+  the built stylesheet, because a minifier that does not know `@view-transition` drops it silently.
 - Two gates: every key the site keeps in the browser must be named on the privacy page
   (`StoredKeysAreDisclosed`), and a companion colour may never be used for text.
 - **The wiki's front door.** The home page opens on the system-landscape poster, then *Ten minutes to

@@ -85,13 +85,13 @@ const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri 
   <a href="#main" class="skip-link">Skip to content</a>
   <div class="kb-chrome" data-topbar>
     <header class="kb-top">
-      <a class="kb-brand" href="/library" aria-label="Knowledge Base home">
+      <a class="kb-brand" href="/library" aria-label="Knowledge Base home" data-astro-prefetch>
         <span class="kb-mark gm" lang="pa" aria-hidden="true">ੴ</span><span class="kb-word">Knowledge Base</span>
       </a>
       <span class="kb-here" aria-hidden="true">{pageName || 'Knowledge Base'}</span>
       <nav class="kb-places" aria-label="Places">
         {PLACES.map((p) => (
-          <a href={p.href} data-place={p.id} class:list={[place?.id === p.id && 'on']}
+          <a href={p.href} data-place={p.id} class:list={[place?.id === p.id && 'on']} data-astro-prefetch
              aria-current={place?.id === p.id ? here(p.href) : undefined}>{p.label}</a>
         ))}
         <button type="button" data-open-saved>Saved<span class="kb-count" data-saved-count hidden>0</span></button>
@@ -104,7 +104,7 @@ const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri 
     {subnav && (
       <nav class="kb-sub" aria-label={`${place.label}: pages`}>
         {subnav.map((pg) => (
-          <a href={pg.href} data-path={pg.href} class:list={[subCurrent(pg.href) && 'on']} aria-current={subCurrent(pg.href)}>{pg.label}</a>
+          <a href={pg.href} data-path={pg.href} class:list={[subCurrent(pg.href) && 'on']} aria-current={subCurrent(pg.href)} data-astro-prefetch>{pg.label}</a>
         ))}
       </nav>
     )}
@@ -117,7 +117,7 @@ const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri 
   <footer class="kb-foot">Scripture is shown verbatim from your edition with its Ang. Transliteration is a mechanical reading aid, not the scripture. · <span class="gm" lang="pa">ਧੁਰ ਕੀ ਬਾਣੀ</span><span id="ver"></span> · <a href="/">Gurbani Soul app</a> · <a href="/support">Support</a> · <a href="/privacy">Privacy</a></footer>
   <nav class="kb-tabs" aria-label="Places">
     {PLACES.map((p) => (
-      <a href={p.href} data-place={p.id} class:list={[place?.id === p.id && 'on']}
+      <a href={p.href} data-place={p.id} class:list={[place?.id === p.id && 'on']} data-astro-prefetch="tap"
          aria-current={place?.id === p.id ? here(p.href) : undefined}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={p.icon} /></svg>{p.label}
       </a>

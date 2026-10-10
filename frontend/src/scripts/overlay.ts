@@ -2,7 +2,8 @@
 // Saved drawer and the display sheet. An owner shows and hides its own element and tells the
 // stack when. While anything is open: Escape closes the top one only, Tab stays inside it, and
 // keys meant for the page (the Reader's arrow paging, Sehaj's Escape) stand down — a page script
-// asks overlayOpen(). Closing returns focus to whatever opened it.
+// asks overlayOpen(). Closing returns focus to whatever opened it. <html> carries `overlay-open`
+// meanwhile (the stylesheet stops holding the bars through a page transition: kb/motion.css).
 type Layer = { el: HTMLElement; close: () => void; opener: HTMLElement | null; fallback?: () => HTMLElement | null };
 const stack: Layer[] = [];
 const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
@@ -19,6 +20,7 @@ function tabbable(root: HTMLElement): HTMLElement[] {
 }
 
 export const overlayOpen = () => stack.length > 0;
+const mark = () => document.documentElement.classList.toggle('overlay-open', stack.length > 0);
 
 /** `el` has just been shown; `close` hides it again (and calls overlayClosed). Opening an overlay
     that is already open changes nothing, so it keeps its first opener. */
@@ -27,6 +29,7 @@ export function overlayOpened(el: HTMLElement, close: () => void,
   if (stack.some((l) => l.el === el)) return;
   const a = document.activeElement as HTMLElement | null;      // Safari does not focus a button on click
   stack.push({ el, close, opener: a && a !== document.body ? a : null, fallback: opts.fallback });
+  mark();
   const first = opts.focus ?? tabbable(el)[0];
   setTimeout(() => first?.focus(), 0);
 }
@@ -36,6 +39,7 @@ export function overlayClosed(el: HTMLElement) {
   const i = stack.findIndex((l) => l.el === el);
   if (i === -1) return;
   const [layer] = stack.splice(i, 1);
+  mark();
   const back = shown(layer.opener) ? layer.opener : layer.fallback?.();
   if (shown(back ?? null)) back!.focus();
 }

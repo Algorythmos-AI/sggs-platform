@@ -201,6 +201,9 @@ function renderAll() {
 
 /* ---------- wire up ---------- */
 subscribe(renderAll);
+// pins changed on another page (then Back) or in another tab: the count, the marks and the list follow
+window.addEventListener('pageshow', (e) => { if (e.persisted) renderAll(); });
+window.addEventListener('storage', (e) => { if (e.key === 'sggs_pins') renderAll(); });
 window.addEventListener('DOMContentLoaded', markPins);
 // pages re-render results with innerHTML; reflect pinned state on every newly added button
 new MutationObserver((muts) => {

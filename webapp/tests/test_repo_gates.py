@@ -476,7 +476,7 @@ class KbStylesheetIsOrderedPartials(unittest.TestCase):
     # partial moved or inserted is a visual change: it is made here too, deliberately.
     ORDER = ["theme", "tokens", "themes", "base", "shell", "search", "reader", "tiles", "panel", "display", "insights",
              "reader-related", "trail", "sehaj", "timeline", "study-trail", "responsive", "contributors", "raag-timing",
-             "reader-chrome", "nitnem", "library", "print", "phone-controls"]
+             "reader-chrome", "nitnem", "library", "motion", "print", "phone-controls"]
 
     def test_entry_lists_every_partial_once_in_order(self):
         text = re.sub(r"/\*.*?\*/", "", (self.STYLES / "global.css").read_text(encoding="utf-8"), flags=re.S)
@@ -491,6 +491,28 @@ class KbStylesheetIsOrderedPartials(unittest.TestCase):
         self.assertEqual(sorted(imported), on_disk, "every styles/kb/*.css is imported exactly once")
         self.assertEqual(len(imported), len(set(imported)), "a partial is imported twice")
         self.assertEqual(imported, self.ORDER, "the import order is the cascade: change it on purpose, and here")
+
+
+class KbPageTransitionsSurviveTheBuild(unittest.TestCase):
+    """The Knowledge Base opts into cross-document view transitions in its stylesheet. A CSS minifier
+    that does not know the at-rule drops it without a word, so the proof is in the BUILT file: the
+    rule is there, only inside the reduced-motion guard, and only in the Knowledge Base's sheet."""
+
+    ASTRO = ROOT / "webapp" / "static" / "_astro"
+
+    def test_the_built_stylesheet_opts_in_under_the_motion_guard_only(self):
+        sheets = sorted(self.ASTRO.glob("Base.*.css"))
+        if not sheets:
+            self.skipTest("webapp/static is not built")
+        self.assertEqual(len(sheets), 1, [p.name for p in sheets])
+        css = sheets[0].read_text(encoding="utf-8")
+        self.assertEqual(css.count("@view-transition"), 1)
+        self.assertRegex(css, r"@media \(prefers-reduced-motion:\s*no-preference\)\s*\{\s*@view-transition\s*\{\s*navigation:\s*auto;?\s*\}")
+        for name in ("kb-chrome", "kb-tabs"):
+            self.assertIn(f"view-transition-name:{name}", css)
+        self.assertRegex(css, r"html\.overlay-open [^{]*\{view-transition-name:none")
+        others = [p.name for p in sorted(self.ASTRO.glob("*.css")) if p != sheets[0] and "@view-transition" in p.read_text(encoding="utf-8")]
+        self.assertEqual(others, [], "the marketing pages have their own router: no cross-document opt-in there")
 
 
 class ScriptureDisplayInSource(unittest.TestCase):

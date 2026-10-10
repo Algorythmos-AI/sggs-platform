@@ -1,0 +1,20 @@
+/* ============================== motion between pages ==============================
+   Going from one Knowledge Base page to another, the cloth stays and the paper changes: the top
+   bar and the phone tab bar are held as they are, and the page under them changes with a short
+   cross-fade. This is the browser's own cross-document view transition: there is no client router,
+   every page still loads and runs as a page, and a browser without it simply navigates. Only with
+   motion allowed. The fade is opacity alone: nothing is moved, scaled or blurred, and no text is
+   animated by itself.
+   While something is open over the page (html.overlay-open, set by scripts/overlay.ts) the bars are
+   not held: a held bar is painted above the page, so it would cover the panel it sits under. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation:auto; }
+  .kb-chrome { view-transition-name:kb-chrome; }
+  .kb-tabs { view-transition-name:kb-tabs; }
+  html.overlay-open .kb-chrome, html.overlay-open .kb-tabs { view-transition-name:none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration:.18s; }
+  /* a bar neither cross-fades nor stretches (one place has a second row, another has none): the new one is simply there */
+  ::view-transition-group(kb-chrome), ::view-transition-group(kb-tabs) { animation-duration:0s; }
+  ::view-transition-old(kb-chrome), ::view-transition-old(kb-tabs) { display:none; }
+  ::view-transition-new(kb-chrome), ::view-transition-new(kb-tabs) { animation:none; }
+}
