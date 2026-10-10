@@ -1,0 +1,35 @@
+/* ---------- Gurmukhi scripture webfont: Sant Lipi (SIL OFL 1.1), bundled so the Granth
+   renders identically on every device. unicode-range scopes it to the Gurmukhi block (+ dandas),
+   so transliteration/English keep the system Latin font even inside a .gm element. Display only —
+   the verbatim corpus/DB is never touched. FE00–FE0F are included so the optional, default-off
+   "traditional saroop" shaping run (Sant Lipi Variation-Selector markup) stays inside the font. */
+@font-face {
+  font-family: "Sant Lipi";
+  src: url("/fonts/SantLipi-VF.woff2") format("woff2");
+  font-weight: 100 900; font-style: normal; font-display: swap;
+  unicode-range: U+0964-0965, U+0A00-0A7F, U+200C-200D, U+FE00-FE0F;
+}
+
+/* Source Serif 4 (SIL OFL 1.1), Latin subset: page titles only. Licence at /fonts/OFL-SourceSerif4.txt. */
+@font-face {
+  font-family: "Source Serif 4";
+  src: url("/fonts/SourceSerif4-latin.woff2") format("woff2");
+  font-weight: 400 700; font-style: normal; font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2010-2015, U+2018-201D, U+2020-2022, U+2026, U+2039-203A, U+00B7;
+}
+
+/* ---------- colour ----------
+   The colours themselves are generated (themes.css, from docs/brand/web-themes.json): surfaces and
+   inks per light/dark, and one accent set per theme. The names this stylesheet was written with are
+   kept here as aliases, so a rule that says var(--accent) follows the chosen theme.
+   --accent is the accent's TEXT colour (4.5:1 on every surface); a filled control uses --accent-fill
+   with --on-accent text and an --accent-ui edge. */
+:root {
+  --gsize:22px; --nav-h:60px;
+  --font-serif:"Source Serif 4", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --bg:var(--canvas); --bg-2:var(--surface-2); --card:var(--surface-card); --card-hover:var(--surface-raised);
+  --accent:var(--accent-text); --accent-2:var(--accent-fill); --accent-ink:var(--on-accent); --gold:var(--accent-text);
+  --rahao:var(--negative); --rahao-bg:var(--negative-bg);
+  --fill-edge:inset 0 0 0 1px var(--accent-ui);
+  --accent-wash:var(--tile1);                 /* a tint the accent text is proven readable on */
+}

@@ -4,6 +4,7 @@
 import '../styles/global.css';
 import Seo from '../components/Seo.astro';
 import { normPath } from '../routes';
+import kbThemes from '../generated/kb-themes.json';
 export interface Props { title?: string; description?: string; }
 const {
   title = 'ੴ Sri Guru Granth Sahib Ji — Knowledge Base',
@@ -11,6 +12,9 @@ const {
 } = Astro.props;
 // Canonical/OG derive from the page's own route (KB pages resolve to the knowledge-base OG card).
 const path = normPath(Astro.url.pathname);
+// The colour themes a stored choice may name (generated from docs/brand/web-themes.json); the
+// default theme needs no attribute.
+const ACCENTS = kbThemes.themes.map((t) => t.id).filter((id) => id !== kbThemes.default);
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -20,15 +24,21 @@ const path = normPath(Astro.url.pathname);
   <title>{title}</title>
   <Seo title={title} description={description} path={path} />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <!-- Resolve the theme before first paint (no flash). Inline + un-bundled on purpose. -->
-  <script is:inline>
+  <!-- Resolve the theme, the colour theme and the paper tone before first paint (no flash).
+       Inline + un-bundled on purpose. A stored value is used only if it is one we know; with
+       storage blocked, the stylesheet's defaults apply. -->
+  <script is:inline define:vars={{ ACCENTS }}>
     (function () {
+      var root = document.documentElement;
       try {
         var t = localStorage.getItem('theme') || 'system';
         var d = t === 'system'
           ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
           : t;
-        document.documentElement.setAttribute('data-theme', d);
+        root.setAttribute('data-theme', d);
+        var a = localStorage.getItem('sggs_accent');
+        if (ACCENTS.indexOf(a) !== -1) root.setAttribute('data-accent', a);
+        if (localStorage.getItem('sggs_reader_tone') === 'warm') root.setAttribute('data-tone', 'warm');
       } catch (e) {}
     })();
   </script>

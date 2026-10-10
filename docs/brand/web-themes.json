@@ -1,0 +1,421 @@
+{
+  "_note": "Knowledge Base colour themes (the website's own theme set). The five 'app' themes copy the iOS accent palettes exactly; the 'italia' and 'midi' themes are web-only. Companion colours are decorative (hem, motif, tile wash) and are never used for text. scripts/brand/gen_web_themes.py derives the tinted surfaces, proves every text pair, and writes frontend/src/styles/kb/themes.css and frontend/src/generated/kb-themes.json. status: approved | review (awaiting scholar review, shipped) | held (not shipped).",
+  "ios_source": {
+    "repo": "Algorythmos-AI/gurbani-soul-ios",
+    "commit": "5bfd12c0",
+    "file": "ios/App/Shared/DesignTokens.swift"
+  },
+  "default": "soul",
+  "collections": {
+    "app": "From the app",
+    "italia": "Italia",
+    "midi": "South of France"
+  },
+  "surfaces": {
+    "light": {
+      "paper": "#FBF7F0",
+      "paperWarm": "#FDF6E3",
+      "card": "#FFFFFF",
+      "raised": "#FFFFFF",
+      "ink": "#201A12",
+      "inkSoft": "#6B5E4B",
+      "inkFaint": "#6F6250",
+      "line": "rgba(43,26,5,.12)",
+      "lineStrong": "rgba(43,26,5,.20)",
+      "chip": "rgba(43,26,5,.05)",
+      "shadow": "0 10px 34px rgba(32,26,18,.10)",
+      "negative": "#B33528",
+      "negativeBg": "rgba(179,53,40,.08)"
+    },
+    "dark": {
+      "base": "#151210",
+      "card": "#1E1A17",
+      "raised": "#282320",
+      "paper": "#171412",
+      "ink": "#F3ECDD",
+      "inkSoft": "#B9AC95",
+      "inkFaint": "#A49885",
+      "clothInk": "#F7F1E3",
+      "clothSoft": "#EDE5D3",
+      "line": "rgba(255,255,255,.10)",
+      "lineStrong": "rgba(255,255,255,.18)",
+      "chip": "rgba(255,255,255,.06)",
+      "shadow": "0 14px 44px rgba(0,0,0,.50)",
+      "negative": "#FF7A6B",
+      "negativeBg": "rgba(255,122,107,.11)"
+    }
+  },
+  "tints": {
+    "canvas": 0.045,
+    "silk": 0.13,
+    "silkCompanion": 0.16,
+    "darkCanvas": 0.035,
+    "darkTile": 0.1
+  },
+  "themes": [
+    {
+      "id": "soul",
+      "name": "Soul Gold",
+      "collection": "app",
+      "evokes": "The app's gold",
+      "status": "approved",
+      "light": {
+        "accent": "#A87900",
+        "accentText": "#8A6100",
+        "accentFill": "#FFBC0D",
+        "onAccent": "#2B1A05",
+        "accentDeep": "#FFB81C",
+        "companion": "#FFB81C"
+      },
+      "dark": {
+        "accent": "#FFBC0D",
+        "accentText": "#FFBC0D",
+        "accentFill": "#FFBC0D",
+        "onAccent": "#2B1A05",
+        "accentDeep": "#C08B00",
+        "companion": "#C08B00"
+      },
+      "velvet": [
+        "#171412",
+        "#2A2118",
+        "#3D2E12"
+      ]
+    },
+    {
+      "id": "saffron",
+      "name": "Saffron",
+      "collection": "app",
+      "evokes": "Kesri",
+      "status": "approved",
+      "light": {
+        "accent": "#E06E09",
+        "accentText": "#A0530A",
+        "accentFill": "#E06E09",
+        "onAccent": "#2B1A05",
+        "accentDeep": "#B07D12",
+        "companion": "#B07D12"
+      },
+      "dark": {
+        "accent": "#FF8F2E",
+        "accentText": "#FFA24F",
+        "accentFill": "#FF8F2E",
+        "onAccent": "#2B1A05",
+        "accentDeep": "#D9A93C",
+        "companion": "#D9A93C"
+      },
+      "velvet": [
+        "#2A1406",
+        "#5C2C08",
+        "#8A430A"
+      ]
+    },
+    {
+      "id": "gold",
+      "name": "Gold",
+      "collection": "app",
+      "evokes": "Antique gold",
+      "status": "approved",
+      "light": {
+        "accent": "#B07D12",
+        "accentText": "#7E5A0C",
+        "accentFill": "#B07D12",
+        "onAccent": "#2B1A05",
+        "accentDeep": "#8A5E0B",
+        "companion": "#8A5E0B"
+      },
+      "dark": {
+        "accent": "#D9A93C",
+        "accentText": "#E3BC5F",
+        "accentFill": "#D9A93C",
+        "onAccent": "#2B1A05",
+        "accentDeep": "#B08A2E",
+        "companion": "#B08A2E"
+      },
+      "velvet": [
+        "#1F1606",
+        "#44310A",
+        "#6B4D0F"
+      ]
+    },
+    {
+      "id": "indigo",
+      "name": "Indigo",
+      "collection": "app",
+      "evokes": "Neel",
+      "status": "approved",
+      "light": {
+        "accent": "#4A55C9",
+        "accentText": "#4149B8",
+        "accentFill": "#4A55C9",
+        "onAccent": "#FFFFFF",
+        "accentDeep": "#36349B",
+        "companion": "#36349B"
+      },
+      "dark": {
+        "accent": "#8B93F5",
+        "accentText": "#A7ADF8",
+        "accentFill": "#8B93F5",
+        "onAccent": "#11133A",
+        "accentDeep": "#6D6FD6",
+        "companion": "#6D6FD6"
+      },
+      "velvet": [
+        "#11133A",
+        "#232874",
+        "#36349B"
+      ]
+    },
+    {
+      "id": "teal",
+      "name": "Teal",
+      "collection": "app",
+      "evokes": "Deep teal",
+      "status": "approved",
+      "light": {
+        "accent": "#0E7E74",
+        "accentText": "#0B6B62",
+        "accentFill": "#0E7E74",
+        "onAccent": "#FFFFFF",
+        "accentDeep": "#0A5C68",
+        "companion": "#0A5C68"
+      },
+      "dark": {
+        "accent": "#3FC2B4",
+        "accentText": "#67D1C6",
+        "accentFill": "#3FC2B4",
+        "onAccent": "#062A26",
+        "accentDeep": "#2E9AA8",
+        "companion": "#2E9AA8"
+      },
+      "velvet": [
+        "#062A26",
+        "#0A4A44",
+        "#0A5C68"
+      ]
+    },
+    {
+      "id": "glicine",
+      "name": "Glicine",
+      "collection": "italia",
+      "evokes": "Wisteria over the Duomo, Florence",
+      "status": "review",
+      "light": {
+        "accent": "#7B52C0",
+        "accentText": "#6A42AE",
+        "accentFill": "#7B52C0",
+        "onAccent": "#FFFFFF",
+        "accentDeep": "#5A3A99",
+        "companion": "#C2603A"
+      },
+      "dark": {
+        "accent": "#B79CF0",
+        "accentText": "#C9B4F5",
+        "accentFill": "#B79CF0",
+        "onAccent": "#1C1035",
+        "accentDeep": "#8E6FD6",
+        "companion": "#F0946A"
+      },
+      "velvet": [
+        "#1F1438",
+        "#3A2569",
+        "#5B3F94"
+      ]
+    },
+    {
+      "id": "siena",
+      "name": "Siena",
+      "collection": "italia",
+      "evokes": "Burnt-sienna walls, green shutters",
+      "status": "review",
+      "light": {
+        "accent": "#B5532B",
+        "accentText": "#9A4320",
+        "accentFill": "#B5532B",
+        "onAccent": "#FFFFFF",
+        "accentDeep": "#8A3A1B",
+        "companion": "#3E6B5A"
+      },
+      "dark": {
+        "accent": "#F0946A",
+        "accentText": "#F4AC8A",
+        "accentFill": "#F0946A",
+        "onAccent": "#33140A",
+        "accentDeep": "#C96F47",
+        "companion": "#8CC2AE"
+      },
+      "velvet": [
+        "#2B120A",
+        "#5A2613",
+        "#8A3A1B"
+      ]
+    },
+    {
+      "id": "toscana",
+      "name": "Toscana",
+      "collection": "italia",
+      "evokes": "Cypress and wheat",
+      "status": "review",
+      "light": {
+        "accent": "#55772B",
+        "accentText": "#486623",
+        "accentFill": "#55772B",
+        "onAccent": "#FFFFFF",
+        "accentDeep": "#3C561D",
+        "companion": "#C9962B"
+      },
+      "dark": {
+        "accent": "#A5CC72",
+        "accentText": "#BBDA92",
+        "accentFill": "#A5CC72",
+        "onAccent": "#17240A",
+        "accentDeep": "#7FA850",
+        "companion": "#E3BC5F"
+      },
+      "velvet": [
+        "#141F0B",
+        "#2A3F16",
+        "#405E21"
+      ]
+    },
+    {
+      "id": "pietra",
+      "name": "Pietra Serena",
+      "collection": "italia",
+      "evokes": "Florentine grey stone and gold leaf",
+      "status": "review",
+      "light": {
+        "accent": "#4D5B73",
+        "accentText": "#435067",
+        "accentFill": "#4D5B73",
+        "onAccent": "#FFFFFF",
+        "accentDeep": "#364154",
+        "companion": "#B07D12"
+      },
+      "dark": {
+        "accent": "#A9B7CF",
+        "accentText": "#C0CBDD",
+        "accentFill": "#A9B7CF",
+        "onAccent": "#141A26",
+        "accentDeep": "#8090AD",
+        "companion": "#D9A93C"
+      },
+      "velvet": [
+        "#10141D",
+        "#222B3B",
+        "#364154"
+      ]
+    },
+    {
+      "id": "lavande",
+      "name": "Lavande",
+      "collection": "midi",
+      "evokes": "Valensole lavender at sunset",
+      "status": "review",
+      "light": {
+        "accent": "#6B63B5",
+        "accentText": "#5A52A3",
+        "accentFill": "#6B63B5",
+        "onAccent": "#FFFFFF",
+        "accentDeep": "#4B448F",
+        "companion": "#E8955A"
+      },
+      "dark": {
+        "accent": "#A9A3EE",
+        "accentText": "#BDB8F3",
+        "accentFill": "#A9A3EE",
+        "onAccent": "#15123A",
+        "accentDeep": "#7F78D0",
+        "companion": "#F2A774"
+      },
+      "velvet": [
+        "#1A1838",
+        "#2F2B63",
+        "#4D4690"
+      ]
+    },
+    {
+      "id": "bougainvillea",
+      "name": "Bougainvillea",
+      "collection": "midi",
+      "evokes": "Èze walls against the sea",
+      "status": "review",
+      "light": {
+        "accent": "#B4287A",
+        "accentText": "#A01E6C",
+        "accentFill": "#B4287A",
+        "onAccent": "#FFFFFF",
+        "accentDeep": "#8A1A5C",
+        "companion": "#2A7FB8"
+      },
+      "dark": {
+        "accent": "#F07DB8",
+        "accentText": "#F59BC9",
+        "accentFill": "#F07DB8",
+        "onAccent": "#3A0A25",
+        "accentDeep": "#D0609A",
+        "companion": "#7FB8E6"
+      },
+      "velvet": [
+        "#2E0B22",
+        "#5A123F",
+        "#8A1A5C"
+      ]
+    },
+    {
+      "id": "azur",
+      "name": "Azur",
+      "collection": "midi",
+      "evokes": "Côte d'Azur water, ochre façades",
+      "status": "review",
+      "light": {
+        "accent": "#0F7DA8",
+        "accentText": "#0B6A91",
+        "accentFill": "#0F7DA8",
+        "onAccent": "#FFFFFF",
+        "accentDeep": "#0A5C80",
+        "companion": "#E08A4A"
+      },
+      "dark": {
+        "accent": "#5CC4EA",
+        "accentText": "#86D4F0",
+        "accentFill": "#5CC4EA",
+        "onAccent": "#062838",
+        "accentDeep": "#2E9AC4",
+        "companion": "#F0A56E"
+      },
+      "velvet": [
+        "#062433",
+        "#0A4460",
+        "#0E6388"
+      ]
+    },
+    {
+      "id": "laurier",
+      "name": "Laurier Rose",
+      "collection": "midi",
+      "evokes": "Riviera oleander",
+      "status": "review",
+      "light": {
+        "accent": "#B5476F",
+        "accentText": "#9C3A5E",
+        "accentFill": "#B5476F",
+        "onAccent": "#FFFFFF",
+        "accentDeep": "#86304F",
+        "companion": "#5E8468"
+      },
+      "dark": {
+        "accent": "#F094B0",
+        "accentText": "#F4AEC3",
+        "accentFill": "#F094B0",
+        "onAccent": "#3B0F1F",
+        "accentDeep": "#D06A8A",
+        "companion": "#9CC2A6"
+      },
+      "velvet": [
+        "#2E0D1A",
+        "#5A1C33",
+        "#86304F"
+      ]
+    }
+  ]
+}

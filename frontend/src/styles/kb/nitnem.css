@@ -1,0 +1,7 @@
+/* ---- Nitnem / Gutka page ---------------------------------------------------- */
+.nitnem-list .sect { font-size:13px; letter-spacing:1px; text-transform:uppercase; color:var(--soft); margin:22px 0 8px; }
+.nitnem-list .tiles { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px; }
+.nitnem-list .hint select { margin-left:6px; }
+.nitnem-reader .sline .cite { font-size:11px; color:var(--faint); margin-top:2px; }
+.nitnem-reader .sline.extra { border-left:2px solid var(--line); padding-left:10px; }
+.nitnem-reader .vbtn { font-size:12px; margin-left:6px; }

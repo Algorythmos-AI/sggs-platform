@@ -1,4 +1,4 @@
-import{c as e,i as t,n,t as r,u as i}from"./core.B0-ZdDOs.js";import{a,c as o,d as s,f as c,h as l,i as u,l as d,m as f,n as p,o as m,p as ee,r as te,s as h,t as ne,u as re}from"./store.BGQq-_Fz.js";function g(e){return e.map(e=>`<div class="sline ${e.is_rahao?`rahao`:``}${e.is_header?``:` haspin`}"${e.is_header?``:` data-line-id="${e.id}"`}>
+import{c as e,i as t,n,t as r,u as i}from"./core.CLHstp5O.js";import{a,c as o,d as s,f as c,h as l,i as u,l as d,m as f,n as p,o as m,p as ee,r as te,s as h,t as ne,u as re}from"./store.BGQq-_Fz.js";function g(e){return e.map(e=>`<div class="sline ${e.is_rahao?`rahao`:``}${e.is_header?``:` haspin`}"${e.is_header?``:` data-line-id="${e.id}"`}>
       ${e.is_header?``:d(e.id,e.ang,e.comp_id,e.gurmukhi)}
       <div class="g gm${e.is_header?` ph`:``}${e.is_header&&e.gurmukhi.startsWith(`ੴ`)?` invoc`:``}" lang="pa">${t(e.gurmukhi)}</div>
       <div class="t${e.is_header?` ph`:``}">${t(e.translit)}</div>

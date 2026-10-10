@@ -71,7 +71,7 @@ const go = guard(async (off: number) => {
   let h = '';
   if (d.related_themes && d.related_themes.length)
     h += `<div class="count">Related themes: ${d.related_themes.map((t: string) =>
-      `<a href="#" class="rel-theme" data-theme="${esc(t)}" style="color:var(--saffron)">${esc(t)}</a>`).join(' · ')}</div>`;
+      `<a href="#" class="rel-theme" data-theme="${esc(t)}">${esc(t)}</a>`).join(' · ')}</div>`;
   if (d.concept) h += `<div class="themedesc"><b>${esc(d.concept.name)}</b> — ${esc(d.concept.description)}<br>
       terms: <span class="gm">${d.concept.terms.map(esc).join(' · ')}</span> — ${d.concept.total} lines</div>`;
   h += `<div class="count">${d.results.length}${d.results.length === 50 ? '+' : ''} result(s) · interpreted as <b>${esc(d.mode)}</b>${off ? ` · from #${off + 1}` : ''}</div>`;

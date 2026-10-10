@@ -1,0 +1,9 @@
+/* drive Tailwind's dark: variant off our explicit data-theme (not OS) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans: "Sant Lipi", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-gm: "Sant Lipi", "Mukta Mahee", "Gurmukhi MN", "Gurmukhi Sangam MN", "Noto Sans Gurmukhi", "Raavi", sans-serif;
+  --color-saffron: #ff9933;
+  --color-gold: #ffd24a;
+}

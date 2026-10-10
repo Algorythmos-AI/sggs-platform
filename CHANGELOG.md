@@ -6,6 +6,26 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 ## [Unreleased]
 
 ### Added
+- **The Knowledge Base has thirteen colour themes, on warm paper.** The five accents of the app, with
+  its exact values (Soul Gold, the default, Saffron, Gold, Indigo, Teal), four from Italy (Glicine,
+  Siena, Toscana, Pietra Serena) and four from the south of France (Lavande, Bougainvillea, Azur,
+  Laurier Rose). Each new theme pairs an accent with a decorative companion colour. The header is
+  now cloth: a pale wash of the theme by day and a deep tone by night, with a two-line hem and a
+  faint Phulkari motif; the title is set in Source Serif 4 and the ੴ mark is flat. Reading surfaces
+  sit on paper, with a warmer tone available by day. The themes are data
+  (`docs/brand/web-themes.json`): `scripts/brand/gen_web_themes.py` derives every tinted surface,
+  solves the tint strength per theme, and refuses to write if any text pair is under 4.5:1. The
+  stored choice (`sggs_accent`, `sggs_reader_tone`, the app's key names) is applied before first
+  paint, follows you across tabs, and falls back to the default if unknown or if storage is
+  blocked. The picker arrives with the new shell; until then the default theme shows.
+- **Colour contrast now passes on every Knowledge Base page, in every theme, light and dark.** The
+  old palette used its accent as text at about 3:1; `--accent` is now the accent's text colour and
+  filled controls use `--accent-fill` with `--on-accent` text. Chips sit on a wash the accent text
+  is proven readable on; search highlights keep the text ink; faded captions use a readable muted
+  ink instead of opacity. The recorded contrast failures in `kb-shell.spec.ts` went from eleven
+  page-and-theme entries to none, and `kb-themes.spec.ts` proves the Reader in all 26 combinations.
+- Two gates: every key the site keeps in the browser must be named on the privacy page
+  (`StoredKeysAreDisclosed`), and a companion colour may never be used for text.
 - **The wiki's front door.** The home page opens on the system-landscape poster, then *Ten minutes to
   your first search* (clone → `make doctor` → `make dataset` → `serve.py`, with the live search
   simulator limited to three results), the four learning paths as cards (`<!-- sggs:cards -->`, a
@@ -42,6 +62,11 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   Lighthouse on three Knowledge Base pages.
 
 ### Changed
+- **The Knowledge Base stylesheet is twenty ordered partials** (`frontend/src/styles/kb/*.css`);
+  `global.css` only lists them. A move, not a restyle: the built stylesheet is byte-identical (same
+  hashed file, same sha256) and `webapp/static` is unchanged. A gate
+  (`KbStylesheetIsOrderedPartials`) keeps every partial imported once, in order, with the phone
+  control-size rule last.
 - **The wiki names both routing states after #205.** `integration` routes production's five API
   contexts to their own functions; production (v1.3.10) still answers every path with `all` until
   the first release after the app is live, which moves all five at once. The architecture overview,

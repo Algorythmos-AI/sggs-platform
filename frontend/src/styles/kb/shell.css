@@ -1,0 +1,66 @@
+/* ======================= shell: header / nav / footer ======================= */
+header.site {
+  position:relative; isolation:isolate; text-align:center; color:var(--cloth-ink); overflow:hidden;
+  padding:34px 20px 30px;
+  background:var(--cloth);
+}
+header.site::before {                      /* a faint Phulkari motif woven into the cloth, never behind scripture */
+  content:''; position:absolute; inset:0; z-index:-1; background:var(--co); opacity:.07; pointer-events:none;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px;
+}
+header.site::after {                       /* the hem: a companion thread over a line of the accent */
+  content:''; position:absolute; left:0; right:0; bottom:0; height:4px;
+  background:linear-gradient(var(--co) 0 2px, transparent 2px 3px, var(--accent-fill) 3px 4px);
+}
+header.site .glow { display:none; }
+header.site .onkar { position:relative; font-size:50px; line-height:1; color:var(--cloth-ink); }   /* the mark: flat, one colour */
+header.site h1 { position:relative; font-family:var(--font-serif); font-size:24px; font-weight:600; margin-top:8px; letter-spacing:-.005em; }
+header.site p { position:relative; font-size:12.5px; color:var(--cloth-soft); margin-top:6px; font-weight:450; }
+
+.themebtn {
+  position:absolute; top:18px; right:18px; z-index:2; width:42px; height:42px; border-radius:14px;
+  display:inline-flex; align-items:center; justify-content:center; font-size:18px; line-height:1; cursor:pointer;
+  color:var(--cloth-ink); border:1px solid color-mix(in srgb, var(--cloth-ink) 24%, transparent);
+  background:color-mix(in srgb, var(--cloth-ink) 6%, transparent); transition:transform .15s, background .15s, border-color .15s;
+}
+.themebtn:hover { background:color-mix(in srgb, var(--cloth-ink) 13%, transparent); border-color:color-mix(in srgb, var(--cloth-ink) 42%, transparent); transform:translateY(-1px); }
+.themebtn:active { transform:scale(.94); }
+/* traditional-saroop toggle — sits just left of the theme button (display-only feature) */
+#saroopBtn { right:68px; font-family:var(--font-gm); font-size:20px; font-weight:600; }
+#saroopBtn.on { background:var(--accent-fill); border-color:var(--accent-ui); color:var(--on-accent); }
+#saroopBtn.on:hover { filter:brightness(1.05); }
+
+nav.site {
+  position:sticky; top:0; z-index:30; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;
+  padding:11px 12px; border-bottom:1px solid var(--line);
+  background:color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter:saturate(160%) blur(14px); -webkit-backdrop-filter:saturate(160%) blur(14px);
+}
+nav.site a, nav.site button {
+  font:inherit; font-size:13.5px; font-weight:550; cursor:pointer; text-decoration:none;
+  display:inline-flex; align-items:center; gap:6px; padding:8px 17px; border-radius:999px;
+  color:var(--soft); background:transparent; border:1px solid transparent; transition:all .16s;
+}
+nav.site a:hover, nav.site button:hover { color:var(--ink); background:var(--chip); border-color:var(--line); }
+nav.site a.on {
+  color:var(--accent-ink); border-color:transparent;
+  background:var(--accent-fill);
+  box-shadow:var(--fill-edge), 0 6px 18px var(--glow); font-weight:650;
+}
+nav.site button#randomBtn { color:var(--accent); border-color:color-mix(in srgb, var(--accent) 35%, transparent); }
+nav.site button#randomBtn:hover { background:color-mix(in srgb, var(--accent) 12%, transparent); border-color:var(--accent); }
+
+main { max-width:940px; margin:0 auto; padding:22px 18px 96px; }
+
+footer.site {
+  position:fixed; inset:auto 0 0 0; z-index:20; text-align:center; font-size:11px; color:var(--soft);
+  padding:8px; border-top:1px solid var(--line);
+  background:color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+}
+footer.site a { color:var(--soft); text-decoration:underline; text-underline-offset:2px; }
+footer.site a:hover { color:var(--ink); }
+.skip-link { position:absolute; left:-9999px; top:auto; z-index:100; background:var(--accent-fill); color:var(--accent-ink);
+  padding:8px 16px; border-radius:0 0 12px 0; font-size:14px; font-weight:600; }
+.skip-link:focus { left:0; top:0; }

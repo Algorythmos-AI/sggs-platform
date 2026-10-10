@@ -2,6 +2,7 @@
 // theme (light/dark/system), nav active-state, cross-page navigation, prefs, footer.
 // The theme toggle lives in ./theme (shared with the marketing shell); core just wires it up.
 import { initTheme } from './theme';
+import { initAppearance } from './appearance';
 export { applyTheme } from './theme';
 export const $ = (s: string) => document.querySelector(s) as HTMLElement | null;
 export const esc = (s: any) =>
@@ -137,8 +138,8 @@ document.addEventListener('click', (e: any) => {
   }
 });
 
-// ---- the browser's own chrome (address bar, status bar) follows the page theme, not the OS:
-// its colour is the header's, read from the stylesheet whenever the theme changes ----
+// ---- the browser's own chrome (address bar, status bar) follows the page, not the OS: its colour
+// is the header's, read from the stylesheet whenever the theme or the colour theme changes ----
 function syncChromeColor() {
   const m = document.getElementById('kbThemeColor');
   const c = getComputedStyle(document.documentElement).getPropertyValue('--chrome').trim();
@@ -147,8 +148,9 @@ function syncChromeColor() {
 
 // shared init (module scripts are deferred → DOM is ready)
 initTheme();
+initAppearance();
 syncChromeColor();
-new MutationObserver(syncChromeColor).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+document.addEventListener('themechange', syncChromeColor);
 applyPrefs();
 markNav();
 syncToolbarTop();
