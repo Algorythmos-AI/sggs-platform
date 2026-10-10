@@ -13,7 +13,7 @@ test('the home page offers a door to every tool, and Home in the navigation is c
   await expect(doors).toHaveCount(9);
   const hrefs = await doors.evaluateAll((els) => els.map((a) => a.getAttribute('href')));
   expect(hrefs).toEqual(['/reader', '/nitnem', '/browse', '/themes', '/constellation', '/trail', '/lineage', '/analytics', '/raag-clock']);
-  await expect(page.locator('nav.site a[aria-current="page"]')).toHaveAttribute('href', '/library');
+  await expect(page.locator('[data-place="home"]:visible')).toHaveAttribute('aria-current', 'page');
 });
 
 test('searching from the home page lands on Search with results', async ({ page }) => {
@@ -42,7 +42,7 @@ test.describe('the current pahar', () => {
 
 test('the Hukam-style random button on the home page opens a composition', async ({ page }) => {
   await page.goto('/library');
-  const btn = page.locator('.hub-random');
+  const btn = page.locator('.hub-random:visible, #randomBtn:visible').first();   // in the top bar on a wide screen
   await expect(btn).toHaveText('✦ Hukam-style random');
   await btn.click();
   await expect(page.locator('#panel')).toHaveClass(/\bon\b/, { timeout: 15_000 });

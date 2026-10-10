@@ -80,6 +80,20 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   Lighthouse on three Knowledge Base pages.
 
 ### Changed
+- **The Knowledge Base has a new shell.** Twelve pills become five places — Home, Read, Search,
+  Explore, Saved — the same on every screen: a slim cloth top bar on a wide screen, a tab bar above
+  the home indicator on a phone. A place with several pages (Read: Reader, Nitnem, Index; Explore:
+  Themes, Constellation, Verse trail, Contributors, Insights, Raag Clock) lists them in a second
+  row. On a 375px phone content now starts within 120px of the top (it was 449px), the footer is
+  part of the page instead of fixed over it, and no Knowledge Base page scrolls sideways (the
+  Reader toolbar and the Contributors controls wrap; both overflow baselines are empty). Every page
+  has its own heading (in the bar on a phone). The pinned-verses button is the Saved place, with
+  its count; its drawer is titled Saved and its second tab Connections. The home page carries the
+  cloth down into a canopy with the title, and keeps room for the pahar line so nothing jumps.
+  Sehaj hides the bars and now always shows an Exit button (a phone has no Esc key). The page
+  allows for the notch and the home indicator (`viewport-fit=cover` with safe-area insets), and a
+  page of scripture prints as paper: no bars, dark ink, whatever the theme.
+  `frontend/e2e/kb-shell-layout.spec.ts` proves each of these on a phone and a wide screen.
 - **The Knowledge Base stylesheet is twenty ordered partials** (`frontend/src/styles/kb/*.css`);
   `global.css` only lists them. A move, not a restyle: the built stylesheet is byte-identical (same
   hashed file, same sha256) and `webapp/static` is unchanged. A gate

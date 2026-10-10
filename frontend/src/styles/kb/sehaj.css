@@ -1,6 +1,12 @@
 /* ============================== sehaj / focus reading mode ============================== */
 #sehajBtn.on { color:var(--accent-ink); background:var(--accent-fill); border-color:var(--accent-ui); }
-body.focus-mode header.site, body.focus-mode nav.site, body.focus-mode footer.site { display:none; }
+body.focus-mode .kb-chrome, body.focus-mode .kb-tabs, body.focus-mode .kb-foot { display:none; }
+body.focus-mode { padding-bottom:0; }
+/* the way out, always in reach: on a phone there is no Esc key, and the toolbar scrolls away */
+.sehaj-exit { display:none; }
+body.focus-mode .sehaj-exit { display:inline-flex; align-items:center; position:fixed; z-index:3; right:14px; bottom:calc(14px + env(safe-area-inset-bottom, 0px));
+  min-height:44px; padding:0 16px; font:inherit; font-size:13px; font-weight:600; color:var(--ink); background:var(--card);
+  border:1px solid var(--line-strong); border-radius:999px; box-shadow:var(--shadow); cursor:pointer; }
 body.focus-mode { background:
   radial-gradient(1200px 720px at 50% 18%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%),
   var(--bg); }

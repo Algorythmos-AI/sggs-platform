@@ -18,10 +18,15 @@ const DOORS = [
   { href: '/raag-clock', name: 'Raag Clock', sub: 'Traditional timing, sources differ', d: dot(12, 12, 8.5) + 'M12 7v5l3 2' },
 ];
 ---
-<Base title="ੴ Sri Guru Granth Sahib Ji — Library"
+<Base title="ੴ Sri Guru Granth Sahib Ji — Library" heading={false}
       description="The Knowledge Base home: search Sri Guru Granth Sahib Ji, carry on where you were reading, and open the Reader, Nitnem, the Index and the study tools.">
+  <div slot="hero" class="hub-canopy">
+    <div class="hub-canopy-in">
+      <h1>Sri Guru Granth Sahib Ji</h1>
+      <p>1430 Angs · verbatim Gurmukhi · searchable by word, sound, first letters &amp; theme</p>
+    </div>
+  </div>
   <section id="v-library" class="hub">
-    <div class="hub-now" id="hubNow" aria-live="polite"></div>
     <form class="searchbar hub-search" action="/search" method="get" role="search">
       <input id="hubQ" name="q" class="gm" aria-label="Search Sri Guru Granth Sahib Ji"
              placeholder="ਨਾਮੁ · waheguru · saadh sangat · ਧ ਧ ਰ ਗ · dh dh r g …" />
@@ -31,6 +36,7 @@ const DOORS = [
       <div class="hub-continue" id="hubContinue"></div>
       <button class="now-btn ghost hub-random" type="button" data-random>✦ Hukam-style random</button>
     </div>
+    <div class="hub-now" id="hubNow" aria-live="polite"></div>
     <h2 class="hub-h">Open a door</h2>
     <nav class="doors" aria-label="Knowledge Base tools">
       {DOORS.map((d) => (

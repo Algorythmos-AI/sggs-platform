@@ -120,14 +120,14 @@ def derive(src):
                 "canvas": canvas, "surface-2": silk_a,
                 "accent-ui": lt["accent"], "accent-text": lt["accentText"], "accent-fill": lt["accentFill"],
                 "on-accent": lt["onAccent"], "accent-deep": lt["accentDeep"], "co": lt["companion"],
-                "cloth": f"linear-gradient(120deg,{silk_a} 0%,{silk_a} 38%,{silk_b} 100%)",
+                "cloth": f"linear-gradient(90deg,{silk_a} 0%,{silk_a} 38%,{silk_b} 100%)",
                 "tile1": silk_a, "tile2": silk_b, "chrome": silk_a, "glow": rgba(lt["accent"], ".16"),
             },
             "dark": {
                 "canvas": dcanvas, "surface-2": D["paper"],
                 "accent-ui": dk["accent"], "accent-text": dk["accentText"], "accent-fill": dk["accentFill"],
                 "on-accent": dk["onAccent"], "accent-deep": dk["accentDeep"], "co": dk["companion"],
-                "cloth": f"linear-gradient(150deg,{velvet[0]} 0%,{velvet[1]} 55%,{velvet[2]} 100%)",
+                "cloth": f"linear-gradient(90deg,{velvet[0]} 0%,{velvet[1]} 55%,{velvet[2]} 100%)",
                 "tile1": dtile1, "tile2": dtile2, "chrome": velvet[0], "glow": rgba(dk["accent"], ".30"),
             },
         })

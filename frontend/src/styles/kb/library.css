@@ -1,6 +1,21 @@
 /* ============================== home (/library) ============================== */
 .hub { display:flex; flex-direction:column; gap:14px; }
-.hub-now:empty, .hub-continue:empty { display:none; }
+.hub-continue:empty, .hub-now[hidden] { display:none; }
+/* the canopy: the cloth of the bar carried down over the title, ending in the hem */
+.hub-canopy { position:relative; isolation:isolate; color:var(--cloth-ink); background:var(--cloth); padding:10px 18px 30px; }
+.hub-canopy::before { content:''; position:absolute; inset:0; z-index:-1; background:var(--co); opacity:.07; pointer-events:none;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px; }
+.hub-canopy::after { content:''; position:absolute; left:0; right:0; bottom:0; height:4px;
+  background:linear-gradient(var(--co) 0 2px, transparent 2px 3px, var(--accent-fill) 3px 4px); }
+.hub-canopy-in { max-width:904px; margin:0 auto; }
+.hub-canopy h1 { font-family:var(--font-serif); font-weight:600; font-size:clamp(28px, 6.4vw, 46px); line-height:1.1; letter-spacing:-.01em; text-wrap:balance; }
+.hub-canopy p { margin-top:8px; font-size:13.5px; color:var(--cloth-soft); }
+/* on the home page the hem moves from the bar to the foot of the canopy */
+body.has-hero .kb-chrome { padding-bottom:0; }
+body.has-hero .kb-chrome::after { display:none; }
+/* room is kept for the pahar line and one row of raags, so the doors do not jump when they arrive */
+.hub-now { min-height:88px; }
 .hub-eyebrow { font-size:13.5px; color:var(--soft); }
 .hub-eyebrow b { color:var(--ink); font-weight:650; }
 .hub-note { font-size:12px; color:var(--faint); margin-left:6px; }
@@ -17,6 +32,7 @@
 .hub-cont span { font-size:12px; color:var(--soft); }
 .hub-cont b { font-size:17px; font-weight:650; }
 .hub-random { min-height:48px; align-self:center; }
+@media (min-width:841px) { .hub-random { display:none; } }   /* a wide screen has it in the top bar */
 .hub-h { font-family:var(--font-serif); font-size:20px; font-weight:600; margin:8px 2px 0; }
 /* the doors: a row of façades, washed alternately in the theme's two colours */
 .doors { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px; }

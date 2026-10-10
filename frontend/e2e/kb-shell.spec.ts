@@ -80,21 +80,8 @@ const STATES: State[] = [
 // per project ('*' = every project) because the two engines pick different fonts there. A platform
 // with no baseline measures, reports an overflow as a warning, and asserts nothing.
 const OVERFLOWS_TODAY: Partial<Record<NodeJS.Platform, Record<string, Record<string, string>>>> = {
-  darwin: {
-    '*': {
-      '/reader?ang=712': 'the Reader toolbar (.toolbar .right, ending at #sehajBtn) does not wrap: scrollWidth 425 (Chromium) / 421 (WebKit)',
-      '/lineage': 'the filter legend (#tlFilter) and the View group (#linGroup) are 2px wider than the phone: scrollWidth 377',
-    },
-  },
-  linux: {
-    desktop: {
-      '/reader?ang=712': 'the Reader toolbar does not wrap: scrollWidth 415',
-    },
-    mobile: {
-      '/reader?ang=712': 'the Reader toolbar does not wrap: scrollWidth 444',
-      '/lineage': 'the filter legend and the View group are wider than the phone: scrollWidth 408',
-    },
-  },
+  darwin: { '*': {} },
+  linux: { desktop: {}, mobile: {} },
 };
 
 // Serious/critical axe rule ids each page violates today, per theme. Unlisted page or theme = clean.
@@ -177,7 +164,7 @@ test.describe('at 375px', () => {
 });
 
 for (const s of STATES) {
-  test(`${s.url} has unique ids, a zoomable viewport and lang="en"`, async ({ page }) => {
+  test(`${s.url} has unique ids, one heading, a zoomable viewport and lang="en"`, async ({ page }) => {
     await open(page, s);
 
     const duplicates = await page.evaluate(() => {
@@ -199,6 +186,7 @@ for (const s of STATES) {
       .toBeGreaterThanOrEqual(2);
 
     await expect.soft(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect.soft(page.locator('h1'), `one <h1> on ${s.url}`).toHaveCount(1);
   });
 
   for (const theme of ['light', 'dark'] as const) {

@@ -10,13 +10,6 @@
 .pin-btn.pinned { opacity:1; filter:none; background:color-mix(in srgb, var(--accent) 18%, transparent);
   border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 0 10px var(--glow); }
 
-.trail-fab { position:fixed; right:18px; bottom:52px; z-index:45; width:54px; height:54px; border-radius:50%;
-  border:1px solid var(--accent-ui); background:var(--accent-fill); color:var(--accent-ink);
-  font-size:20px; cursor:pointer; box-shadow:0 10px 30px var(--glow); display:flex; align-items:center; justify-content:center; transition:transform .15s; }
-.trail-fab:hover { transform:translateY(-2px) scale(1.05); }
-.trail-fab-n { position:absolute; top:-4px; right:-4px; min-width:20px; height:20px; padding:0 5px; border-radius:999px;
-  background:var(--ink); color:var(--bg); font-size:11px; font-weight:800; display:none; align-items:center; justify-content:center; }
-.trail-fab.has .trail-fab-n { display:inline-flex; }
 
 .trail-scrim { position:fixed; inset:0; z-index:55; background:color-mix(in srgb, #05070d 55%, transparent);
   backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity .25s; }

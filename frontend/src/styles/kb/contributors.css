@@ -83,7 +83,7 @@ body.cmp-mode .tl-node:hover .tl-card { border-color:color-mix(in srgb, var(--ac
 .cmp-col .ld-tlabel { width:92px; }
 @media (max-width:660px) { .cmp-grid { grid-template-columns:1fr; } }
 
-.cmp-tray { position:fixed; left:50%; transform:translateX(-50%); bottom:64px; z-index:46; max-width:94vw;
+.cmp-tray { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(14px + var(--kb-bottom)); z-index:46; max-width:94vw;
   display:flex; align-items:center; gap:9px; flex-wrap:wrap; justify-content:center;
   background:color-mix(in srgb, var(--bg-2) 94%, transparent); border:1px solid var(--line-strong); border-radius:16px; padding:9px 13px;
   box-shadow:0 16px 44px rgba(0,0,0,.34); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
@@ -100,6 +100,8 @@ body.cmp-mode .tl-node:hover .tl-card { border-color:color-mix(in srgb, var(--ac
 @media (max-width:560px) {
   .tl-band { padding-left:66px; }
   .lin-controls { flex-direction:column; align-items:stretch; }
+  .lin-controls > * { min-width:0; max-width:100%; }
+  .lin-legend { flex-wrap:wrap; }
   .lin-group { overflow-x:auto; }
 }
 
