@@ -31,12 +31,17 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   stored choice (`sggs_accent`, `sggs_reader_tone`, the app's key names) is applied before first
   paint, follows you across tabs, and falls back to the default if unknown or if storage is
   blocked. The picker arrives with the new shell; until then the default theme shows.
-- **Colour contrast now passes on every Knowledge Base page, in every theme, light and dark.** The
-  old palette used its accent as text at about 3:1; `--accent` is now the accent's text colour and
-  filled controls use `--accent-fill` with `--on-accent` text. Chips sit on a wash the accent text
-  is proven readable on; search highlights keep the text ink; faded captions use a readable muted
-  ink instead of opacity. The recorded contrast failures in `kb-shell.spec.ts` went from eleven
-  page-and-theme entries to none, and `kb-themes.spec.ts` proves the Reader in all 26 combinations.
+- **Colour contrast: every Knowledge Base page passes in the default theme, light and dark, and the
+  base text pairs are proven for all thirteen.** The old palette used its accent as text at about
+  3:1; `--accent` is now the accent's text colour and filled controls use `--accent-fill` with
+  `--on-accent` text. Chips sit on a wash the accent text is proven readable on; search highlights
+  keep the text ink; faded captions use a readable muted ink instead of opacity. The recorded
+  contrast failures in `kb-shell.spec.ts` went from eleven page-and-theme entries to none (every
+  page, default theme), `kb-themes.spec.ts` checks the Reader in all 26 combinations, and the
+  generator proves accent, soft and faint text on six surfaces per mode for every theme. Not yet
+  in that proof: text on a tint layered over another tint (a chip on the second background, the
+  Raag Clock dial's arcs, the contributor-kind chips), which dips to 4.2–4.5:1 in the twelve themes
+  that cannot be chosen until the picker ships. Those composites join the generator before it does.
 - Two gates: every key the site keeps in the browser must be named on the privacy page
   (`StoredKeysAreDisclosed`), and a companion colour may never be used for text.
 - **The wiki's front door.** The home page opens on the system-landscape poster, then *Ten minutes to
@@ -132,6 +137,15 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   and reached 80px back in — unseen on the old dark page, a grey band down the right edge of every
   Knowledge Base page on paper. The shadow now belongs to the open drawer only.
 - The Raag Clock link beside the home page's raags has a full 44px touch target.
+- **Found reviewing the themes, fixed before release.** The Constellation's centre label was dark
+  text on the accent's text colour (3.8:1): it is a filled control now (`--accent-fill`, its edge,
+  `--on-accent`). The header's two buttons used `color-mix()` of the ink for their wash, and the
+  build's fallback for browsers without `color-mix()` (Safari before 16.2) was the ink itself — a
+  solid square the colour of its own glyph: the wash is a literal now. The Study Trail's coverage
+  bars and the skip link carry the edge every brand-gold fill must have. Three captions still
+  dimmed by opacity (Themes, Contributors, the Reader's "EN ·" label) use the muted ink. A raag's
+  Gurmukhi name in the divergence table no longer takes the theme colour on hover — the
+  transliteration shows the link. The contributor "term" chip sits on the proven wash.
 - **On the Knowledge Base, Gurmukhi is ink everywhere, and a test now proves it.** The pages
   coloured scripture: composition headings and the ੴ invocation were gold (the invocation with a
   glow and extra letter-spacing), refrain lines were orange on a tinted band, and the composition

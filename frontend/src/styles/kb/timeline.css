@@ -39,7 +39,7 @@
 .ld-h { font-size:12px; font-weight:700; color:var(--ink); margin-bottom:8px; }
 .ld-note { font-size:11px; color:var(--faint); font-weight:400; }
 .ld-termwrap { display:flex; gap:7px; flex-wrap:wrap; }
-.ld-term { font-size:12px; padding:4px 12px; border-radius:999px; background:color-mix(in srgb, var(--accent) 12%, transparent);
+.ld-term { font-size:12px; padding:4px 12px; border-radius:999px; background:var(--accent-wash);
   color:var(--accent); border:1px solid color-mix(in srgb, var(--accent) 28%, transparent); }
 
 /* related-drawer trail link */

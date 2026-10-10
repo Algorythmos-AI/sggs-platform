@@ -22,9 +22,12 @@ header.site p { position:relative; font-size:12.5px; color:var(--cloth-soft); ma
   position:absolute; top:18px; right:18px; z-index:2; width:42px; height:42px; border-radius:14px;
   display:inline-flex; align-items:center; justify-content:center; font-size:18px; line-height:1; cursor:pointer;
   color:var(--cloth-ink); border:1px solid color-mix(in srgb, var(--cloth-ink) 24%, transparent);
-  background:color-mix(in srgb, var(--cloth-ink) 6%, transparent); transition:transform .15s, background .15s, border-color .15s;
+  /* The wash is a literal grey, light enough for silk and velvet alike. As color-mix() of the ink,
+     the build's fallback for browsers without color-mix() (Safari before 16.2) was the ink itself:
+     a solid square the same colour as the glyph on it. */
+  background:rgb(127 127 127 / .10); transition:transform .15s, background .15s, border-color .15s;
 }
-.themebtn:hover { background:color-mix(in srgb, var(--cloth-ink) 13%, transparent); border-color:color-mix(in srgb, var(--cloth-ink) 42%, transparent); transform:translateY(-1px); }
+.themebtn:hover { background:rgb(127 127 127 / .20); border-color:color-mix(in srgb, var(--cloth-ink) 42%, transparent); transform:translateY(-1px); }
 .themebtn:active { transform:scale(.94); }
 /* traditional-saroop toggle — sits just left of the theme button (display-only feature) */
 #saroopBtn { right:68px; font-family:var(--font-gm); font-size:20px; font-weight:600; }
@@ -61,6 +64,6 @@ footer.site {
 }
 footer.site a { color:var(--soft); text-decoration:underline; text-underline-offset:2px; }
 footer.site a:hover { color:var(--ink); }
-.skip-link { position:absolute; left:-9999px; top:auto; z-index:100; background:var(--accent-fill); color:var(--accent-ink);
+.skip-link { position:absolute; left:-9999px; top:auto; z-index:100; background:var(--accent-fill); color:var(--accent-ink); box-shadow:var(--fill-edge);
   padding:8px 16px; border-radius:0 0 12px 0; font-size:14px; font-weight:600; }
 .skip-link:focus { left:0; top:0; }
