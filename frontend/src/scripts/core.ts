@@ -1,7 +1,7 @@
 // core.ts — shared across every MPA page: DOM helpers, API, store, toast, META cache,
 // theme (light/dark/system), nav active-state, cross-page navigation, prefs, footer.
 // The theme toggle lives in ./theme (shared with the marketing shell); core just wires it up.
-import { initTheme } from './theme';
+import { initTheme, applyTheme } from './theme';
 import { initAppearance } from './appearance';
 export { applyTheme } from './theme';
 export const $ = (s: string) => document.querySelector(s) as HTMLElement | null;
@@ -162,4 +162,17 @@ markNav();
 document.querySelector('.kb-sub a[aria-current]')?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'instant' });
 syncToolbarTop();
 window.addEventListener('resize', syncToolbarTop);
+// A page brought back by Back/Forward is exactly as it was left. What was chosen on another page
+// since is applied again — the appearance and the text size here, the colour theme and paper tone
+// in ./appearance — and what was measured is measured again.
+window.addEventListener('pageshow', (e) => {
+  if (!e.persisted) return;
+  const t = store.get('theme', 'system');
+  applyTheme(t === 'light' || t === 'dark' ? t : 'system');
+  const gs = parseInt(store.get('gsize', ''), 10);
+  if (gs) document.documentElement.style.setProperty('--gsize', gs + 'px');
+  else document.documentElement.style.removeProperty('--gsize');
+  syncToolbarTop();
+  syncChromeColor();
+});
 initFooter();

@@ -60,6 +60,10 @@ repository gate fails if the sitemap and the built pages disagree.
 - **One overlay stack.** The composition panel, Saved and the display sheet register with
   `scripts/overlay.ts`: Escape closes the top one, Tab stays inside it, focus returns to the opener,
   and a page's own keys (the Reader's arrow paging) ask `overlayOpen()` first.
+- **Page transitions without a router.** The Knowledge Base opts into cross-document view
+  transitions in CSS (`styles/kb/motion.css`, inside `prefers-reduced-motion: no-preference`): the
+  bars are held, the page cross-fades. The marketing pages keep Astro's `<ClientRouter />`.
+  Navigation links carry `data-astro-prefetch`.
 - **Fonts are self-hosted.** Sant Lipi (SIL OFL) renders Gurmukhi and is limited by
   `unicode-range` to the Gurmukhi block, so it never downloads for an English-only page; the
   marketing pages add Source Serif 4. Both are preloaded.
