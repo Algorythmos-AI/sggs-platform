@@ -575,7 +575,6 @@ body.drawer-open { overflow:hidden; }
 
 @media (prefers-reduced-motion: reduce) { *{ transition:none !important; scroll-behavior:auto !important; } }
 @media (max-width:620px) {
-  :root, :root[data-theme] { --gsize:20px; }
   main { padding:18px 14px 92px; }
   .shabad { padding:16px 18px 18px; }
   nav.site a, nav.site button { min-height:42px; }

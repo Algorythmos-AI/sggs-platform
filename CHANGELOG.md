@@ -73,6 +73,19 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   every push to `main` still audit all twenty.
 
 ### Fixed
+- **The Reader no longer loses the page you are on, and Nitnem keeps your place.** Five faults,
+  each reproduced by a test before the fix (`frontend/e2e/reader-nitnem.spec.ts`, desktop and phone):
+  on a weak connection a request for an Ang you had already paged past could fail late and replace
+  the Ang on screen with an error (a superseded request is now cancelled and can never paint); an
+  Ang already being prefetched was fetched a second time when you turned to it; a link to a verse
+  (`/reader?ang=…&line=…`) landed with the navigation and toolbar hidden, because the landing scroll
+  itself — or the page settling as a chip or the font arrived — counted as reading downwards (only a
+  wheel or touch scroll hides them now, and landing is an instant jump); reopening a bani put the
+  saved line in the middle of the screen and then saved the line above it, so the place crept back a
+  few lines every time (saving and resuming now share one anchor, just under the toolbar); and the
+  Gurmukhi size was written inline on every page even when you had never chosen one, which
+  overrode the stylesheet (it is written only once chosen; Reader and Nitnem now share one size
+  control and one range, 16–40px). No change to how any page looks.
 - **Every wiki page is in the sidebar again.** Fourteen of the nineteen sidebar groups rendered empty
   (Start here, Scripture 101, Architecture, Search, the handbook, Process, Brand, Decisions and the
   pinned groups), so 87 of 148 pages were reachable only through search and had no previous/next

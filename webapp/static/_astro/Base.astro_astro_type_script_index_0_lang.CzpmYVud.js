@@ -1,4 +1,4 @@
-import{c as e,i as t,n,t as r,u as i}from"./core.HDWhTXCo.js";import{a,c as o,d as s,f as ee,h as c,i as l,l as u,m as d,n as f,o as p,p as te,r as ne,s as m,t as re,u as ie}from"./store.BGQq-_Fz.js";function h(e){return e.map(e=>`<div class="sline ${e.is_rahao?`rahao`:``}${e.is_header?``:` haspin`}"${e.is_header?``:` data-line-id="${e.id}"`}>
+import{c as e,i as t,n,t as r,u as i}from"./core.B7V7yXG9.js";import{a,c as o,d as s,f as ee,h as c,i as l,l as u,m as d,n as f,o as p,p as te,r as ne,s as m,t as re,u as ie}from"./store.BGQq-_Fz.js";function h(e){return e.map(e=>`<div class="sline ${e.is_rahao?`rahao`:``}${e.is_header?``:` haspin`}"${e.is_header?``:` data-line-id="${e.id}"`}>
       ${e.is_header?``:u(e.id,e.ang,e.comp_id,e.gurmukhi)}
       <div class="g gm ${e.is_header&&e.gurmukhi.startsWith(`ੴ`)?`invoc`:``}" lang="pa" style="${e.is_header?`color:var(--gold);font-weight:600;text-align:center`:``}">${t(e.gurmukhi)}</div>
       <div class="t" style="${e.is_header?`text-align:center`:``}">${t(e.translit)}</div>

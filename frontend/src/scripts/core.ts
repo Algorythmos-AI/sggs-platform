@@ -19,10 +19,13 @@ export function toast(msg: string) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 3200);
 }
 
-export async function api(p: string): Promise<any> {
+export async function api(p: string, init?: RequestInit): Promise<any> {
   let r: Response;
-  try { r = await fetch('/api/' + p); }
-  catch (e) { toast('Cannot reach the app — is serve.py still running?'); throw e; }
+  try { r = await fetch('/api/' + p, init); }
+  catch (e) {
+    if (init?.signal?.aborted) throw e;        // cancelled on purpose (superseded) — nothing to report
+    toast('Cannot reach the app — is serve.py still running?'); throw e;
+  }
   if (!r.ok) {
     let m = 'Request failed (' + r.status + ')';
     try { m = (await r.json()).error || m; } catch {}
@@ -94,7 +97,15 @@ function markNav() {
 export function applyPrefs() {
   if (store.get('show_t', '1') === '0') document.body.classList.add('hide-t');
   if (store.get('show_timing', '1') === '0') document.body.classList.add('hide-timing');  // raag timing chip, default ON
-  const gs = parseInt(store.get('gsize', '22')); if (gs) document.documentElement.style.setProperty('--gsize', gs + 'px');
+  // only a size the reader chose is written inline; with nothing stored the stylesheet's default applies
+  const gs = parseInt(store.get('gsize', ''), 10); if (gs) document.documentElement.style.setProperty('--gsize', gs + 'px');
+}
+// one step (2px) larger or smaller Gurmukhi, from the size showing now — shared by Reader and Nitnem
+export function stepFontSize(d: number) {
+  const cur = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gsize'), 10) || 22;
+  const next = Math.max(16, Math.min(40, cur + d * 2));
+  document.documentElement.style.setProperty('--gsize', next + 'px');
+  store.set('gsize', next);
 }
 
 // ---- sticky reader toolbar below the (wrapping) nav ----

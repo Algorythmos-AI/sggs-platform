@@ -5,7 +5,7 @@
 // never cited as an Ang. Reading position per bani lives in localStorage (this browser only).
 // All scripture/API text goes through esc() before innerHTML; the `.gm` class lets saroop.ts
 // paint the traditional rendering (display only).
-import { $, esc, guard, api, store, goReader, applyPrefs, toast } from './core';
+import { $, esc, guard, api, store, goReader, applyPrefs, toast, stepFontSize } from './core';
 
 const CATEGORY_TITLE: Record<string, string> = {
   nitnem_morning: 'Morning', nitnem_evening: 'Evening', nitnem_night: 'Night',
@@ -130,20 +130,31 @@ const openBani = guard(async (key: string, variant?: string) => {
   });
   ($('#baniTop') as HTMLElement).addEventListener('click', () => window.scrollTo({ top: 0 }));
   ($('#baniDone') as HTMLElement).addEventListener('click', () => { prefs.setPos(id, 0); toast('Marked as read'); window.scrollTo({ top: 0 }); });
-  // resume: the saved line scrolls into view
+  // resume: the saved line returns to the anchor it was saved at (just above it, so the line
+  // before stays clear of the anchor and the next save reads this same line)
   const saved = prefs.pos(id);
   const target = saved > 1 ? document.querySelector(`#baniOut [data-seq="${saved}"]`) : null;
-  if (target) target.scrollIntoView({ block: 'center' }); else window.scrollTo({ top: 0 });
+  if (target) window.scrollTo({ top: Math.max(0, target.getBoundingClientRect().top + window.scrollY - anchorY() + 2), behavior: 'instant' });
+  else window.scrollTo({ top: 0 });
   try { history.replaceState(null, '', `/nitnem?bani=${encodeURIComponent(key)}${current.variant ? '&variant=' + encodeURIComponent(current.variant) : ''}`); } catch { /* ignore */ }
 });
 
-// position tracking: the first line whose top is below the header becomes the saved position
+// One anchor for saving and resuming a place: just below the sticky toolbar. Saving reads the
+// first line under it and resuming puts that line back there, so reopening lands on the same line.
+function anchorY(): number {
+  const tb = document.querySelector('#nitnemReader .toolbar') as HTMLElement | null;
+  if (!tb) return 120;
+  const stuck = parseFloat(getComputedStyle(tb).top);
+  return (Number.isFinite(stuck) ? stuck : 0) + tb.offsetHeight + 8;
+}
+
+// position tracking: the first line under the anchor becomes the saved position
 function trackPosition() {
   if (!current) return;
   window.clearTimeout(saveTimer);
   saveTimer = window.setTimeout(() => {
     const lines = Array.from(document.querySelectorAll('#baniOut [data-seq]')) as HTMLElement[];
-    const top = 120;
+    const top = anchorY();
     const first = lines.find((el) => el.getBoundingClientRect().bottom > top);
     const b = BANIS.find((x) => x.key === current!.key && (x.variant || '') === current!.variant);
     if (first && b) prefs.setPos(baniId(b), parseInt(first.dataset.seq || '0', 10));
@@ -184,10 +195,5 @@ function syncTranslit() {
 tglT.addEventListener('click', () => { store.set('show_t', store.get('show_t', '1') === '0' ? '1' : '0'); syncTranslit(); });
 tglT.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tglT.click(); } });
 syncTranslit();
-($('#fontMinus') as HTMLElement).addEventListener('click', () => bumpFont(-1));
-($('#fontPlus') as HTMLElement).addEventListener('click', () => bumpFont(1));
-function bumpFont(d: number) {
-  const cur = parseInt(store.get('gsize', '22'), 10) || 22;
-  store.set('gsize', String(Math.max(16, Math.min(40, cur + d * 2))));
-  applyPrefs();
-}
+($('#fontMinus') as HTMLElement).addEventListener('click', () => stepFontSize(-1));
+($('#fontPlus') as HTMLElement).addEventListener('click', () => stepFontSize(1));
