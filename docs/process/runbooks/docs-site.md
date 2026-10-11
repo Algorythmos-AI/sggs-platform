@@ -123,6 +123,12 @@ or `vercel rollback <previous-url> --scope <team>` with the docs project's token
 Vercel stops assigning the domain automatically; the next `deploy-production` run's `vercel promote`
 restores it. The wiki carries no state, so a rollback costs nothing but the newer pages.
 
+**Switching the page menu off.** If the page menu (copy, view as Markdown, the assistant links,
+print) ever misbehaves, it can be removed without a code change: set `DOCS_PAGE_ACTIONS=0` in the
+docs project's build environment and deploy again. The build then leaves the menu out of every page
+and stops announcing `actions1`, so the live checks do not look for it
+(`docs-site/plugins/features.mjs`, [ADR-0013](../../adr/0013-outbound-assistant-links.md)).
+
 ## 5. After launch: the routine
 
 | When | What |

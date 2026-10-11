@@ -1,11 +1,30 @@
 ---
 // Starlight's footer (edit link, pagination) plus the site's own: where the product lives, what
 // changed, the source, and how to report a problem. The page's date and verified stamp are under
-// its title (src/components/PageTitle.astro).
+// its title (src/components/PageTitle.astro). On paper, a colophon closes the page.
 import Default from '@astrojs/starlight/components/Footer.astro';
+import { SITE_ORIGIN } from '../../plugins/export-pages.mjs';
 const repo = 'https://github.com/Algorythmos-AI/sggs-platform';
+// On paper the page ends with where it came from (src/styles/print.css shows it; hidden on screen).
+const route = Astro.locals.starlightRoute;
+const pageId = route.id || 'index';
+const pageUrl = SITE_ORIGIN + (pageId === 'index' ? '/' : `/${pageId}/`);
+const commit = (process.env.PUBLIC_DOCS_COMMIT ?? '').slice(0, 7);
+const verified = (route.entry.data as { verified?: { commit: string; date: string } }).verified;
+const updated = route.lastUpdated;
+const day = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 ---
 <Default><slot /></Default>
+{pageId !== '404' && (
+  <p class="print-only print-colophon" data-pagefind-ignore>
+    Sri Guru Granth Sahib Ji — Knowledge Base wiki.
+    {/^[0-9a-f]{7}$/.test(commit) && <span> Generated from commit {commit}.</span>}
+    {updated && <span> Updated {day(updated)}.</span>}
+    {verified && <span> Verified against {verified.commit.slice(0, 7)} on {verified.date}.</span>}
+    <span class="print-colophon__printed"></span>
+    <span> This copy may be out of date; the page is at {pageUrl}</span>
+  </p>
+)}
 <nav class="site-footer" aria-label="Site">
   <p class="site-footer__links">
     <a href="https://gurbanisoul.com/">gurbanisoul.com</a>

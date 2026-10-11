@@ -156,6 +156,7 @@ export function planEdits(body, { repoRel, title, origin, pageUrl, sources, glos
     if (frozen.some((f) => start >= f.start && end <= f.end)) { left++; return; }
     edits.push({ start, end, text, kind });
   };
+  const count = (text) => text.split(/\s+/).filter(Boolean).length;
   const eol = (at) => (body.startsWith('\r\n', at) ? at + 2 : body[at] === '\n' ? at + 1 : at);
 
   // the body's `# Title` repeats the frontmatter title (docs_check requires it); the export's header carries it
@@ -169,21 +170,16 @@ export function planEdits(body, { repoRel, title, origin, pageUrl, sources, glos
   const walk = (node, parent, index) => {
     if (node.type === 'blockquote' && HAS_GURMUKHI.test(src(node))) frozen.push({ start: node.position.start.offset, end: node.position.end.offset });
     if (node.type === 'text') {
-      if (parent && !['table', 'tableRow', 'tableCell'].includes(parent.type)) words += node.value.split(/\s+/).filter(Boolean).length;
+      words += count(node.value);
       if (node.value.includes('[[') && parent.type !== 'link') terms(node);
       return;
     }
     if (node.type === 'html') { widget(node, parent, index); return; }
-    if (node.type === 'code' || node.type === 'inlineCode') return;
+    // code and tables are read too (a runbook is mostly both); a diagram's source is not
+    if (node.type === 'code') { if (node.lang !== 'mermaid') words += count(node.value); return; }
+    if (node.type === 'inlineCode') { words += count(node.value); return; }
     if (node.type === 'link' || node.type === 'image' || node.type === 'definition') link(node);
-    if (node.type === 'table') { for (const c of node.children ?? []) walkQuiet(c); return; }
     (node.children ?? []).forEach((c, i) => walk(c, node, i));
-  };
-  // inside a table: edit as usual, but its words are reference material, not reading time
-  const walkQuiet = (node) => {
-    const before = words;
-    (node.children ?? []).forEach((c, i) => walk(c, node, i));
-    words = before;
   };
 
   const terms = (node) => {

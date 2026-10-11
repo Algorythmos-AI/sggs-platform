@@ -60,7 +60,7 @@ export default defineConfig({
       lastUpdated: true,
       routeMiddleware: './src/route-data.ts',
       pagination: true,
-      customCss: ['./src/styles/theme.css', './src/styles/widgets.css'],
+      customCss: ['./src/styles/theme.css', './src/styles/widgets.css', './src/styles/page-actions.css', './src/styles/print.css'],
       components: {
         Head: './src/components/Head.astro',
         EditLink: './src/components/EditLink.astro',

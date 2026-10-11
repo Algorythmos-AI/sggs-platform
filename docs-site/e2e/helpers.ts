@@ -10,6 +10,7 @@ export async function mockApi(page: Page, fixtures: Record<string, string | null
   await page.route('**/api/**', async (route) => {
     if (route.request().resourceType() === 'document') return route.fallback();   // a docs page under /api/… (the reference, the routes page)
     const path = new URL(route.request().url()).pathname;
+    if (path.startsWith('/md/')) return route.fallback();                            // a page's Markdown (/md/api/….md), not the API
     const name = fixtures[path];
     if (name === undefined || name === null) return route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"mocked outage"}' });
     return route.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(resolve(here, 'fixtures', name), 'utf8') });

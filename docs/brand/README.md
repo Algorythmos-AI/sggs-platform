@@ -34,3 +34,15 @@ contrast ratio, computed from the file at build. On GitHub, read [`tokens.json`]
 The wiki's own theme (`docs-site/src/styles/theme.css`) uses the same values for paper, card,
 accent, accent text, accent fill and the status colours; the docs gates fail a pull request when
 the two drift ([the docs gates](../contributing/docs-gates.md)).
+
+Two things about the wiki that touch the brand:
+
+- **On paper the body is serif.** On screen, headings are Source Serif 4 and the body is the
+  system sans. A printed page and a downloaded PDF set the body in Source Serif 4 as well
+  (`docs-site/src/styles/print.css`), so every machine embeds the same face; Gurmukhi is Sant Lipi
+  in ink in both. Print is always the light palette, whatever the reader's theme.
+- **The wiki links out to assistants; the product does not.** Each wiki page offers *Ask ChatGPT*
+  and *Ask Claude* as plain outbound links with an instruction that holds the scripture rule. That
+  is a convenience of the engineering wiki, not a feature of Gurbani Soul, which generates nothing:
+  "verbatim, cited by Ang, never AI-invented" is unchanged
+  ([ADR-0013](../adr/0013-outbound-assistant-links.md)).
