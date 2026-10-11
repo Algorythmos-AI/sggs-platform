@@ -60,6 +60,8 @@ repository gate fails if the sitemap and the built pages disagree.
 - **One overlay stack.** The composition panel, Saved and the display sheet register with
   `scripts/overlay.ts`: Escape closes the top one, Tab stays inside it, focus returns to the opener,
   and a page's own keys (the Reader's arrow paging) ask `overlayOpen()` first.
+- **The Reader's controls** (`scripts/readerchrome.ts`): the Go-to sheet, the page bar, reading
+  options and the swipe. It only navigates; `reader.ts` draws.
 - **Page transitions without a router.** The Knowledge Base opts into cross-document view
   transitions in CSS (`styles/kb/motion.css`, inside `prefers-reduced-motion: no-preference`): the
   bars are held, the page cross-fades. The marketing pages keep Astro's `<ClientRouter />`.

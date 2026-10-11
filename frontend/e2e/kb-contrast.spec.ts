@@ -42,6 +42,15 @@ const OVER: Record<string, { url: string; act: (page: Page) => Promise<void> }> 
     await page.locator('[data-open-saved]:visible').click();
     await expect(page.locator('#trailDrawer')).toHaveClass(/\bon\b/);
   } },
+  'the Go-to sheet': { url: '/reader?ang=712', act: async (page) => {
+    await page.locator('#jumpBtn').click();
+    await expect(page.locator('#jumpSheet')).toHaveClass(/\bon\b/);
+    await expect(page.locator('#jumpWhere')).not.toBeEmpty();
+  } },
+  'reading options': { url: '/reader?ang=712', act: async (page) => {
+    await page.locator('#readerOptsBtn').click();
+    await expect(page.locator('#readerOpts')).toHaveClass(/\bon\b/);
+  } },
   'the display sheet': { url: '/reader?ang=712', act: async (page) => {
     await page.locator('#displayBtn').click();
     await expect(page.locator('#displaySheet')).toHaveClass(/\bon\b/);

@@ -6,6 +6,17 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 ## [Unreleased]
 
 ### Added
+- **The Reader's controls on the web, in step with the app.** The bar is three things: "Go to", the
+  Ang itself (a button: tap it and type another) and reading options. A page bar sits at the foot,
+  in the thumb's reach: "Ang N of 1430" over a hairline of the Granth, then the Ang before, Hukam
+  and the Ang after, each a full-size target. It slides away while reading down and comes back on
+  the way up. "Go to Ang" is a sheet: a large number that is selected ready to be replaced, the
+  raag that Ang is in, a scrubber across the whole Granth with a tick where each raag begins,
+  steppers, a raag menu, and a button that restates where it goes; nothing is fetched until Go, and
+  going is a lookup, so a place being kept in a long reading does not move. Reading options (text
+  size, transliteration, timing chip, Sehaj) are a small panel. On a phone a quick sideways swipe
+  turns the Ang: one finger, clearly sideways, never from the screen's edge, with text selected,
+  zoomed in, or with anything open over the page.
 - **The Raag Clock on the web, in step with the app.** One face answers "what time is it here, and
   which raags belong to it": a 24-hour ring of the eight watches with the reader's own clock in its
   hollow — hour, minute and a sweeping second hand, numerals and the day — and a pointer on the
