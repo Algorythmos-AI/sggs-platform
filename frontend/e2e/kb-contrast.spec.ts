@@ -47,6 +47,10 @@ const OVER: Record<string, { url: string; act: (page: Page) => Promise<void> }> 
     await expect(page.locator('#jumpSheet')).toHaveClass(/\bon\b/);
     await expect(page.locator('#jumpWhere')).not.toBeEmpty();
   } },
+  'a verse\'s actions': { url: '/reader?ang=712', act: async (page) => {
+    await page.locator('#angOut .pin-btn').first().click();
+    await expect(page.locator('#verseSheet')).toHaveClass(/\bon\b/);
+  } },
   'reading options': { url: '/reader?ang=712', act: async (page) => {
     await page.locator('#readerOptsBtn').click();
     await expect(page.locator('#readerOpts')).toHaveClass(/\bon\b/);

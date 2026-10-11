@@ -78,6 +78,8 @@ test.describe('on a 375px phone', () => {
     const count = page.locator('.kb-tabs [data-saved-count]');
     await expect(count).toBeHidden();
     await page.locator('#angOut .pin-btn').first().dispatchEvent('click');
+    await page.locator('#vsPin').click();
+    await page.keyboard.press('Escape');
     await expect(count).toHaveText('1');
     await page.locator('.kb-tabs [data-open-saved]').click();
     await expect(page.locator('#trailDrawer')).toHaveClass(/\bon\b/);

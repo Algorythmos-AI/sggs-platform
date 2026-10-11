@@ -4,56 +4,20 @@
 // so a pin click never fires the underlying verse card's own onclick.
 import { $, esc, api } from './core';
 import { overlayOpened, overlayClosed } from './overlay';
+import { openVerse, markVerseButtons } from './verse';
 import {
-  getPins, count, isPinned, togglePin, removePin, clearPins, subscribe, mostRecent,
-  enrichThemes, centerOfGravity, label, toJSON, toText, MAX_PINS, pinButtonHTML, repairPins, type Pin,
+  getPins, count, isPinned, removePin, clearPins, subscribe, mostRecent,
+  enrichThemes, centerOfGravity, label, toJSON, toText, pinButtonHTML, repairPins, type Pin,
 } from './store';
 
-/* ---------- transient toast (self-contained, no CSS dependency) ---------- */
-function toast(msg: string) {
-  let t = document.getElementById('sggs-toast') as HTMLDivElement | null;
-  if (!t) {
-    t = document.createElement('div'); t.id = 'sggs-toast';
-    t.setAttribute('role', 'status'); t.setAttribute('aria-live', 'polite');
-    t.style.cssText = 'position:fixed;left:50%;bottom:calc(30px + var(--kb-bottom, 0px));transform:translateX(-50%);z-index:9999;'
-      + 'background:rgba(20,22,30,.95);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;'
-      + 'max-width:80vw;text-align:center;box-shadow:0 10px 34px rgba(0,0,0,.45);opacity:0;transition:opacity .2s;';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg; t.style.opacity = '1';
-  clearTimeout((t as any)._h);
-  (t as any)._h = setTimeout(() => { if (t) t.style.opacity = '0'; }, 3400);
-}
-
-/* ---------- pin-button capture delegate (verse cards keep their own click intact) ---------- */
+/* ---------- a verse's "⋯" button opens its actions (capture phase: the card under it keeps its own click) ---------- */
 document.addEventListener('click', (e: any) => {
   const btn = e.target?.closest?.('.pin-btn');
   if (!btn) return;
-  e.stopPropagation(); e.preventDefault();                 // capture-phase: beat the card's onclick
-  const id = +btn.dataset.id, ang = +btn.dataset.ang, cid = +btn.dataset.cid;
-  // verbatim scripture comes from the data model (data-gm), NEVER from rendered text — the
-  // display-only saroop painter rewrites .g text nodes, and that must never reach storage.
-  const gm = btn.dataset.gm || '';
-  const r = togglePin({ line_id: id, gm, ang, comp_id: cid });
-  if (r === 'cap' || r === 'quota') {            // save failed → keep the button truthful + tell the user
-    btn.classList.remove('pinned'); btn.setAttribute('aria-pressed', 'false');
-    toast(r === 'cap'
-      ? `Saved verses are full (max ${MAX_PINS}) — unpin a verse to add more.`
-      : 'Could not save — your browser storage is full.');
-    return;
-  }
-  const on = r === 'pinned';
-  btn.classList.toggle('pinned', on);
-  btn.setAttribute('aria-pressed', String(on));
+  e.stopPropagation(); e.preventDefault();
+  openVerse(btn);
 }, true);
-
-// reflect pinned state on every pin button currently in the DOM
-function markPins() {
-  document.querySelectorAll('.pin-btn').forEach((b: any) => {
-    const on = isPinned(+b.dataset.id);
-    b.classList.toggle('pinned', on); b.setAttribute('aria-pressed', String(on));
-  });
-}
+const markPins = markVerseButtons;
 
 /* ---------- drawer open / close ----------
    Closed, the drawer is only moved off-screen, so it is `inert` until opened: Tab and screen
@@ -118,7 +82,7 @@ function renderPinned() {
   const host = $('#tab-pinned'); if (!host) return;
   const pins = getPins();
   if (!pins.length) {
-    host.innerHTML = `<div class="trail-empty">No verses pinned yet.<br><span>Tap 📌 on any verse — in Search, the Reader, or a composition — to begin building a study collection.</span></div>`;
+    host.innerHTML = `<div class="trail-empty">No verses pinned yet.<br><span>Tap ⋯ on any verse, then Pin — in Search, the Reader, or a composition — to begin building a study collection.</span></div>`;
     return;
   }
   host.innerHTML = `<div class="pv-head"><span>${pins.length} verse${pins.length > 1 ? 's' : ''}</span>

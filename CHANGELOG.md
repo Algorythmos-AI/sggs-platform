@@ -6,6 +6,12 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 ## [Unreleased]
 
 ### Added
+- **Every verse is a door.** The button on a verse (⋯, where the pin was) opens its actions in one
+  sheet, wherever a verse appears — Search, the Reader, a composition, the Verse trail: pin or
+  unpin, open in the Reader, related verses, the whole composition, copy, share. The sheet shows the
+  verse and its citation. What is pinned, copied or shared is the verbatim line from the API with
+  "Sri Guru Granth Sahib Ji · Ang N", never the painted glyphs; a shared link lands on the verse.
+  Pinning is now two taps, as it is two steps in the app.
 - **Search on the web, in step with the app.** Results arrive as you type, after a short pause: one
   request for a burst of keystrokes, the last results staying (dimmed) until the new ones land, and
   a search still in flight never landing on a cleared page. An empty box shows what the chosen

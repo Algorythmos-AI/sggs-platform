@@ -152,6 +152,24 @@ const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri 
     </div>
   </aside>
 
+  <!-- A verse's actions, wherever a verse appears. The text shown, copied, shared or pinned is the
+       verbatim line, with its citation. -->
+  <div id="verseScrim" class="vs-scrim" aria-hidden="true"></div>
+  <div id="verseSheet" class="vs" role="dialog" aria-modal="true" aria-labelledby="vsCite" inert>
+    <div class="vs-head">
+      <div class="vs-verse"><p id="vsText" class="gm" lang="pa"></p><p id="vsCite" class="vs-cite"></p></div>
+      <button id="vsClose" class="vs-x" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="vs-acts">
+      <button id="vsPin" type="button" class="vs-main" aria-pressed="false">Pin verse</button>
+      <button id="vsOpen" type="button" data-go-ang="1">Open in Reader</button>
+      <a id="vsRelated" href="/trail">Related verses</a>
+      <button id="vsComp" type="button">Composition</button>
+      <button id="vsCopy" type="button">Copy verse</button>
+      <button id="vsShare" type="button">Share</button>
+    </div>
+  </div>
+
   <!-- Display: how the page looks, on every page. Each choice applies at once and is kept in this
        browser; none of them changes the scripture text. The themes come from docs/brand/web-themes.json. -->
   <div id="displayScrim" class="ds-scrim" aria-hidden="true"></div>
