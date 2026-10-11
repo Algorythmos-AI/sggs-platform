@@ -142,8 +142,8 @@ function excerptMarkdown(attrs, { sources, commit, where }) {
 
 /**
  * The edits that turn a page's body into portable Markdown.
- * @returns {{ edits: {start:number,end:number,text:string,kind:string}[], words: number, left: number }}
- *   `left` counts edits skipped because they fell inside a frozen quotation.
+ * @returns {{ edits: {start:number,end:number,text:string,kind:string}[], words: number, left: number, lead: string }}
+ *   `left` counts edits skipped because they fell inside a frozen quotation; `lead` is the first paragraph's text.
  */
 export function planEdits(body, { repoRel, title, origin, pageUrl, sources, glossary, commit, where = repoRel }) {
   const tree = fromMarkdown(body, { extensions: [gfm()], mdastExtensions: [gfmFromMarkdown()] });
@@ -222,8 +222,8 @@ export function planEdits(body, { repoRel, title, origin, pageUrl, sources, glos
     }
     const next = parent?.children?.[index + 1];
     const explained = next?.type === 'paragraph' && FALLBACK.test(toString(next).trim());
-    // a list of cards and a quiz are already readable text; anything else is live only on the page
-    const note = explained || w.name === 'cards' || w.name === 'quiz' ? '' : `*On the wiki this part is live (${w.name}): <${pageUrl}>*`;
+    // cards, a quiz and a list of steps are already readable text; anything else is live only on the page
+    const note = explained || ['cards', 'quiz', 'steps'].includes(w.name) ? '' : `*On the wiki this part is live (${w.name}): <${pageUrl}>*`;
     add(start, note ? end : eol(end), note, 'widget');
   };
 
@@ -248,6 +248,8 @@ export function planEdits(body, { repoRel, title, origin, pageUrl, sources, glos
   };
 
   tree.children.forEach((c, i) => walk(c, tree, i));
+  const first = tree.children.find((n) => n.type === 'paragraph');
+  const lead = first ? toString(first).replace(/\s+/g, ' ').trim() : '';
 
   edits.sort((a, b) => a.start - b.start || a.end - b.end);
   for (let k = 1; k < edits.length; k++) {
@@ -258,7 +260,7 @@ export function planEdits(body, { repoRel, title, origin, pageUrl, sources, glos
     const hit = runs.find((r) => e.start < r.end && e.end > r.start);
     if (hit) throw new Error(`${where}: a ${e.kind} edit would touch scripture at offset ${hit.start}; the export never rewrites Gurmukhi`);
   }
-  return { edits, words, left };
+  return { edits, words, left, lead };
 }
 
 /** Minutes to read `words` of prose (at least one). */
@@ -287,9 +289,9 @@ export function exportPage(source, ctx) {
   if (!source.isWellFormed()) throw new Error(`${where}: the file is not well-formed Unicode`);
   const { bodyStart } = splitFrontmatter(source);
   const body = source.slice(bodyStart);
-  const { edits, words, left } = planEdits(body, { ...ctx, where });
+  const { edits, words, left, lead } = planEdits(body, { ...ctx, where });
   const exported = applyEdits(body, edits);
   verifyExport(body, edits, exported, where);
   const header = exportHeader(ctx);
-  return { markdown: header + exported.replace(/^(?:\r?\n)+/, ''), body, exported, edits, words, minutes: readingMinutes(words), left };
+  return { markdown: header + exported.replace(/^(?:\r?\n)+/, ''), body, exported, edits, words, minutes: readingMinutes(words), left, lead };
 }

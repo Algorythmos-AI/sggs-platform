@@ -14,6 +14,11 @@ carry `verified: {commit, date}` — the commit you last read the page against �
 when code the page cites (a code excerpt, a linked source file, a poster's *Source of truth*)
 changes after that commit; the weekly `docs-freshness` issue lists the same pages.
 
+**The description is read by people.** It is shown under the page's title as a summary, as well
+as to search engines and in link previews. Write one or two sentences saying what the page covers,
+and do not open it with the page's first sentence: a description that repeats the opening
+paragraph is left out of the page.
+
 ## Where a page appears in the sidebar
 
 A new page in an existing directory appears in that directory's sidebar group by itself, after the
@@ -49,6 +54,15 @@ no scripture at all.
   optionally `— why`. It reads as text on GitHub.
 - `<!-- sggs:code file="…" symbol="…" repo="…" -->` shows a function read from the source at
   build time; never paste code that could drift.
+- `<!-- sggs:steps -->` on the line before an ordered list sets it as a procedure: numbered
+  circles joined by a line. Use it for three to nine actions done in order (a runbook, a set-up).
+  Do not use it for concepts, and never for the structure of scripture. Everywhere else — GitHub,
+  paper, the Markdown export — the list is a plain numbered list.
+
+**Notes and quotations look different on purpose.** A blockquote that opens with bold text and has
+no Gurmukhi becomes a callout: a tinted box with a thick rule. A blockquote that quotes scripture
+stays a quotation: no tint, no box, a thin rule, the Gurmukhi and its Ang. Never dress a note as a
+quotation, or a quotation as a note.
 
 The full widget list is in `docs-site/plugins/widgets.schema.json`; every widget needs a fallback
 sentence within three lines.

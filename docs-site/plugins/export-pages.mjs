@@ -115,12 +115,13 @@ export const READING_MIN_WORDS = 150;
 let facts = null;
 /**
  * What the page chrome needs to know about each exported page (memoised for the build):
- * id -> { minutes, words, isIndex }. `isIndex` is a section's overview page (and the home page).
+ * id -> { minutes, words, isIndex, lead, description, pinned }. `isIndex` is a section's overview page
+ * (and the home page); `lead` is the page's first paragraph.
  */
 export function pageFacts() {
   return (facts ??= new Map(listExportPages().map((p) => {
     const e = exportOne(p);
-    return [p.id, { minutes: e.minutes, words: e.words, isIndex: p.isIndex }];
+    return [p.id, { minutes: e.minutes, words: e.words, isIndex: p.isIndex, lead: e.lead, description: e.description, pinned: !!p.source }];
   })));
 }
 
@@ -129,4 +130,21 @@ export function readingLabel(id) {
   const f = pageFacts().get(id);
   if (!f || f.isIndex || f.words < READING_MIN_WORDS) return null;
   return `${f.minutes} min read`;
+}
+
+/** A summary shorter than this says too little to earn its place under the title. */
+export const SUMMARY_MIN = 60;
+const plain = (s) => String(s).toLowerCase().replace(/[`*_\[\]()]/g, '').replace(/\s+/g, ' ').trim();
+
+/**
+ * The page's description as a summary under its title, or null where it would only repeat the
+ * page: the home page, a pinned page (its description IS its first paragraph), a description that
+ * opens like the first paragraph, or one too short to say anything.
+ */
+export function summaryFor(id) {
+  const f = pageFacts().get(id);
+  if (!f || id === 'index' || f.pinned || f.description.length < SUMMARY_MIN) return null;
+  const a = plain(f.description).slice(0, 60), b = plain(f.lead).slice(0, 60);
+  if (a && b && (a.startsWith(b.slice(0, 40)) || b.startsWith(a.slice(0, 40)))) return null;
+  return f.description;
 }

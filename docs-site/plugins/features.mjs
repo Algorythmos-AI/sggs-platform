@@ -7,6 +7,7 @@
 //   actions1  the page menu (copy, view as Markdown, the assistant links, print) is on every page
 //   print1    the print layout: provenance on the first page, a colophon, numbered link references
 //   pdf1      every exported page has a pre-built PDF under /pdf/ (only when the build was asked for them)
+//   look2     the reading layout: the type scale, the summary under the title, callouts, steps (src/styles/look.css)
 //
 // Switches (build-time environment; documented in docs/process/runbooks/docs-site.md):
 //   DOCS_PAGE_ACTIONS=0   build without the page menu, should it ever misbehave in production
@@ -16,4 +17,4 @@ const off = (name) => process.env[name] === '0';
 
 export const PAGE_ACTIONS = !off('DOCS_PAGE_ACTIONS');
 export const PDFS = process.env.DOCS_PDF === '1';
-export const FEATURES = ['nav2', 'md1', ...(PAGE_ACTIONS ? ['actions1'] : []), 'print1', ...(PDFS ? ['pdf1'] : [])];
+export const FEATURES = ['nav2', 'md1', ...(PAGE_ACTIONS ? ['actions1'] : []), 'print1', ...(PDFS ? ['pdf1'] : []), 'look2'];

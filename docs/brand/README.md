@@ -35,8 +35,14 @@ The wiki's own theme (`docs-site/src/styles/theme.css`) uses the same values for
 accent, accent text, accent fill and the status colours; the docs gates fail a pull request when
 the two drift ([the docs gates](../contributing/docs-gates.md)).
 
-Two things about the wiki that touch the brand:
+Three things about the wiki that touch the brand:
 
+- **The reading layout** (`docs-site/src/styles/look.css`) takes its patterns from good help
+  centres and its dress from this brand: a 17px body on a 44rem measure, serif headings, a summary
+  under each title, callouts tinted with the status colours (each tint is its colour mixed 10%
+  into paper, 14% into ink; a test recomputes them from `tokens.json` and checks ink at 4.5:1 and
+  the rule at 3:1), and gold only as a fill. A quotation of scripture is the plainest thing on a
+  page: no tint, no box.
 - **On paper the body is serif.** On screen, headings are Source Serif 4 and the body is the
   system sans. A printed page and a downloaded PDF set the body in Source Serif 4 as well
   (`docs-site/src/styles/print.css`), so every machine embeds the same face; Gurmukhi is Sant Lipi

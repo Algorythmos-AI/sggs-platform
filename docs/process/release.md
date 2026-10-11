@@ -9,6 +9,7 @@ verified:
 ---
 # Release Process
 
+<!-- sggs:steps -->
 1. On `integration`, ensure everything is green on staging.
 2. Bump the unified version: `make release VERSION=1.2.0` (runs `bump.py` +
    `check_versions.py`). Fill in the CHANGELOG section it stubs.

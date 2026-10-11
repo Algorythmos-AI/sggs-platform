@@ -106,6 +106,10 @@
     "swatches": {
       "purpose": "The brand palette from docs/brand/tokens.json, rendered at build (remark-swatches): every role, light and dark, with a swatch and its contrast ratio. No JavaScript.",
       "attrs": {}
+    },
+    "steps": {
+      "purpose": "Marks the ordered list that follows as a procedure: numbered circles joined by a line (src/styles/look.css). No JavaScript. For 3 to 9 actions done in order — a runbook, a set-up — never for concepts or the structure of scripture. On GitHub, on paper and in the Markdown export the list is a plain numbered list.",
+      "attrs": {}
     }
   }
 }

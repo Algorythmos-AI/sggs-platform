@@ -15,6 +15,7 @@ and the node kinds are on [Diagrams and posters](../diagrams/README.md).
 
 ## Steps
 
+<!-- sggs:steps -->
 1. Copy the nearest spec (poster 03 is a good reference); take the next number and a slug.
 2. Lay out `nodes` on the 1200-wide canvas: content between y = 170 and your `height`, 40 px
    margins. Each node has `x, y, w, h`, a `kind` (box, store, actor, gate, fail, pin, ext, good,
