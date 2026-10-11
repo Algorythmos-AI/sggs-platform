@@ -163,3 +163,26 @@ test.describe('a sideways swipe', () => {
     expect(await ang(page)).toBe('712');
   });
 });
+
+test('the Nitnem reader has the same bar: the way back at one end, reading options at the other', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/nitnem?bani=japji');
+  await expect(page.locator('#baniOut .sline').first()).toBeVisible({ timeout: 15_000 });
+  const m = await page.evaluate(() => {
+    const r = (id: string) => document.getElementById(id)!.getBoundingClientRect();
+    const bar = document.querySelector('#nitnemReader .toolbar')!.getBoundingClientRect(), back = r('nitnemBack'), opts = r('nitnemOptsBtn');
+    return { backLeft: back.left - bar.left, optsRight: bar.right - opts.right, heights: [back.height, opts.height] };
+  });
+  expect(m.backLeft).toBeLessThan(24);
+  expect(m.optsRight).toBeLessThan(24);
+  expect(Math.min(...m.heights)).toBeGreaterThanOrEqual(43.5);
+  await page.locator('#nitnemOptsBtn').click();
+  await expect(page.locator('#nitnemOpts')).toHaveClass(/\bon\b/);
+  await page.locator('#fontPlus').click();
+  expect(await page.evaluate(() => localStorage.getItem('gsize'))).toBe('24');
+  await page.locator('#tglT').click();
+  await expect(page.locator('body')).toHaveClass(/hide-t/);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#nitnemOpts')).toHaveAttribute('inert', '');
+  await expect(page.locator('#nitnemOptsBtn')).toBeFocused();
+});

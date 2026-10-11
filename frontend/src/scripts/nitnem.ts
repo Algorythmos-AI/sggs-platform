@@ -6,6 +6,7 @@
 // All scripture/API text goes through esc() before innerHTML; the `.gm` class lets saroop.ts
 // paint the traditional rendering (display only).
 import { $, esc, guard, api, store, goReader, applyPrefs, toast, stepFontSize } from './core';
+import { overlayOpened, overlayClosed } from './overlay';
 
 const CATEGORY_TITLE: Record<string, string> = {
   nitnem_morning: 'Morning', nitnem_evening: 'Evening', nitnem_night: 'Night',
@@ -195,5 +196,19 @@ function syncTranslit() {
 tglT.addEventListener('click', () => { store.set('show_t', store.get('show_t', '1') === '0' ? '1' : '0'); syncTranslit(); });
 tglT.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tglT.click(); } });
 syncTranslit();
+// reading options: the same small panel as the Reader's
+const optsBtn = $('#nitnemOptsBtn') as HTMLElement | null, optsPanel = $('#nitnemOpts') as HTMLElement | null;
+function closeOpts() {
+  if (!optsPanel || !optsPanel.classList.contains('on')) return;
+  optsPanel.classList.remove('on'); optsPanel.setAttribute('inert', ''); $('#nitnemOptsScrim')?.classList.remove('on');
+  optsBtn?.setAttribute('aria-expanded', 'false'); overlayClosed(optsPanel);
+}
+optsBtn?.addEventListener('click', () => {
+  if (!optsPanel) return;
+  if (optsPanel.classList.contains('on')) { closeOpts(); return; }
+  optsPanel.removeAttribute('inert'); optsPanel.classList.add('on'); $('#nitnemOptsScrim')?.classList.add('on');
+  optsBtn.setAttribute('aria-expanded', 'true'); overlayOpened(optsPanel, closeOpts, { fallback: () => optsBtn });
+});
+$('#nitnemOptsScrim')?.addEventListener('click', closeOpts);
 ($('#fontMinus') as HTMLElement).addEventListener('click', () => stepFontSize(-1));
 ($('#fontPlus') as HTMLElement).addEventListener('click', () => stepFontSize(1));
