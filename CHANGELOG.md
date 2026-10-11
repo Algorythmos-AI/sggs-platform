@@ -5,6 +5,18 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 
 ## [Unreleased]
 
+### Added
+- **A page menu on every wiki page, and a wiki that prints.** Above each title, *Copy page* copies
+  the page as Markdown in one click; beside it a panel copies the link, opens the Markdown, opens
+  the page in ChatGPT or Claude with an instruction that holds the scripture rule (answer only from
+  the page; quote Gurbani only as printed there, with its Ang), and prints. Links work without
+  JavaScript, the menu records nothing, and `DOCS_PAGE_ACTIONS=0` removes it (ADR-0013). The title
+  line says how long a page takes to read. Printed, a page is the article alone in the light
+  palette: its address and a colophon, a running head and page numbers, external addresses listed
+  once under "Links", a quotation never split from its Ang, a poster on one sheet with its steps
+  listed. Sant Lipi's declared range now includes the dandas, so they no longer fall back to
+  another font.
+
 ## [1.4.0] — 2026-10-11 — the Knowledge Base, redressed: thirteen themes, a new shell, and the app's Reader, Nitnem, Search and Raag Clock on the web
 
 ### Added

@@ -20,8 +20,8 @@ export function listExportPages({ root = REPO_ROOT, sources = loadSources() } = 
   if (missingSources.size) {
     throw new Error(`export: ${[...missingSources].join(', ')} docs are not installed — run python3 tools/fetch_sibling_docs.py (the Markdown export covers every published page or none)`);
   }
-  const home = { id: idForRepoPath(HOME, sources), repoPath: HOME, source: null };
-  return [home, ...[...pages.values()].map(({ id, repoPath, source }) => ({ id, repoPath, source }))];
+  const home = { id: idForRepoPath(HOME, sources), repoPath: HOME, source: null, isIndex: true };
+  return [home, ...[...pages.values()].map(({ id, repoPath, source, isIndex }) => ({ id, repoPath, source, isIndex: !!isIndex }))];
 }
 
 const day = (date) => (date ? date.toISOString().slice(0, 10) : null);
@@ -64,7 +64,7 @@ export const manifestEntry = (p) => ({
   updated: p.updated, words: p.words, readingMinutes: p.minutes,
 });
 
-export function _resetForTests() { shared = null; ids = null; }
+export function _resetForTests() { shared = null; ids = null; facts = null; }
 
 /**
  * /llms.txt (llmstxt.org): what this site is and one line per page, grouped as the sidebar groups
@@ -105,4 +105,26 @@ let ids = null;
 /** The ids of every exported page (memoised for the build): which pages have a /md/<id>.md. */
 export function exportedIds() {
   return (ids ??= new Set(listExportPages().map((p) => p.id)));
+}
+
+/** Under this many words a reading time is noise, not information. */
+export const READING_MIN_WORDS = 150;
+
+let facts = null;
+/**
+ * What the page chrome needs to know about each exported page (memoised for the build):
+ * id -> { minutes, words, isIndex }. `isIndex` is a section's overview page (and the home page).
+ */
+export function pageFacts() {
+  return (facts ??= new Map(listExportPages().map((p) => {
+    const e = exportOne(p);
+    return [p.id, { minutes: e.minutes, words: e.words, isIndex: p.isIndex }];
+  })));
+}
+
+/** "4 min read" for a page, or null where it would not help: overviews, short pages, pages with no export. */
+export function readingLabel(id) {
+  const f = pageFacts().get(id);
+  if (!f || f.isIndex || f.words < READING_MIN_WORDS) return null;
+  return `${f.minutes} min read`;
 }

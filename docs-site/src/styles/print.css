@@ -1,0 +1,152 @@
+/* The wiki on paper — the browser's Print / Save as PDF, and the pre-built PDFs, which are made
+   from this same stylesheet.
+
+   What a printed page is: the article and nothing else, in the light palette whatever the reader's
+   theme, set in the brand serif so every machine embeds the same face; its address and dates under
+   the title, a colophon at the end, and every external address listed once under "Links"
+   (src/widgets/print.ts) instead of scattered through the lines.
+
+   Starlight ships its own print rules (it hides the sidebar, the contents column and pagination,
+   and forces a light grey scale with its own blue accent). These rules come after and are more
+   specific where the two disagree. */
+
+/* Page furniture. A running head, never a foot: the name of the scripture is not printed at the
+   bottom of a sheet. Browsers without page-margin boxes simply print no head; the title block and
+   the colophon carry the provenance either way. No `size`: a Letter printer keeps Letter. */
+@page {
+  margin: 20mm 18mm 22mm;
+  @top-left { content: "Sri Guru Granth Sahib Ji — Knowledge Base"; font: 8pt "Source Serif 4", Georgia, serif; color: #6b6156; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt "Source Serif 4", Georgia, serif; color: #6b6156; }
+}
+
+@media print {
+  /* Always light. Dark is the default selector on this site, so the light values (the light leg of
+     src/styles/theme.css) are restated here at a specificity that wins over both legs. */
+  :root:root, :root:root[data-theme] {
+    color-scheme: light;
+    --sl-color-accent-low: #fdf0c8; --sl-color-accent: #8a6100; --sl-color-accent-high: #5c4100; --sl-color-text-accent: #8a6100;
+    --sl-color-white: #201a12; --sl-color-gray-1: #2b241c; --sl-color-gray-2: #4a4137; --sl-color-gray-3: #6b6156;
+    --sl-color-gray-4: #9a9084; --sl-color-gray-5: #d9d0c2; --sl-color-gray-6: #efe8dc; --sl-color-gray-7: #f7f2ea;
+    --sl-color-black: #ffffff; --sl-color-bg: #ffffff; --sl-color-bg-nav: #ffffff; --sl-color-bg-sidebar: #ffffff;
+    --sl-color-bg-inline-code: transparent; --sl-color-hairline: #d9d0c2; --sl-color-hairline-light: #e3dacb;
+    --sl-color-red: #b33528;
+    --sgs-ink: #201a12; --sgs-paper: #ffffff; --sgs-paper-warm: #ffffff; --sgs-card: #ffffff; --sgs-canvas: #ffffff;
+    --sgs-accent: #a87900; --sgs-accent-text: #8a6100; --sgs-kraft: #b69a81;
+    --sgs-positive: #27703f; --sgs-negative: #b33528; --sgs-info: #2a63c9; --sgs-special: #6d3fbf;
+    --sl-content-width: 100%;
+    font-size: 10.5pt;
+  }
+  html, body { background: #fff !important; }
+  body { font-family: var(--sgs-font-serif); line-height: 1.43; color: #201a12; hyphens: manual; }
+
+  /* nothing but the article */
+  header.header, .sl-skip-link, sggs-page-actions, nav.site-footer, footer .meta, .sl-anchor-link,
+  .diagram__hint, .wt__bar, .wt__caption, .wt__list, .lightbox, .expressive-code .copy, .releases__bar,
+  .term__card, .quiz button, .quiz__summary, .sggs-fallback { display: none !important; }
+  .print-only { display: block; }
+  .page, .main-frame, .main-pane, main, .content-panel, .sl-container { padding: 0 !important; margin: 0 !important; max-inline-size: none !important; }
+
+  /* the title block */
+  .page-head { display: block; }
+  .page-eyebrow { margin: 0; font-family: var(--sl-font); font-size: 8.5pt; color: #4a4137; }
+  h1#_top { margin: 2pt 0 0; font-size: 24pt; line-height: 28pt; color: #201a12; }
+  .page-meta { margin: 6pt 0 0; font-family: var(--sl-font); font-size: 8.5pt; color: #4a4137; }
+  .print-provenance {
+    margin: 8pt 0 16pt; padding: 5pt 0; border-block: 0.75pt solid #9a9084;
+    font-family: var(--sl-font); font-size: 8.5pt; color: #4a4137; overflow-wrap: anywhere;
+  }
+
+  /* prose: about 75 characters to the line; tables, code and figures may use the whole width */
+  .sl-markdown-content { font-size: 10.5pt; }
+  .sl-markdown-content > :is(p, ul, ol, dl, h2, h3, h4, h5, blockquote, .starlight-aside) { max-inline-size: 140mm; }
+  .sl-markdown-content :is(p, li) { orphans: 3; widows: 3; }
+  .sl-markdown-content :is(h2, h3, h4, h5) { break-after: avoid; color: #201a12; hyphens: none; }
+  .sl-markdown-content h2 { font-size: 16pt; line-height: 20pt; margin-top: 18pt; }
+  .sl-markdown-content h3 { font-size: 12.5pt; line-height: 16pt; margin-top: 14pt; }
+  .sl-markdown-content h4 { font-size: 10.5pt; line-height: 15pt; }
+  .sl-markdown-content a { color: inherit; text-decoration: underline; text-decoration-thickness: 0.5pt; text-underline-offset: 1.5pt; font-weight: inherit; }
+
+  /* Gurmukhi: Sant Lipi, ink, room to breathe, never hyphenated */
+  :lang(pa), .gm, [lang="pa"] { color: #201a12 !important; font-size: 13pt; line-height: 22pt; hyphens: none; }
+  /* a quotation and its citation stay on one sheet */
+  .sl-markdown-content blockquote { break-inside: avoid; margin-inline: 8mm 0; padding-inline-start: 4mm; border-inline-start: 0.75pt solid #b69a81; color: #201a12; }
+  .sl-markdown-content blockquote > p:last-child { break-before: avoid; }
+
+  /* callouts: legible without colour */
+  .starlight-aside { break-inside: avoid; background: #fff !important; border: 0.75pt solid #9a9084; border-inline-start: 2pt solid #6b6156; color: #201a12; }
+  .starlight-aside__title { color: #201a12; font-weight: 700; }
+
+  /* code: wraps, no scrollbars; a long block may run on to the next sheet */
+  .sl-markdown-content :is(code, pre), .expressive-code { font-size: 8.5pt; line-height: 12pt; hyphens: none; }
+  .sl-markdown-content pre { white-space: pre-wrap; overflow-wrap: anywhere; overflow: visible; }
+  .sl-markdown-content .expressive-code, .sl-markdown-content pre { break-inside: auto; }
+  .expressive-code .frame { box-shadow: none !important; }
+  .expressive-code .frame.is-terminal .header { display: none; }          /* window dressing, and ink */
+
+  /* tables: a real table again (not a scrolling block), header on every sheet, no split rows */
+  .sl-markdown-content table { display: table; inline-size: 100%; overflow: visible; font-size: 8.5pt; line-height: 12pt; border-collapse: collapse; }
+  .sl-markdown-content thead { display: table-header-group; }
+  .sl-markdown-content tr { break-inside: avoid; }
+  /* break-word, not anywhere: a long token may break, but a short word never mid-way to narrow a column */
+  .sl-markdown-content :is(th, td) { overflow-wrap: break-word; border-block-end: 0.5pt solid #d9d0c2; }
+  .sl-markdown-content th { background: #efe8dc !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .sl-markdown-content [tabindex] { overflow: visible !important; }
+
+  /* diagrams: the light drawing, whatever the theme, scaled to the sheet */
+  .diagram { --sgs-diagram-bg: #fff; background: #fff !important; border: 0.5pt solid #d9d0c2; break-inside: avoid; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .diagram .mmd--dark { display: none !important; }
+  .diagram .mmd--light { display: block !important; }
+  .diagram__scroll { overflow: visible; }
+  .diagram__scroll svg, .diagram--wide .diagram__scroll svg { max-inline-size: 100%; block-size: auto; }
+  .diagram figcaption { color: #4a4137 !important; }
+
+  /* posters: the whole picture in its light palette, every step lit, then the steps as a list */
+  :root:root .poster__canvas {
+    --poster-paper: initial; --poster-paper-warm: initial; --poster-card: initial; --poster-canvas: initial; --poster-ink: initial;
+    --poster-accent: initial; --poster-accent-text: initial; --poster-accent-fill: initial; --poster-kraft: initial; --poster-maroon: initial;
+    --poster-negative: initial; --poster-info: initial; --poster-positive: initial; --poster-special: initial; --poster-on-strong: initial;
+    background: #fbf7f0 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+  /* a picture cannot run on to a second sheet: it is scaled to fit one, with room for its caption */
+  .poster, .poster__canvas { break-inside: avoid; }
+  .poster__canvas { overflow: visible; border-radius: 0; }
+  .poster__canvas svg { inline-size: 100%; block-size: auto; max-block-size: 205mm; }
+  .poster__canvas :is(.is-past, .is-future, .is-active, .is-dim) { opacity: 1 !important; filter: none !important; }
+  .poster__open { display: none; }
+  .poster__print-steps { margin: 6pt 0 12pt; padding-inline-start: 14pt; font-size: 9pt; line-height: 13pt; }
+  .poster__print-steps li { break-inside: avoid; margin-block: 2pt; }
+
+  /* what only works on a screen says so, once, where it stood */
+  :is(sggs-status, sggs-ang-explorer, sggs-waterfall, sggs-verify, sggs-api-try, sggs-progress) > * { display: none !important; }
+  :is(sggs-status, sggs-ang-explorer, sggs-waterfall, sggs-verify, sggs-api-try, sggs-progress) {
+    display: block; margin: 8pt 0; padding: 5pt 8pt; border: 0.75pt solid #9a9084; break-inside: avoid;
+    font-family: var(--sl-font); font-size: 8.5pt; color: #4a4137;
+  }
+  sggs-status::before { content: "Interactive on the web: the live status of the API."; }
+  sggs-ang-explorer::before { content: "Interactive on the web: an Ang, read live from the API."; }
+  sggs-waterfall::before { content: "Interactive on the web: a search, traced through each tier."; }
+  sggs-verify::before { content: "Interactive on the web: a quotation checked by the verification engine."; }
+  sggs-api-try::before { content: "Interactive on the web: a console for trying any API route."; }
+  sggs-progress::before { content: "Interactive on the web: a checklist that remembers what you have done."; }
+  .term__link { color: inherit; text-decoration: none; border: 0; }
+  .canonical { border: 0.75pt solid #9a9084; background: #fff !important; font-size: 8.5pt; break-inside: avoid; }
+
+  /* links: a number in the text, the addresses once at the end (src/widgets/print.ts) */
+  .print-ref { font-family: var(--sl-font); font-size: 6.5pt; line-height: 0; margin-inline-start: 0.5pt; }
+  .print-links { margin-top: 20pt; font-size: 8.5pt; line-height: 12pt; overflow-wrap: anywhere; }
+  .print-links h2 { font-size: 12.5pt; line-height: 16pt; margin: 0 0 4pt; }
+  .print-links ol { margin: 0; padding-inline-start: 16pt; }
+  .print-links li { break-inside: avoid; }
+  /* without script there is no list: each external address follows its link, outside tables */
+  :root:not([data-print-refs]) .sl-markdown-content :is(p, li) a[href^="http"]::after {
+    content: " (" attr(href) ")"; font-family: var(--sl-font); font-size: 7.5pt; overflow-wrap: anywhere; text-decoration: none;
+  }
+
+  /* the colophon closes the page */
+  footer { margin: 0 !important; padding: 0 !important; border: 0 !important; }
+  .print-colophon {
+    margin: 18pt 0 0; padding-top: 6pt; border-top: 0.75pt solid #9a9084; break-inside: avoid;
+    font-family: var(--sl-font); font-size: 8pt; line-height: 11.5pt; color: #4a4137; overflow-wrap: anywhere;
+  }
+  img, svg { max-inline-size: 100%; }
+}

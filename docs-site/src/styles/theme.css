@@ -16,7 +16,8 @@
   font-weight: 300 700;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0A00-0A7F, U+200C-200D, U+25CC;
+  /* the dandas (U+0964, U+0965) are Devanagari code points that Gurmukhi uses; Sant Lipi has them */
+  unicode-range: U+0A00-0A7F, U+0964-0965, U+200C-200D, U+25CC;
 }
 
 :root {
@@ -184,3 +185,6 @@ div.sl-openapi-section-panel.sl-openapi-section-panel :is(pre, code) { backgroun
 
 /* a Mermaid label's lines (plugins/remark-mermaid.mjs lineBlocks): one block per line, no <br> */
 .mmd .mmd-line { display: block; }
+
+/* shown only on paper (src/styles/print.css): the page's address, and its colophon */
+.print-only { display: none; }

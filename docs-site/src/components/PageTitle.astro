@@ -4,7 +4,15 @@
 // changed, and for pages that describe code, the commit it was last verified against (frontmatter
 // `verified`, enforced by tools/docs_check.py). The date is the page's own last commit
 // (plugins/git-dates.mjs via src/route-data.ts); Starlight's footer date is not repeated.
+//
+// Beside the eyebrow sits the page menu (PageActions.astro). In the source it comes after the meta
+// line, so a phone reads eyebrow, title, dates, then the menu; from 50rem a grid lifts it to the
+// title's top right. The line under the title also says how long the page takes to read, and on
+// paper a ruled block gives the page's address and how current it is (src/styles/print.css).
 import { originOf } from '../../plugins/paths.mjs';
+import { readingLabel, SITE_ORIGIN } from '../../plugins/export-pages.mjs';
+import { PAGE_ACTIONS } from '../../plugins/features.mjs';
+import PageActions from './PageActions.astro';
 
 const route = Astro.locals.starlightRoute;
 type Entry = (typeof route.sidebar)[number];
@@ -29,22 +37,37 @@ const verified = (route.entry.data as { verified?: { commit: string; date: strin
 const updated = route.lastUpdated;
 const repo = 'https://github.com/Algorythmos-AI/sggs-platform';
 const day = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const pageId = route.id || 'index';
+const reading = readingLabel(pageId);
+const pageUrl = SITE_ORIGIN + (pageId === 'index' ? '/' : `/${pageId}/`);
+const facts = [reading, updated, verified].filter(Boolean).length;
 ---
-{(where.length > 0 || pinned) && (
-  <p class="page-eyebrow">
-    {where.join(' · ')}{pinned && <span class="page-eyebrow__pinned">{where.length ? ' · ' : ''}pinned from {pinned}</span>}
-  </p>
-)}
-<h1 id="_top">{route.entry.data.title}</h1>
-{(updated || verified) && (
-  <p class="page-meta">
-    {updated && <span>Updated <time datetime={updated.toISOString()}>{day(updated)}</time></span>}
-    {updated && verified && <span aria-hidden="true"> · </span>}
-    {verified && (
-      <span class="page-meta__verified">Verified against <a href={`${repo}/commit/${verified.commit}`}><code>{verified.commit.slice(0, 7)}</code></a> on {verified.date}</span>
-    )}
-  </p>
-)}
+<div class="page-head">
+  {(where.length > 0 || pinned) && (
+    <p class="page-eyebrow">
+      {where.join(' · ')}{pinned && <span class="page-eyebrow__pinned">{where.length ? ' · ' : ''}pinned from {pinned}</span>}
+    </p>
+  )}
+  <h1 id="_top">{route.entry.data.title}</h1>
+  {facts > 0 && (
+    <p class="page-meta">
+      {reading && <span class="page-meta__read" data-pagefind-ignore>{reading}</span>}
+      {reading && updated && <span aria-hidden="true"> · </span>}
+      {updated && <span>Updated <time datetime={updated.toISOString()}>{day(updated)}</time></span>}
+      {(reading || updated) && verified && <span aria-hidden="true"> · </span>}
+      {verified && (
+        <span class="page-meta__verified">Verified against <a href={`${repo}/commit/${verified.commit}`}><code>{verified.commit.slice(0, 7)}</code></a> on {verified.date}</span>
+      )}
+    </p>
+  )}
+  {PAGE_ACTIONS && <PageActions />}
+  {pageId !== '404' && (
+    <p class="print-only print-provenance" data-pagefind-ignore>
+      <span class="print-provenance__url">{pageUrl}</span>
+      {pinned && origin?.kind === 'sibling' && <span> · a pinned copy of {origin.repository} at {origin.commit.slice(0, 7)}</span>}
+    </p>
+  )}
+</div>
 
 <style>
   @layer starlight.core {
@@ -56,6 +79,15 @@ const day = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 
       color: var(--sl-color-white);
       text-wrap: balance;
     }
+  }
+  /* phone: eyebrow, title, dates, menu — the source order. From 50rem the menu sits at the title's
+     top right, on the eyebrow's row (or alone on it, for a page with no eyebrow). */
+  .page-head { display: grid; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 50rem) {
+    .page-head { grid-template-columns: minmax(0, 1fr) auto; column-gap: 1rem; align-items: end; }
+    .page-head > :global(*) { grid-column: 1 / -1; }
+    .page-head > .page-eyebrow { grid-column: 1; grid-row: 1; }
+    .page-head > :global(sggs-page-actions) { grid-column: 2; grid-row: 1; }
   }
   .page-eyebrow {
     margin: 1rem 0 0;

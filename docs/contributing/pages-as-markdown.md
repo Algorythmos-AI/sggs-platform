@@ -1,10 +1,10 @@
 ---
-title: "Pages as Markdown"
-description: "Every wiki page is also published as portable Markdown under /md/, with a manifest and llms.txt: what the export changes, what it never changes, and what an author must keep in mind."
+title: "Pages as Markdown, the page menu and print"
+description: "Every wiki page is also published as portable Markdown, has a menu to copy, open or print it, and prints as a clean document: what each does, and what an author must keep in mind."
 sidebar:
   order: 6
 ---
-# Pages as Markdown
+# Pages as Markdown, the page menu and print
 
 Every published page is also served as plain Markdown, so a reader can copy it, a tool can fetch
 it, and an assistant can be pointed at exactly what the page says:
@@ -74,7 +74,44 @@ The export fails the build, with the page and the reason, on anything it cannot 
   quotation in the export with the same quotation on the page.
 - After each deploy, `scripts/ci/docs_smoke.py` fetches `/md/index.md` and checks its type and
   character set, on builds that announce the `md1` feature.
+- `docs-site/e2e/page-actions.spec.ts` drives the menu on desktop and phone: copying, the keyboard,
+  the refusals, no JavaScript, and axe with the panel open in both schemes.
+  `docs-site/e2e/print.spec.ts` checks the printed page as a dark-theme reader would get it.
 
 The files are served as `text/plain; charset=utf-8` so they open in a browser tab, and with
 `X-Robots-Tag: noindex` so search engines index the page, not its copy. Both come from a rule in
 `docs-site/vercel.json`.
+
+## The page menu
+
+Above every title is **Copy page**, which copies the page's Markdown, and a panel beside it:
+
+| Item | What it does |
+|---|---|
+| Copy page as Markdown, Copy link | to the clipboard; a line says "Copied", or what to do when the browser refuses |
+| View as Markdown | opens `/md/<id>.md` in a new tab |
+| Ask ChatGPT, Ask Claude | plain links to those services with an instruction and the page's public Markdown address ([ADR-0013](../adr/0013-outbound-assistant-links.md)) |
+| Print | the browser's print dialog; shown where there is a mouse or trackpad |
+
+Every link in it works without JavaScript; only copying and printing need script. The menu is not
+on the 404 page, and on the generated API reference it copies the link, since there is no Markdown
+to copy. It records nothing. The line under the title also says how long the page takes to read
+(prose, tables and code at 220 words a minute), except on a section's overview page and on pages
+under 150 words.
+
+## On paper
+
+Printing a page, from the menu or the browser, gives the article and nothing else
+(`docs-site/src/styles/print.css`):
+
+- always the light palette, in Source Serif, with Gurmukhi in Sant Lipi;
+- the page's address under the title and a colophon at the end (commit, dates, "this copy may be out of date");
+- a running head and "Page x of y" where the browser supports them;
+- every external address listed once under **Links**, with a small number in the text
+  (`docs-site/src/widgets/print.ts`);
+- a quotation and its Ang kept on one sheet; a poster scaled to fit one sheet, with its steps
+  printed as a list; table headers repeated; code wrapped;
+- a live widget replaced by one line saying what it is.
+
+**For authors:** a poster's steps come from its `.steps.json`, so write captions that read well as
+a list. Nothing else is needed: a page that passes the gates prints.

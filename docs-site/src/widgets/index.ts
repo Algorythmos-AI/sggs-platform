@@ -1,5 +1,6 @@
 // The wiki's interactive elements. Each is a vanilla custom element inserted from Markdown by
-// docs-site/plugins/remark-widgets.mjs (`<!-- sggs:<name> -->`). One small bundle, loaded once per
+// docs-site/plugins/remark-widgets.mjs (`<!-- sggs:<name> -->`); the page menu comes from the page
+// title (src/components/PageActions.astro). One small bundle, loaded once per
 // page (src/components/Head.astro); nothing here is required to read the page.
 import { SggsStatus } from './status';
 import { SggsWalkthrough } from './walkthrough';
@@ -11,6 +12,8 @@ import { SggsTerm } from './term';
 import { SggsQuiz } from './quiz';
 import { SggsProgress } from './progress';
 import { SggsReleases } from './releases';
+import { SggsPageActions } from './page-actions';
+import { watchPrint } from './print';
 import { watchScrollRegions } from './a11y';
 
 const define = (name: string, ctor: CustomElementConstructor) => {
@@ -27,5 +30,7 @@ define('sggs-term', SggsTerm);
 define('sggs-quiz', SggsQuiz);
 define('sggs-progress', SggsProgress);
 define('sggs-releases', SggsReleases);
+define('sggs-page-actions', SggsPageActions);
 
 watchScrollRegions();
+watchPrint();

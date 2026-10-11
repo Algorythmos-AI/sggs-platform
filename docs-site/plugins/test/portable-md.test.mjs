@@ -191,13 +191,13 @@ test('the header says what the page is, where it lives and how current it is', (
   assert.equal(exportHeader({ title: 'T', pageUrl: 'https://x/' }).split('\n')[2], '- Page: <https://x/>');
 });
 
-test('reading time is prose only, at least a minute', () => {
+test('reading time counts what is read — prose, tables and code, not a diagram — and is at least a minute', () => {
   assert.equal(readingMinutes(0), 1);
   assert.equal(readingMinutes(220), 1);
   assert.equal(readingMinutes(221), 2);
   const prose = 'word '.repeat(50);
-  const { words } = planEdits(`${prose}\n\n\`\`\`js\n${'code '.repeat(500)}\n\`\`\`\n\n| a | b |\n|---|---|\n| ${'cell '.repeat(100)} | x |\n`, ctx());
-  assert.equal(words, 50);
+  const body = `${prose}\n\n\`\`\`js\n${'code '.repeat(30)}\n\`\`\`\n\n\`\`\`mermaid\n${'node '.repeat(400)}\n\`\`\`\n\n| a | b |\n|---|---|\n| ${'cell '.repeat(10)} | x |\n`;
+  assert.equal(planEdits(body, ctx()).words, 50 + 30 + 2 + 10 + 1);
 });
 
 test('a file that is not well-formed Unicode is refused', () => {
