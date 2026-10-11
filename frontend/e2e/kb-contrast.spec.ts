@@ -51,6 +51,12 @@ const OVER: Record<string, { url: string; act: (page: Page) => Promise<void> }> 
     await page.locator('#angOut .pin-btn').first().click();
     await expect(page.locator('#verseSheet')).toHaveClass(/\bon\b/);
   } },
+  'the jump palette': { url: '/search', act: async (page) => {
+    await page.locator('#paletteBtn').click();
+    await expect(page.locator('#palette')).toHaveClass(/\bon\b/);
+    await page.locator('#paletteQ').fill('a');
+    await expect(page.locator('#paletteList .pal-item .gm').first()).toBeVisible({ timeout: 15_000 });
+  } },
   'reading options': { url: '/reader?ang=712', act: async (page) => {
     await page.locator('#readerOptsBtn').click();
     await expect(page.locator('#readerOpts')).toHaveClass(/\bon\b/);
