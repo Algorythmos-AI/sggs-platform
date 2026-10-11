@@ -101,7 +101,7 @@ test.describe('the page menu', () => {
     test.skip(testInfo.project.name !== 'mobile', 'a touch screen');
     const menu = await ready(page);
     await menu.locator('summary').click();
-    const heights = await menu.locator('.pa__btn:visible, .pa__item:visible').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+    const heights = await menu.locator('.pa__btn:visible, .pa__item:visible').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));   // a fractional device scale gives 43.99997
     expect(Math.min(...heights)).toBeGreaterThanOrEqual(44);
     await expect(menu.getByRole('button', { name: 'Print' })).toHaveCount(0);  // printing from a phone is the PDF's job
     for (const width of [390, 320]) {
