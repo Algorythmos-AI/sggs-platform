@@ -1,22 +1,27 @@
-// raagclock.ts — the Raag Clock page (/raag-clock).
-// A clean SVG 24-hour dial (pahar number + time + raag count, no cramped
-// name-stacks) paired with a rich detail panel that fills in as you tap each
-// pahar, and a searchable/filterable claims explorer with a 24-hour timeline
-// per raag. Everything here is METADATA about raags — scripture rendering is
-// untouched; all API text passes esc() before innerHTML.
-import { $, esc, guard, store, toast, prefersReducedMotion, goReader, failHTML } from './core';
+// raagclock.ts — the Raag Clock page (/raag-clock), in step with the app's clock.
+// One face answers "what time is it here, and which raags belong to it": a 24-hour ring of the
+// eight watches (fixed hours, or the sun's own when solar mode has a location), with the reader's
+// own clock — hour, minute and second hands — in its hollow. Beside it, the claims for the watch
+// that was tapped; under it, the time in words, the eight watches as a list (the full-content
+// path for a keyboard or a screen reader), the seasonal raags, and every claim in a table.
+// Everything here is METADATA about raags — scripture rendering is untouched; all API text passes
+// esc() before innerHTML.
+import { $, esc, guard, store, toast, prefersReducedMotion, failHTML } from './core';
 import { loadClock as loadClockShared, currentPahar, getMode, getLoc, type Mode } from './timing';
 import {
-  paharFromMinutes, paharWindow, paharLabel, paharRange, fmt12,
+  paharFromMinutes, paharWindow, paharSolarWindow, paharLabel, fmt12,
   nextPaharBoundary, raagsForPahar, minutesOf,
 } from './pahar.js';
 
 const NS = 'http://www.w3.org/2000/svg';
-const C = 400, R_IN = 176, R_OUT = 322, R_SEA_IN = 330, R_SEA_OUT = 350, R_HOURS = 368;
+// The face, from the centre outwards (units of an 800 box): the 12-hour clock in the hollow, the
+// band of the eight watches, the 24 hour ticks, the hour numerals.
+const C = 400, R_IN = 196, R_OUT = 316, R_FACE = R_IN - 8, R_TICK = R_OUT + 5, R_NUM = R_OUT + 26;
 let CLOCK: any = null;
 let BYRAAG: Record<string, any[]> = {};
 let selPahar = 0;
-let nowTimer: any = null;
+let selSeason = '';
+let dialKey = '';
 
 // ---- tiny SVG helpers -------------------------------------------------------
 function el(tag: string, attrs: Record<string, string | number> = {}, text?: string) {
@@ -25,15 +30,40 @@ function el(tag: string, attrs: Record<string, string | number> = {}, text?: str
   if (text != null) e.textContent = text;
   return e;
 }
-/** minutes-since-midnight → radians. Noon top, midnight bottom, 6 AM left. */
-const angle = (m: number) => ((m / 1440) * 360 + 180 - 90) * Math.PI / 180;
+/** minutes-since-midnight → radians. Noon top, midnight bottom, 6 AM left (as in the app). */
+const angle = (m: number) => ((m / 1440) * 360 + 90) * Math.PI / 180;
 const pt = (m: number, r: number) => [C + r * Math.cos(angle(m)), C + r * Math.sin(angle(m))];
 function arcPath(m0: number, m1: number, r0: number, r1: number) {
   const [x0, y0] = pt(m0, r1), [x1, y1] = pt(m1, r1);
   const [x2, y2] = pt(m1, r0), [x3, y3] = pt(m0, r0);
-  const large = ((m1 - m0 + 1440) % 1440) > 720 ? 1 : 0;
+  const large = (m1 - m0) > 720 ? 1 : 0;
   return `M${x0},${y0} A${r1},${r1} 0 ${large} 1 ${x1},${y1} L${x2},${y2} A${r0},${r0} 0 ${large} 0 ${x3},${y3} Z`;
 }
+
+// ---- the reader's own clock: 12- or 24-hour as their locale has it ------------
+const H24 = (() => {
+  try { return /^h2[34]$/.test(new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).resolvedOptions().hourCycle || ''); }
+  catch { return false; }
+})();
+const pad = (n: number) => String(n).padStart(2, '0');
+/** minutes-since-midnight → "6:12 AM" / "06:12" */
+function tm(min: number): string {
+  const m = ((Math.round(min) % 1440) + 1440) % 1440, h = Math.floor(m / 60), mm = m % 60;
+  return H24 ? `${pad(h)}:${pad(mm)}` : fmt12(`${h}:${pad(mm)}`);
+}
+/** a window as "3–6 PM" / "9 PM–12 AM" / "15:00–18:00" */
+function span(w: { start: number; end: number }): string {
+  const a = tm(w.start), b = tm(w.end);
+  if (H24) return `${a}–${b}`;
+  const [ah, aap] = a.split(' '), [bh, bap] = b.split(' ');
+  return aap === bap ? `${ah}–${bh} ${bap}` : `${a}–${b}`;
+}
+/** the window of a watch on the clock in force: the sun's when solar mode is live, else fixed */
+function win(p: number, st = currentPahar()) {
+  return st.mode === 'solar' && st.sun ? paharSolarWindow(p, st.sun.sunrise, st.sun.sunset) : paharWindow(p);
+}
+const windowText = (p: number, st = currentPahar()) => span(win(p, st));
+const countOf = (n: number) => `${n} raag${n === 1 ? '' : 's'}`;
 
 async function loadClock(): Promise<any> {
   if (CLOCK) return CLOCK;
@@ -47,94 +77,86 @@ function indexClaims() {
 const allClaims = () => CLOCK
   ? [...CLOCK.claims.primary, ...CLOCK.claims.variant, ...CLOCK.claims.seasonal, ...CLOCK.claims.ceremonial]
   : [];
+const variantsOf = (p: number) => (CLOCK.claims.variant || []).filter((c: any) => c.pahar === p);
 
 // =============================================================================
 // The dial
 // =============================================================================
+// Drawn again only when what it shows changes shape: the mode, the sun's times, the day.
 function buildDial() {
   const wrap = $('#clockWrap'); if (!wrap || !CLOCK) return;
+  const st = currentPahar(), now = new Date();
+  dialKey = [st.mode, st.sun?.sunrise, st.sun?.sunset, now.toDateString()].join('|');
   wrap.textContent = '';
   const svg = el('svg', { viewBox: `0 0 ${C * 2} ${C * 2}`, class: 'raagdial' });
-  const nowP = currentPahar().pahar;
 
+  // 24 hour ticks, a longer one and a numeral every three hours
+  const ring = el('g', { class: 'hours', 'aria-hidden': 'true' });
+  for (let h = 0; h < 24; h++) {
+    const major = h % 3 === 0;
+    const [x1, y1] = pt(h * 60, R_TICK), [x2, y2] = pt(h * 60, R_TICK + (major ? 11 : 6));
+    ring.appendChild(el('line', { x1, y1, x2, y2, class: major ? 'tick tick-major' : 'tick' }));
+    if (major) {
+      // a numeral sits clear of its tick: beside it at the sides, above or below it at the ends
+      const [x, y] = pt(h * 60, R_NUM);
+      const label = H24 ? pad(h) : (h % 6 === 0 ? fmt12(`${h}:00`) : String(h % 12));
+      const side = x < C - 60 ? 'end' : x > C + 60 ? 'start' : 'middle';
+      ring.appendChild(el('text', { x, y: y + (side === 'middle' ? (y < C ? 2 : 17) : 7), class: 'hourmark', 'text-anchor': side }, label));
+    }
+  }
+  svg.appendChild(ring);
+
+  // the eight watches
   for (let p = 1; p <= 8; p++) {
-    const { start } = paharWindow(p);
-    const primary = raagsForPahar(CLOCK, p);
-    const variants = (CLOCK.claims.variant || []).filter((c: any) => c.pahar === p);
-    const g = el('g', { class: 'wedge' });
-    const cls = p === 7 ? 'arc arc-quiet' : `arc ${p <= 4 ? 'arc-day' : 'arc-night'} arc-p${p}`;
+    const w = win(p, st), len = ((w.end - w.start) % 1440 + 1440) % 1440, mid = w.start + len / 2;
+    const primary = raagsForPahar(CLOCK, p), variants = variantsOf(p);
+    const g = el('g', { class: 'wedge', 'data-wedge': p });
     const path = el('path', {
-      d: arcPath(start, start + 180, R_IN, R_OUT),
-      class: cls + (p === nowP ? ' arc-now' : ''),
+      d: arcPath(w.start, w.start + len, R_IN, R_OUT),
+      class: p === 7 ? 'arc arc-quiet' : `arc ${p <= 4 ? 'arc-day' : 'arc-night'} arc-p${p}`,
       tabindex: 0, role: 'button', 'data-pahar': p,
     });
     path.setAttribute('aria-label', p === 7
-      ? `Pahar 7, ${paharRange(7)}: deliberately no raags — the deep night is left in silence.`
-      : `Pahar ${p}, ${paharLabel(p)}, ${paharRange(p)}, ${primary.length} raags: ${primary.map((c: any) => c.roman).join(', ') || 'none'}${variants.length ? `, plus ${variants.length} disputed variant` : ''}. Press Enter for detail.`);
+      ? `Pahar 7, ${span(w)}: deliberately no raags — the deep night is left in silence.`
+      : `Pahar ${p}, ${paharLabel(p)}, ${span(w)}, ${countOf(primary.length)}: ${primary.map((c: any) => c.roman).join(', ') || 'none'}${variants.length ? `, plus ${variants.length} disputed variant` : ''}. Press Enter for detail.`);
     g.appendChild(path);
-
-    // radial content: pahar number, time, and a compact "N raags" + bead row.
-    const [nx, ny] = pt(start + 90, R_IN + 34);
-    g.appendChild(el('text', { x: nx, y: ny, class: 'pnum', 'text-anchor': 'middle', 'pointer-events': 'none' }, String(p)));
-    g.appendChild(el('text', { x: nx, y: ny + 17, class: 'prange', 'text-anchor': 'middle', 'pointer-events': 'none' }, paharRange(p)));
-
-    const [mx, my] = pt(start + 90, (R_IN + R_OUT) / 2 + 14);
+    const [nx, ny] = pt(mid, R_IN + 34);
+    g.appendChild(el('text', { x: nx, y: ny + 11, class: 'pnum', 'text-anchor': 'middle', 'pointer-events': 'none', 'aria-hidden': 'true' }, String(p)));
     if (p === 7) {
-      g.appendChild(el('text', { x: mx, y: my, class: 'quiet-star', 'text-anchor': 'middle', 'pointer-events': 'none' }, '✦'));
-      g.appendChild(el('text', { x: mx, y: my + 18, class: 'quiet-sub', 'text-anchor': 'middle', 'pointer-events': 'none' }, 'quiet hours'));
-    } else {
-      g.appendChild(el('text', { x: mx, y: my, class: 'pcount', 'text-anchor': 'middle', 'pointer-events': 'none' },
-        `${primary.length} raag${primary.length !== 1 ? 's' : ''}`));
-      // bead row: primary filled, variant ringed — a density cue, tap for names
-      const beads = [...primary.map(() => 0), ...variants.map(() => 1)];
-      const bw = 12, total = (beads.length - 1) * bw;
-      const [bx, by] = pt(start + 90, (R_IN + R_OUT) / 2 + 30);
-      // lay beads horizontally centred on the wedge midline
-      const ux = Math.cos(angle(start + 90) + Math.PI / 2), uy = Math.sin(angle(start + 90) + Math.PI / 2);
-      beads.forEach((v, i) => {
-        const off = i * bw - total / 2;
-        g.appendChild(el('circle', {
-          cx: bx + ux * off, cy: by + uy * off, r: v ? 3.4 : 3.8,
-          class: v ? 'bead bead-var' : 'bead', 'pointer-events': 'none',
-        }));
-      });
+      const [sx, sy] = pt(mid, R_OUT - 34);
+      g.appendChild(el('text', { x: sx, y: sy + 8, class: 'quiet-star', 'text-anchor': 'middle', 'pointer-events': 'none', 'aria-hidden': 'true' }, '✦'));
     }
+    // one bead for each raag, along the arc: filled for a primary claim, ringed for a variant
+    const beads = [...primary.map(() => 0), ...variants.map(() => 1)].slice(0, 10);
+    beads.forEach((v, i) => {
+      const [bx, by] = pt(w.start + len * (i + 1) / (beads.length + 1), R_OUT - 30);
+      g.appendChild(el('circle', { cx: bx, cy: by, r: v ? 5 : 5.6, class: v ? 'bead bead-var' : 'bead', 'pointer-events': 'none' }));
+    });
     svg.appendChild(g);
   }
 
-  // seasonal outer ring — labels on the free diagonals, rotated to the tangent
-  const seasons = [
-    { m0: 720, m1: 1439, labelAt: 900, short: 'Basant · spring', raag: 'ਬਸੰਤੁ',
-      label: 'Basant — spring (Chet–Vaisakh), sung any time of day in season' },
-    { m0: 0, m1: 719, labelAt: 540, short: 'Malhar · monsoon', raag: 'ਮਲਾਰ',
-      label: 'Malhar — monsoon (Sawan–Bhadon), sung any time of day in season' },
-  ];
-  seasons.forEach((s, i) => {
-    const g = el('g', { class: 'seasonseg' });
-    const path = el('path', { d: arcPath(s.m0, s.m1, R_SEA_IN, R_SEA_OUT), class: `arc-season arc-season${i}`, tabindex: 0, role: 'button', 'data-season': s.raag });
-    path.setAttribute('aria-label', s.label + '. Press Enter for detail.');
-    g.appendChild(path);
-    const [tx, ty] = pt(s.labelAt, R_SEA_OUT + 13);
-    const deg = ((s.labelAt / 1440) * 360 + 90) % 360;
-    let rot = (deg + 90) % 360; if (rot > 90 && rot < 270) rot -= 180;
-    g.appendChild(el('text', { x: tx, y: ty, class: 'seasonlabel', 'text-anchor': 'middle', 'pointer-events': 'none', transform: `rotate(${rot} ${tx} ${ty})` }, s.short));
-    svg.appendChild(g);
-  });
+  // sunrise and sunset, on the seam between day and night, when the sun's hours are in force
+  if (st.mode === 'solar' && st.sun) {
+    ([[st.sun.sunrise, 'Sunrise', 1], [st.sun.sunset, 'Sunset', -1]] as [number, string, number][]).forEach(([m, name, up]) => {
+      const [x, y] = pt(m, (R_IN + R_OUT) / 2);
+      const g = el('g', { class: 'sunmark', 'pointer-events': 'none' });
+      g.appendChild(el('title', {}, `${name} ${tm(m)}`));
+      g.appendChild(el('circle', { cx: x, cy: y, r: 15, class: 'sun-badge' }));
+      g.appendChild(el('path', { d: `M${x - 7},${y + 2} A7,7 0 0 ${up > 0 ? 1 : 0} ${x + 7},${y + 2} Z`, class: 'sun-disc' }));
+      g.appendChild(el('line', { x1: x - 10, y1: y + 2, x2: x + 10, y2: y + 2, class: 'sun-line' }));
+      svg.appendChild(g);
+    });
+  }
 
-  // hour marks
-  [[360, '6 AM'], [720, 'NOON'], [1080, '6 PM'], [0, 'MIDNIGHT']].forEach(([m, lbl]) => {
-    const [x, y] = pt(m as number, R_HOURS);
-    svg.appendChild(el('text', { x, y: (y as number) + 4, class: 'hourmark', 'text-anchor': 'middle' }, lbl as string));
-  });
+  // "now" on the band: it never crosses the hollow, which belongs to the clock
+  const nowHand = el('g', { class: 'nowhand', id: 'nowHand', 'pointer-events': 'none', 'aria-hidden': 'true' });
+  // it keeps to the outer half of the band, clear of the watch's numeral
+  nowHand.appendChild(el('line', { x1: C, y1: C - R_OUT + 52, x2: C, y2: C - R_OUT - 9, class: 'handhalo' }));
+  nowHand.appendChild(el('line', { x1: C, y1: C - R_OUT + 52, x2: C, y2: C - R_OUT - 9, class: 'handline' }));
+  nowHand.appendChild(el('circle', { cx: C, cy: C - R_OUT - 9, r: 6.5, class: 'handdot' }));
+  svg.appendChild(nowHand);
 
-  // now-hand + centre
-  const hand = el('g', { class: 'nowhand' + (prefersReducedMotion() ? ' nomotion' : '') });
-  hand.appendChild(el('line', { x1: C, y1: C, x2: C, y2: C - R_IN + 54, class: 'handline', id: 'handLine' }));
-  hand.appendChild(el('circle', { cx: C, cy: C, r: 6, class: 'handdot' }));
-  svg.appendChild(hand);
-  svg.appendChild(el('text', { x: C, y: C - 18, class: 'dialtitle gm', 'text-anchor': 'middle' }, 'ੴ'));
-  svg.appendChild(el('text', { x: C, y: C + 8, class: 'dialsub', 'text-anchor': 'middle' }, '24-HOUR RAAG CLOCK'));
-  svg.appendChild(el('text', { x: C, y: C + 30, class: 'dialhint', 'text-anchor': 'middle' }, 'tap a pahar →'));
+  svg.appendChild(buildFace(now));
 
   svg.addEventListener('click', (e: any) => hit(e.target));
   svg.addEventListener('keydown', (e: any) => {
@@ -142,21 +164,97 @@ function buildDial() {
   });
   svg.addEventListener('focusin', (e: any) => {
     const w = e.target.closest('[data-pahar]'); if (w) selectPahar(+w.dataset.pahar, true);
-    const s = e.target.closest('[data-season]'); if (s) selectSeason(s.dataset.season, true);
   });
   wrap.appendChild(svg);
-  positionHand();
-}
-function hit(target: any) {
-  const w = target.closest('[data-pahar]'); if (w) return selectPahar(+w.dataset.pahar);
-  const s = target.closest('[data-season]'); if (s) return selectSeason(s.dataset.season);
+  markNow(st.pahar);
+  if (selSeason) markSelected('season', selSeason); else if (selPahar) markSelected('pahar', selPahar);
+  positionHands();
 }
 
+// The 12-hour face in the hollow: sixty rim ticks with the hours bold, numerals 1–12, the day and
+// date, and the hands. Decoration for a screen reader — the time is in words under the dial.
+function buildFace(now: Date) {
+  const r = R_FACE, g = el('g', { class: 'face', 'aria-hidden': 'true', 'pointer-events': 'none' });
+  const at = (a: number, rad: number) => [C + rad * Math.cos(a), C + rad * Math.sin(a)];
+  g.appendChild(el('circle', { cx: C, cy: C, r, class: 'face-disc' }));
+  for (let i = 0; i < 60; i++) {
+    const hour = i % 5 === 0, a = (i / 60) * 2 * Math.PI - Math.PI / 2;
+    const [x1, y1] = at(a, r - 4), [x2, y2] = at(a, r - (hour ? 17 : 10));
+    g.appendChild(el('line', { x1, y1, x2, y2, class: hour ? 'ftick ftick-hour' : 'ftick' }));
+  }
+  for (let h = 1; h <= 12; h++) {
+    const [x, y] = at((h / 12) * 2 * Math.PI - Math.PI / 2, r * 0.7);
+    g.appendChild(el('text', { x, y: y + 12, class: 'fnum', 'text-anchor': 'middle' }, String(h)));
+  }
+  let weekday = '', day = String(now.getDate());
+  try { weekday = new Intl.DateTimeFormat(undefined, { weekday: 'short' }).format(now).toUpperCase(); } catch {}
+  const date = el('text', { x: C + r * 0.4, y: C + 7, class: 'fdate', 'text-anchor': 'middle' });
+  date.appendChild(el('tspan', { class: 'fdate-w' }, weekday + ' '));
+  date.appendChild(el('tspan', { class: 'fdate-d' }, day));
+  g.appendChild(date);
+  // a hand is a slim stem from the hub, then a rounded bar, with a halo where it crosses a numeral
+  const hand = (id: string, len: number, width: number) => {
+    const h = el('g', { id, class: 'hand' }), neck = len * 0.17;
+    h.appendChild(el('line', { x1: C, y1: C - neck, x2: C, y2: C - len, class: 'hand-halo', 'stroke-width': width + 5 }));
+    h.appendChild(el('line', { x1: C, y1: C, x2: C, y2: C - neck, class: 'hand-stem', 'stroke-width': Math.max(2, width * 0.35) }));
+    h.appendChild(el('line', { x1: C, y1: C - neck, x2: C, y2: C - len, class: 'hand-bar', 'stroke-width': width }));
+    return h;
+  };
+  g.appendChild(hand('handHour', r * 0.5, r * 0.06));
+  g.appendChild(hand('handMinute', r * 0.84, r * 0.045));
+  if (!prefersReducedMotion()) {
+    const s = el('g', { id: 'handSecond', class: 'hand' });
+    s.appendChild(el('line', { x1: C, y1: C + r * 0.18, x2: C, y2: C - r * 0.9, class: 'hand-second' }));
+    g.appendChild(s);
+  }
+  g.appendChild(el('circle', { cx: C, cy: C, r: 8, class: 'hub' }));
+  g.appendChild(el('circle', { cx: C, cy: C, r: 3, class: 'hub-pin' }));
+  return g;
+}
+
+// The hands, from the clock itself. The second hand sweeps and the others creep with it, as on a
+// real movement; with reduced motion there is no second hand and the others step once a minute.
+function positionHands() {
+  const d = new Date(), smooth = !prefersReducedMotion();
+  const s = smooth ? d.getSeconds() + d.getMilliseconds() / 1000 : 0;
+  const m = d.getMinutes() + s / 60, h = (d.getHours() % 12) + m / 60;
+  const turn = (id: string, deg: number) => document.getElementById(id)?.setAttribute('transform', `rotate(${deg.toFixed(2)} ${C} ${C})`);
+  turn('handHour', h * 30); turn('handMinute', m * 6); turn('handSecond', s * 6);
+  // noon is at the top of the 24-hour ring
+  turn('nowHand', ((d.getHours() * 60 + m - 720) / 1440) * 360);
+}
+let sweeping = false, dialSeen = true, lastFrame = 0;
+function sweep(t: number) {
+  if (!sweeping) return;
+  if (dialSeen && t - lastFrame > 33) { lastFrame = t; positionHands(); }      // at most 30 a second, and only on screen
+  requestAnimationFrame(sweep);
+}
+function startHands() {
+  if (prefersReducedMotion() || sweeping) return;
+  const wrap = $('#clockWrap');
+  if (wrap && 'IntersectionObserver' in window)
+    new IntersectionObserver((es) => { dialSeen = es.some((e) => e.isIntersecting); }).observe(wrap);
+  sweeping = true; requestAnimationFrame(sweep);
+}
+
+function hit(target: any) {
+  const w = target.closest('[data-pahar]'); if (w) return selectPahar(+w.dataset.pahar);
+}
+function markNow(p: number) {
+  document.querySelectorAll('.raagdial .wedge').forEach((g: any) => g.classList.toggle('is-now', g.dataset.wedge === String(p)));
+  document.querySelectorAll('#watchList .watch').forEach((b: any) => {
+    const on = b.dataset.pahar === String(p);
+    b.classList.toggle('is-now', on);
+    if (on) b.setAttribute('aria-current', 'time'); else b.removeAttribute('aria-current');
+  });
+}
 function markSelected(kind: 'pahar' | 'season', key: string | number) {
   document.querySelectorAll('.raagdial .arc').forEach((a: any) =>
     a.classList.toggle('arc-sel', kind === 'pahar' && a.dataset.pahar === String(key)));
-  document.querySelectorAll('.raagdial .arc-season').forEach((a: any) =>
-    a.classList.toggle('arc-sel', kind === 'season' && a.dataset.season === String(key)));
+  document.querySelectorAll('#watchList .watch').forEach((b: any) =>
+    b.setAttribute('aria-pressed', String(kind === 'pahar' && b.dataset.pahar === String(key))));
+  document.querySelectorAll('#seasonList .season').forEach((b: any) =>
+    b.setAttribute('aria-pressed', String(kind === 'season' && b.dataset.season === String(key))));
 }
 function scrollPanelIntoView() {
   try {
@@ -171,7 +269,7 @@ function scrollPanelIntoView() {
 const TRAD = (t: string) => t === 'hindustani' ? 'Hindustani' : 'Gurmat Sangeet';
 const safeHref = (u: any) => (/^https?:\/\//i.test(u || '') ? esc(u) : '');   // never javascript: etc.
 function whenText(c: any): string {
-  if (c.pahar) return esc(`${paharLabel(c.pahar)} · ${paharRange(c.pahar)}`);
+  if (c.pahar) return esc(`${paharLabel(c.pahar)} · ${windowText(c.pahar)}`);
   if (c.time_start) return esc(`${fmt12(c.time_start)}–${fmt12(c.time_end)}`) + (c.occasion ? ` · ${esc(c.occasion)}` : '');
   if (c.season) return `${esc(c.season)} · any time`;
   if (c.occasion) return esc(c.occasion);
@@ -184,7 +282,7 @@ function raagCard(c: any, isVariant: boolean): string {
   return `<div class="raagcard${isVariant ? ' is-variant' : ''}">
     <div class="rc-top">
       <div class="rc-name"><span class="gm" lang="pa">${esc(c.raag_name)}</span><span class="rc-roman">${esc(c.roman || '')}</span></div>
-      <button class="rc-read" type="button" data-go-ang="${c.first_ang || 1}" data-go-raag="${esc(c.raag_name)}" aria-label="Read raag ${esc(c.roman)} in the reader">Read →</button>
+      <button class="rc-read" type="button" data-go-ang="${c.first_ang || 1}" data-go-raag="${esc(c.raag_name)}" aria-label="Read raag ${esc(c.roman)} from Ang ${c.first_ang || 1}">Ang ${c.first_ang || 1} ›</button>
     </div>
     <div class="rc-meta">
       <span class="cbadge cb-${esc(c.claim_type)}">${esc(c.claim_type)}</span>
@@ -202,106 +300,194 @@ function detailPahar(p: number): string {
       <div class="det-quiet-star">✦</div>
       <div class="det-badge pbadge-night">P7</div>
       <h3>The quiet hours</h3>
-      <div class="det-sub">${paharRange(7)} · 3rd pahar of night</div>
+      <div class="det-sub">${esc(windowText(7))} · 3rd pahar of night</div>
       <p>No raag of the Granth is assigned to this watch. The deep night is left in silence —
       this absence is deliberate and canonical, so the empty arc is itself part of the tradition,
       not missing data.</p></div>`;
   }
   const primary = raagsForPahar(CLOCK, p);
-  const variants = (CLOCK.claims.variant || []).filter((c: any) => c.pahar === p);
+  const variants = variantsOf(p);
   const dn = p <= 4 ? 'day' : 'night';
   const cards = [...primary.map((c: any) => raagCard(c, false)), ...variants.map((c: any) => raagCard(c, true))].join('');
   return `<div class="det-head">
       <div class="det-badge pbadge-${dn}">P${p}</div>
       <div><div class="det-title">${paharLabel(p)}</div>
-      <div class="det-sub">${paharRange(p)} · ${primary.length} raag${primary.length !== 1 ? 's' : ''}${variants.length ? ` · ${variants.length} variant` : ''}</div></div>
+      <div class="det-sub">${esc(windowText(p))} · ${countOf(primary.length)}${variants.length ? ` · ${variants.length} variant` : ''}</div></div>
     </div>
     <div class="det-cards">${cards || '<div class="hint">No raags in this pahar.</div>'}</div>`;
 }
 function selectPahar(p: number, soft = false) {
-  selPahar = p;
+  selPahar = p; selSeason = '';
   markSelected('pahar', p);
   const d = $('#clockDetail'); if (d) d.innerHTML = detailPahar(p);
   if (!soft) scrollPanelIntoView();
 }
 function selectSeason(raagName: string, soft = false) {
-  markSelected('season', raagName);
   const claims = (BYRAAG[raagName] || []);
   const seasonal = claims.find((c: any) => c.claim_type === 'seasonal') || claims[0];
   const d = $('#clockDetail'); if (!d || !seasonal) return;
+  selSeason = raagName; selPahar = 0;
+  markSelected('season', raagName);
   d.innerHTML = `<div class="det-head">
       <div class="det-badge pbadge-season">✿</div>
       <div><div class="det-title gm" lang="pa">${esc(raagName)}</div>
       <div class="det-sub">${esc(seasonal.roman || '')} · seasonal raag</div></div>
     </div>
     <div class="det-cards">${raagCard(seasonal, false)}</div>
-    <p class="det-foot">Seasonal raags are sung at <b>any time of day</b> while their season lasts —
-    the outer ring marks them apart from the hour-bound pahars.</p>`;
+    <p class="det-foot">Seasonal raags are sung at <b>any time of day</b> while their season lasts.</p>`;
   if (!soft) scrollPanelIntoView();
 }
-function positionHand(svg?: any) {
-  const line = (svg || document).querySelector('#handLine'); if (!line) return;
-  const [x, y] = pt(minutesOf(new Date()), R_IN - 54);
-  line.setAttribute('x2', String(x)); line.setAttribute('y2', String(y));
+
+// =============================================================================
+// The eight watches, and the raags of a season — the same content as the dial, as lists
+// =============================================================================
+function renderWatches(st = currentPahar()) {
+  const box = $('#watchList'); if (!box || !CLOCK) return;
+  let h = '';
+  for (let p = 1; p <= 8; p++) {
+    const n = raagsForPahar(CLOCK, p).length;
+    h += `<button type="button" class="watch" data-pahar="${p}" aria-pressed="false">
+      <span class="watch-p ${p <= 4 ? 'pbadge-day' : 'pbadge-night'}">P${p}</span>
+      <span class="watch-main"><span class="watch-l">${paharLabel(p)}</span><span class="watch-w">${esc(windowText(p, st))}</span></span>
+      <span class="watch-n">${n ? countOf(n) : (p === 7 ? 'silent' : '—')}</span>
+    </button>`;
+  }
+  box.innerHTML = h;
+  markNow(st.pahar);
+  if (selPahar) markSelected('pahar', selPahar);
+}
+const seasonNow = () => {
+  const month = new Date().getMonth() + 1;
+  return (month === 3 || month === 4) ? 'ਬਸੰਤੁ' : (month === 7 || month === 8) ? 'ਮਲਾਰ' : null;
+};
+function renderSeasons() {
+  const box = $('#seasonList'), sec = $('#seasonSec'); if (!box || !sec || !CLOCK) return;
+  const seen = new Set<string>();
+  const rows = (CLOCK.claims.seasonal || []).filter((c: any) => !seen.has(c.raag_name) && seen.add(c.raag_name));
+  if (!rows.length) { (sec as HTMLElement).hidden = true; return; }
+  const live = seasonNow();
+  box.innerHTML = rows.map((c: any) => `<button type="button" class="season" data-season="${esc(c.raag_name)}" aria-pressed="false">
+      <span class="gm" lang="pa">${esc(c.raag_name)}</span>
+      <span class="season-main"><span class="season-r">${esc(c.roman || '')}</span><span class="season-s">${esc(c.season || 'seasonal')} · any time</span></span>
+      ${c.raag_name === live ? '<span class="season-now">in season now</span>' : ''}
+    </button>`).join('');
 }
 
 // =============================================================================
 // "What raag is it now?"
 // =============================================================================
-const hhmm = (min: number) => fmt12(`${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`);
+let nowHTML = '';
 function renderNow() {
   const body = $('#nowBody'); if (!body || !CLOCK) return;
-  const st = currentPahar();
-  const m = minutesOf(new Date());
+  const st = currentPahar(), now = new Date();
+  const m = minutesOf(now);
   const raags = raagsForPahar(CLOCK, st.pahar);
   const nb = nextPaharBoundary(m, st.mode, st.sun?.sunrise, st.sun?.sunset);
   const hrs = Math.floor(nb.minutes / 60), mins = nb.minutes % 60;
   const inWait = (hrs ? `${hrs} h ` : '') + `${mins} min`;
   const nextRaags = raagsForPahar(CLOCK, nb.nextPahar);
-  const month = new Date().getMonth() + 1;
-  const seasonNow = (month === 3 || month === 4) ? 'ਬਸੰਤੁ' : (month === 7 || month === 8) ? 'ਮਲਾਰ' : null;
+  const season = seasonNow();
 
-  body.innerHTML = `
+  const html = `
     <div class="now-pahar"><b>${paharLabel(st.pahar)}</b>
-      <span class="now-range">${st.mode === 'solar' && st.sun
-        ? `solar · sunrise ${hhmm(st.sun.sunrise)} · sunset ${hhmm(st.sun.sunset)}`
-        : paharRange(st.pahar)}</span></div>
+      <span class="now-range">${esc(windowText(st.pahar, st))}${st.mode === 'solar' && st.sun
+        ? ` · sunrise ${esc(tm(st.sun.sunrise))} · sunset ${esc(tm(st.sun.sunset))}` : ''}</span></div>
     ${st.pahar === 7
       ? `<p class="quiet-note">✦ The quiet hours — no raag is assigned to the 3rd pahar of night. This silence is deliberate and canonical.</p>`
       : `<div class="now-raags">${raags.map((c: any) =>
           `<button type="button" class="now-chip gm" lang="pa" data-go-ang="${c.first_ang || 1}" data-go-raag="${esc(c.raag_name)}"
-             aria-label="Read raag ${esc(c.roman)} in the reader">${esc(c.raag_name)}<span class="tr">${esc(c.roman)}</span></button>`).join('')}
-        ${seasonNow ? `<button type="button" class="now-chip gm season" lang="pa" data-go-ang="${
-            (CLOCK.claims.seasonal.find((c: any) => c.raag_name === seasonNow) || {}).first_ang || 1
-          }" data-go-raag="${esc(seasonNow)}" aria-label="Seasonal raag, any time of day right now">${esc(seasonNow)}<span class="tr">in season · any time</span></button>` : ''}</div>`}
-    <div class="now-next">next: <b>${paharLabel(nb.nextPahar)}</b> in ${inWait}${
-      nextRaags.length ? ` — ${nextRaags.map((c: any) => esc(c.roman)).join(', ')}` : ' — the quiet hours'}</div>
-    ${st.note ? `<div class="now-fallback">${esc(st.note)}</div>` : ''}`;
-  document.querySelectorAll('.raagdial .arc').forEach((a: any) =>
-    a.classList.toggle('arc-now', a.dataset.pahar === String(st.pahar)));
-  positionHand();
+             aria-label="Read raag ${esc(c.roman)} from Ang ${c.first_ang || 1}">${esc(c.raag_name)}<span class="tr">${esc(c.roman)} · Ang ${c.first_ang || 1}</span></button>`).join('')}
+        ${season ? `<button type="button" class="now-chip gm season" lang="pa" data-go-ang="${
+            (CLOCK.claims.seasonal.find((c: any) => c.raag_name === season) || {}).first_ang || 1
+          }" data-go-raag="${esc(season)}" aria-label="Seasonal raag, any time of day right now">${esc(season)}<span class="tr">in season · any time</span></button>` : ''}</div>`}
+`;
+  // the region is announced when it changes: once a watch. The countdown, which changes every
+  // minute, sits outside it.
+  if (html !== nowHTML) { nowHTML = html; body.innerHTML = html; }
+  const nx = $('#nowNext');
+  if (nx) nx.innerHTML = `next: <b>${paharLabel(nb.nextPahar)}</b> in ${inWait}${
+    nextRaags.length ? ` — ${nextRaags.map((c: any) => esc(c.roman)).join(', ')}` : ' — the quiet hours'}`;
+
+  // the time in words, under the dial
+  const ro = $('#clockReadout');
+  if (ro) {
+    let t = tm(m);
+    try { t = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(now); } catch {}
+    ro.innerHTML = `<b class="cr-time">${esc(t)}</b><span class="cr-dot" aria-hidden="true">·</span><span class="cr-p">${paharLabel(st.pahar)}</span>`;
+  }
+
+  // the dial is drawn again only when its shape changed (mode, the sun's hours, a new day)
+  const key = [st.mode, st.sun?.sunrise, st.sun?.sunset, now.toDateString()].join('|');
+  if (key !== dialKey) {
+    buildDial(); renderWatches(st);
+    if (selPahar) { const d = $('#clockDetail'); if (d) d.innerHTML = detailPahar(selPahar); }
+    renderExp();
+  } else { markNow(st.pahar); positionHands(); }
 }
-function initModeToggle() {
-  const tgl = $('#modeTgl'); if (!tgl) return;
-  const reflect = () => tgl.querySelectorAll('button').forEach((b: any) =>
-    b.setAttribute('aria-checked', String(b.dataset.mode === getMode())));
-  reflect();
-  tgl.addEventListener('click', (e: any) => {
+
+// ---- solar mode: the sun's own watches need a place, asked for only by a button ----------------
+// The place is rounded to two decimals (about 1 km) before it is kept, in this browser only.
+const keepLoc = (lat: number, lon: number) => store.set('pahar_loc', JSON.stringify({ lat: +lat.toFixed(2), lon: +lon.toFixed(2) }));
+function renderSolar() {
+  const box = $('#solarBox') as HTMLElement | null; if (!box) return;
+  const st = currentPahar(), loc = getLoc();
+  if (getMode() !== 'solar') { box.hidden = true; box.innerHTML = ''; return; }
+  box.hidden = false;
+  if (loc) {
+    box.innerHTML = `<p class="solar-note">${st.mode === 'solar'
+        ? 'Solar watches from your stored location (rounded to about 1 km; it never leaves this device).'
+        : esc(st.note || 'Showing the fixed clock.')}</p>
+      <button type="button" class="solar-link" data-solar="forget">Forget location</button>`;
+    return;
+  }
+  box.innerHTML = `<p class="solar-ask">Sun-accurate watches need your location once. It is rounded to about 1 km, stored in this browser, and never sent.</p>
+    <div class="solar-btns">
+      <button type="button" class="solar-go" data-solar="locate">Use my location</button>
+      <button type="button" class="solar-alt" data-solar="manual" aria-expanded="false" aria-controls="solarForm">Enter manually</button>
+    </div>
+    <form id="solarForm" class="solar-form" hidden novalidate>
+      <label>Latitude <input id="solarLat" inputmode="decimal" autocomplete="off" placeholder="e.g. 31.63" /></label>
+      <label>Longitude <input id="solarLon" inputmode="decimal" autocomplete="off" placeholder="e.g. 74.87" /></label>
+      <button type="submit" class="solar-alt">Use these coordinates</button>
+      <p id="solarErr" class="solar-err" role="alert" hidden>Latitude must be −90…90 and longitude −180…180.</p>
+    </form>
+    <p class="solar-note">Until then: showing the fixed clock (pahar 1 at 6 AM).</p>`;
+}
+function refreshAll() { reflectMode(); renderSolar(); renderNow(); }
+function reflectMode() {
+  $('#modeTgl')?.querySelectorAll('button').forEach((b: any) => b.setAttribute('aria-checked', String(b.dataset.mode === getMode())));
+}
+function initSolar() {
+  const tgl = $('#modeTgl');
+  tgl?.addEventListener('click', (e: any) => {
     const b = e.target.closest('button'); if (!b) return;
-    const mode = b.dataset.mode as Mode;
-    if (mode === 'solar' && !getLoc()) {
-      if (!('geolocation' in navigator)) { toast('Geolocation is not available — staying on fixed clock.'); return; }
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          store.set('pahar_loc', JSON.stringify({ lat: +pos.coords.latitude.toFixed(3), lon: +pos.coords.longitude.toFixed(3) }));
-          store.set('pahar_mode', 'solar'); reflect(); renderNow();
-        },
-        () => { toast('Location declined — staying on fixed clock (your choice is remembered).'); store.set('pahar_mode', 'fixed'); reflect(); renderNow(); },
-        { maximumAge: 86400000, timeout: 8000 });
-      return;
-    }
-    store.set('pahar_mode', mode); reflect(); renderNow();
+    store.set('pahar_mode', b.dataset.mode as Mode); refreshAll();
   });
+  const box = $('#solarBox');
+  box?.addEventListener('click', (e: any) => {
+    const b = e.target.closest('[data-solar]'); if (!b) return;
+    if (b.dataset.solar === 'forget') { try { localStorage.removeItem('pahar_loc'); } catch {} refreshAll(); toast('Location removed from this browser.'); }
+    else if (b.dataset.solar === 'manual') {
+      const f = $('#solarForm') as HTMLElement | null; if (!f) return;
+      f.hidden = !f.hidden; b.setAttribute('aria-expanded', String(!f.hidden));
+      if (!f.hidden) ($('#solarLat') as HTMLElement | null)?.focus();
+    } else if (b.dataset.solar === 'locate') {
+      if (!('geolocation' in navigator)) { toast('Location is not available in this browser — enter coordinates manually.'); return; }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => { keepLoc(pos.coords.latitude, pos.coords.longitude); refreshAll(); },
+        () => { toast('Location was not shared — enter coordinates manually, or stay on the fixed clock.'); },
+        { maximumAge: 86400000, timeout: 8000 });
+    }
+  });
+  box?.addEventListener('submit', (e: any) => {
+    e.preventDefault();
+    const num = (id: string) => { const v = ($(id) as HTMLInputElement).value.trim(); return /^-?\d+(\.\d+)?$/.test(v) ? +v : NaN; };
+    const lat = num('#solarLat'), lon = num('#solarLon');
+    const ok = Math.abs(lat) <= 90 && Math.abs(lon) <= 180;                 // NaN fails both
+    const err = $('#solarErr') as HTMLElement | null; if (err) err.hidden = ok;
+    if (ok) { keepLoc(lat, lon); refreshAll(); }
+  });
+  reflectMode(); renderSolar();
 }
 
 // =============================================================================
@@ -395,10 +581,17 @@ guard(async () => {
   }
   indexClaims();
   buildDial();
+  renderWatches();
+  renderSeasons();
   buildExplorer();
-  initModeToggle();
+  initSolar();
   renderNow();
-  nowTimer = setInterval(renderNow, 60000);
+  startHands();
+  // on the minute, so the words change with the hands
+  setTimeout(() => { renderNow(); setInterval(renderNow, 60000); }, 60000 - (Date.now() % 60000) + 50);
+  $('#watchList')?.addEventListener('click', (e: any) => { const w = e.target.closest('[data-pahar]'); if (w) selectPahar(+w.dataset.pahar); });
+  $('#seasonList')?.addEventListener('click', (e: any) => { const b = e.target.closest('[data-season]'); if (b) selectSeason(b.dataset.season); });
+  window.addEventListener('storage', (e) => { if (e.key === 'pahar_mode' || e.key === 'pahar_loc') refreshAll(); });
   // a page restored from the back/forward cache, or a tab brought back to the front, has a timer
   // that was frozen or throttled: show the current pahar at once rather than up to a minute late
   window.addEventListener('pageshow', (e) => { if (e.persisted) renderNow(); });

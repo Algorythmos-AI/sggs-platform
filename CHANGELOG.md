@@ -6,6 +6,19 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 ## [Unreleased]
 
 ### Added
+- **The Raag Clock on the web, in step with the app.** One face answers "what time is it here, and
+  which raags belong to it": a 24-hour ring of the eight watches with the reader's own clock in its
+  hollow — hour, minute and a sweeping second hand, numerals and the day — and a pointer on the
+  ring for now. The watch it is now is the accent fill; each raag is a bead along its arc (ringed
+  for a disputed variant), so no text is crowded into a wedge. In solar mode the ring is drawn with
+  the sun's own watches, with sunrise and sunset marked on the seam; before, the ring always showed
+  fixed hours. Under the face: the time in words, the eight watches as a list (the full path for a
+  keyboard and a screen reader), and the seasonal raags. Times follow the reader's 12- or 24-hour
+  clock, and the words change on the minute.
+- **Solar mode asks for nothing by itself.** Choosing Solar no longer triggers the browser's
+  location prompt: a place is asked for only by "Use my location", or typed in by hand, and
+  "Forget location" removes it. It is rounded to two decimals (about 1 km, as in the app; it was
+  three) before it is kept in this browser. The privacy page says so.
 - **The Knowledge Base has a home: `/library`.** The current pahar with the raags the timing layer
   records for it ("traditional timing, sources differ"), a search box, the places this browser was
   last reading, a Hukam-style random draw, and a door into each of the nine tools. Search and the
