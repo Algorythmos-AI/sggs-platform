@@ -13,12 +13,6 @@
   },
   "production": {
     "api_platform": "vercel",
-    "services": [
-      "insights",
-      "knowledge",
-      "reader",
-      "search",
-      "verify"
-    ]
+    "services": []
   }
 }

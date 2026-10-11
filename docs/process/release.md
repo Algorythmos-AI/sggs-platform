@@ -20,7 +20,7 @@ verified:
    commit, and that commit's `dataset.lock.json` names the exact database it serves.
 6. Confirm with `make verify-prod` (commit identity, health, Ang 712 heading, web deployment).
    The release that moves production's API contexts onto their own functions (the first after
-   1.3.10; [services-production](runbooks/services-production.md) steps 2–3) also owes the
+   the app is live; [services-production](runbooks/services-production.md) steps 2–3) also owes the
    performance gate, from the same vantage as the baseline:
    `python3 tools/perf_baseline.py --base https://gurbanisoul.com --from "<same vantage>" --compare docs/perf/baseline-2026-09.json`
    must PASS (p95 within +10 % per context), and each context's `X-Service` must name itself.
