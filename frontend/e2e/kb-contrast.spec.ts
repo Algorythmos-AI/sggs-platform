@@ -23,8 +23,8 @@ const KB = JSON.parse(readFileSync(resolve(here, '../src/generated/kb-themes.jso
 // Not measured, and why:
 //  * the theme network's labels: a label is placed beside its own node and may lie across a
 //    neighbour's, by position — the charts get a halo with their own colours (plan step 15);
-//  * a drawing's own text (the charts read their colours once, when drawn, so switching the theme
-//    on the page would measure a state no visitor sees) — except the Raag Clock dial, which is
+//  * a drawing's own text (a chart repaints a moment after the theme changes — charts-theme.spec.ts
+//    — so measuring it the instant the attribute is set would catch it between two themes) — except the Raag Clock dial, which is
 //    styled by the stylesheet and is measured.
 const SKIP = '#network svg, #chord svg, #stream svg, #constel svg, #radar';
 
