@@ -17,7 +17,8 @@ version, `info.version` in the [OpenAPI description](contract-and-openapi.md), i
 
 | Release | Date | What a client sees |
 |---|---|---|
-| Next release (on `integration`) | — | Production's five contexts each answer from their own function, so `X-Service` names the context (`search`, `reader`, …) instead of `all`. Bodies unchanged. The OpenAPI operations gain short summaries (documentation only). |
+| 1.4.0 | — | The OpenAPI operations gain short summaries (documentation only). Production still answers every path from `all`. |
+| First release after the app is live | — | Production's five contexts each answer from their own function, so `X-Service` names the context (`search`, `reader`, …) instead of `all`. Bodies unchanged. |
 | 1.3.10 | 2026-09-25 | Production's API runs as Vercel functions inside the website's project, on the same origin. Every body is byte-identical to 1.3.9, proven by replaying the golden contract before the switch; `X-Service` is `all`. |
 | 1.3.9 | 2026-09-25 | **`/api/v1/*`**: every route with the same body and strict errors (`404` for an unknown endpoint; `{"error": {"code", "message", "request_id"}}`). **`X-Request-Id`** on every response, reusing a valid incoming id. **`X-Service`** on every response. |
 | 1.3.8 | 2026-09-24 | None. The code moved into three repositories; the database bytes and every response are unchanged. |

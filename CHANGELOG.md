@@ -5,6 +5,8 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-10-11 — the Knowledge Base, redressed: thirteen themes, a new shell, and the app's Reader, Nitnem, Search and Raag Clock on the web
+
 ### Added
 - **Every wiki page as Markdown.** `docs.gurbanisoul.com/md/<page>.md` serves each wiki page
   as portable Markdown (glossary terms as plain words, code excerpts filled in from the
@@ -196,12 +198,16 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   hashed file, same sha256) and `webapp/static` is unchanged. A gate
   (`KbStylesheetIsOrderedPartials`) keeps every partial imported once, in order, with the phone
   control-size rule last.
-- **The wiki names both routing states after #205.** `integration` routes production's five API
-  contexts to their own functions; production (v1.3.10) still answers every path with `all` until
-  the first release after the app is live, which moves all five at once. The architecture overview,
+- **The wiki names both routing states after #205.** Staging routes the five API contexts to their
+  own functions; production answers every path with `all` until the first release after the app is
+  live, which moves all five at once. The architecture overview,
   bounded contexts, environments, the API page, the roadmap, the release steps (which now carry the
   per-context performance gate), ADR-0011 (an amendment note) and posters 08 and 09 say so; found by
   the docs-freshness gate.
+- **Held back from this release (owner decision 2026-10-11): production keeps the single API
+  function.** `production.services` in `gateway/routes.json` is empty again, as on v1.3.10, so every
+  `/api` path is still answered by `all`. The entry below describes the change as it was merged; it
+  ships in the first release after the app is live, by listing the five contexts again.
 - **Production's API contexts each answer from their own function** (runbook services-production,
   step 3). `gateway/routes.json` lists all five contexts for production — reader, search, verify,
   insights, knowledge — so each is answered by its own Vercel function with its own database slice,

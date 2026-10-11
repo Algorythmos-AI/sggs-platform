@@ -48,11 +48,11 @@ carries no API-base configuration. `gateway/routes.json` decides the routing per
 
 - **Staging** routes each of the five bounded contexts (`reader`, `search`, `verify`, `insights`,
   `knowledge`) to its own function, with `all` — the whole API — as the catch-all.
-- **Production today (v1.3.10)** answers every `/api` path with `all`.
-- **From the release after 1.3.10** production routes the five contexts the same way as staging —
-  all five in that one release, the first after the app is live on the App Store
-  ([services-production](../process/runbooks/services-production.md), step 3). The change is already
-  on `integration`.
+- **Production (v1.3.10, and 1.4.0)** answers every `/api` path with `all`.
+- **From the first release after the app is live on the App Store** production routes the five
+  contexts the same way as staging, all five in that one release
+  ([services-production](../process/runbooks/services-production.md), step 3). It is one line in
+  `gateway/routes.json`; 1.4.0 leaves it out.
 
 Setting production's `api_platform` back to `render` proxies `/api` to the Render single API, which
 every release still deploys as the rollback target until it is retired. See
