@@ -176,3 +176,14 @@ window.addEventListener('pageshow', (e) => {
   syncChromeColor();
 });
 initFooter();
+
+// ---- jump anywhere: ⌘K / Ctrl+K from anywhere, "/" when not typing, or the bar's button. The
+// palette itself is loaded the first time it is asked for. ----
+const jump = () => import('./palette').then((m) => m.openPalette());
+document.getElementById('paletteBtn')?.addEventListener('click', jump);
+document.addEventListener('keydown', (e) => {
+  const t = e.target as HTMLElement | null;
+  const typing = !!t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+  if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey) { e.preventDefault(); jump(); }
+  else if (e.key === '/' && !typing && !e.metaKey && !e.ctrlKey && !e.altKey && !document.documentElement.classList.contains('overlay-open')) { e.preventDefault(); jump(); }
+});

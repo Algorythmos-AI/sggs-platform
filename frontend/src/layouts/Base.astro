@@ -97,6 +97,9 @@ const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri 
         <button type="button" data-open-saved>Saved<span class="kb-count" data-saved-count hidden>0</span></button>
       </nav>
       <span class="kb-grow"></span>
+      <button id="paletteBtn" class="kb-jump" type="button" aria-haspopup="dialog" aria-controls="palette" aria-keyshortcuts="Meta+K Control+K /" aria-label="Jump to an Ang, a raag, a bani, a page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><span>Jump to…</span><kbd>⌘K</kbd>
+      </button>
       <button id="randomBtn" type="button">✦ Hukam-style random</button>
       <button id="displayBtn" class="kb-ibtn kb-aa" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="displaySheet" aria-label="Display: colour theme, text size and Gurmukhi rendering" title="Display">Aa</button>
       <button id="themeBtn" class="kb-ibtn" type="button" aria-label="Theme" title="Theme">◐</button>
@@ -151,6 +154,19 @@ const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri 
       <div id="tab-insights" role="tabpanel" style="display:none"></div>
     </div>
   </aside>
+
+  <!-- Jump anywhere: an Ang, a raag, a section, a bani, a contributor, a theme, a page (scripts/palette.ts, loaded when first opened) -->
+  <div id="paletteScrim" class="pal-scrim" aria-hidden="true"></div>
+  <div id="palette" class="pal" role="dialog" aria-modal="true" aria-label="Jump to" inert>
+    <div class="pal-top">
+      <input id="paletteQ" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go"
+             role="combobox" aria-expanded="true" aria-controls="paletteList" aria-autocomplete="list" aria-label="Jump to an Ang, a raag, a bani, a page"
+             placeholder="712 · todee · japji · hukam · raag clock" />
+      <button id="paletteClose" class="pal-x" type="button" aria-label="Close">×</button>
+    </div>
+    <div id="paletteList" class="pal-list" role="listbox" aria-label="Places"></div>
+    <div class="pal-foot">↑ ↓ to choose · Enter to go · Esc to close</div>
+  </div>
 
   <!-- A verse's actions, wherever a verse appears. The text shown, copied, shared or pinned is the
        verbatim line, with its citation. -->

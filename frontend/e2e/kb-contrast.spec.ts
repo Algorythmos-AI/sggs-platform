@@ -23,8 +23,8 @@ const KB = JSON.parse(readFileSync(resolve(here, '../src/generated/kb-themes.jso
 // Not measured, and why:
 //  * the theme network's labels: a label is placed beside its own node and may lie across a
 //    neighbour's, by position — the charts get a halo with their own colours (plan step 15);
-//  * a drawing's own text (the charts read their colours once, when drawn, so switching the theme
-//    on the page would measure a state no visitor sees) — except the Raag Clock dial, which is
+//  * a drawing's own text (a chart repaints a moment after the theme changes — charts-theme.spec.ts
+//    — so measuring it the instant the attribute is set would catch it between two themes) — except the Raag Clock dial, which is
 //    styled by the stylesheet and is measured.
 const SKIP = '#network svg, #chord svg, #stream svg, #constel svg, #radar';
 
@@ -50,6 +50,12 @@ const OVER: Record<string, { url: string; act: (page: Page) => Promise<void> }> 
   'a verse\'s actions': { url: '/reader?ang=712', act: async (page) => {
     await page.locator('#angOut .pin-btn').first().click();
     await expect(page.locator('#verseSheet')).toHaveClass(/\bon\b/);
+  } },
+  'the jump palette': { url: '/search', act: async (page) => {
+    await page.locator('#paletteBtn').click();
+    await expect(page.locator('#palette')).toHaveClass(/\bon\b/);
+    await page.locator('#paletteQ').fill('a');
+    await expect(page.locator('#paletteList .pal-item .gm').first()).toBeVisible({ timeout: 15_000 });
   } },
   'reading options': { url: '/reader?ang=712', act: async (page) => {
     await page.locator('#readerOptsBtn').click();

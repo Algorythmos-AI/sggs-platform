@@ -13,6 +13,19 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   re-writes it: every run of Gurmukhi is protected, an edit that would touch one fails the build,
   and each page's export is proven to carry every run unchanged
   (`docs-site/plugins/portable-md.mjs`). The first step of the page menu, print and PDF work.
+- **The charts follow the theme, and a colour keeps its meaning.** Insights and the Constellation
+  read their colours from the stylesheet when they draw; they now draw again when the appearance,
+  the colour theme or the paper tone changes, without a reload and without asking the server again.
+  Category colours are fixed tokens (`--viz-1` … `--viz-10`) in every theme: the Gurus were drawn
+  in the accent, so under Indigo they were the Bhagats' blue, and the two voices of the author
+  fingerprint could be the same colour. The contributor kinds on the Contributors page use the
+  same fixed colours.
+- **Jump anywhere.** ⌘K or Ctrl+K from any Knowledge Base page, "/" when not typing, or the search
+  button in the top bar opens a box that knows the Angs by number, the 31 raags, the sections, the
+  banis, the contributors, the themes and the pages. It matches the names the site already has
+  (Gurmukhi or Roman) and hands anything else to the real search; with a place kept in the Reader,
+  an empty box offers to continue there. Every result is a link, the arrows choose and Enter goes.
+  The palette's script is loaded only the first time it is asked for.
 - **Every verse is a door.** The button on a verse (⋯, where the pin was) opens its actions in one
   sheet, wherever a verse appears — Search, the Reader, a composition, the Verse trail: pin or
   unpin, open in the Reader, related verses, the whole composition, copy, share. The sheet shows the

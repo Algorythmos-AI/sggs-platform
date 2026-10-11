@@ -4,9 +4,9 @@
 import * as d3 from 'd3';
 import Chart from 'chart.js/auto';
 import { $, esc, api, meta, prefersReducedMotion, guard, failHTML, goSearchTheme } from './core';
+import { cssVar, viz, onTheme, cached } from './viz';
 
 const titleCase = (k: string) => k.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 /* ============================ D3 theme network ============================ */
 async function themeNetwork() {
@@ -20,12 +20,8 @@ async function themeNetwork() {
   const ppmiMax = d3.max(edgesAll, (d: any) => d.ppmi) || 1;
   const sizeMax = d3.max(Object.values(size)) || 1;
 
-  const accent = cssVar('--accent') || '#ff9933';
-  const gold = cssVar('--gold') || '#ffd24a';
-  const ink = cssVar('--ink') || '#eef1f8';
   const soft = cssVar('--soft') || '#93a0bd';
   const rNode = (c: string) => 7 + 30 * Math.sqrt((size[c] || 1) / sizeMax);
-  const edgeColor = d3.scaleLinear<string>().domain([0, ppmiMax]).range(['#7c5cff55', accent]);
 
   const W = host.clientWidth || 800, H = 560;
   host.innerHTML = '';
@@ -68,7 +64,6 @@ async function themeNetwork() {
     link.exit().remove();
     link.enter().append('line').attr('stroke-linecap', 'round')
       .merge(link as any)
-      .attr('stroke', (d: any) => edgeColor(d.ppmi))
       .attr('stroke-width', (d: any) => 0.6 + 2.6 * (d.ppmi / ppmiMax))
       .attr('stroke-opacity', 0.55);
 
@@ -76,8 +71,7 @@ async function themeNetwork() {
     node.exit().remove();
     const nEnter = node.enter().append('circle')
       .attr('r', (d: any) => rNode(d.id))
-      .attr('fill', (d: any) => d3.interpolateRgb('#5b6cff', accent)(Math.sqrt((size[d.id] || 1) / sizeMax)))
-      .attr('stroke', gold).attr('stroke-width', 1).attr('stroke-opacity', 0.5)
+      .attr('stroke-width', 1).attr('stroke-opacity', 0.5)
       .style('cursor', 'pointer')
       .on('mouseover', (ev: any, d: any) => {
         tip.html(`<b>${esc(titleCase(d.id))}</b><br><span>${(size[d.id] || 0).toLocaleString()} lines</span><br>${esc(desc[d.id] || '')}`)
@@ -113,9 +107,10 @@ async function themeNetwork() {
     const label = labelSel.selectAll('text').data(nodes.filter((d: any) => rNode(d.id) > 15), (d: any) => d.id);
     label.exit().remove();
     label.enter().append('text').text((d: any) => titleCase(d.id))
-      .attr('font-size', 11).attr('font-weight', 600).attr('fill', ink)
+      .attr('font-size', 11).attr('font-weight', 600)
       .attr('text-anchor', 'middle').attr('pointer-events', 'none')
-      .attr('paint-order', 'stroke').attr('stroke', cssVar('--bg')).attr('stroke-width', 3);
+      .attr('paint-order', 'stroke').attr('stroke-width', 3);
+    paint();
 
     sim.nodes(nodes); (sim.force('link') as any).links(edges);
     if (prefersReducedMotion()) {
@@ -132,6 +127,15 @@ async function themeNetwork() {
     nodeSel.selectAll('circle').attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y);
     labelSel.selectAll('text').attr('x', (d: any) => d.x).attr('y', (d: any) => d.y - rNode((d as any).id) - 4);
   }
+  // The colours, read from the stylesheet as it is now: called after every render, and again when
+  // the theme changes (the layout stays as it is — only the paint moves).
+  function paint() {
+    const accent = cssVar('--accent') || '#A87900', edge = d3.scaleLinear<string>().domain([0, ppmiMax]).range([viz(2) + '55', accent]);
+    linkSel.selectAll('line').attr('stroke', (d: any) => edge(d.ppmi));
+    nodeSel.selectAll('circle').attr('fill', (d: any) => d3.interpolateRgb(viz(1), accent)(Math.sqrt((size[d.id] || 1) / sizeMax))).attr('stroke', cssVar('--ink'));
+    labelSel.selectAll('text').attr('fill', cssVar('--ink')).attr('stroke', cssVar('--bg'));
+  }
+  onTheme(paint);
   sim.on('tick', ticked);
   render();
   buildNetworkTable(edgesAll, size, desc);
@@ -187,7 +191,7 @@ async function authorRadar() {
 
   const fpMap = async (author: string) => {
     if (!author) return null;
-    const d = await api('analytics/author?full=1&author=' + encodeURIComponent(author));
+    const d = await cached('analytics/author?full=1&author=' + encodeURIComponent(author));
     const m: Record<string, number> = {};
     (d.theme_fingerprint || []).forEach((f: any) => { m[f.concept] = +f.lift; });
     return m;
@@ -199,8 +203,7 @@ async function authorRadar() {
     const mapB = b ? await fpMap(b) : null;
     // axes = author A's 9 most distinctive themes (lift desc)
     const axes = Object.entries(mapA).sort((x, y) => y[1] - x[1]).slice(0, 9).map(([k]) => k);
-    const accent = cssVar('--accent') || '#ff9933';
-    const blue = '#5b8cff';
+    const accent = viz(0), blue = viz(1);                     // two voices, two fixed colours
     const grid = cssVar('--line-strong') || 'rgba(255,255,255,.13)';
     const ink = cssVar('--ink'), soft = cssVar('--soft');
     const ds = [{
@@ -232,6 +235,7 @@ async function authorRadar() {
     if (note) note.textContent = `Theme emphasis as lift vs. the corpus baseline (1.0× = average). Axes are ${a}'s most distinctive themes.`;
   }
   selA.onchange = draw; selB.onchange = draw;
+  onTheme(draw);
   draw();
 }
 
@@ -247,8 +251,8 @@ async function resonanceChord() {
     const cj = await fetch('/contributors.json').then((r) => r.json());
     (cj.contributors || []).forEach((c: any) => { kinds[c.name] = c.kind; });
   } catch {}
-  const KCOL: Record<string, string> = { guru: cssVar('--accent') || '#ff9933', bhagat: '#5b8cff', bhatt: '#b07cff', gursikh: '#23b3a1' };
-  const colorOf = (name: string) => KCOL[kinds[name]] || (cssVar('--accent') || '#ff9933');
+  const KIND = ['guru', 'bhagat', 'bhatt', 'gursikh'];
+  const colorOf = (name: string) => viz(Math.max(0, KIND.indexOf(kinds[name])));
   const short = (s: string) => s.split(' (')[0].replace('Bhagat ', '').replace('Guru ', '').replace(' Ji', '');
   const tip = d3.select(host).append('div').attr('class', 'viz-tip').style('opacity', 0);
 
@@ -258,7 +262,7 @@ async function resonanceChord() {
     const minLift = lift ? lift.value : '1.0';
     if (liftOut && lift) liftOut.textContent = (+lift.value).toFixed(1) + '×';
     const my = ++req;
-    const d = await api(`analytics/resonance?min_lines=${minLines}&min_lift=${minLift}&min_edges=8`);
+    const d = await cached(`analytics/resonance?min_lines=${minLines}&min_lift=${minLift}&min_edges=8`);
     if (my !== req) return;                                   // a newer selection superseded this one
     const names: string[] = (d.nodes || []).map((n: any) => n.author);
     const idx: Record<string, number> = {}; names.forEach((n, i) => idx[n] = i);
@@ -315,11 +319,11 @@ async function resonanceChord() {
   }
   if (sel) sel.onchange = draw;
   if (lift) lift.oninput = draw;
+  onTheme(draw);
   draw();
 }
 
 /* ============================ D3 raag theme-progression streamgraph ============================ */
-const STREAM_PAL = ['#ff9933', '#ffd24a', '#5b8cff', '#23b3a1', '#b07cff', '#ff6b6b', '#7ed957', '#48c6ef', '#f78fb3', '#c9a227'];
 async function ribbonStream() {
   const host = $('#stream'); if (!host) return;
   const sel = $('#progRaag') as HTMLSelectElement | null;
@@ -330,14 +334,14 @@ async function ribbonStream() {
     sel.dataset.filled = '1';
   }
   const tip = d3.select(host).append('div').attr('class', 'viz-tip').style('opacity', 0);
-  const color = (i: number) => STREAM_PAL[i % STREAM_PAL.length];
+  const color = (i: number) => viz(i);
 
   let req = 0;
   async function draw() {
     const raag = sel ? sel.value : raags[0]?.name;
     if (!raag) return;
     const my = ++req;
-    const d = await api(`analytics/progression?raag=${encodeURIComponent(raag)}&bins=40&top=7`);
+    const d = await cached(`analytics/progression?raag=${encodeURIComponent(raag)}&bins=40&top=7`);
     if (my !== req) return;                                   // stale response
     const concepts: string[] = d.concepts || []; const series = d.series || {};
     host.querySelectorAll('svg').forEach((s) => s.remove());
@@ -373,13 +377,15 @@ async function ribbonStream() {
     if (lg) lg.innerHTML = concepts.map((c, i) => `<span><i class="lg" style="background:${color(i)}"></i>${esc(titleCase(c))}</span>`).join('');
   }
   if (sel) sel.onchange = draw;
+  onTheme(draw);
   draw();
 }
 
 /* ============================ Vaar Anatomy Strip ============================ */
-const AUTHOR_COL: Record<string, string> = { M1: '#5b8cff', M2: '#23b3a1', M3: '#b07cff', M4: '#7ed957', M5: 'var(--accent)', M9: '#f78fb3' };
+// the stylesheet's own fixed chart colours: a Guru keeps one colour in every theme
+const AUTHOR_COL: Record<string, string> = { M1: 'var(--viz-2)', M2: 'var(--viz-4)', M3: 'var(--viz-3)', M4: 'var(--viz-6)', M5: 'var(--viz-1)', M9: 'var(--viz-8)' };
 const mahala = (a: string) => { const m = (a || '').match(/\(M(\d)\)/); return m ? 'M' + m[1] : ''; };
-const authColor = (a: string) => AUTHOR_COL[mahala(a)] || '#8a92a8';
+const authColor = (a: string) => AUTHOR_COL[mahala(a)] || 'var(--viz-10)';
 const authShort = (a: string) => (a || '?').split(' (')[0].replace('Guru ', '').replace('Bhagat ', '').replace(' Ji', '');
 
 async function vaarAnatomy() {

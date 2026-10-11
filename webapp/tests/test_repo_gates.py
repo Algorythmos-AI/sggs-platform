@@ -474,7 +474,7 @@ class KbStylesheetIsOrderedPartials(unittest.TestCase):
     # The cascade, in full. Equal-specificity rules are settled by this order (a phone rule in
     # responsive.css over a component rule before it, phone-controls.css over everything), so a
     # partial moved or inserted is a visual change: it is made here too, deliberately.
-    ORDER = ["theme", "tokens", "themes", "base", "shell", "search", "reader", "tiles", "panel", "display", "insights",
+    ORDER = ["theme", "tokens", "themes", "base", "shell", "search", "reader", "tiles", "panel", "display", "palette", "insights",
              "reader-related", "trail", "sehaj", "timeline", "study-trail", "responsive", "contributors", "raag-timing",
              "reader-chrome", "nitnem", "library", "motion", "print", "phone-controls"]
 

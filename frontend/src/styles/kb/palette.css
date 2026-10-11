@@ -1,0 +1,39 @@
+/* ============================== jump anywhere ==============================
+   A box and a list: an Ang by number, a raag, a section, a bani, a contributor, a theme, a page.
+   Under the top of a wide screen; the whole screen's width, from the top, on a phone (so the
+   keyboard never covers the results). Names in Gurmukhi are ink, as everywhere. */
+.kb-jump { flex:none; display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:0 12px 0 13px; font:inherit; font-size:13.5px; cursor:pointer;
+  color:var(--cloth-soft); background:color-mix(in srgb, var(--cloth-ink) 6%, transparent); border:1px solid color-mix(in srgb, var(--cloth-ink) 22%, transparent); border-radius:999px; }
+.kb-jump:hover { color:var(--cloth-ink); background:color-mix(in srgb, var(--cloth-ink) 10%, transparent); }
+.kb-jump svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.kb-jump kbd { font:inherit; font-size:11.5px; padding:1px 6px; border-radius:6px; border:1px solid color-mix(in srgb, var(--cloth-ink) 26%, transparent); }
+.pal-scrim { position:fixed; inset:0; z-index:64; display:none; background:color-mix(in srgb, #05070d 34%, transparent); }
+.pal-scrim.on { display:block; }
+.pal { position:fixed; z-index:65; left:50%; top:max(12px, 9vh); width:min(600px, calc(100vw - 24px)); max-height:min(560px, calc(100dvh - 24px)); display:flex; flex-direction:column;
+  color:var(--ink); background:var(--surface-raised); border:1px solid var(--line-strong); border-radius:20px; box-shadow:var(--shadow); overflow:hidden;
+  transform:translate(-50%, -8px); opacity:0; visibility:hidden; transition:opacity .14s ease, transform .18s ease, visibility 0s linear .18s; }
+.pal.on { opacity:1; visibility:visible; transform:translate(-50%, 0); transition-delay:0s; }
+.pal-top { display:flex; align-items:center; gap:6px; padding:8px 8px 8px 16px; border-bottom:1px solid var(--line); }
+.pal-top input { flex:1 1 auto; min-width:0; min-height:44px; font:inherit; font-size:17px; color:var(--ink); background:transparent; border:0; outline:none; -webkit-appearance:none; appearance:none; }
+.pal-top input::placeholder { color:var(--faint); }
+.pal-top input::-webkit-search-cancel-button { -webkit-appearance:none; display:none; }
+.pal-x { flex:none; width:44px; height:44px; font:inherit; font-size:24px; line-height:1; color:var(--soft); background:transparent; border:0; border-radius:12px; cursor:pointer; }
+.pal-x:hover { background:var(--chip); color:var(--ink); }
+.pal-x:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+.pal-list { overflow-y:auto; overscroll-behavior:contain; padding:6px; }
+.pal-item { display:grid; grid-template-columns:92px minmax(0, 1fr) auto; align-items:center; gap:10px; min-height:48px; padding:6px 12px; border-radius:12px; text-decoration:none; color:var(--ink); }
+.pal-item.on, .pal-item:hover { background:var(--accent-wash); }
+.pal-kind { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--soft); }
+.pal-main { min-width:0; font-size:15.5px; font-weight:550; overflow-wrap:anywhere; }
+.pal-main .gm { font-size:18px; font-weight:400; }
+.pal-sub { font-size:12.5px; color:var(--soft); text-align:right; }
+.pal-foot { padding:8px 16px; font-size:12px; color:var(--faint); border-top:1px solid var(--line); }
+@media (max-width:840px) {
+  .kb-jump { width:44px; height:44px; padding:0; justify-content:center; border-color:transparent; background:transparent; color:var(--cloth-ink); }
+  .kb-jump span, .kb-jump kbd { display:none; }
+  .kb-jump svg { width:20px; height:20px; }
+  .pal { top:max(8px, env(safe-area-inset-top, 0px)); max-height:min(70dvh, 520px); }
+  .pal-item { grid-template-columns:78px minmax(0, 1fr); }
+  .pal-sub { grid-column:2; text-align:left; }
+  .pal-foot { display:none; }
+}
