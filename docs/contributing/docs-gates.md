@@ -38,7 +38,9 @@ Regenerate or re-pin; never edit a generated file.
 
 ## The build and after
 
-`npm run typecheck` first; `npm run build` renders every Mermaid fence and every poster; then
+`npm run typecheck` first; `npm run build` renders every Mermaid fence and every poster, and exports
+every page as Markdown — an export that would touch a run of Gurmukhi, or that cannot be proven
+to carry every run unchanged, fails the build ([pages as Markdown](pages-as-markdown.md)); then
 `npm run check:all` — `check-render` (every page rendered completely — Astro logs a failed render
 and exits 0), `check-nav` (every published page is in the sidebar and marked current on itself, no
 sidebar group is empty, no label is longer than 48 characters, and every page has previous and

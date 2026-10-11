@@ -27,6 +27,7 @@ import { remarkMermaid } from './plugins/remark-mermaid.mjs';
 import { remarkPosters } from './plugins/remark-posters.mjs';
 import { remarkTaskLists } from './plugins/remark-task-lists.mjs';
 import { SIDEBAR } from './sidebar.mjs';
+import { FEATURES } from './plugins/features.mjs';
 
 // The commit this build documents: CI passes PUBLIC_DOCS_COMMIT; locally, git. Emitted as
 // <meta name="sggs-docs-commit"> and checked by scripts/ci/docs_smoke.py after every deploy.
@@ -70,8 +71,8 @@ export default defineConfig({
       },
       head: [
         { tag: 'meta', attrs: { name: 'sggs-docs-commit', content: process.env.PUBLIC_DOCS_COMMIT } },
-        // what this build can be held to (scripts/ci/docs_smoke.py, e2e-live): nav2 = every page is in the sidebar
-        { tag: 'meta', attrs: { name: 'sggs-docs-features', content: 'nav2' } },
+        // what this build can be held to (scripts/ci/docs_smoke.py, e2e-live): plugins/features.mjs
+        { tag: 'meta', attrs: { name: 'sggs-docs-features', content: FEATURES.join(' ') } },
       ],
       // the generated API reference sits inside the API group, not after Reference
       sidebar: SIDEBAR.map((/** @type {any} */ g) => (g.label === 'API' ? { ...g, items: [...g.items, ...openAPISidebarGroups] } : g)),

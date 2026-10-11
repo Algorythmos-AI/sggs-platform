@@ -107,6 +107,12 @@ def main():
         checks.append((poster, "image/svg+xml", lambda b: b.startswith(b"<svg") or b"<svg" in b[:500]))
     else:
         print("  BAD no poster linked as 'open full size' on /architecture/overview/"); bad += 1
+    if "md1" in built:
+        # every page as Markdown: the type and charset come from a vercel.json header rule, which the
+        # local test server cannot prove — only the deployed site can
+        checks += [("/md/index.md", "text/plain; charset=utf-8", lambda b: b.startswith(b"# ") and b"- Page: <https://docs.gurbanisoul.com/>" in b),
+                   ("/md-manifest.json", "application/json", lambda b: len(json.loads(b)["pages"]) > 100),
+                   ("/llms.txt", "text/plain", lambda b: b.startswith(b"# Sri Guru Granth Sahib Ji"))]
     if "nav2" in built:
         try:
             gaps = nav_gaps(a.base_url, bypass)

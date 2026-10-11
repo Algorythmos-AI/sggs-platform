@@ -13,6 +13,15 @@ test('vercel source patterns become anchored regexps', () => {
   assert.ok(!toRegExp('/a.b').test('/aXb'));                   // literals are escaped
 });
 
+test('a Content-Type rule in vercel.json applies to the Markdown export, with noindex', () => {
+  const h = headersFor('/md/api/quickstart.md');
+  assert.equal(h['content-type'], 'text/plain; charset=utf-8');
+  assert.equal(h['x-robots-tag'], 'noindex');
+  assert.equal(h['x-content-type-options'], 'nosniff');       // the first rule still applies
+  assert.equal(headersFor('/api/quickstart/')['content-type'], undefined);
+  assert.equal(headersFor('/md-manifest.json')['x-robots-tag'], 'noindex');
+});
+
 test('every page gets the production security headers, including the CSP', () => {
   const h = headersFor('/scripture/structure/');
   assert.match(h['content-security-policy'], /default-src 'self'/);
