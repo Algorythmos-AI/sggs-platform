@@ -3,8 +3,11 @@
 //   • tagged for assistive technology, with bookmarks where the page has sections;
 //   • the brand serif is embedded, and EVERY run of Gurmukhi that contains a letter is set in
 //     Sant Lipi — a missing or substituted Gurmukhi font fails here, not in a reader's hands.
-//     (A vowel sign shown alone on a dotted circle cannot use a range-limited web font; those
-//     runs, which only appear where the script itself is being explained, are counted and allowed.)
+//     The one allowance: a vowel sign with no letter before it (shown alone on a dotted circle, or
+//     put first to show the PDF's visual order) cannot use a range-limited web font, and a browser
+//     may then draw that sign, or the word it sits in, in a fallback. Such runs are allowed only
+//     on a page whose own text has such a sign, and no more of them than it has; every other
+//     page must be Sant Lipi throughout.
 //   • a quotation's "— Sri Guru Granth Sahib Ji · Ang N" line is on the same sheet as its Gurmukhi;
 //   • no link leads to the machine that built it; and the files stay within their size budget.
 // A PDF cannot be proven byte-exact for Gurmukhi (shaping reorders glyphs inside the file); the
@@ -23,6 +26,18 @@ const GURMUKHI = /[਀-੿।॥]/;
 // consonants, independent vowels, the letters with nukta, iri/ura/ik-onkar: a run with any of these is a word
 const LETTER = /[ਅ-ਹਖ਼-ਫ਼ੲ-ੴ]/;
 const CITATION = /— Sri Guru Granth Sahib Ji · Ang \d+/;
+// a dependent sign (nukta, vowel signs, virama, bindi/tippi/addak, udaat, yakash) whose neighbour before it is not Gurmukhi
+const ORPHAN_SIGN = /(?:^|[^\u0A01-\u0A03\u0A05-\u0A39\u0A3C-\u0A4D\u0A51\u0A59-\u0A5E\u0A70-\u0A75\u200C\u200D])[\u0A01-\u0A03\u0A3C-\u0A4D\u0A51\u0A70\u0A71\u0A75]/g;
+
+/** How many signs in a page's text stand with no letter before them (the page is showing the sign itself). */
+export function orphanSigns(html) {
+  // inline elements are joined (syntax highlighting puts a letter and its sign in separate spans);
+  // any other tag is a boundary
+  const text = html.replace(/<(script|style)\b[\s\S]*?<\/\1>/g, ' ')
+    .replace(/<\/?(?:span|a|em|strong|b|i|u|s|sup|sub|mark|small|sggs-term)\b[^>]*>/g, '')
+    .replace(/<[^>]+>/g, '\u0000');
+  return (text.match(ORPHAN_SIGN) ?? []).length;
+}
 const LOCAL = /^(?:https?:\/\/(?:127\.0\.0\.1|localhost|\[::1\])(?::\d+)?(?:\/|$)|file:|about:)/i;
 
 const walk = (dir, out = []) => {
@@ -80,8 +95,12 @@ export function problemsOf(entry, info, size, html) {
   if (!info.tagged) p.push('is not tagged (no structure for a screen reader)');
   if (/<h2[\s>]/.test(html.slice(html.indexOf('sl-markdown-content'))) && info.outline < 1) p.push('has no bookmarks though the page has sections');
   if (![...info.fonts].some((f) => /SourceSerif/i.test(f))) p.push(`does not embed Source Serif (fonts: ${[...info.fonts].join(', ')})`);
-  for (const where of info.gurmukhi.lettersElsewhere.slice(0, 3)) p.push(`sets Gurmukhi outside Sant Lipi (${where})`);
-  if (info.gurmukhi.lettersElsewhere.length > 3) p.push(`… and ${info.gurmukhi.lettersElsewhere.length - 3} more Gurmukhi runs outside Sant Lipi`);
+  const elsewhere = info.gurmukhi.lettersElsewhere.length + info.gurmukhi.signsElsewhere;
+  const allowed = orphanSigns(html);
+  if (elsewhere > allowed) {
+    const where = info.gurmukhi.lettersElsewhere.slice(0, 3).join('; ') || 'signs only';
+    p.push(`sets ${elsewhere} run(s) of Gurmukhi outside Sant Lipi (${where}) where the page shows ${allowed} sign(s) without a letter — the font did not load, or was substituted`);
+  }
   for (const n of info.strayCitations) p.push(`page ${n} carries an Ang citation with no Gurmukhi on the sheet (a quotation was split)`);
   // a page may itself link to a local address (the set-up instructions do); only a link the page did not write is a leak
   const authored = new Set([...html.matchAll(/href="(https?:\/\/[^"]+)"/g)].map((m) => { try { return new URL(m[1].replace(/&amp;/g, '&')).href; } catch { return m[1]; } }));
@@ -113,7 +132,7 @@ async function main() {
     const html = readFileSync(path.join(dist, entry.id === 'index' ? '' : entry.id, 'index.html'), 'utf8');
     let info;
     try { info = await inspect(file); } catch (e) { problems.push(`${rel}: cannot be read (${e.message})`); continue; }
-    runs += info.gurmukhi.sant; signs += info.gurmukhi.signsElsewhere;
+    runs += info.gurmukhi.sant; signs += info.gurmukhi.signsElsewhere + info.gurmukhi.lettersElsewhere.length;
     for (const f of info.fonts) fonts.add(f);
     for (const p of problemsOf(entry, info, size, html)) problems.push(`${rel}: ${p}`);
   }
@@ -123,7 +142,7 @@ async function main() {
     for (const p of problems.slice(0, 40)) console.log(`::error::check-pdf: ${p}`);
     return 1;
   }
-  console.log(`check-pdf: ${expected.size} PDFs, ${(total / 1048576).toFixed(0)} MB — tagged, titled, bookmarked; ${runs} Gurmukhi runs in Sant Lipi (${signs} isolated signs elsewhere); every Ang citation on its quotation's sheet`);
+  console.log(`check-pdf: ${expected.size} PDFs, ${(total / 1048576).toFixed(0)} MB — tagged, titled, bookmarked; ${runs} Gurmukhi runs in Sant Lipi (${signs} beside a sign shown without its letter, in a fallback); every Ang citation on its quotation's sheet`);
   console.log(`check-pdf: fonts embedded: ${[...fonts].sort().join(', ')}`);
   return 0;
 }

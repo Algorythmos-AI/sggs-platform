@@ -133,10 +133,11 @@ site and the build never calls the network. A page that cannot be rendered fails
 them to this:
 
 - one PDF for every exported page, titled, tagged for assistive technology, with bookmarks;
-- **every run of Gurmukhi that contains a letter is set in Sant Lipi**: a missing or substituted
-  font fails the build. A vowel sign shown alone on a dotted circle is the one exception: a browser
-  cannot use a range-limited web font for a sign with no letter under it, and those appear only
-  where the script itself is explained;
+- **Gurmukhi is set in Sant Lipi**: a missing or substituted font fails the build. The one
+  allowance is a vowel sign with no letter before it (shown alone, or put first to show the PDF's
+  visual order): a browser cannot use a range-limited web font for it and may draw the sign, or
+  the word it sits in, in a fallback. That is allowed only on a page whose own text has such a
+  sign, and for no more runs than it has; seven pages do, and the rest must be Sant Lipi throughout;
 - an Ang citation is on the same sheet as its quotation;
 - no link leads to the machine that built it; each file is at most 3 MB and all of them 75 MB.
 
