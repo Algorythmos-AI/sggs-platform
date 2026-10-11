@@ -8,12 +8,13 @@ let mode = 'auto';
 // mode chips: keep the chip UI + `mode` in sync; usable by click, keyboard, and code paths
 function syncMode(m: string) {
   mode = m;
-  document.querySelectorAll('#modes span').forEach((x: any) => {
+  renderIdle();
+  document.querySelectorAll('#modes button').forEach((x: any) => {
     const on = x.dataset.m === m; x.classList.toggle('on', on);
     x.setAttribute('aria-checked', String(on)); x.setAttribute('tabindex', on ? '0' : '-1');
   });
 }
-document.querySelectorAll('#modes span').forEach((s: any) => {
+document.querySelectorAll('#modes button').forEach((s: any) => {
   s.setAttribute('role', 'radio');
   s.setAttribute('aria-checked', String(s.classList.contains('on')));
   s.setAttribute('tabindex', s.classList.contains('on') ? '0' : '-1');
@@ -24,7 +25,47 @@ document.querySelectorAll('#modes span').forEach((s: any) => {
     else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); (s.previousElementSibling || s.parentElement.lastElementChild).focus(); }
   };
 });
-($('#q') as HTMLInputElement | null)?.addEventListener('keydown', (e: KeyboardEvent) => { if (e.key === 'Enter') go(0); });
+// ---- before anything is typed: what this mode takes, in a few lines (the app's idle canvas) ----
+const IDLE: Record<string, [string, string[]]> = {
+  auto: ['Search the Granth', ['Words, sounds, first letters or a theme. Auto picks the way.', 'Roman spelling is forgiven: waheguru, satgur kirpa, gobind.', 'Every result is verbatim scripture, cited by Ang.']],
+  gurmukhi: ['Gurmukhi', ['Type the words as they are written.']],
+  roman: ['Roman', ['waheguru · satgur · naam. Spelling is forgiven.']],
+  english: ['English', ['Search the labelled translation layer: mercy, light, ego.']],
+  first: ['First letters', ['Type the first letter of each word of a line you half remember.', 'In Gurmukhi or in Roman: s n k']],
+  theme: ['Theme', ['Try naam, hukam, haumai, seva, simran.', 'Every tagged verse, cited by Ang.']],
+  verify: ['Verify a quotation', ['Paste a line as you remember it, in Gurmukhi or Roman, and press Enter.', 'Add @ and an Ang to check a claimed page, for example “… @1”.', 'The verdict cites the canonical line and its Ang.']],
+};
+const SAMPLE: Record<string, string> = { auto: 'ਨਾਮੁ', gurmukhi: 'ਨਾਮੁ · ਸਤਿਗੁਰ · ਹੁਕਮਿ', first: 'ਸ ਨ ਕ' };
+function renderIdle() {
+  const box = $('#searchIdle') as HTMLElement | null; if (!box) return;
+  const empty = !($('#q') as HTMLInputElement).value.trim() && !($('#results') as HTMLElement).innerHTML;
+  box.hidden = !empty;
+  if (!empty) return;
+  const [title, lines] = IDLE[mode] || IDLE.auto;
+  box.innerHTML = `<div class="si-mark gm" lang="pa" aria-hidden="true">ੴ</div><h2>${esc(title)}</h2>
+    ${SAMPLE[mode] ? `<p class="si-sample gm" lang="pa">${esc(SAMPLE[mode])}</p>` : ''}
+    ${lines.map((l) => `<p>${esc(l)}</p>`).join('')}`;
+}
+// ---- search as you type: a pause, then the search; an empty box returns to the idle canvas ----
+let typeTimer: number | undefined;
+const qEl = $('#q') as HTMLInputElement | null, qClear = $('#qClear') as HTMLElement | null;
+function clearSearch() {
+  searchReq++;                                         // a search in flight must not land on the cleared page
+  ($('#results') as HTMLElement).innerHTML = '';
+  try { const u = new URL(location.href); u.searchParams.delete('q'); history.replaceState({}, '', u); } catch {}
+  renderIdle();
+}
+qEl?.addEventListener('input', () => {
+  window.clearTimeout(typeTimer);
+  const v = qEl.value.trim();
+  if (qClear) qClear.hidden = !qEl.value;
+  if (!v) { clearSearch(); return; }
+  // a quotation is checked when the reader says so (Enter): half a line would always read "not found"
+  if (mode === 'verify' || v.length < 2) return;
+  typeTimer = window.setTimeout(() => go(0, true), 300);
+});
+qEl?.addEventListener('keydown', (e: KeyboardEvent) => { if (e.key === 'Enter') { window.clearTimeout(typeTimer); go(0); qEl.blur(); } });
+qClear?.addEventListener('click', () => { if (!qEl) return; qEl.value = ''; qClear.hidden = true; window.clearTimeout(typeTimer); clearSearch(); qEl.focus(); });
 
 // ---- search ----
 let hlToks: string[] = [];
@@ -60,14 +101,18 @@ function lineCard(l: any): string {
     <div class="meta">${chips.join('')}</div></div>`;
 }
 let searchReq = 0;
-const go = guard(async (off: number) => {
+const go = guard(async (off: number, typing = false) => {
   const q = ($('#q') as HTMLInputElement).value.trim(); if (!q) return;
   if (mode === 'verify') return doVerify(q);
   const myReq = ++searchReq;
-  ($('#results') as HTMLElement).innerHTML = '<div class="hint">Searching…</div>';
+  const out = $('#results') as HTMLElement;
+  // while typing, the last results stay (dimmed) until the new ones arrive: no flicker between keystrokes
+  if (typing && out.querySelector('.card')) out.classList.add('busy'); else out.innerHTML = '<div class="hint">Searching…</div>';
+  ($('#searchIdle') as HTMLElement | null)?.setAttribute('hidden', '');
   hlToks = q.split(/\s+/).filter((t) => t.length > 1);
   const d = await api(`search?q=${encodeURIComponent(q)}&mode=${mode}&limit=50&offset=${off}`);
   if (myReq !== searchReq) return;          // a newer search was fired; drop this stale result
+  out.classList.remove('busy');
   let h = '';
   if (d.related_themes && d.related_themes.length)
     h += `<div class="count">Related themes: ${d.related_themes.map((t: string) =>
@@ -83,12 +128,12 @@ const go = guard(async (off: number) => {
       <a href="#" class="rel-theme" data-theme="hukam">hukam</a> ·
       <a href="#" class="rel-theme" data-theme="haumai">haumai</a> —
       or <a href="/browse">browse the index</a>.</div>`;
-  ($('#results') as HTMLElement).innerHTML = h; window.scrollTo({ top: 0 });
+  out.innerHTML = h; if (!typing) window.scrollTo({ top: 0 });
   try {                                            // shareable URL; one entry, not one per keystroke
     const u = new URL(location.href); u.searchParams.set('q', q); u.searchParams.set('mode', mode);
     history.replaceState({ q, mode }, '', u);
   } catch {}
-}, () => { const r = $('#results'); if (r) r.innerHTML = failHTML('Search'); });
+}, () => { const r = $('#results'); if (r) { r.classList.remove('busy'); r.innerHTML = failHTML('Search'); } });
 // delegated handlers for #results — keyboard activation of cards + related-theme links
 ($('#results') as HTMLElement | null)?.addEventListener('click', (e: any) => {
   const a = e.target.closest('.rel-theme');
@@ -107,6 +152,7 @@ const doVerify = guard(async (qIn: string) => {
   const d = await api(`verify?q=${encodeURIComponent(q)}${ang ? `&ang=${ang}` : ''}`);
   const v = d.verdict || '';
   const cls = v.startsWith('VERIFIED') ? 'v-ok' : (v.startsWith('NOT_FOUND') ? 'v-no' : 'v-maybe');
+  ($('#searchIdle') as HTMLElement | null)?.setAttribute('hidden', '');
   let h = `<div class="verdict ${cls}">
       <div class="vv">${esc(v.replace(/\+/g, ' + '))}</div>
       ${v.startsWith('NOT_FOUND') ? '' : `<div class="vc">confidence ${(d.confidence * 100).toFixed(1)}%</div>`}
@@ -132,7 +178,8 @@ const doVerify = guard(async (qIn: string) => {
   const qp = p.get('q'); const mp = p.get('mode');
   const VALID = ['auto', 'gurmukhi', 'roman', 'english', 'first', 'theme', 'verify'];
   if (mp && VALID.includes(mp)) syncMode(mp);
-  if (qp) { ($('#q') as HTMLInputElement).value = qp; go(0); }
+  if (qp) { ($('#q') as HTMLInputElement).value = qp; if (qClear) qClear.hidden = false; go(0); }
+  renderIdle();
   // the cursor waits in the box on a desktop; on a phone that would raise the keyboard on arrival
   if (matchMedia('(min-width: 841px) and (hover: hover) and (pointer: fine)').matches) ($('#q') as HTMLInputElement | null)?.focus();
 })();

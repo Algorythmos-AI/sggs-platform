@@ -6,6 +6,12 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 ## [Unreleased]
 
 ### Added
+- **Search on the web, in step with the app.** Results arrive as you type, after a short pause: one
+  request for a burst of keystrokes, the last results staying (dimmed) until the new ones land, and
+  a search still in flight never landing on a cleared page. An empty box shows what the chosen
+  mode takes instead of a paragraph of instructions, and changes with the mode. The modes are real
+  radio buttons, one row that scrolls inside itself on a phone; the box has a clear button and the
+  phone keyboard's own Search key. A quotation is still checked only on Enter.
 - **The Nitnem home on the web, in step with the app.** The time of day brings a set forward: Amrit
   Vela and the day the five morning banis, the evening Rehras Sahib, the night Kirtan Sohila (to
   3 AM). The clock only orders the list; every bani is always shown. The hero draws the day as an
