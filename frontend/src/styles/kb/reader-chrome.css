@@ -17,4 +17,5 @@
 body.chrome-hidden .kb-chrome { transform: translateY(-100%); opacity: 0; pointer-events: none; }
 body.chrome-hidden .kb-tabs { transform: translateY(100%); pointer-events: none; }
 body.chrome-hidden .toolbar { transform: translateY(calc(-100% - var(--nav-h) - 12px)); opacity: 0; pointer-events: none; }
-@media (prefers-reduced-motion: reduce) { .kb-chrome, .kb-tabs, .toolbar { transition: none; } }
+body.chrome-hidden .pagebar { transform: translate(-50%, 140%); opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .kb-chrome, .kb-tabs, .toolbar, .pagebar { transition: none; } }

@@ -3,6 +3,7 @@
 import { $, esc, api, guard, meta, store, validAng, syncToolbarTop, relChip, failHTML, stepFontSize } from './core';
 import { pinButtonHTML } from './store';
 import { overlayOpen } from './overlay';
+import { initReaderChrome, syncReaderChrome } from './readerchrome';
 import { loadClock, claimsFor } from './timing';
 import { paharLabel, paharRange } from './pahar.js';
 
@@ -53,6 +54,7 @@ let focusLine: number | null = null, focusComp: number | null = null;
 const ang = guard(async (n: number, turn = false) => {
   const from = curAng;
   curAng = Math.max(1, Math.min(1430, n)); ($('#angIn') as HTMLInputElement).value = String(curAng);
+  syncReaderChrome(curAng);
   const turned = turn && curAng !== from;
   const myReq = ++angReq;
   angAbort?.abort(); angAbort = null;
@@ -179,8 +181,7 @@ function onScroll() {
   requestAnimationFrame(() => {
     scrollTick = false;
     const y = window.scrollY, dy = y - lastY; lastY = y;
-    if (document.body.classList.contains('focus-mode') || $('#panel')?.classList.contains('on')
-        || document.body.classList.contains('drawer-open')) return;
+    if (document.body.classList.contains('focus-mode') || overlayOpen()) return;
     if (y < 80 || dy < -8) showChrome();
     else if (dy > 0 && y > 80 && !chromeHidden && performance.now() < userScrollUntil) { chromeHidden = true; document.body.classList.add('chrome-hidden'); }
   });
@@ -189,6 +190,7 @@ window.addEventListener('scroll', onScroll, { passive: true });
 document.addEventListener('keydown', showChrome);
 document.addEventListener('pointerdown', (e) => { if (e.clientY < 72) showChrome(); });
 const step = (d: number) => ang(curAng + d, true);
+initReaderChrome({ current: () => curAng, go: (n) => ang(n), turn: (d) => { if (curAng + d >= 1 && curAng + d <= 1430) step(d); } });
 window.addEventListener('popstate', () => {
   const p = new URLSearchParams(location.search);
   const n = parseInt(p.get('ang') || '', 10);
