@@ -6,6 +6,13 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 ## [Unreleased]
 
 ### Added
+- **The Nitnem home on the web, in step with the app.** The time of day brings a set forward: Amrit
+  Vela and the day the five morning banis, the evening Rehras Sahib, the night Kirtan Sohila (to
+  3 AM). The clock only orders the list; every bani is always shown. The hero draws the day as an
+  arc with now marked, a ring for each bani of the set, and one action ("Read Rehras Sahib", or
+  "Continue" where this browser has a place). Hukam is a card under it. Banis are rows in one card
+  per set, each a real button with a ring for how far the kept place is; on a wide screen the hero
+  stays beside the list. The Nitnem reader has the Reader's bar and options panel.
 - **The Reader's controls on the web, in step with the app.** The bar is three things: "Go to", the
   Ang itself (a button: tap it and type another) and reading options. A page bar sits at the foot,
   in the thumb's reach: "Ang N of 1430" over a hairline of the Granth, then the Ang before, Hukam
