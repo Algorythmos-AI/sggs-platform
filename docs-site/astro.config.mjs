@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 // @ts-check
 // docs.gurbanisoul.com — the SGGS engineering + domain wiki. Starlight renders the Markdown that
 // lives in ../docs (ADR-0003: the wiki is PR-reviewed Markdown in the repository; ADR-0012: this
@@ -27,7 +28,8 @@ import { remarkMermaid } from './plugins/remark-mermaid.mjs';
 import { remarkPosters } from './plugins/remark-posters.mjs';
 import { remarkTaskLists } from './plugins/remark-task-lists.mjs';
 import { SIDEBAR } from './sidebar.mjs';
-import { FEATURES } from './plugins/features.mjs';
+import { FEATURES, PDFS } from './plugins/features.mjs';
+import { buildPdfs } from './scripts/build-pdfs.mjs';
 
 // The commit this build documents: CI passes PUBLIC_DOCS_COMMIT; locally, git. Emitted as
 // <meta name="sggs-docs-commit"> and checked by scripts/ci/docs_smoke.py after every deploy.
@@ -87,6 +89,18 @@ export default defineConfig({
         ]),
       ],
     }),
+    // A PDF of every page, made here — inside the build — because the deploy jobs run their own
+    // `vercel build` and deploy only what it writes to dist/ (scripts/build-pdfs.mjs explains the rest).
+    {
+      name: 'sggs-pdfs',
+      hooks: {
+        'astro:build:done': async ({ dir }) => {
+          // imported at the top, not here: this file is loaded through Vite, whose module runner has
+          // closed by the time this hook runs, so an import() at this point fails
+          if (PDFS) await buildPdfs(fileURLToPath(dir));
+        },
+      },
+    },
   ],
   vite: {
     server: {

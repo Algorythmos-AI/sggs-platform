@@ -32,7 +32,7 @@ jobs:
   docs:
     name: docs
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with: { fetch-depth: 0 }   # last-updated dates and verified-stamp staleness need history
@@ -78,11 +78,11 @@ jobs:
       - name: Types
         working-directory: docs-site
         run: npm run typecheck
-      - name: Build (every Mermaid fence rendered)
+      - name: Build (every Mermaid fence rendered, every page exported as Markdown and as a PDF)
         working-directory: docs-site
-        env: { PUBLIC_DOCS_COMMIT: "${{ github.sha }}" }
+        env: { PUBLIC_DOCS_COMMIT: "${{ github.sha }}", DOCS_PDF: "1" }
         run: npm run build
-      - name: The built site is whole (render, Mermaid, links, budgets, CSP hashes) — the same as make docs
+      - name: The built site is whole (render, Mermaid, links, budgets, CSP hashes, the PDFs) — the same as make docs
         working-directory: docs-site
         run: npm run check:all
       - name: End-to-end + accessibility (mocked API, served with the production headers and CSP)
@@ -150,7 +150,7 @@ jobs:
     needs: docs
     runs-on: ubuntu-latest
     environment: staging
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DOCS_PROJECT_ID }}
@@ -196,9 +196,12 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           PUBLIC_DOCS_COMMIT: ${{ github.sha }}
+          DOCS_PDF: "1"
         run: |
           vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
           vercel build --token="$VERCEL_TOKEN"
+          # this job built the site again, so the PDFs it is about to deploy are checked again
+          node scripts/check-pdf.mjs .vercel/output/static
           vercel deploy --prebuilt --archive=tgz --format=json --token="$VERCEL_TOKEN" > deploy.out 2> deploy.err || { cat deploy.err; exit 1; }
           cat deploy.err
           url=$(python3 ../scripts/ci/vercel_deploy_url.py deploy.out deploy.err)
@@ -224,7 +227,7 @@ jobs:
     needs: docs
     runs-on: ubuntu-latest
     environment: production
-    timeout-minutes: 30
+    timeout-minutes: 35
     permissions:
       contents: read
       issues: write
@@ -270,9 +273,12 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           PUBLIC_DOCS_COMMIT: ${{ github.sha }}
+          DOCS_PDF: "1"
         run: |
           vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
           vercel build --prod --token="$VERCEL_TOKEN"
+          # this job built the site again, so the PDFs it is about to deploy are checked again
+          node scripts/check-pdf.mjs .vercel/output/static
           if ! vercel deploy --prebuilt --prod --skip-domain --format=json --token="$VERCEL_TOKEN" > deploy.out 2> deploy.err; then
             cat deploy.err; cat deploy.out; echo "::error::vercel deploy failed"; exit 1
           fi

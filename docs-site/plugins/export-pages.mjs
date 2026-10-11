@@ -10,6 +10,7 @@ import { readPages } from './nav.mjs';
 import { loadGlossary } from './remark-terms.mjs';
 import { commitDates } from './git-dates.mjs';
 import { exportPage } from './portable-md.mjs';
+import { PDFS } from './features.mjs';
 
 export const SITE_ORIGIN = 'https://docs.gurbanisoul.com';
 const HOME = 'docs/README.md';
@@ -62,6 +63,7 @@ export function exportOne(page, options = {}) {
 export const manifestEntry = (p) => ({
   id: p.id, title: p.title, description: p.description, url: p.url, markdown: SITE_ORIGIN + p.mdPath,
   updated: p.updated, words: p.words, readingMinutes: p.minutes,
+  ...(PDFS ? { pdf: `${SITE_ORIGIN}/pdf/${p.id}.pdf` } : {}),
 });
 
 export function _resetForTests() { shared = null; ids = null; facts = null; }
