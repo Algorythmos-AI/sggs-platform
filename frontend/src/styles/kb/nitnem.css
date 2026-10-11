@@ -1,7 +1,51 @@
 /* ---- Nitnem / Gutka page ---------------------------------------------------- */
 .nitnem-list .sect { font-size:13px; letter-spacing:1px; text-transform:uppercase; color:var(--soft); margin:22px 0 8px; }
-.nitnem-list .tiles { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px; }
-.nitnem-list .hint select { margin-left:6px; }
+.nit-foot { margin-top:16px; }
+.nit-foot select { margin-left:6px; font:inherit; font-size:16px; height:44px; padding:0 10px; color:var(--ink); background:var(--card); border:1px solid var(--line-strong); border-radius:10px; }
+/* the hero: paper with a faint wash of the accent whose corner follows the time of day (the colour never changes) */
+.nit-hero { position:relative; padding:20px 22px 22px; border:1px solid var(--line); border-radius:22px; box-shadow:var(--shadow);
+  background:radial-gradient(520px 300px at var(--gx, 50%) var(--gy, 0%), var(--accent-wash), transparent 72%), var(--card); }
+.nit-amrit { --gx:0%; --gy:100%; } .nit-day { --gx:50%; --gy:0%; } .nit-evening { --gx:100%; --gy:0%; } .nit-night { --gx:0%; --gy:0%; }
+.nit-eyebrow { font-size:12px; font-weight:650; letter-spacing:.07em; text-transform:uppercase; color:var(--soft); }
+.nit-band { font-family:var(--font-serif); font-size:28px; font-weight:650; letter-spacing:-.01em; margin-top:4px; }
+.nit-cap { font-size:14.5px; color:var(--soft); margin-top:2px; }
+.dayarc { display:block; width:100%; max-width:360px; height:auto; margin:10px auto 4px; }
+.dayarc .da-seg { fill:none; stroke:var(--line-strong); stroke-width:7; stroke-linecap:round; }
+.dayarc .da-seg.on { stroke:var(--accent-ui); }
+.dayarc .da-halo { fill:var(--card); }
+.dayarc .da-now { fill:var(--accent-fill); stroke:var(--accent-ui); stroke-width:2; }
+.dayarc .da-t { font-size:11px; fill:var(--soft); font-variant-numeric:tabular-nums; }
+.nit-rings { display:flex; gap:14px; flex-wrap:wrap; margin-top:8px; }
+.nit-ring { display:grid; justify-items:center; gap:3px; }
+.nit-ring span { font-size:11.5px; color:var(--soft); }
+.pring { flex:none; display:block; }
+.pring-bg { fill:none; stroke:var(--line-strong); stroke-width:3; }
+.pring-fg { fill:none; stroke:var(--accent-ui); stroke-width:3; stroke-linecap:round; }
+.nit-go { display:inline-flex; align-items:center; min-height:48px; margin-top:16px; padding:0 22px; font:inherit; font-size:15.5px; font-weight:650; color:var(--on-accent);
+  background:var(--accent-fill); border:0; border-radius:999px; box-shadow:var(--fill-edge); cursor:pointer; }
+.nit-card { display:flex; align-items:center; gap:14px; width:100%; min-height:64px; margin-top:14px; padding:10px 18px; font:inherit; text-align:left; color:var(--ink);
+  background:var(--card); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); cursor:pointer; }
+.nit-card-i { flex:none; font-size:22px; color:var(--accent); }
+.nit-card-m { flex:1 1 auto; display:grid; }
+.nit-card-m b { font-size:15.5px; font-weight:650; }
+.nit-card-m span { font-size:12.5px; color:var(--soft); }
+.nit-card-c, .bani-chev { flex:none; font-size:20px; color:var(--faint); }
+/* the banis of a set: one card, a row each */
+.bani-rows { background:var(--card); border:1px solid var(--line); border-radius:18px; overflow:hidden; }
+.bani-row { display:flex; align-items:center; gap:14px; width:100%; min-height:68px; padding:10px 16px; font:inherit; text-align:left; color:var(--ink);
+  background:transparent; border:0; border-top:1px solid var(--line); cursor:pointer; transition:background .15s; }
+.bani-row:first-child { border-top:0; }
+.bani-row:hover, .nit-card:hover { background:var(--card-hover); border-color:var(--line-strong); }
+.bani-main { flex:1 1 auto; min-width:0; display:grid; gap:1px; }
+.bani-en { font-size:15.5px; font-weight:600; }
+.bani-gm { font-size:17px; line-height:1.5; color:var(--ink); }
+.bani-meta { font-size:12.5px; color:var(--soft); }
+.bani-row:focus-visible, .nit-card:focus-visible, .nit-go:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+@media (min-width:900px) {
+  .nitnem-list { display:grid; grid-template-columns:380px minmax(0, 1fr); column-gap:26px; align-items:start; }
+  .nit-side { position:sticky; top:calc(var(--nav-h) + 14px); }
+  .nit-main > .sect:first-child { margin-top:2px; }
+}
 .nitnem-reader .sline .cite { font-size:11px; color:var(--faint); margin-top:2px; }
 .nitnem-reader .sline.extra { border-left:2px solid var(--line); padding-left:10px; }
 .tb-variants { display:inline-flex; gap:4px; padding:3px; border-radius:999px; background:var(--chip); }

@@ -30,43 +30,90 @@ function visible(banis: any[]) {
   return banis.filter((b) => (b.key === 'rehras' ? b.variant === prefs.rehras : b.is_default));
 }
 
+// ---- the day, as the app has it: four bands from 3 AM, and the set each one brings forward ----
+type Band = { id: string; title: string; caption: string; focus: string; order: string[]; from: number; to: number };
+const BANDS: Band[] = [
+  { id: 'amrit', title: 'Amrit Vela', caption: 'The five morning banis.', focus: 'nitnem_morning', order: ['nitnem_morning', 'nitnem_evening', 'nitnem_night'], from: 180, to: 540 },
+  { id: 'day', title: 'Morning banis', caption: 'The five morning banis, whenever the day allows.', focus: 'nitnem_morning', order: ['nitnem_morning', 'nitnem_evening', 'nitnem_night'], from: 540, to: 1020 },
+  { id: 'evening', title: 'Evening', caption: 'Rehras Sahib, as the day closes.', focus: 'nitnem_evening', order: ['nitnem_evening', 'nitnem_night', 'nitnem_morning'], from: 1020, to: 1260 },
+  { id: 'night', title: 'Night', caption: 'Kirtan Sohila before rest.', focus: 'nitnem_night', order: ['nitnem_night', 'nitnem_morning', 'nitnem_evening'], from: 1260, to: 1620 },
+];
+const sinceThree = (d: Date) => ((d.getHours() * 60 + d.getMinutes() - 180) % 1440 + 1440) % 1440;
+const bandAt = (d: Date) => { const m = sinceThree(d) + 180; return BANDS.find((b) => m >= b.from && m < b.to) || BANDS[3]; };
+const fraction = (b: any) => { const pos = prefs.pos(baniId(b)); return pos > 1 && b.n_lines ? Math.min(1, pos / b.n_lines) : 0; };
+const shortTitle = (b: any) => String(b.title_en || '').replace(/ Sahib$/, '');
+
+// The day as a half-arc: 3 AM at the left, over the top, to 3 AM again at the right. The band it
+// is now is drawn in the accent; a dot marks the moment. One image, described in words.
+function dayArc(now: Date, band: Band): string {
+  const W = 320, H = 150, cx = W / 2, cy = H - 14, r = 130;
+  const at = (f: number) => { const a = Math.PI * (1 - f); return [cx + r * Math.cos(a), cy - r * Math.sin(a)]; };
+  const seg = (f0: number, f1: number) => { const [x0, y0] = at(f0), [x1, y1] = at(f1); return `M${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 0 1 ${x1.toFixed(1)},${y1.toFixed(1)}`; };
+  const gap = 0.006;
+  const arcs = BANDS.map((b) => `<path class="da-seg${b.id === band.id ? ' on' : ''}" d="${seg((b.from - 180) / 1440 + gap, (b.to - 180) / 1440 - gap)}"/>`).join('');
+  const [mx, my] = at(sinceThree(now) / 1440);
+  return `<svg class="dayarc" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(band.title)}: the day from 3 AM to 3 AM, with now marked">
+    ${arcs}<circle class="da-halo" cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="11"/><circle class="da-now" cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="6"/>
+    <text class="da-t" x="${cx - r}" y="${H - 1}" text-anchor="middle">3 AM</text><text class="da-t" x="${cx}" y="${cy - r + 24}" text-anchor="middle">3 PM</text><text class="da-t" x="${cx + r}" y="${H - 1}" text-anchor="middle">3 AM</text>
+  </svg>`;
+}
+// a thin ring: how far through the bani this browser's place is
+function ring(f: number, size = 44): string {
+  const r = 18, c = 2 * Math.PI * r;
+  return `<svg class="pring" width="${size}" height="${size}" viewBox="0 0 44 44" aria-hidden="true">
+    <circle class="pring-bg" cx="22" cy="22" r="${r}"/>${f > 0 ? `<circle class="pring-fg" cx="22" cy="22" r="${r}" stroke-dasharray="${(c * f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 22 22)"/>` : ''}</svg>`;
+}
+
 // ---- list ---------------------------------------------------------------------------
 const renderList = () => {
-  const rows = visible(BANIS);
-  const cats = ['nitnem_morning', 'nitnem_evening', 'nitnem_night', 'popular', 'ceremony'];
-  let h = `<div class="raagbanner"><div class="rn">Nitnem · Gutka Sahib</div>
-    <div class="rr">Daily banis, read from the verbatim corpus and cited by Ang. Non-SGGS text is a separate, labelled layer.</div></div>`;
-  for (const c of cats) {
+  const rows = visible(BANIS), now = new Date(), band = bandAt(now);
+  const focus = rows.filter((b) => b.category === band.focus);
+  const next = focus.find((b) => fraction(b) > 0) || focus[0];
+  let date = '';
+  try { date = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' }).format(now); } catch {}
+  // the hero: what to read now, and how far along the day is. The clock only ORDERS the list.
+  let h = `<div class="nit-side"><div class="nit-hero nit-${band.id}">
+      <div class="nit-eyebrow">${esc(date)}</div>
+      <h2 class="nit-band">${esc(band.title)}</h2>
+      <p class="nit-cap">${esc(band.caption)}</p>
+      ${dayArc(now, band)}
+      ${focus.length ? `<div class="nit-rings">${focus.map((b) => `<div class="nit-ring" title="${esc(b.title_en)}">${ring(fraction(b))}<span>${esc(shortTitle(b))}</span></div>`).join('')}</div>` : ''}
+      ${next ? `<button type="button" class="nit-go" data-open="${esc(next.key)}">${fraction(next) > 0 ? 'Continue' : 'Read'} ${esc(next.title_en)}</button>` : ''}
+    </div>
+    <button type="button" class="nit-card" data-random>
+      <span class="nit-card-i" aria-hidden="true">✦</span>
+      <span class="nit-card-m"><b>Hukam</b><span>A complete composition, read verbatim</span></span>
+      <span class="nit-card-c" aria-hidden="true">›</span>
+    </button></div><div class="nit-main">`;
+  for (const c of [...band.order, 'popular', 'ceremony']) {
     const list = rows.filter((b) => b.category === c);
     if (!list.length) continue;
-    h += `<h2 class="sect">${esc(CATEGORY_TITLE[c] || c)}</h2><div class="tiles">`;
+    h += `<h2 class="sect">${esc(CATEGORY_TITLE[c] || c)}</h2><div class="bani-rows">`;
     h += list.map((b) => {
-      const id = baniId(b);
-      const pos = prefs.pos(id);
-      const pct = pos > 1 ? Math.min(100, Math.round((pos / b.n_lines) * 100)) : 0;
-      const meta = [b.estimated_minutes ? `about ${b.estimated_minutes} min` : '',
+      const f = fraction(b), pct = Math.round(f * 100);
+      const meta = [b.estimated_minutes ? `about ${b.estimated_minutes} min` : '', pct ? `${pct}% read` : '',
                     b.has_extra ? 'includes Sri Dasam Granth text' : ''].filter(Boolean).join(' · ');
-      return `<div class="tile bani-tile" data-key="${esc(b.key)}" role="button" tabindex="0"
+      return `<button type="button" class="bani-row bani-tile" data-key="${esc(b.key)}"
           aria-label="${esc(b.title_en)}${pct ? `, ${pct} percent read` : ''}">
-        <div class="n gm" lang="pa">${esc(b.title_gm)}</div>
-        <div class="r">${esc(b.title_en)}</div>
-        <div class="s">${esc(meta)}${pct ? ` · ${pct}% read` : ''}</div></div>`;
+        ${ring(f)}
+        <span class="bani-main"><span class="bani-en">${esc(b.title_en)}</span><span class="bani-gm gm" lang="pa">${esc(b.title_gm)}</span>
+          <span class="bani-meta">${esc(meta)}</span></span>
+        <span class="bani-chev" aria-hidden="true">›</span></button>`;
     }).join('');
     h += '</div>';
   }
-  h += `<p class="hint">Rehras Sahib version:
-    <select id="rehrasSel" aria-label="Rehras Sahib version">
+  h += `<p class="hint nit-foot"><label>Rehras Sahib version:
+    <select id="rehrasSel">
       <option value="sgpc" ${prefs.rehras === 'sgpc' ? 'selected' : ''}>SGPC (standard)</option>
       <option value="taksal" ${prefs.rehras === 'taksal' ? 'selected' : ''}>Damdami Taksal</option>
-    </select></p>`;
+    </select></label></p>
+    <p class="hint nit-foot">Sri Guru Granth Sahib Ji lines are shown verbatim from the verified corpus and cited by Ang. Non-SGGS text is a separate, labelled layer.</p></div>`;
   ($('#nitnemList') as HTMLElement).innerHTML = h;
   ($('#rehrasSel') as HTMLSelectElement | null)?.addEventListener('change', (e) => {
     prefs.rehras = (e.target as HTMLSelectElement).value; renderList();
   });
-  document.querySelectorAll('.bani-tile').forEach((t) => {
-    const open = () => openBani((t as HTMLElement).dataset.key || '');
-    t.addEventListener('click', open);
-    t.addEventListener('keydown', (e: any) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  document.querySelectorAll('#nitnemList .bani-tile, #nitnemList [data-open]').forEach((t) => {
+    t.addEventListener('click', () => openBani((t as HTMLElement).dataset.key || (t as HTMLElement).dataset.open || ''));
   });
 };
 
@@ -185,6 +232,9 @@ const boot = guard(async () => {
   if (key && /^[a-z0-9_]{1,32}$/.test(key)) openBani(key, q.get('variant') || undefined);
 });
 boot();
+// the list follows the clock: come back to the tab in another band and the hero has moved on
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !current && BANIS.length) renderList(); });
+window.addEventListener('pageshow', (e) => { if (e.persisted && !current && BANIS.length) renderList(); });
 ($('#nitnemBack') as HTMLElement).addEventListener('click', backToList);
 window.addEventListener('scroll', trackPosition, { passive: true });
 const tglT = $('#tglT') as HTMLElement;
