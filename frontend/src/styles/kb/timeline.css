@@ -1,6 +1,6 @@
 /* ============================== contributor timeline ============================== */
 /* --k is the kind's colour (rules, dots, tints); --kt is that colour as TEXT, deepened toward the ink so it reads on its own tint */
-.kind-guru { --k:var(--accent); } .kind-bhagat { --k:#5b8cff; } .kind-bhatt { --k:#b07cff; } .kind-gursikh { --k:#23b3a1; }
+.kind-guru { --k:var(--viz-1); } .kind-bhagat { --k:var(--viz-2); } .kind-bhatt { --k:var(--viz-3); } .kind-gursikh { --k:var(--viz-4); }
 .kind-guru, .kind-bhagat, .kind-bhatt, .kind-gursikh { --kt:color-mix(in srgb, var(--k) 50%, var(--ink)); }
 .timeline { position:relative; margin-top:6px; }
 .timeline::before { content:''; position:absolute; top:10px; bottom:10px; left:80px; width:2px;

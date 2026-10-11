@@ -6,6 +6,13 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 ## [Unreleased]
 
 ### Added
+- **The charts follow the theme, and a colour keeps its meaning.** Insights and the Constellation
+  read their colours from the stylesheet when they draw; they now draw again when the appearance,
+  the colour theme or the paper tone changes, without a reload and without asking the server again.
+  Category colours are fixed tokens (`--viz-1` … `--viz-10`) in every theme: the Gurus were drawn
+  in the accent, so under Indigo they were the Bhagats' blue, and the two voices of the author
+  fingerprint could be the same colour. The contributor kinds on the Contributors page use the
+  same fixed colours.
 - **Jump anywhere.** ⌘K or Ctrl+K from any Knowledge Base page, "/" when not typing, or the search
   button in the top bar opens a box that knows the Angs by number, the 31 raags, the sections, the
   banis, the contributors, the themes and the pages. It matches the names the site already has

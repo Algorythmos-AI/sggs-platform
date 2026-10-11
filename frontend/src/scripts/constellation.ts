@@ -4,10 +4,9 @@
 // existing concepts/concept_lines tables); nothing computed client-side. Tap a star → Reader.
 import * as d3 from 'd3';
 import { $, esc, api, guard, failHTML } from './core';
+import { cssVar, viz, onTheme } from './viz';
 
 const titleCase = (k: string) => k.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const PAL = ['#ff9933', '#ffd24a', '#5b8cff', '#23b3a1', '#b07cff', '#ff6b6b', '#7ed957', '#48c6ef', '#f78fb3'];
 // deterministic PRNG so star positions are stable across redraws (no jitter on resize/refocus)
 function rng(seed: number) { let s = seed % 2147483647; if (s <= 0) s += 2147483646; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
 
@@ -59,7 +58,7 @@ async function constellation() {
     clusters.forEach((cl: any, i: number) => {
       const ang = (i / N) * 2 * Math.PI - Math.PI / 2;
       const gx = cx + R * Math.cos(ang), gy = cy + R * Math.sin(ang);
-      const col = PAL[i % PAL.length];
+      const col = viz(i);
       svg.append('line').attr('x1', cx).attr('y1', cy).attr('x2', gx).attr('y2', gy)
         .attr('stroke', col).attr('stroke-opacity', 0.16).attr('stroke-width', 1);
       const g = svg.append('g');
@@ -105,6 +104,7 @@ async function constellation() {
     host.querySelectorAll('.constel-list a').forEach((a: any) =>
       a.addEventListener('click', (e: any) => { e.preventDefault(); openReader(+a.dataset.ang); }));
   }, () => { host.insertAdjacentHTML('beforeend', failHTML('This constellation')); if (head) head.textContent = 'Could not load this theme.'; });
+  onTheme(draw);
   if (sel) sel.onchange = draw;
   if (authorSel) authorSel.onchange = draw;
   if (raagSel) raagSel.onchange = draw;

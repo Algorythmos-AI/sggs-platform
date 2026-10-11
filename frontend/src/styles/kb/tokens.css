@@ -31,5 +31,9 @@
   --accent:var(--accent-text); --accent-2:var(--accent-fill); --accent-ink:var(--on-accent); --gold:var(--accent-text);
   --rahao:var(--negative); --rahao-bg:var(--negative-bg);
   --fill-edge:inset 0 0 0 1px var(--accent-ui);
-  --accent-wash:var(--tile1);                 /* a tint the accent text is proven readable on */
+  --accent-wash:var(--tile1);
+  /* chart categories: fixed in every theme, so a colour means the same voice or theme whichever
+     accent is chosen (the Gurus were the accent once, and under Indigo were the Bhagats' blue) */
+  --viz-1:#E08A1E; --viz-2:#5B8CFF; --viz-3:#B07CFF; --viz-4:#23B3A1; --viz-5:#FF6B6B;
+  --viz-6:#7ED957; --viz-7:#48C6EF; --viz-8:#F78FB3; --viz-9:#C9A227; --viz-10:#8A92A8;                 /* a tint the accent text is proven readable on */
 }
