@@ -6,6 +6,13 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 ## [Unreleased]
 
 ### Added
+- **Every wiki page as Markdown.** `docs.gurbanisoul.com/md/<page>.md` serves each wiki page
+  as portable Markdown (glossary terms as plain words, code excerpts filled in from the
+  source, links absolute), with `/md-manifest.json` and `/llms.txt` listing them and a
+  `rel="alternate"` link on every page. The export edits the original text in place and never
+  re-writes it: every run of Gurmukhi is protected, an edit that would touch one fails the build,
+  and each page's export is proven to carry every run unchanged
+  (`docs-site/plugins/portable-md.mjs`). The first step of the page menu, print and PDF work.
 - **Every verse is a door.** The button on a verse (⋯, where the pin was) opens its actions in one
   sheet, wherever a verse appears — Search, the Reader, a composition, the Verse trail: pin or
   unpin, open in the Reader, related verses, the whole composition, copy, share. The sheet shows the
