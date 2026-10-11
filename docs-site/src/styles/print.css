@@ -56,6 +56,13 @@
     font-size: 8.5pt; color: #4a4137; overflow-wrap: anywhere;
   }
 
+  .page-summary { margin: 10pt 0 0; padding: 0; border: 0; background: none; font-size: 10.5pt; font-style: italic; color: #2b241c; max-inline-size: 140mm; }
+  .page-eyebrow a { color: inherit; text-decoration: none; }
+  /* a procedure on paper: plain numbers, no circles or connecting line */
+  sggs-steps + ol { list-style: decimal; padding-inline-start: 16pt; }
+  sggs-steps + ol > li { padding: 0 0 4pt; }
+  sggs-steps + ol > li::before, sggs-steps + ol > li::after { display: none; }
+
   /* prose: about 75 characters to the line; tables, code and figures may use the whole width */
   .sl-markdown-content { font-size: 10.5pt; }
   .sl-markdown-content > :is(p, ul, ol, dl, h2, h3, h4, h5, blockquote, .starlight-aside) { max-inline-size: 140mm; }

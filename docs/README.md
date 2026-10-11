@@ -34,6 +34,7 @@ New to the project? [Your first week](onboarding/README.md) is five days to a me
 
 ## Ten minutes to your first search
 
+<!-- sggs:steps -->
 1. Clone the platform: `git clone https://github.com/Algorythmos-AI/sggs-platform.git && cd sggs-platform`
 2. `make doctor` — checks Python 3.12, Node 22 and whether the database is installed.
 3. `make dataset` — downloads the pinned database (~104 MiB), verifies its sha256, installs it.

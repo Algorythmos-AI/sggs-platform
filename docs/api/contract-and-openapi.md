@@ -64,6 +64,7 @@ app — see [One version number](../adr/0004-unified-semver.md).
 
 ## Changing the API honestly
 
+<!-- sggs:steps -->
 1. Add or change the handler in the bounded context module and its entry in `serve.py:ROUTES`.
 2. Declare it in `tools/gen_openapi.py:ROUTES` with parameters, limits and at least one sample
    request, and give it a short label in `SUMMARIES` (at most 32 characters; a test holds both

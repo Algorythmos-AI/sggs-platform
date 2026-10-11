@@ -22,6 +22,13 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   per page, an Ang citation on its quotation's sheet, no link to the build machine, and every run
   of Gurmukhi with a letter in it set in Sant Lipi.
 
+- **The wiki reads like a help centre, in its own dress.** A larger title, a 17px body on a
+  70-character measure, and under each title how long the page takes, when it changed, and the
+  page in a sentence. The section above a title is a link. Notes are tinted callouts with a thick
+  rule in the status colours; a quotation of scripture has no tint and no box, so the two cannot
+  be confused. A procedure marked `<!-- sggs:steps -->` is set as numbered steps down a line. The
+  current page and section are marked in ink with a gold bar instead of a filled block.
+
 ### Fixed
 - **Gurmukhi on the wiki is drawn in Sant Lipi everywhere.** Page text was never marked as Punjabi,
   so the rule that gives Gurmukhi its font did not apply to it: in prose, tables, headings, code
