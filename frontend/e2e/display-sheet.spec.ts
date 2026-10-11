@@ -165,6 +165,7 @@ test('the saroop switch lives in the sheet, once, and still only changes how the
 test('Tab stays inside the open sheet', async ({ page }) => {
   await start(page);
   await openSheet(page);
+  await expect(page.locator('#displayClose')).toBeFocused();              // the sheet has taken focus: only then is it ours to move
   await page.locator('#saroopBtn').focus();                               // the last control
   await page.keyboard.press('Tab');
   await expect(page.locator('#displayClose')).toBeFocused();              // … wraps to the first

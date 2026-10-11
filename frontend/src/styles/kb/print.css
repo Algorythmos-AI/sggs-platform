@@ -5,7 +5,7 @@
     --line:rgba(0,0,0,.22); --shadow:none; color-scheme:light; }
   body { background:#fff !important; padding:0; }
   .kb-chrome, .kb-tabs, .kb-foot, .toolbar, .pin-btn, #toast, #sggs-toast, .trail-drawer, .trail-scrim, .skip-link, .endnav, .cont-slot, .cont,
-  .related, .sehaj-exit, .timechip, .ds, .ds-scrim, .pagebar, .ro, .jump, .vs, .vs-scrim { display:none !important; }
+  .related, .sehaj-exit, .timechip, .ds, .ds-scrim, .pagebar, .ro, .jump, .vs, .vs-scrim, .pal, .pal-scrim { display:none !important; }
   main { max-width:none; padding:0; }
   .page-title { position:static; width:auto; height:auto; clip-path:none; margin:0 0 12px; }
   .shabad, .card { background:#fff; border:0; box-shadow:none; padding:0 0 8px; }
