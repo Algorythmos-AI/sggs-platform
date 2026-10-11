@@ -91,7 +91,7 @@ states it (every statement there is checked against the code):
   SDKs. Its App Store label is "Data Not Collected". Location for the raag clock is rounded to
   about 1 km and stays on the device.
 - **The Knowledge Base pages** load no analytics and set no cookies. Preferences, reading
-  positions, pins and a rounded location (about 100 m) stay in the browser's storage.
+  positions, pins and a rounded location (about 1 km) stay in the browser's storage.
 - **The Gurbani Soul pages** on `gurbanisoul.com` use Vercel Web Analytics: cookieless totals of
   page, referrer, country, browser, OS and device type, with a visitor hash discarded daily.
 - **The API log** is one JSON line per request with the method, the path, the status, the
