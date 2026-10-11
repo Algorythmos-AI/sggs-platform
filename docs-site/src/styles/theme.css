@@ -56,9 +56,13 @@
   --sgs-info: #7fb0ff;
   --sgs-special: #b79af2;
 
-  --sl-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --sl-font-system-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --sgs-font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  /* Sant Lipi leads every stack. Its @font-face covers only the Gurmukhi block and the dandas
+     (unicode-range), so it draws Gurmukhi wherever it appears — prose, a table, a heading, code, a
+     printed page — and nothing else; without it, text that is not marked lang="pa" took whatever
+     Gurmukhi font the reader's device had, or none. */
+  --sl-font: "Sant Lipi", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sl-font-system-mono: "Sant Lipi", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sgs-font-serif: "Sant Lipi", "Source Serif 4", Georgia, "Times New Roman", serif;
   --sgs-font-gm: "Sant Lipi", "Mukta Mahee", "Gurmukhi MN", "Noto Sans Gurmukhi", "Raavi", sans-serif;
   --sl-text-h1: 2.25rem;
   --sl-text-h2: 1.625rem;

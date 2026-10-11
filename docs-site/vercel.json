@@ -25,6 +25,7 @@
     { "source": "/pagefind/:path*", "headers": [ { "key": "Cache-Control", "value": "public, max-age=3600" } ] },
     { "source": "/md/:path*", "headers": [ { "key": "Content-Type", "value": "text/plain; charset=utf-8" }, { "key": "X-Robots-Tag", "value": "noindex" } ] },
     { "source": "/md-manifest.json", "headers": [ { "key": "X-Robots-Tag", "value": "noindex" } ] },
+    { "source": "/pdf/:path*", "headers": [ { "key": "X-Robots-Tag", "value": "noindex" }, { "key": "Cache-Control", "value": "public, max-age=3600" } ] },
     { "source": "/llms.txt", "headers": [ { "key": "Content-Type", "value": "text/plain; charset=utf-8" } ] }
   ],
   "git": {

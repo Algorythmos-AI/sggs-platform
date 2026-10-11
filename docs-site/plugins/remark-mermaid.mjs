@@ -17,7 +17,9 @@ export function mermaidConfig(P, { onColour = '#FFFFFF' } = {}) {
   return {
   startOnLoad: false,
   theme: 'base',
-  fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  // Sant Lipi first, as in src/styles/theme.css: a diagram carries its own font list, and Gurmukhi in a
+  // label would otherwise be drawn in whatever the reader's device has (the face covers Gurmukhi only)
+  fontFamily: '"Sant Lipi", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   fontSize: 16,
   flowchart: { htmlLabels: false, useMaxWidth: false, padding: 12, nodeSpacing: 40, rankSpacing: 48, curve: 'basis' },
   sequence: { useMaxWidth: false, actorFontSize: 16, messageFontSize: 15, noteFontSize: 15 },

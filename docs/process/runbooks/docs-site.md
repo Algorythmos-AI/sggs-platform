@@ -123,6 +123,13 @@ or `vercel rollback <previous-url> --scope <team>` with the docs project's token
 Vercel stops assigning the domain automatically; the next `deploy-production` run's `vercel promote`
 restores it. The wiki carries no state, so a rollback costs nothing but the newer pages.
 
+**If the PDFs fail a build.** `build-pdfs` names the page that could not be rendered, and
+`check-pdf` names the file and the promise it broke (most seriously: Gurmukhi set outside Sant
+Lipi, which means the font did not load). Fix the page or the stylesheet; never deploy around the
+gate. To ship without PDFs while that is investigated, remove `DOCS_PDF: "1"` from the three build
+steps of `deploy-docs.yml`: the build then makes none, the menu shows no *Download PDF*, and the
+build stops announcing `pdf1`.
+
 **Switching the page menu off.** If the page menu (copy, view as Markdown, the assistant links,
 print) ever misbehaves, it can be removed without a code change: set `DOCS_PAGE_ACTIONS=0` in the
 docs project's build environment and deploy again. The build then leaves the menu out of every page

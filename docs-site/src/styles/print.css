@@ -48,12 +48,12 @@
 
   /* the title block */
   .page-head { display: block; }
-  .page-eyebrow { margin: 0; font-family: var(--sl-font); font-size: 8.5pt; color: #4a4137; }
+  .page-eyebrow { margin: 0; font-size: 8.5pt; color: #4a4137; }
   h1#_top { margin: 2pt 0 0; font-size: 24pt; line-height: 28pt; color: #201a12; }
-  .page-meta { margin: 6pt 0 0; font-family: var(--sl-font); font-size: 8.5pt; color: #4a4137; }
+  .page-meta { margin: 6pt 0 0; font-size: 8.5pt; color: #4a4137; }
   .print-provenance {
     margin: 8pt 0 16pt; padding: 5pt 0; border-block: 0.75pt solid #9a9084;
-    font-family: var(--sl-font); font-size: 8.5pt; color: #4a4137; overflow-wrap: anywhere;
+    font-size: 8.5pt; color: #4a4137; overflow-wrap: anywhere;
   }
 
   /* prose: about 75 characters to the line; tables, code and figures may use the whole width */
@@ -120,7 +120,7 @@
   :is(sggs-status, sggs-ang-explorer, sggs-waterfall, sggs-verify, sggs-api-try, sggs-progress) > * { display: none !important; }
   :is(sggs-status, sggs-ang-explorer, sggs-waterfall, sggs-verify, sggs-api-try, sggs-progress) {
     display: block; margin: 8pt 0; padding: 5pt 8pt; border: 0.75pt solid #9a9084; break-inside: avoid;
-    font-family: var(--sl-font); font-size: 8.5pt; color: #4a4137;
+    font-size: 8.5pt; color: #4a4137;
   }
   sggs-status::before { content: "Interactive on the web: the live status of the API."; }
   sggs-ang-explorer::before { content: "Interactive on the web: an Ang, read live from the API."; }
@@ -132,21 +132,21 @@
   .canonical { border: 0.75pt solid #9a9084; background: #fff !important; font-size: 8.5pt; break-inside: avoid; }
 
   /* links: a number in the text, the addresses once at the end (src/widgets/print.ts) */
-  .print-ref { font-family: var(--sl-font); font-size: 6.5pt; line-height: 0; margin-inline-start: 0.5pt; }
+  .print-ref { font-size: 6.5pt; line-height: 0; margin-inline-start: 0.5pt; }
   .print-links { margin-top: 20pt; font-size: 8.5pt; line-height: 12pt; overflow-wrap: anywhere; }
   .print-links h2 { font-size: 12.5pt; line-height: 16pt; margin: 0 0 4pt; }
   .print-links ol { margin: 0; padding-inline-start: 16pt; }
   .print-links li { break-inside: avoid; }
   /* without script there is no list: each external address follows its link, outside tables */
   :root:not([data-print-refs]) .sl-markdown-content :is(p, li) a[href^="http"]::after {
-    content: " (" attr(href) ")"; font-family: var(--sl-font); font-size: 7.5pt; overflow-wrap: anywhere; text-decoration: none;
+    content: " (" attr(href) ")"; font-size: 7.5pt; overflow-wrap: anywhere; text-decoration: none;
   }
 
   /* the colophon closes the page */
   footer { margin: 0 !important; padding: 0 !important; border: 0 !important; }
   .print-colophon {
     margin: 18pt 0 0; padding-top: 6pt; border-top: 0.75pt solid #9a9084; break-inside: avoid;
-    font-family: var(--sl-font); font-size: 8pt; line-height: 11.5pt; color: #4a4137; overflow-wrap: anywhere;
+    font-size: 8pt; line-height: 11.5pt; color: #4a4137; overflow-wrap: anywhere;
   }
   img, svg { max-inline-size: 100%; }
 }

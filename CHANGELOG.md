@@ -16,6 +16,17 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   once under "Links", a quotation never split from its Ang, a poster on one sheet with its steps
   listed. Sant Lipi's declared range now includes the dandas, so they no longer fall back to
   another font.
+- **Every wiki page as a PDF.** *Download PDF* in the page menu serves a pre-built, tagged,
+  bookmarked PDF of the page (`/pdf/<page>.pdf`), made inside the site build from the print
+  stylesheet, at the page's published address so its links are real. A gate reads every PDF: one
+  per page, an Ang citation on its quotation's sheet, no link to the build machine, and every run
+  of Gurmukhi with a letter in it set in Sant Lipi.
+
+### Fixed
+- **Gurmukhi on the wiki is drawn in Sant Lipi everywhere.** Page text was never marked as Punjabi,
+  so the rule that gives Gurmukhi its font did not apply to it: in prose, tables, headings, code
+  and diagrams it took whatever Gurmukhi font the reader's device had, or none. Sant Lipi now leads
+  every font stack; its declared range covers only Gurmukhi and the dandas, so nothing else changes.
 
 ## [1.4.0] — 2026-10-11 — the Knowledge Base, redressed: thirteen themes, a new shell, and the app's Reader, Nitnem, Search and Raag Clock on the web
 

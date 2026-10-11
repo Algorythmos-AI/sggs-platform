@@ -113,6 +113,8 @@ def main():
         checks += [("/md/index.md", "text/plain; charset=utf-8", lambda b: b.startswith(b"# ") and b"- Page: <https://docs.gurbanisoul.com/>" in b),
                    ("/md-manifest.json", "application/json", lambda b: len(json.loads(b)["pages"]) > 100),
                    ("/llms.txt", "text/plain", lambda b: b.startswith(b"# Sri Guru Granth Sahib Ji"))]
+    if "pdf1" in built:
+        checks.append(("/pdf/index.pdf", "application/pdf", lambda b: b[:5] == b"%PDF-"))
     if "nav2" in built:
         try:
             gaps = nav_gaps(a.base_url, bypass)

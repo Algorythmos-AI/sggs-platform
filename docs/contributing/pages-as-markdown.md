@@ -74,6 +74,8 @@ The export fails the build, with the page and the reason, on anything it cannot 
   quotation in the export with the same quotation on the page.
 - After each deploy, `scripts/ci/docs_smoke.py` fetches `/md/index.md` and checks its type and
   character set, on builds that announce the `md1` feature.
+- `docs-site/plugins/test/pdf.test.mjs` breaks each promise the PDF gate makes and expects it
+  reported; `docs-site/e2e/pdf.spec.ts` fetches a PDF from the built site.
 - `docs-site/e2e/page-actions.spec.ts` drives the menu on desktop and phone: copying, the keyboard,
   the refusals, no JavaScript, and axe with the panel open in both schemes.
   `docs-site/e2e/print.spec.ts` checks the printed page as a dark-theme reader would get it.
@@ -91,6 +93,7 @@ Above every title is **Copy page**, which copies the page's Markdown, and a pane
 | Copy page as Markdown, Copy link | to the clipboard; a line says "Copied", or what to do when the browser refuses |
 | View as Markdown | opens `/md/<id>.md` in a new tab |
 | Ask ChatGPT, Ask Claude | plain links to those services with an instruction and the page's public Markdown address ([ADR-0013](../adr/0013-outbound-assistant-links.md)) |
+| Download PDF | the page's pre-built PDF, `/pdf/<id>.pdf` |
 | Print | the browser's print dialog; shown where there is a mouse or trackpad |
 
 Every link in it works without JavaScript; only copying and printing need script. The menu is not
@@ -115,3 +118,28 @@ Printing a page, from the menu or the browser, gives the article and nothing els
 
 **For authors:** a poster's steps come from its `.steps.json`, so write captions that read well as
 a list. Nothing else is needed: a page that passes the gates prints.
+
+## The pre-built PDFs
+
+Every exported page also has a PDF at `/pdf/<id>.pdf`, made from the built page with the same print
+stylesheet, so it reads exactly like a careful print. `docs-site/scripts/build-pdfs.mjs` makes them
+**inside the build** (the deploy jobs build the site themselves, and only what a build writes is
+deployed), when `DOCS_PDF=1`; CI sets it for every build it tests or deploys, and a local build is
+quicker without (`npm run pdf` makes them afterwards). Each page is rendered at its published
+address with every request answered from the built files, so links inside a PDF point at the real
+site and the build never calls the network. A page that cannot be rendered fails the build.
+
+`npm run check:pdf` (part of `check:all`, and run again by each deploy job on what it built) holds
+them to this:
+
+- one PDF for every exported page, titled, tagged for assistive technology, with bookmarks;
+- **every run of Gurmukhi that contains a letter is set in Sant Lipi**: a missing or substituted
+  font fails the build. A vowel sign shown alone on a dotted circle is the one exception: a browser
+  cannot use a range-limited web font for a sign with no letter under it, and those appear only
+  where the script itself is explained;
+- an Ang citation is on the same sheet as its quotation;
+- no link leads to the machine that built it; each file is at most 3 MB and all of them 75 MB.
+
+A PDF cannot be proven character for character the way the Markdown is: shaping reorders glyphs
+inside the file. The verbatim export is the Markdown; the PDF is checked for font, presence and
+place.
