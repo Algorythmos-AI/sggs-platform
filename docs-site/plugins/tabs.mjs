@@ -10,5 +10,12 @@ export const TABS = [
   { label: 'Operate', slug: 'process', groups: ['Ship & operate'] },
 ];
 
+/** The tab for the page a Starlight sidebar marks as current, or null. */
+export function litTab(sidebar) {
+  const holds = (e) => (e.type === 'group' ? e.entries.some(holds) : e.isCurrent);
+  const top = sidebar.find((e) => e.type === 'group' && holds(e));
+  return top ? tabFor(top.label) : null;
+}
+
 /** The tab for a top-level sidebar group, or null. */
 export const tabFor = (groupLabel) => TABS.find((t) => t.groups.includes(groupLabel)) ?? null;

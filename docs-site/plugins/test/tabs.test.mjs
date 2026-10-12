@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { TABS, tabFor } from '../tabs.mjs';
+import { TABS, tabFor, litTab } from '../tabs.mjs';
 import { LAYOUT } from '../../sidebar.mjs';
 import { readPages } from '../nav.mjs';
 import { splitRuns } from '../rehype-lang-pa.mjs';
@@ -15,6 +15,19 @@ test('every tab names sidebar groups that exist, and no group has two tabs', () 
   }
   assert.equal(tabFor('Data').label, 'Platform');
   assert.equal(tabFor('Brand'), null);
+});
+
+test('the lit tab is the one whose group holds the current page', () => {
+  const link = (isCurrent) => ({ type: 'link', isCurrent });
+  const side = (where) => [
+    { type: 'group', label: 'Data', entries: [link(where === 'data'), { type: 'group', label: 'Runbooks', entries: [link(where === 'deep')] }] },
+    { type: 'group', label: 'Brand', entries: [link(where === 'brand')] },
+    link(where === 'loose'),
+  ];
+  assert.equal(litTab(side('data')).label, 'Platform');
+  assert.equal(litTab(side('deep')).label, 'Platform');
+  assert.equal(litTab(side('brand')), null);
+  assert.equal(litTab(side('loose')), null);
 });
 
 test('every tab opens a published page', () => {

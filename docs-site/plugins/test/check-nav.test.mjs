@@ -81,3 +81,10 @@ test('a page without its "Updated" date fails', () => {
   const dist = fakeDist({ '/a/': { next: true }, '/b/': { prev: true, next: true, undated: true }, '/c/': { prev: true } });
   assert.deepEqual(checkSite(dist, { exempt: {} }), ['/b/: no "Updated" date']);
 });
+
+test('the drawer\'s section shortcuts are not read as sidebar entries', () => {
+  const html = '<nav class="sidebar" aria-label="Main"><ul class="drawer-tabs" aria-label="Sections"><li><a href="/api/" aria-current="true">API</a></li></ul><ul><li><a href="/api/" aria-current="page">Overview</a></li></ul></nav>';
+  const nav = mainNav(html);
+  assert.equal(nav.includes('drawer-tabs'), false);
+  assert.equal((nav.match(/href="\/api\/"/g) ?? []).length, 1);
+});

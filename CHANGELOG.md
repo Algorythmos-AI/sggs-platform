@@ -31,7 +31,14 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 
 - **Section tabs on the wiki.** On a wide screen the header has a second row — Get started,
   Scripture, Platform, API, Operate — each opening that section's overview, with the section of
-  the current page marked. A phone keeps the menu drawer, which opens on the same sections.
+  the current page marked. On a phone the same five links are at the top of the menu drawer.
+  A long page has a *Back to top* link under "On this page", and a wide table on a phone shades
+  the edge that has more to show.
+
+- **The wiki's layout is guarded by pictures.** The top of six kinds of page — wide and phone,
+  light and dark — is compared with a committed baseline on every pull request, in a pinned
+  container so fonts cannot differ. A difference fails the `docs` check and uploads what the build
+  drew. The fallback fonts a PDF may embed are now installed by name on the build machines.
 
 - **Gurmukhi on the wiki is marked as Punjabi.** Every run of Gurmukhi in a page's prose, tables
   and glossary cards is wrapped in `lang="pa"`, so a screen reader reads it as Punjabi instead of
@@ -39,6 +46,10 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   drawings are left as they are.
 
 ### Fixed
+- **A wiki title no longer jumps as its font arrives.** Until Source Serif loaded, a title was
+  drawn in Georgia, which is a fifth wider: a long title wrapped onto a second line and then
+  snapped back, moving the page under it. The heading font is now fetched with the page and the
+  fallback is one of nearly the same width; a test measures the shift on every build.
 - **Gurmukhi on the wiki is drawn in Sant Lipi everywhere.** Page text was never marked as Punjabi,
   so the rule that gives Gurmukhi its font did not apply to it: in prose, tables, headings, code
   and diagrams it took whatever Gurmukhi font the reader's device had, or none. Sant Lipi now leads

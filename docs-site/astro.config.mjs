@@ -70,6 +70,8 @@ export default defineConfig({
         EditLink: './src/components/EditLink.astro',
         Footer: './src/components/Footer.astro',
         SiteTitle: './src/components/SiteTitle.astro',
+        Sidebar: './src/components/Sidebar.astro',
+        TableOfContents: './src/components/TableOfContents.astro',
         PageTitle: './src/components/PageTitle.astro',
         LastUpdated: './src/components/LastUpdated.astro',
       },

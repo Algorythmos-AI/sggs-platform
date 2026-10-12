@@ -68,7 +68,11 @@ jobs:
         run: npm ci
       - name: Playwright Chromium (renders Mermaid at build; runs the e2e suite)
         working-directory: docs-site
-        run: npx playwright install --with-deps chromium
+        # the fallback fonts a PDF may embed are installed by name, not left to the runner image
+        # (scripts/check-pdf.mjs allows exactly these beside Sant Lipi and Source Serif)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends fonts-dejavu-core fonts-liberation fonts-freefont-ttf fonts-noto-color-emoji
+          npx playwright install --with-deps chromium
       - name: Plugin unit tests
         working-directory: docs-site
         run: npm run test:unit
@@ -88,6 +92,29 @@ jobs:
       - name: End-to-end + accessibility (mocked API, served with the production headers and CSP)
         working-directory: docs-site
         run: npm run test:e2e
+      - name: Visual baseline (the reading layout, compared in the pinned Playwright container)
+        # Screenshots are comparable only when the fonts are, so they are made and compared in one
+        # image and nowhere else. On a difference the job fails and the pictures this build drew
+        # are uploaded as `visual-baselines`: look at them, and if the change is meant, commit them
+        # (docs/process/runbooks/docs-site.md, "Visual baselines").
+        if: github.event_name == 'pull_request'
+        env: { PW_IMAGE: "mcr.microsoft.com/playwright:v1.63.0-noble" }
+        run: |
+          visual() { docker run --rm --ipc=host -e CI=1 -v "$PWD:/w" -w /w/docs-site "$PW_IMAGE" npx playwright test -c playwright.visual.config.ts "$@"; }
+          if visual; then exit 0; fi
+          rm -rf docs-site/e2e-visual/__screenshots__
+          visual --update-snapshots || true
+          echo "::error::The wiki's visual baseline differs. Download the visual-baselines artifact, review it, and commit it to docs-site/e2e-visual/__screenshots__/ if the change is intended."
+          exit 1
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: failure() && github.event_name == 'pull_request'
+        with:
+          name: visual-baselines
+          path: |
+            docs-site/e2e-visual/__screenshots__
+            docs-site/test-results
+          retention-days: 7
+          if-no-files-found: ignore
       - name: Lighthouse budgets (five pages on a pull request or staging push; all twenty nightly and on main)
         # Lighthouse was two-thirds of this job (20 pages x 3 runs, ~12 minutes). A pull request needs
         # the pages that stress the budget — the home page, the heaviest page, a poster, a live widget,
@@ -190,6 +217,7 @@ jobs:
       - working-directory: docs-site
         run: |
           npm ci
+          sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends fonts-dejavu-core fonts-liberation fonts-freefont-ttf fonts-noto-color-emoji
           npx playwright install --with-deps chromium
       - name: Build, deploy (preview) and alias to the docs staging domain
         working-directory: docs-site
@@ -256,6 +284,7 @@ jobs:
       - working-directory: docs-site
         run: |
           npm ci
+          sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends fonts-dejavu-core fonts-liberation fonts-freefont-ttf fonts-noto-color-emoji
           npx playwright install --with-deps chromium
       - name: Record the deployment serving docs.gurbanisoul.com (the rollback target)
         # the deployment the domain serves now, not the newest READY production deployment: a build
