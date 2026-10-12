@@ -37,6 +37,34 @@ test.describe('section tabs', () => {
     expect((await page.locator('#versioning').boundingBox())!.y).toBeGreaterThanOrEqual(header.height - 1);
   });
 
+  test('on a phone: the five sections open the menu drawer, each a full touch target', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile', 'phone only');
+    await open(page, '/data/data-dictionary/');
+    await page.locator('button.sl-menu-button').click();
+    const links = page.locator('ul.drawer-tabs a');
+    await expect(links).toHaveText(['Get started', 'Scripture', 'Platform', 'API', 'Operate']);
+    await expect(page.locator('ul.drawer-tabs a[aria-current]')).toHaveText('Platform');
+    for (const box of await links.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height))) expect(Math.round(box)).toBeGreaterThanOrEqual(44);
+    expect(await sideways(page)).toBeLessThanOrEqual(0);
+    await links.filter({ hasText: 'Operate' }).click();
+    await expect(page).toHaveURL(/\/process\/$/);
+  });
+
+  test('on a wide screen the drawer links are not shown, and a long page offers the way back up', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === 'mobile', 'the contents column is a wide-screen column');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await open(page, '/data/data-dictionary/');
+    await expect(page.locator('ul.drawer-tabs')).toBeHidden();
+    const top = page.locator('a.toc-top');
+    await expect(top).toHaveText('Back to top');
+    await page.locator('.sl-markdown-content h2').last().scrollIntoViewIfNeeded();
+    await top.click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(5);
+    // a page with almost nothing on it has no such link
+    await open(page, '/glossary/');
+    expect(await page.locator('a.toc-top').count()).toBeLessThanOrEqual(1);
+  });
+
   test('on a phone: no tab row, and the header is its usual height', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'mobile', 'phone only');
     await open(page, '/data/data-dictionary/');

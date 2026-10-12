@@ -62,7 +62,10 @@
      Gurmukhi font the reader's device had, or none. */
   --sl-font: "Sant Lipi", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --sl-font-system-mono: "Sant Lipi", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --sgs-font-serif: "Sant Lipi", "Source Serif 4", Georgia, "Times New Roman", serif;
+  /* Times New Roman before Georgia: until Source Serif arrives the fallback is what is drawn, and
+     Times sets a title within 1% of Source Serif's width where Georgia is 20% wider — wide enough
+     to wrap a title onto a second line and then jump back (e2e/look.spec.ts measures the shift) */
+  --sgs-font-serif: "Sant Lipi", "Source Serif 4", "Times New Roman", Georgia, serif;
   --sgs-font-gm: "Sant Lipi", "Mukta Mahee", "Gurmukhi MN", "Noto Sans Gurmukhi", "Raavi", sans-serif;
   --sl-text-h1: 2.25rem;
   --sl-text-h2: 1.625rem;

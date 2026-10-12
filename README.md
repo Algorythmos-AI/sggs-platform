@@ -20,7 +20,47 @@ The website and the app keep separate names and identities on purpose — see [B
 ---
 
 
-> **Engineering wiki:** see [`docs/`](docs/README.md) — architecture & diagrams, scripture-integrity, branching, environments, CI gates, runbooks, ADRs.
+## The engineering wiki
+
+Everything about how this project is built, proven and shipped is in the wiki: architecture and diagrams, the scripture-integrity chain, the data model, search and verification, the API, the iOS app, branching, environments, CI gates, runbooks and decision records. It is written as Markdown in [`docs/`](docs/README.md), reviewed in pull requests like code, and published as a site.
+
+| Where | Address | Who can open it |
+|---|---|---|
+| Published wiki | **[docs.gurbanisoul.com](https://docs.gurbanisoul.com)** | Everyone. Serves the last release. |
+| Staging wiki | [sggs-docs-staging.vercel.app](https://sggs-docs-staging.vercel.app) | The team, signed in to Vercel. Serves the `integration` branch, so it shows work before it is released. |
+| Source | [`docs/`](docs/README.md) | Anyone with the repository. Reads well on GitHub too. |
+
+### Finding your way
+
+- **Section tabs** under the header open the five main areas: *Get started*, *Scripture*, *Platform*, *API* and *Operate*. On a phone the same five links are at the top of the menu.
+- **The sidebar** lists every page, grouped by area. The line above each page title links back to that area's overview.
+- **Search** (`⌘K` or `Ctrl K`) covers every page, including the glossary.
+- **On this page**, on the right, lists the headings of the page you are reading.
+
+### Good places to start
+
+| If you want to see… | Open |
+|---|---|
+| A procedure, step by step | [The release process](https://docs.gurbanisoul.com/process/release/) |
+| How scripture is quoted and cited | [What Sri Guru Granth Sahib Ji is](https://docs.gurbanisoul.com/scripture/what-sggs-is/) |
+| Reference tables | [The data dictionary](https://docs.gurbanisoul.com/data/data-dictionary/) |
+| A diagram you can walk through | [The search waterfall](https://docs.gurbanisoul.com/architecture/search-waterfall/) |
+| Your first week on the project | [Get started](https://docs.gurbanisoul.com/onboarding/) |
+
+To review a change before release, open the same path on the staging address.
+
+### Taking a page with you
+
+The **Copy page** button beside every title copies the page as Markdown. The arrow next to it opens the rest:
+
+- **View as Markdown** — the page as plain text, at `/md/<page>.md`. Every page is also listed in [`/llms.txt`](https://docs.gurbanisoul.com/llms.txt).
+- **Download PDF** — a print-ready copy with page numbers, the page's address and the date it was last updated.
+- **Print** — the same layout from your browser.
+- **Ask ChatGPT / Ask Claude** — opens that assistant with the page's public address and an instruction to answer only from the page. They are third-party services; the wiki itself records nothing.
+
+In every copy — Markdown, PDF or paper — Gurmukhi is carried exactly as it is on the page, with its Ang.
+
+To write or change a page, start with [`docs/contributing/`](docs/contributing/README.md).
 
 ## Table of contents
 

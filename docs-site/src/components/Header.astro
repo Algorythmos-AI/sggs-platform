@@ -1,15 +1,11 @@
 ---
 // Starlight's header, with one row added under it on wide screens: the section tabs
-// (plugins/tabs.mjs). On a phone the row is not shown — the menu drawer already opens on the same
-// sections. Starlight's own header is rendered as it is, so an upgrade changes nothing here.
+// (plugins/tabs.mjs). On a phone the row is not shown — the same five links open the menu drawer
+// (Sidebar.astro). Starlight's own header is rendered as it is, so an upgrade changes nothing here.
 import Default from '@astrojs/starlight/components/Header.astro';
-import { TABS, tabFor } from '../../plugins/tabs.mjs';
+import { TABS, litTab } from '../../plugins/tabs.mjs';
 
-const route = Astro.locals.starlightRoute;
-type Entry = (typeof route.sidebar)[number];
-const holds = (e: Entry): boolean => (e.type === 'group' ? e.entries.some(holds) : e.isCurrent);
-const top = route.sidebar.find((e) => e.type === 'group' && holds(e));
-const lit = top ? tabFor(top.label) : null;
+const lit = litTab(Astro.locals.starlightRoute.sidebar);
 ---
 
 <div class="hdr">

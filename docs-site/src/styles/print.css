@@ -40,7 +40,7 @@
   body { font-family: var(--sgs-font-serif); line-height: 1.43; color: #201a12; hyphens: manual; }
 
   /* nothing but the article */
-  header.header, .tabs, .sl-skip-link, sggs-page-actions, nav.site-footer, footer .meta, .sl-anchor-link,
+  header.header, .tabs, .drawer-tabs, .toc-top, .sl-skip-link, sggs-page-actions, nav.site-footer, footer .meta, .sl-anchor-link,
   .diagram__hint, .wt__bar, .wt__caption, .wt__list, .lightbox, .expressive-code .copy, .releases__bar,
   .term__card, .quiz button, .quiz__summary, .sggs-fallback { display: none !important; }
   .print-only { display: block; }
@@ -93,7 +93,7 @@
   .expressive-code .frame.is-terminal .header { display: none; }          /* window dressing, and ink */
 
   /* tables: a real table again (not a scrolling block), header on every sheet, no split rows */
-  .sl-markdown-content table { display: table; inline-size: 100%; overflow: visible; font-size: 8.5pt; line-height: 12pt; border-collapse: collapse; }
+  .sl-markdown-content table { background: none; display: table; inline-size: 100%; overflow: visible; font-size: 8.5pt; line-height: 12pt; border-collapse: collapse; }
   .sl-markdown-content thead { display: table-header-group; }
   .sl-markdown-content tr { break-inside: avoid; }
   /* break-word, not anywhere: a long token may break, but a short word never mid-way to narrow a column */

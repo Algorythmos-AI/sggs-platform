@@ -136,11 +136,32 @@ docs project's build environment and deploy again. The build then leaves the men
 and stops announcing `actions1`, so the live checks do not look for it
 (`docs-site/plugins/features.mjs`, [ADR-0013](../../adr/0013-outbound-assistant-links.md)).
 
+### Visual baselines
+
+The `docs` check compares a picture of the top of six kinds of page (wide and phone, light and
+dark: 24 pictures in `docs-site/e2e-visual/__screenshots__/`) with what the pull request's build
+draws. The sidebar, "On this page", the dates under a title and live widgets are masked, so a new
+page or a re-verified stamp does not trip it; a change to the layout, the type or one of the six
+pages' opening content does.
+
+When it fails:
+
+1. Open the run, download the **`visual-baselines`** artifact. `__screenshots__/` holds what this
+   build drew; `test-results/` holds expected, actual and diff for each picture that changed.
+2. If the change is a mistake, fix it. If it is meant, replace the files in
+   `docs-site/e2e-visual/__screenshots__/` with the artifact's and commit them in the same pull
+   request, saying in the description what changed to the eye.
+
+Never commit a baseline made on your own machine: fonts differ between systems, and the comparison
+runs only in the pinned Playwright container (`PW_IMAGE` in `deploy-docs.yml`; raise it together
+with the `playwright` version in `docs-site/package.json`, and refresh the baselines in that pull
+request).
+
 ## 5. After launch: the routine
 
 | When | What |
 |---|---|
-| every pull request | the `docs` check (required on `integration` and `main`): gates, build, links, budgets, CSP, e2e, axe on every page, Lighthouse on five pages (all twenty nightly and on `main`) — about nine minutes |
+| every pull request | the `docs` check (required on `integration` and `main`): gates, build, links, budgets, CSP, e2e, axe on every page, the visual baseline, Lighthouse on five pages (all twenty nightly and on `main`) — about nine minutes |
 | a dataset bump lands | nothing to do: the docs job installs the pinned database and re-verifies the cited lines |
 | every 15 minutes | `uptime` probes the wiki's landing page and `/api/health` through its rewrite; issue *uptime: docs site probe failing* |
 | every 6 hours | `docs-watch`: the domain serves the last deployed commit, the smoke and the live suite pass; issue *docs-watch: production wiki check failing* (after a manual rollback it stays open until the next release — expected) |

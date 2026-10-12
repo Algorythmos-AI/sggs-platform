@@ -93,4 +93,52 @@ test.describe('the reading layout', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
     await expect(page.locator('.starlight-aside, sggs-steps + ol').first()).toBeVisible();
   });
+  // 1280px at 200% zoom is a 640px viewport; 400% is 320px (WCAG 1.4.10, Reflow)
+  for (const width of [640, 320]) {
+    test(`zoomed in (a ${width}px viewport): nothing scrolls sideways, and the page menu still opens`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name === 'mobile', 'sets its own viewport');
+      await page.setViewportSize({ width, height: 700 });
+      for (const path of ARCHETYPES) {
+        await open(page, path);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), path).toBeLessThanOrEqual(0);
+      }
+      await open(page, '/process/release/');
+      await page.locator('sggs-page-actions summary').click();
+      const panel = (await page.locator('sggs-page-actions .pa__panel').boundingBox())!;
+      expect(panel.x).toBeGreaterThanOrEqual(0);
+      expect(panel.x + panel.width).toBeLessThanOrEqual(width + 1);
+    });
+  }
+
+  test('the header and the title block do not move once they are drawn', async ({ page }) => {
+    await mockApi(page);
+    // only shifts of something in the header or the title panel count: a live widget further down
+    // fills in when the API answers, which is its own matter
+    await page.addInitScript(() => {
+      const w = window as unknown as { __cls: number };
+      w.__cls = 0;
+      type Shift = { value: number; hadRecentInput: boolean; sources: { node: Node | null }[] };
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries() as unknown as Shift[]) {
+          const top = e.sources.some((s) => { const el = s.node instanceof Element ? s.node : s.node?.parentElement; return !!el?.closest('header.header, main > .content-panel:first-child'); });
+          if (!e.hadRecentInput && top) w.__cls += e.value;
+        }
+      }).observe({ type: 'layout-shift', buffered: true });
+    });
+    for (const path of ['/scripture/what-sggs-is/', '/process/release/', '/data/data-dictionary/']) {
+      await page.goto(path);
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForTimeout(600);
+      expect(await page.evaluate(() => (window as unknown as { __cls: number }).__cls), path).toBeLessThanOrEqual(0.02);
+    }
+  });
+
+  test('a wide table on a phone shows there is more to the side', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile', 'phone only');
+    await open(page, '/data/data-dictionary/');
+    const table = page.locator('.sl-markdown-content table').first();
+    expect(await table.evaluate((e) => getComputedStyle(e).backgroundAttachment)).toContain('local');
+    await expect(table).toHaveAttribute('role', 'region');
+    await expect(table).toHaveAttribute('aria-label', 'Scrollable table');
+  });
 });

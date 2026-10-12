@@ -32,7 +32,9 @@ export function mainNav(html) {
   const start = html.search(/<nav[^>]*aria-label="Main"/);
   if (start < 0) return null;
   const end = html.indexOf('</nav>', start);
-  return html.slice(start, end < 0 ? undefined : end);
+  // the five section links at the top of the phone's drawer (src/components/Sidebar.astro) are
+  // shortcuts to pages the sidebar already lists, and are lit per section: not sidebar entries
+  return html.slice(start, end < 0 ? undefined : end).replace(/<ul class="drawer-tabs"[\s\S]*?<\/ul>/, '');
 }
 
 /**
