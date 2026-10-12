@@ -40,7 +40,7 @@
   body { font-family: var(--sgs-font-serif); line-height: 1.43; color: #201a12; hyphens: manual; }
 
   /* nothing but the article */
-  header.header, .sl-skip-link, sggs-page-actions, nav.site-footer, footer .meta, .sl-anchor-link,
+  header.header, .tabs, .sl-skip-link, sggs-page-actions, nav.site-footer, footer .meta, .sl-anchor-link,
   .diagram__hint, .wt__bar, .wt__caption, .wt__list, .lightbox, .expressive-code .copy, .releases__bar,
   .term__card, .quiz button, .quiz__summary, .sggs-fallback { display: none !important; }
   .print-only { display: block; }
@@ -75,6 +75,8 @@
 
   /* Gurmukhi: Sant Lipi, ink, room to breathe, never hyphenated */
   :lang(pa), .gm, [lang="pa"] { color: #201a12 !important; font-size: 13pt; line-height: 22pt; hyphens: none; }
+  /* in prose the mark only names the language: Gurmukhi keeps the size of the line it is in */
+  .sl-markdown-content .pa { font-size: inherit; line-height: inherit; }
   /* a quotation and its citation stay on one sheet */
   .sl-markdown-content blockquote { break-inside: avoid; margin-inline: 8mm 0; padding-inline-start: 4mm; border-inline-start: 0.75pt solid #b69a81; color: #201a12; }
   .sl-markdown-content blockquote > p:last-child { break-before: avoid; }

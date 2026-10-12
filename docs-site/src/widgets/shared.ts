@@ -16,6 +16,21 @@ export function lineCard(l: ApiLine, extra: (Node | string)[] = []) {
   return card;
 }
 
+// the same run as plugins/rehype-lang-pa.mjs marks at build time
+const PA_RUN = /[\u0A00-\u0A7F](?:[\u0A00-\u0A7F\u0964\u0965\u200C\u200D ]*[\u0A00-\u0A7F\u0964\u0965])?/g;
+/** Text for a widget, with each Gurmukhi run marked lang="pa". The pieces, joined, are the text. */
+export function markPa(text: string): (Node | string)[] {
+  const out: (Node | string)[] = [];
+  let at = 0;
+  for (const m of text.matchAll(PA_RUN)) {
+    if (m.index > at) out.push(text.slice(at, m.index));
+    out.push(el('span', { lang: 'pa', class: 'pa' }, [m[0]]));
+    at = m.index + m[0].length;
+  }
+  if (at < text.length) out.push(text.slice(at));
+  return out;
+}
+
 /** Light a step on the walkthrough of this poster, if it is on the page. */
 export function lightStep(poster: string, stepId: string | null) {
   const wt = document.querySelector<HTMLElement & { goTo?: (id: string) => void; show?: (i: number) => void }>(`sggs-walkthrough[data-poster="${poster}"]`);

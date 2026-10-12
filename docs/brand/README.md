@@ -43,6 +43,8 @@ Three things about the wiki that touch the brand:
   into paper, 14% into ink; a test recomputes them from `tokens.json` and checks ink at 4.5:1 and
   the rule at 3:1), and gold only as a fill. A quotation of scripture is the plainest thing on a
   page: no tint, no box.
+- **Section tabs are quiet.** The row under the wiki's header is plain text; the current section
+  is ink with a 2px accent rule under it — never a gold fill, never a pill.
 - **On paper the body is serif.** On screen, headings are Source Serif 4 and the body is the
   system sans. A printed page and a downloaded PDF set the body in Source Serif 4 as well
   (`docs-site/src/styles/print.css`), so every machine embeds the same face; Gurmukhi is Sant Lipi

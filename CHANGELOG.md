@@ -29,6 +29,15 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   be confused. A procedure marked `<!-- sggs:steps -->` is set as numbered steps down a line. The
   current page and section are marked in ink with a gold bar instead of a filled block.
 
+- **Section tabs on the wiki.** On a wide screen the header has a second row — Get started,
+  Scripture, Platform, API, Operate — each opening that section's overview, with the section of
+  the current page marked. A phone keeps the menu drawer, which opens on the same sections.
+
+- **Gurmukhi on the wiki is marked as Punjabi.** Every run of Gurmukhi in a page's prose, tables
+  and glossary cards is wrapped in `lang="pa"`, so a screen reader reads it as Punjabi instead of
+  as English (WCAG 3.1.2). The text is only cut at the run's edges, never changed; code blocks and
+  drawings are left as they are.
+
 ### Fixed
 - **Gurmukhi on the wiki is drawn in Sant Lipi everywhere.** Page text was never marked as Punjabi,
   so the rule that gives Gurmukhi its font did not apply to it: in prose, tables, headings, code

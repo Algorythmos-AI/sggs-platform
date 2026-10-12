@@ -59,6 +59,10 @@ no scripture at all.
   Do not use it for concepts, and never for the structure of scripture. Everywhere else — GitHub,
   paper, the Markdown export — the list is a plain numbered list.
 
+**Gurmukhi is marked as Punjabi for you.** The build wraps every run of Gurmukhi in prose, tables
+and inline code in `lang="pa"` (`docs-site/plugins/rehype-lang-pa.mjs`), so a screen reader reads
+it as Punjabi. Write the text as it is; do not add `<span lang>` by hand.
+
 **Notes and quotations look different on purpose.** A blockquote that opens with bold text and has
 no Gurmukhi becomes a callout: a tinted box with a thick rule. A blockquote that quotes scripture
 stays a quotation: no tint, no box, a thin rule, the Gurmukhi and its Ang. Never dress a note as a
