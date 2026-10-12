@@ -17,7 +17,7 @@ const PAGES: [string, string][] = [
   ['procedure', '/process/release/'],
 ];
 const SIZES = { wide: { width: 1280, height: 800 }, phone: { width: 390, height: 844 } } as const;
-const MASKED = 'nav.sidebar, starlight-toc, mobile-starlight-toc, .page-meta, sggs-status, sggs-ang-explorer, sggs-waterfall, sggs-verify, sggs-api-try, sggs-progress';
+const MASKED = 'nav.sidebar .sidebar-pane, starlight-toc, mobile-starlight-toc, .page-meta, sggs-status, sggs-ang-explorer, sggs-waterfall, sggs-verify, sggs-api-try, sggs-progress';
 
 for (const [name, path] of PAGES) {
   for (const [size, viewport] of Object.entries(SIZES)) {
