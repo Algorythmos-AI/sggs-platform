@@ -39,7 +39,7 @@ assign to it. It runs in **Fixed** mode (eight three-hour watches from 06:00; th
 and says so) or **Solar** mode, the traditional reckoning: four equal watches of daylight and four
 of night at your location, stretching with the season. Location is asked for only
 when you choose "use my location" (when-in-use only), and only the coordinates rounded to two
-decimal places are kept; you can also type them, and "Forget location" removes them. A sheet shows where timing traditions disagree.
+decimal places are kept; you can also type them, and "Forget location" (from 1.4.0) removes them. A sheet shows where timing traditions disagree.
 In the Reader, a timing chip on each Ang opens the clock at that raag.
 
 ## Widgets and the Live Activity

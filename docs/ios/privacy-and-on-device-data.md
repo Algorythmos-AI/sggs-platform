@@ -40,7 +40,7 @@ Source: `ios/tests/test_ios_gates.py` in gurbani-soul-ios, read at the pinned co
 | My Nitnem | `nitnem-plan.json` in the App Group | your own sets: order, hidden and added banis |
 | Widget snapshot | `widget-snapshot.json` in the App Group | a Hukam verse and its Ang, the pahar-to-raag tables, the clock mode and coordinates, the set names |
 | Settings | the app's preferences | display and reader settings, the last Ang read, reminder times, and the launch-integrity cache |
-| Clock settings | the App Group's preferences | the clock mode and, in Solar mode, your coordinates rounded to two decimal places (about a kilometre); the exact position is never stored, and "Forget location" removes it |
+| Clock settings | the App Group's preferences | the clock mode and, in Solar mode, your coordinates rounded to two decimal places (about a kilometre); the exact position is never stored, and "Forget location" (from 1.4.0) removes it |
 | Spotlight | the system index | your saved verses only (Gurmukhi, transliteration, Ang), so system search can find them |
 | Diagnostics | Application Support | MetricKit reports, as above |
 
@@ -93,9 +93,9 @@ Source: `ios/App/Resources/PrivacyInfo.xcprivacy` in gurbani-soul-ios, read at t
 ## Deleting data
 
 - **A saved verse:** swipe to delete; its Spotlight entry goes with it.
-- **Your location:** Raag Clock → Forget location. It goes from the app's settings and from the
+- **Your location** (from 1.4.0): Raag Clock → Forget location. It goes from the app's settings and from the
   widgets' snapshot; Solar mode shows the fixed clock until you add one again.
-- **Your reading history:** Reading journey → Clear reading history, after a confirmation. It
+- **Your reading history** (from 1.4.0): Reading journey → Clear reading history, after a confirmation. It
   removes the days you completed and where you stopped in each bani.
 - **A bani's reading position:** Start again (the days completed are kept).
 - **My Nitnem:** Reset to default.
@@ -103,6 +103,7 @@ Source: `ios/App/Resources/PrivacyInfo.xcprivacy` in gurbani-soul-ios, read at t
 - **Everything:** delete the app. iOS removes its containers; the App Group goes with the last app
   that uses it.
 
-These controls, and the Spotlight clean-up, came from gaps found while this page was first written
+The two controls marked *from 1.4.0*, and the Spotlight clean-up, are not in 1.3.10, the first
+version on the App Store; there, deleting the app removes that data. They came from gaps found while this page was first written
 (gurbani-soul-ios [#26](https://github.com/Algorythmos-AI/gurbani-soul-ios/pull/26)); each has a unit
 test and a UI test in the app repository.
