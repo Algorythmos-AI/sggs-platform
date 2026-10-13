@@ -55,9 +55,9 @@ on the performance baseline and the data canary (`docs/process/runbooks/services
 ## Amendments
 
 - **2026-09-26 — production's contexts move in one release.** Production went onto `all` with
-  1.3.10. Its per-context routing (services-production step 3) is on `integration`
-  (`gateway/routes.json` lists all five contexts for production) and goes live in **one** release
-  for all five, the first after the app is live on the App Store: under the one-version policy every
+  1.3.10. Its per-context routing (services-production step 3) was merged and then held back
+  (owner decision 2026-10-11: `production.services` in `gateway/routes.json` is empty) and goes live in **one** release
+  for all five, a later one after the app is live on the App Store (1.4.0 keeps `all`): under the one-version policy every
   release is also an App Store update (owner decision). Each context is still gated on its own —
   `verify_functions --env production`, the golden contract before promotion, the performance gate
   per context — and rolls back alone by leaving the list. The Render single API stays deployed as

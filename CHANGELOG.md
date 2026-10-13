@@ -5,6 +5,8 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-10-14 — the Knowledge Base, redressed: thirteen themes, a new shell, and the app's Reader, Nitnem, Search and Raag Clock on the web
+
 ### Added
 - **A page menu on every wiki page, and a wiki that prints.** Above each title, *Copy page* copies
   the page as Markdown in one click; beside it a panel copies the link, opens the Markdown, opens
@@ -21,43 +23,25 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   stylesheet, at the page's published address so its links are real. A gate reads every PDF: one
   per page, an Ang citation on its quotation's sheet, no link to the build machine, and every run
   of Gurmukhi with a letter in it set in Sant Lipi.
-
 - **The wiki reads like a help centre, in its own dress.** A larger title, a 17px body on a
   70-character measure, and under each title how long the page takes, when it changed, and the
   page in a sentence. The section above a title is a link. Notes are tinted callouts with a thick
   rule in the status colours; a quotation of scripture has no tint and no box, so the two cannot
   be confused. A procedure marked `<!-- sggs:steps -->` is set as numbered steps down a line. The
   current page and section are marked in ink with a gold bar instead of a filled block.
-
 - **Section tabs on the wiki.** On a wide screen the header has a second row — Get started,
   Scripture, Platform, API, Operate — each opening that section's overview, with the section of
   the current page marked. On a phone the same five links are at the top of the menu drawer.
   A long page has a *Back to top* link under "On this page", and a wide table on a phone shades
   the edge that has more to show.
-
 - **The wiki's layout is guarded by pictures.** The top of six kinds of page — wide and phone,
   light and dark — is compared with a committed baseline on every pull request, in a pinned
   container so fonts cannot differ. A difference fails the `docs` check and uploads what the build
   drew. The fallback fonts a PDF may embed are now installed by name on the build machines.
-
 - **Gurmukhi on the wiki is marked as Punjabi.** Every run of Gurmukhi in a page's prose, tables
   and glossary cards is wrapped in `lang="pa"`, so a screen reader reads it as Punjabi instead of
   as English (WCAG 3.1.2). The text is only cut at the run's edges, never changed; code blocks and
   drawings are left as they are.
-
-### Fixed
-- **A wiki title no longer jumps as its font arrives.** Until Source Serif loaded, a title was
-  drawn in Georgia, which is a fifth wider: a long title wrapped onto a second line and then
-  snapped back, moving the page under it. The heading font is now fetched with the page and the
-  fallback is one of nearly the same width; a test measures the shift on every build.
-- **Gurmukhi on the wiki is drawn in Sant Lipi everywhere.** Page text was never marked as Punjabi,
-  so the rule that gives Gurmukhi its font did not apply to it: in prose, tables, headings, code
-  and diagrams it took whatever Gurmukhi font the reader's device had, or none. Sant Lipi now leads
-  every font stack; its declared range covers only Gurmukhi and the dandas, so nothing else changes.
-
-## [1.4.0] — 2026-10-11 — the Knowledge Base, redressed: thirteen themes, a new shell, and the app's Reader, Nitnem, Search and Raag Clock on the web
-
-### Added
 - **Every wiki page as Markdown.** `docs.gurbanisoul.com/md/<page>.md` serves each wiki page
   as portable Markdown (glossary terms as plain words, code excerpts filled in from the
   source, links absolute), with `/md-manifest.json` and `/llms.txt` listing them and a
@@ -249,15 +233,15 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   (`KbStylesheetIsOrderedPartials`) keeps every partial imported once, in order, with the phone
   control-size rule last.
 - **The wiki names both routing states after #205.** Staging routes the five API contexts to their
-  own functions; production answers every path with `all` until the first release after the app is
-  live, which moves all five at once. The architecture overview,
+  own functions; production answers every path with `all` until a later release, after the app is
+  live, moves all five at once. The architecture overview,
   bounded contexts, environments, the API page, the roadmap, the release steps (which now carry the
   per-context performance gate), ADR-0011 (an amendment note) and posters 08 and 09 say so; found by
   the docs-freshness gate.
 - **Held back from this release (owner decision 2026-10-11): production keeps the single API
   function.** `production.services` in `gateway/routes.json` is empty again, as on v1.3.10, so every
   `/api` path is still answered by `all`. The entry below describes the change as it was merged; it
-  ships in the first release after the app is live, by listing the five contexts again.
+  ships in a later release, after the app is live, by listing the five contexts again.
 - **Production's API contexts each answer from their own function** (runbook services-production,
   step 3). `gateway/routes.json` lists all five contexts for production — reader, search, verify,
   insights, knowledge — so each is answered by its own Vercel function with its own database slice,
@@ -296,6 +280,14 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
   every push to `main` still audit all twenty.
 
 ### Fixed
+- **A wiki title no longer jumps as its font arrives.** Until Source Serif loaded, a title was
+  drawn in Georgia, which is a fifth wider: a long title wrapped onto a second line and then
+  snapped back, moving the page under it. The heading font is now fetched with the page and the
+  fallback is one of nearly the same width; a test measures the shift on every build.
+- **Gurmukhi on the wiki is drawn in Sant Lipi everywhere.** Page text was never marked as Punjabi,
+  so the rule that gives Gurmukhi its font did not apply to it: in prose, tables, headings, code
+  and diagrams it took whatever Gurmukhi font the reader's device had, or none. Sant Lipi now leads
+  every font stack; its declared range covers only Gurmukhi and the dandas, so nothing else changes.
 - **The search bar fits a 375px phone in every font.** Its `<input>` would not shrink below 20
   characters of the system font, which pushed the Search button off the page in wider fonts: 388px
   (Chromium) and 402px (WebKit) on the Linux runners, on Search and on the new home page.

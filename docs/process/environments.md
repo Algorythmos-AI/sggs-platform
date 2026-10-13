@@ -13,7 +13,7 @@ verified:
 |---|---|---|---|
 | Branch | working tree | `integration` | `main` |
 | Web | `serve.py` on :7777 | `sggs-staging.vercel.app` (SSO-protected; open logged in) | **`gurbanisoul.com`** (canonical) |
-| API | same process | Vercel functions in the web project, one per context + `all` (ADR-0011) | Vercel functions in the web project: every `/api` path is answered by `all` (v1.3.10, and 1.4.0 keeps it so); each context moves to its own function, as on staging, in the first release after the app is live (Render `sggs-knowledge-base.onrender.com` kept as rollback) |
+| API | same process | Vercel functions in the web project, one per context + `all` (ADR-0011) | Vercel functions in the web project: every `/api` path is answered by `all` (v1.3.10, and 1.4.0 keeps it so); each context moves to its own function, as on staging, in a later release after the app is live (Render `sggs-knowledge-base.onrender.com` kept as rollback) |
 | iOS | simulator | TestFlight **Internal** | TestFlight **External** / App Store |
 | DB profile | full | full | full (public profile until the English licence is recorded) |
 | Who deploys | you | `deploy-staging.yml` on push to integration | `deploy-production.yml` on push to main |
@@ -28,7 +28,7 @@ The browser always calls `/api/*` on the site's own host, so no frontend configu
 needed. On staging the rewrites are internal and **host-conditioned**: each context's prefixes go to
 its function, everything else to `all`. Production's rules come after them, internal too and
 host-less, so they catch every other host, including an unaliased deployment URL. `production.services` is empty: production (v1.3.10, and 1.4.0 after it) sends every `/api` path to
-`all`. Listing the five contexts there, in the first release after the app is live, sends each
+`all`. Listing the five contexts there, in a later release after the app is live, sends each
 context's prefixes to its own function in production too, and everything else (and `/readyz`,
 `/healthz`) to `all`. Until then every path goes to `all`, the single API's role on the same
 database and code. The rules are generated (`tools/gen_gateway.py` from `gateway/routes.json`), for
@@ -44,7 +44,7 @@ example:
   "destination": "/api/svc/all" }
 ```
 
-Splitting production's contexts out — all five in one release, the first after the app is live —
+Splitting production's contexts out — all five in one release, after the app is live —
 and retiring Render afterwards are [runbook: services-production](runbooks/services-production.md).
 
 ## As-code

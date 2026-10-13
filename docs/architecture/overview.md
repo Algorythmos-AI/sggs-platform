@@ -49,7 +49,7 @@ carries no API-base configuration. `gateway/routes.json` decides the routing per
 - **Staging** routes each of the five bounded contexts (`reader`, `search`, `verify`, `insights`,
   `knowledge`) to its own function, with `all` — the whole API — as the catch-all.
 - **Production (v1.3.10, and 1.4.0)** answers every `/api` path with `all`.
-- **From the first release after the app is live on the App Store** production routes the five
+- **From a later release, after the app is live on the App Store,** production routes the five
   contexts the same way as staging, all five in that one release
   ([services-production](../process/runbooks/services-production.md), step 3). It is one line in
   `gateway/routes.json`; 1.4.0 leaves it out.

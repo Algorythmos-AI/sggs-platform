@@ -46,7 +46,7 @@ route outside the enabled set is a 404, and startup refuses a database missing a
 `gateway/routes.json` says per environment where `/api` goes. Staging and — on `integration` —
 production both list all five contexts, so each has its own Vercel function (`api/svc/<context>`)
 and `all` catches the rest. Production *today* (v1.3.10, released before the split) still answers
-every path with `all`; the five contexts go live there together in the first release after the app
+every path with `all`; the five contexts go live there together in a later release, after the app
 is on the App Store (owner decision 2026-09-26, services-production step 3). Setting
 `api_platform: render` proxies `/api` back to the Render single API — the rollback. `tools/gen_gateway.py`
 combines it with `serve.ROUTES` and writes the rewrites in `frontend/vercel.json`: every prefix of

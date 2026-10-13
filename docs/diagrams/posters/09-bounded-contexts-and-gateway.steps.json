@@ -14,7 +14,7 @@
   {
     "id": "step-03",
     "title": "Routing is generated, never hand-written",
-    "caption": "gateway/routes.json says, per environment, where /api goes: on staging to Vercel functions, one per context plus all; on integration the production entry lists the same five contexts, which go live together in the first release after the app is on the App Store — production today (1.3.10) answers every path with all. tools/gen_gateway.py combines it with the route table to produce the rewrites — every prefix of a routed context and its /api/v1 twin, then a catch-all to all.",
+    "caption": "gateway/routes.json says, per environment, where /api goes: on staging to Vercel functions, one per context plus all; in production (1.3.10 and 1.4.0) the entry is empty, so all answers every path, and the five contexts go live together in a later release, after the app is on the App Store. tools/gen_gateway.py combines it with the route table to produce the rewrites — every prefix of a routed context and its /api/v1 twin, then a catch-all to all.",
     "link": "/adr/0011-api-as-functions-in-the-web-project/"
   },
   {
