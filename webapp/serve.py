@@ -27,7 +27,7 @@ PORT = int(os.environ.get('PORT') or os.environ.get('SGGS_PORT') or '7777')
 # DB meta row is the fallback. Bump on every search-logic release so the UI footer
 # (which reads /api/meta) reflects the running build.
 APP_VERSION = '1.4.0'
-APP_BUILT = '2026-10-11'
+APP_BUILT = '2026-10-14'
 
 
 # The exact source commit of the running build, so a deploy can be verified by

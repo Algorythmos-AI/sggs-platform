@@ -48,5 +48,5 @@ it as a `curl` command. On GitHub, the routes are listed on [API routes](routes.
 The routes are owned by five [bounded contexts](../architecture/bounded-contexts-and-gateway.md)
 — `reader`, `search`, `verify`, `insights`, `knowledge` — each of which opens only the tables it
 needs. On staging each context runs as its own function behind the gateway; production (v1.3.10
-and 1.4.0) serves them all from one function, `all`, until the first release after the app is live. A
+and 1.4.0) serves them all from one function, `all`, until a later release, after the app is live. A
 client never sees the difference except in `X-Service`.

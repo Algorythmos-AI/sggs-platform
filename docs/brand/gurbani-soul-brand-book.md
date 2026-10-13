@@ -246,6 +246,12 @@ Status at the first submission (1.3.10, 2026-09-26):
   WIPO, both app stores, and the trade-dress rule above); full professional clearance is scheduled after launch.
   The search record is private and stays out of the public repositories.
 
+Status at the Knowledge Base redesign (web 1.4.0):
+- **G3 for the web themes is open.** The five themes copied from the app are `approved`. The eight web-only
+  themes, and the rule that Gurmukhi is ink in every theme, have not been seen by a scholar; they ship
+  marked `review` in `docs/brand/web-themes.json`. The owner waived the review for the 1.4.0 release on
+  2026-10-13; it runs after the release, and a theme can be withdrawn by setting it to `held`.
+
 ## 13. Implementation map (phase 2 — shipped in PRs #28–#31; kept as the record)
 
 One pull request per step, tests green at each:

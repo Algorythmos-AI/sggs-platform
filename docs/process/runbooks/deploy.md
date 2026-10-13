@@ -140,6 +140,13 @@ Rehearse on staging first: the same variable on **Preview** + `gh workflow run d
 integration`, then remove it and re-run. To take the site back to "Coming soon", delete the
 variable and redeploy the same way.
 
+If a release is about to ship anyway, step 4 can be that release's own deploy: set the variable
+(steps 2–3 unchanged), let the release run, then do step 5. A green pipeline does not prove the
+switch — the `@smoke` spec accepts either state unless `SGGS_EXPECT_APP_STORE` is set — so step 5
+is never skipped. When watching a same-commit redeploy, follow the new run by its id
+(`gh run list --workflow deploy-production.yml --event workflow_dispatch --limit 1`):
+`scripts/release/watch_deploy.sh` selects by commit and can report an older run.
+
 ## Concurrency
 Runs share the `production` group without cancellation: a run in progress always finishes.
 If several pushes queue, GitHub keeps only the newest pending run (older pending runs are replaced).

@@ -30,6 +30,7 @@ and live verification passes live under [reports](../reports/README.md).
 | **v1.3.8** | 2026-09-24 | Three repositories: data, platform, app ([ADR-0007](../adr/0007-three-repositories.md)); the database arrives by pin ([ADR-0008](../adr/0008-dataset-by-pin.md)). | `dataset.lock.json` is the only way a dataset changes here; the editorial ledger is 4 rules, 11 applications. |
 | **v1.3.9** | 2026-09-25 | Every bounded context runs as its own service on staging behind a gateway generated from the route table ([ADR-0010](../adr/0010-services-behind-a-generated-gateway.md)); `/api/v1/*` with strict errors beside a byte-identical legacy `/api/*`; request ids; continuous production verification. | Routing is generated, never hand-written; legacy `/api/*` stays byte-identical (the golden contract pins it). |
 | **v1.3.10** | 2026-09-25 | The API runs as Python functions inside the Vercel web project in production ([ADR-0011](../adr/0011-api-as-functions-in-the-web-project.md)), replayed against the golden contract before it goes live; the Render API keeps deploying as the rollback; this wiki launches at docs.gurbanisoul.com. | The website and the API deploy — and roll back — together. |
+| **v1.4.0** | 2026-10-14 | The Knowledge Base is redressed (thirteen themes, a new shell) and gains the app's Reader, Nitnem, Search and Raag Clock; the wiki gains its page menu, Markdown and PDF. The API is unchanged and production keeps the single `all` function. | A web release ships first and the app follows as iOS `1.4.0 (1)` from the tag; until that update is approved the site reports 1.4.0 and the App Store binary 1.3.10. |
 
 ## Still open
 
@@ -38,6 +39,9 @@ and live verification passes live under [reports](../reports/README.md).
 | Analytics-chart accessibility: the D3 charts are mouse-driven; the theme network has a data-table alternative, the others do not yet | open | web |
 | One line with an empty `translit_norm` (id 35328, Ang 829) | fixes on the next rebuild; tracked row by row in sggs-data's data-quality baseline | data |
 | 21 source-faithful lines with a vowel sign that has no base consonant (Angs 214, 342, 695, 698, 699, 897, 1203, 1205) | flagged for scholarly review; never silently changed (the Ang 1354/1358/1387 rows were resolved by the editorial corrections approved in the scholar review of 2026-09-24) | scholar review |
+| Eight web-only colour themes (`review` in `docs/brand/web-themes.json`) and the rule that Gurmukhi is ink in every theme: scholar review | shipped in 1.4.0 labelled `review`; the review was waived for the release by the owner on 2026-10-13 and runs after it | brand |
+| Five-person task check of the redressed Knowledge Base | waived for the 1.4.0 release by the owner on 2026-10-13; runs after it | web |
+| The site reports 1.4.0 while the App Store binary is 1.3.10 | planned gap; closes when iOS 1.4.0 (1) is approved and released | release |
 | Japji `author = null`: author filters for Guru Nanak miss it | known, deferred | data |
 | `comp_type` mislabelled in places | suppressed at the display layer; prefer `comp_id`/`section` | data |
 
