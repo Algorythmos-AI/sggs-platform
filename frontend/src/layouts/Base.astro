@@ -1,66 +1,134 @@
 ---
-// Base.astro — the shared MPA shell: head, header (with theme toggle), nav, footer,
-// the shared composition modal (#panel) + toast, and the global core/panel scripts.
+// Base.astro — the Knowledge Base shell: head, the top bar (the cloth: mark, the five places,
+// the display and theme buttons), a second row for a place with several pages, the phone tab bar,
+// the footer, the shared composition modal (#panel) + toast, the saved-verses drawer, the display
+// sheet (colour theme, appearance, paper tone, text size, saroop), and the global scripts. A page
+// gets its own <h1> from its title unless it passes `heading`.
 import '../styles/global.css';
 import Seo from '../components/Seo.astro';
 import { normPath } from '../routes';
-export interface Props { title?: string; description?: string; }
+import kbThemes from '../generated/kb-themes.json';
+export interface Props { title?: string; description?: string; heading?: string | false; }
 const {
   title = 'ੴ Sri Guru Granth Sahib Ji — Knowledge Base',
   description = 'Study Sri Guru Granth Sahib Ji online: all 1430 Angs in verbatim Gurmukhi, cited by Ang, searchable by word, sound, first letters and theme.',
+  heading,
 } = Astro.props;
 // Canonical/OG derive from the page's own route (KB pages resolve to the knowledge-base OG card).
 const path = normPath(Astro.url.pathname);
+// The colour themes a stored choice may name (generated from docs/brand/web-themes.json); the
+// default theme needs no attribute.
+const ACCENTS = kbThemes.themes.map((t) => t.id).filter((id) => id !== kbThemes.default);
+// The header's colour per theme, [by day, by night]: the browser's own chrome takes it before first paint.
+const CHROME = Object.fromEntries(kbThemes.themes.map((t) => [t.id, [t.chrome.light, t.chrome.dark]]));
+const DEFAULT_ACCENT = kbThemes.default;
+const APPEARANCES = [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']];
+
+// The five places, the same on every screen: a row in the top bar on a wide screen, a tab bar on a
+// phone. A place with several pages lists them in a second row under the bar. (Saved is the fifth:
+// it opens the drawer, so it is a button.)
+const PLACES = [
+  { id: 'home', label: 'Home', href: '/library', paths: ['/library'],
+    icon: 'M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z' },
+  { id: 'read', label: 'Read', href: '/reader', paths: ['/reader', '/nitnem', '/browse'],
+    icon: 'M5 5h9a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h9',
+    pages: [{ href: '/reader', label: 'Reader' }, { href: '/nitnem', label: 'Nitnem' }, { href: '/browse', label: 'Index' }] },
+  { id: 'search', label: 'Search', href: '/search', paths: ['/search'],
+    icon: 'M5 11a6 6 0 1 0 12 0a6 6 0 1 0-12 0zM20 20l-4.5-4.5' },
+  { id: 'explore', label: 'Explore', href: '/themes',
+    paths: ['/themes', '/constellation', '/trail', '/lineage', '/analytics', '/raag-clock', '/divergence'],
+    icon: 'M3.5 12a8.5 8.5 0 1 0 17 0a8.5 8.5 0 1 0-17 0zM15 9l-1.8 4.2L9 15l1.8-4.2z',
+    pages: [{ href: '/themes', label: 'Themes' }, { href: '/constellation', label: 'Constellation' },
+            { href: '/trail', label: 'Verse trail' }, { href: '/lineage', label: 'Contributors' },
+            { href: '/analytics', label: 'Insights' }, { href: '/raag-clock', label: 'Raag Clock' }] },
+];
+const SAVED_ICON = 'M7 4h10v16l-5-4-5 4z';
+const place = PLACES.find((p) => p.paths.includes(path));
+const subnav = place?.pages;
+// aria-current: "page" on the link to this very page, "true" on the place it belongs to
+const here = (href: string) => (href === path ? 'page' : 'true');
+const subCurrent = (href: string) =>
+  href === path ? 'page' : (path === '/divergence' && href === '/raag-clock' ? 'true' : undefined);
+// the page's own heading: what follows the site name in its <title>, unless the page supplies one
+const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri Guru Granth Sahib Ji\s*—\s*/, ''));
 ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
   <title>{title}</title>
   <Seo title={title} description={description} path={path} />
-  <!-- Resolve the theme before first paint (no flash). Inline + un-bundled on purpose. -->
-  <script is:inline>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <!-- Resolve the theme, the colour theme and the paper tone before first paint (no flash), and
+       give the browser's own chrome the header's colour. Inline + un-bundled on purpose. A stored
+       value is used only if it is one we know; with storage blocked the appearance follows the
+       system and the default colour theme applies. -->
+  <script is:inline define:vars={{ ACCENTS, CHROME, DEFAULT_ACCENT }}>
     (function () {
+      var root = document.documentElement, t = null, a = null, tone = null;
       try {
-        var t = localStorage.getItem('theme') || 'system';
-        var d = t === 'system'
-          ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-          : t;
-        document.documentElement.setAttribute('data-theme', d);
+        t = localStorage.getItem('theme'); a = localStorage.getItem('sggs_accent'); tone = localStorage.getItem('sggs_reader_tone');
       } catch (e) {}
+      var d = t === 'light' || t === 'dark' ? t : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      root.setAttribute('data-theme', d);
+      if (ACCENTS.indexOf(a) === -1) a = DEFAULT_ACCENT; else root.setAttribute('data-accent', a);
+      if (tone === 'warm') root.setAttribute('data-tone', 'warm');
+      var m = document.getElementById('kbThemeColor');
+      if (m) m.setAttribute('content', CHROME[a][d === 'dark' ? 1 : 0]);
     })();
   </script>
   <!-- Preload the bundled Gurmukhi scripture font for a fast swap (display layer only). -->
   <link rel="preload" href="/fonts/SantLipi-VF.woff2" as="font" type="font/woff2" crossorigin />
 </head>
-<body>
+<body class:list={[Astro.slots.has('hero') && 'has-hero']}>
   <a href="#main" class="skip-link">Skip to content</a>
-  <header class="site" lang="en">
-    <div class="glow" aria-hidden="true"></div>
-    <div class="onkar gm" aria-hidden="true">ੴ</div>
-    <h1>Sri Guru Granth Sahib Ji — Knowledge Base</h1>
-    <p>1430 Angs · verbatim Gurmukhi · searchable by word, sound, first letters &amp; theme</p>
-    <button id="saroopBtn" class="themebtn gm" type="button" lang="pa" aria-pressed="false" aria-label="Toggle traditional Gurmukhi rendering (display only — does not change the scripture text)" title="Traditional saroop (display only)">ਯ</button>
-    <button id="themeBtn" class="themebtn" type="button" aria-label="Theme" title="Theme">◐</button>
-  </header>
-  <nav class="site">
-    <a href="/" data-path="/">Home</a>
-    <a href="/search" data-path="/search">Search</a>
-    <a href="/reader" data-path="/reader">Reader</a>
-    <a href="/nitnem" data-path="/nitnem">Nitnem</a>
-    <a href="/browse" data-path="/browse">Index</a>
-    <a href="/themes" data-path="/themes">Themes</a>
-    <a href="/lineage" data-path="/lineage">Lineage</a>
-    <a href="/trail" data-path="/trail">Trail</a>
-    <a href="/analytics" data-path="/analytics">Insights</a>
-    <a href="/constellation" data-path="/constellation">Constellation</a>
-    <a href="/raag-clock" data-path="/raag-clock">Raag Clock</a>
-    <button id="randomBtn" type="button">✦ Hukam-style random</button>
-  </nav>
+  <div class="kb-chrome" data-topbar>
+    <header class="kb-top">
+      <a class="kb-brand" href="/library" aria-label="Knowledge Base home" data-astro-prefetch>
+        <span class="kb-mark gm" lang="pa" aria-hidden="true">ੴ</span><span class="kb-word">Knowledge Base</span>
+      </a>
+      <span class="kb-here" aria-hidden="true">{pageName || 'Knowledge Base'}</span>
+      <nav class="kb-places" aria-label="Places">
+        {PLACES.map((p) => (
+          <a href={p.href} data-place={p.id} class:list={[place?.id === p.id && 'on']} data-astro-prefetch
+             aria-current={place?.id === p.id ? here(p.href) : undefined}>{p.label}</a>
+        ))}
+        <button type="button" data-open-saved>Saved<span class="kb-count" data-saved-count hidden>0</span></button>
+      </nav>
+      <span class="kb-grow"></span>
+      <button id="paletteBtn" class="kb-jump" type="button" aria-haspopup="dialog" aria-controls="palette" aria-keyshortcuts="Meta+K Control+K /" aria-label="Jump to an Ang, a raag, a bani, a page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><span>Jump to…</span><kbd>⌘K</kbd>
+      </button>
+      <button id="randomBtn" type="button">✦ Hukam-style random</button>
+      <button id="displayBtn" class="kb-ibtn kb-aa" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="displaySheet" aria-label="Display: colour theme, text size and Gurmukhi rendering" title="Display">Aa</button>
+      <button id="themeBtn" class="kb-ibtn" type="button" aria-label="Theme" title="Theme">◐</button>
+    </header>
+    {subnav && (
+      <nav class="kb-sub" aria-label={`${place.label}: pages`}>
+        {subnav.map((pg) => (
+          <a href={pg.href} data-path={pg.href} class:list={[subCurrent(pg.href) && 'on']} aria-current={subCurrent(pg.href)} data-astro-prefetch>{pg.label}</a>
+        ))}
+      </nav>
+    )}
+  </div>
+  <slot name="hero" />
   <main id="main">
+    {pageName && <h1 class="page-title">{pageName}</h1>}
     <slot />
   </main>
+  <footer class="kb-foot">Scripture is shown verbatim from your edition with its Ang. Transliteration is a mechanical reading aid, not the scripture. · <span class="gm" lang="pa">ਧੁਰ ਕੀ ਬਾਣੀ</span><span id="ver"></span> · <a href="/">Gurbani Soul app</a> · <a href="/support">Support</a> · <a href="/privacy">Privacy</a></footer>
+  <nav class="kb-tabs" aria-label="Places">
+    {PLACES.map((p) => (
+      <a href={p.href} data-place={p.id} class:list={[place?.id === p.id && 'on']} data-astro-prefetch="tap"
+         aria-current={place?.id === p.id ? here(p.href) : undefined}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={p.icon} /></svg>{p.label}
+      </a>
+    ))}
+    <button type="button" data-open-saved>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d={SAVED_ICON} /></svg>Saved<span class="kb-count" data-saved-count hidden>0</span>
+    </button>
+  </nav>
 
   <div id="toast" role="status"></div>
   <div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="ptitle">
@@ -70,21 +138,16 @@ const path = normPath(Astro.url.pathname);
       <div id="pbody"></div>
     </div>
   </div>
-  <footer class="site">Scripture is shown verbatim from your edition with its Ang. Transliteration is a mechanical reading aid, not the scripture. · <span class="gm">ਧੁਰ ਕੀ ਬਾਣੀ</span><span id="ver"></span> · <a href="/support">Support</a> · <a href="/privacy">Privacy</a></footer>
-
-  <!-- Study Trail: a persistent, ML-aware cross-reference collection (every page) -->
-  <button id="trailFab" class="trail-fab" type="button" aria-label="Open study trail">
-    <span class="trail-fab-i" aria-hidden="true">📌</span><span id="trailFabN" class="trail-fab-n">0</span>
-  </button>
+  <!-- Saved verses: the pins kept in this browser, and what connects them (every page) -->
   <div id="trailScrim" class="trail-scrim" aria-hidden="true"></div>
-  <aside id="trailDrawer" class="trail-drawer" role="dialog" aria-modal="true" aria-label="Study Trail">
+  <aside id="trailDrawer" class="trail-drawer" role="dialog" aria-modal="true" aria-label="Saved verses" inert>
     <div class="trail-dhead">
-      <div class="trail-dtitle">✦ Study Trail</div>
-      <button id="trailClose" class="trail-close" type="button" aria-label="Close study trail">×</button>
+      <div class="trail-dtitle">Saved</div>
+      <button id="trailClose" class="trail-close" type="button" aria-label="Close saved verses">×</button>
     </div>
-    <div id="trailTabs" class="trail-tabs" role="tablist" aria-label="Study Trail views">
+    <div id="trailTabs" class="trail-tabs" role="tablist" aria-label="Saved verses: views">
       <button data-tab="pinned" class="on" role="tab" aria-selected="true" type="button">Pinned Verses</button>
-      <button data-tab="insights" role="tab" aria-selected="false" type="button">AI Insights</button>
+      <button data-tab="insights" role="tab" aria-selected="false" type="button">Connections</button>
     </div>
     <div class="trail-dbody">
       <div id="tab-pinned" role="tabpanel"></div>
@@ -92,11 +155,102 @@ const path = normPath(Astro.url.pathname);
     </div>
   </aside>
 
+  <!-- Jump anywhere: an Ang, a raag, a section, a bani, a contributor, a theme, a page (scripts/palette.ts, loaded when first opened) -->
+  <div id="paletteScrim" class="pal-scrim" aria-hidden="true"></div>
+  <div id="palette" class="pal" role="dialog" aria-modal="true" aria-label="Jump to" inert>
+    <div class="pal-top">
+      <input id="paletteQ" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go"
+             role="combobox" aria-expanded="true" aria-controls="paletteList" aria-autocomplete="list" aria-label="Jump to an Ang, a raag, a bani, a page"
+             placeholder="712 · todee · japji · hukam · raag clock" />
+      <button id="paletteClose" class="pal-x" type="button" aria-label="Close">×</button>
+    </div>
+    <div id="paletteList" class="pal-list" role="listbox" aria-label="Places"></div>
+    <div class="pal-foot">↑ ↓ to choose · Enter to go · Esc to close</div>
+  </div>
+
+  <!-- A verse's actions, wherever a verse appears. The text shown, copied, shared or pinned is the
+       verbatim line, with its citation. -->
+  <div id="verseScrim" class="vs-scrim" aria-hidden="true"></div>
+  <div id="verseSheet" class="vs" role="dialog" aria-modal="true" aria-labelledby="vsCite" inert>
+    <div class="vs-head">
+      <div class="vs-verse"><p id="vsText" class="gm" lang="pa"></p><p id="vsCite" class="vs-cite"></p></div>
+      <button id="vsClose" class="vs-x" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="vs-acts">
+      <button id="vsPin" type="button" class="vs-main" aria-pressed="false">Pin verse</button>
+      <button id="vsOpen" type="button" data-go-ang="1">Open in Reader</button>
+      <a id="vsRelated" href="/trail">Related verses</a>
+      <button id="vsComp" type="button">Composition</button>
+      <button id="vsCopy" type="button">Copy verse</button>
+      <button id="vsShare" type="button">Share</button>
+    </div>
+  </div>
+
+  <!-- Display: how the page looks, on every page. Each choice applies at once and is kept in this
+       browser; none of them changes the scripture text. The themes come from docs/brand/web-themes.json. -->
+  <div id="displayScrim" class="ds-scrim" aria-hidden="true"></div>
+  <div id="displaySheet" class="ds" role="dialog" aria-modal="true" aria-labelledby="displayTitle" inert>
+    <div class="ds-head">
+      <h2 id="displayTitle">Display</h2>
+      <button id="displayClose" class="ds-x" type="button" aria-label="Close display settings">×</button>
+    </div>
+    <fieldset class="ds-set">
+      <legend>Colour theme</legend>
+      {Object.entries(kbThemes.collections).map(([cid, cname]) => (
+        <div class="ds-coll" role="group" aria-label={cname}>
+          <div class="ds-coll-name" aria-hidden="true">{cname}</div>
+          <div class="ds-themes" style={`--n:${kbThemes.themes.filter((t) => t.collection === cid).length}`}>
+            {kbThemes.themes.filter((t) => t.collection === cid).map((t) => (
+              <label class="ds-theme" style={`--la:${t.swatch.light[0]};--lb:${t.swatch.light[1]};--da:${t.swatch.dark[0]};--db:${t.swatch.dark[1]}`}>
+                <input type="radio" name="kbAccent" value={t.id} />
+                <span class="ds-swatch" aria-hidden="true"></span>
+                <span class="ds-name">{t.name}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ))}
+      <p id="dsEvokes" class="ds-note" aria-live="polite"></p>
+    </fieldset>
+    <fieldset class="ds-set">
+      <legend>Appearance</legend>
+      <div class="ds-seg">
+        {APPEARANCES.map(([value, label]) => (
+          <label><input type="radio" name="kbTheme" value={value} /><span>{label}</span></label>
+        ))}
+      </div>
+    </fieldset>
+    <fieldset class="ds-set ds-tone">
+      <legend>Paper</legend>
+      <div class="ds-seg">
+        <label><input type="radio" name="kbTone" value="paper" /><span>Paper</span></label>
+        <label><input type="radio" name="kbTone" value="warm" /><span>Warm</span></label>
+      </div>
+    </fieldset>
+    <div class="ds-set" role="group" aria-labelledby="dsSizeLabel">
+      <div class="ds-legend" id="dsSizeLabel">Gurmukhi text size</div>
+      <div class="ds-size">
+        <button id="dsSizeDown" type="button" aria-label="Smaller Gurmukhi text">A−</button>
+        <span class="ds-sample gm" lang="pa" aria-hidden="true">ੳ ਅ ੲ</span>
+        <span id="dsSizeVal" class="ds-size-val" aria-live="polite"></span>
+        <button id="dsSizeUp" type="button" aria-label="Larger Gurmukhi text">A+</button>
+      </div>
+    </div>
+    <div class="ds-set ds-row">
+      <div>
+        <div class="ds-legend" id="dsSaroopLabel">Traditional saroop</div>
+        <p class="ds-note">Draws the half-yayya as the printed saroop does. Display only: the text, search and copying stay verbatim.</p>
+      </div>
+      <button id="saroopBtn" class="ds-switch" type="button" aria-pressed="false" aria-label="Traditional saroop rendering (display only — does not change the scripture text)"><span aria-hidden="true"></span></button>
+    </div>
+  </div>
+
   <script>
     import '../scripts/core';
     import '../scripts/panel';
     import '../scripts/studytrail';
     import '../scripts/saroop';
+    import '../scripts/display';
   </script>
 </body>
 </html>

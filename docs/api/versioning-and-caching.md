@@ -4,8 +4,8 @@ description: "The two API surfaces and their errors, request ids, which response
 sidebar:
   order: 3
 verified:
-  commit: 7a343c62
-  date: "2026-09-25"
+  commit: c761e513
+  date: "2026-09-27"
 ---
 # Versioning and caching
 
@@ -20,8 +20,13 @@ structured envelope:
 { "error": { "code": "not_found", "message": "no such endpoint: /api/v1/nope", "request_id": "…" } }
 ```
 
-`code` is `not_found`, `invalid_request` (a bad parameter → 400) or `error`. New clients should use
-`/api/v1`; the legacy surface stays for the app until it re-vendors.
+`code` is `not_found` (404), `invalid_request` (a bad parameter, 400) or `internal` (500); every
+case is on the [error reference](errors.md). New clients should use `/api/v1`.
+
+**What happens to `/api`.** Nothing is scheduled. The legacy surface is what the golden contract pins
+and what existing clients and the website call, so it keeps answering byte for byte. It has no
+retirement date; if one is ever set, it will be announced in the [API changelog](changelog.md) well
+ahead, and `/api/v1` is already the surface to build on.
 
 <!-- sggs:code file="webapp/serve.py" symbol="_handle_v1" -->
 Source: [`webapp/serve.py` · `H._handle_v1`](../../webapp/serve.py), read at build time.
@@ -53,8 +58,9 @@ answered afresh and a health check is never stale. The rule is the same on both 
 <!-- sggs:code file="webapp/serve.py" symbol="_CACHEABLE" -->
 Source: [`webapp/serve.py`](../../webapp/serve.py) — the cacheable set, read at build time.
 
-A dataset change is a new deploy (the pin is baked into the image), and the release runbook purges
-the CDN so no cached body outlives the database it came from.
+A dataset change is a new deploy (the pin is baked into the image), and the deploy workflows purge
+the CDN after each promotion (`vercel cache purge`, in `deploy-production` and `deploy-staging`), so
+no cached body outlives the database it came from.
 
 ## Headers on every response
 

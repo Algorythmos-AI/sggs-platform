@@ -6,10 +6,12 @@ import { dirname, resolve } from 'node:path';
 import { mockApi } from './helpers';
 
 // Every page the build produced, from the sitemap: axe on all of them (desktop project only — the
-// sections' own suites cover phone width). A new page cannot ship with a violation.
+// sections' own suites cover phone width). A new page cannot ship with a violation. The server
+// (scripts/serve-dist.mjs) sends docs-site/vercel.json's headers, so every page also runs under the
+// production Content-Security-Policy: a script it blocks, or any uncaught error, fails here.
 const here = dirname(fileURLToPath(import.meta.url));
 const sitemap = readFileSync(resolve(here, '..', 'dist', 'sitemap-0.xml'), 'utf8');
-const urls = Array.from(sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)).map((m) => new URL(m[1]).pathname).filter((p) => !p.startsWith('/api/reference/'));
+const urls = Array.from(sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)).map((m) => new URL(m[1]).pathname);
 
 test.describe('every page', () => {
   test.beforeEach(({}, testInfo) => { test.skip(testInfo.project.name !== 'desktop', 'desktop only'); });
@@ -20,11 +22,18 @@ test.describe('every page', () => {
 
   for (const path of urls) {
     test(`axe: ${path}`, async ({ page }) => {
+      const blocked: string[] = [];
+      // every console error counts (a CSP block, a malformed SVG path, a script failure) except the
+      // network errors of the mocked API's deliberate 503s
+      page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/i.test(m.text())) blocked.push(m.text()); });
+      page.on('pageerror', (e) => blocked.push(`uncaught: ${e.message}`));
       await mockApi(page);
       const res = await page.goto(path);
       expect(res?.status(), path).toBe(200);
+      expect(res?.headers()['content-security-policy'], 'served with the production CSP').toContain("script-src 'self'");
       const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
       expect(results.violations, JSON.stringify(results.violations, null, 1)).toEqual([]);
+      expect(blocked, 'no console error: no script blocked by the CSP, no malformed SVG, no uncaught error').toEqual([]);
     });
   }
 });

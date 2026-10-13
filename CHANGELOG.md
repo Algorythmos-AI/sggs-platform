@@ -3,6 +3,402 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [Unreleased]
+
+## [1.4.0] — 2026-10-14 — the Knowledge Base, redressed: thirteen themes, a new shell, and the app's Reader, Nitnem, Search and Raag Clock on the web
+
+### Added
+- **A page menu on every wiki page, and a wiki that prints.** Above each title, *Copy page* copies
+  the page as Markdown in one click; beside it a panel copies the link, opens the Markdown, opens
+  the page in ChatGPT or Claude with an instruction that holds the scripture rule (answer only from
+  the page; quote Gurbani only as printed there, with its Ang), and prints. Links work without
+  JavaScript, the menu records nothing, and `DOCS_PAGE_ACTIONS=0` removes it (ADR-0013). The title
+  line says how long a page takes to read. Printed, a page is the article alone in the light
+  palette: its address and a colophon, a running head and page numbers, external addresses listed
+  once under "Links", a quotation never split from its Ang, a poster on one sheet with its steps
+  listed. Sant Lipi's declared range now includes the dandas, so they no longer fall back to
+  another font.
+- **Every wiki page as a PDF.** *Download PDF* in the page menu serves a pre-built, tagged,
+  bookmarked PDF of the page (`/pdf/<page>.pdf`), made inside the site build from the print
+  stylesheet, at the page's published address so its links are real. A gate reads every PDF: one
+  per page, an Ang citation on its quotation's sheet, no link to the build machine, and every run
+  of Gurmukhi with a letter in it set in Sant Lipi.
+- **The wiki reads like a help centre, in its own dress.** A larger title, a 17px body on a
+  70-character measure, and under each title how long the page takes, when it changed, and the
+  page in a sentence. The section above a title is a link. Notes are tinted callouts with a thick
+  rule in the status colours; a quotation of scripture has no tint and no box, so the two cannot
+  be confused. A procedure marked `<!-- sggs:steps -->` is set as numbered steps down a line. The
+  current page and section are marked in ink with a gold bar instead of a filled block.
+- **Section tabs on the wiki.** On a wide screen the header has a second row — Get started,
+  Scripture, Platform, API, Operate — each opening that section's overview, with the section of
+  the current page marked. On a phone the same five links are at the top of the menu drawer.
+  A long page has a *Back to top* link under "On this page", and a wide table on a phone shades
+  the edge that has more to show.
+- **The wiki's layout is guarded by pictures.** The top of six kinds of page — wide and phone,
+  light and dark — is compared with a committed baseline on every pull request, in a pinned
+  container so fonts cannot differ. A difference fails the `docs` check and uploads what the build
+  drew. The fallback fonts a PDF may embed are now installed by name on the build machines.
+- **Gurmukhi on the wiki is marked as Punjabi.** Every run of Gurmukhi in a page's prose, tables
+  and glossary cards is wrapped in `lang="pa"`, so a screen reader reads it as Punjabi instead of
+  as English (WCAG 3.1.2). The text is only cut at the run's edges, never changed; code blocks and
+  drawings are left as they are.
+- **Every wiki page as Markdown.** `docs.gurbanisoul.com/md/<page>.md` serves each wiki page
+  as portable Markdown (glossary terms as plain words, code excerpts filled in from the
+  source, links absolute), with `/md-manifest.json` and `/llms.txt` listing them and a
+  `rel="alternate"` link on every page. The export edits the original text in place and never
+  re-writes it: every run of Gurmukhi is protected, an edit that would touch one fails the build,
+  and each page's export is proven to carry every run unchanged
+  (`docs-site/plugins/portable-md.mjs`). The first step of the page menu, print and PDF work.
+- **The charts follow the theme, and a colour keeps its meaning.** Insights and the Constellation
+  read their colours from the stylesheet when they draw; they now draw again when the appearance,
+  the colour theme or the paper tone changes, without a reload and without asking the server again.
+  Category colours are fixed tokens (`--viz-1` … `--viz-10`) in every theme: the Gurus were drawn
+  in the accent, so under Indigo they were the Bhagats' blue, and the two voices of the author
+  fingerprint could be the same colour. The contributor kinds on the Contributors page use the
+  same fixed colours.
+- **Jump anywhere.** ⌘K or Ctrl+K from any Knowledge Base page, "/" when not typing, or the search
+  button in the top bar opens a box that knows the Angs by number, the 31 raags, the sections, the
+  banis, the contributors, the themes and the pages. It matches the names the site already has
+  (Gurmukhi or Roman) and hands anything else to the real search; with a place kept in the Reader,
+  an empty box offers to continue there. Every result is a link, the arrows choose and Enter goes.
+  The palette's script is loaded only the first time it is asked for.
+- **Every verse is a door.** The button on a verse (⋯, where the pin was) opens its actions in one
+  sheet, wherever a verse appears — Search, the Reader, a composition, the Verse trail: pin or
+  unpin, open in the Reader, related verses, the whole composition, copy, share. The sheet shows the
+  verse and its citation. What is pinned, copied or shared is the verbatim line from the API with
+  "Sri Guru Granth Sahib Ji · Ang N", never the painted glyphs; a shared link lands on the verse.
+  Pinning is now two taps, as it is two steps in the app.
+- **Search on the web, in step with the app.** Results arrive as you type, after a short pause: one
+  request for a burst of keystrokes, the last results staying (dimmed) until the new ones land, and
+  a search still in flight never landing on a cleared page. An empty box shows what the chosen
+  mode takes instead of a paragraph of instructions, and changes with the mode. The modes are real
+  radio buttons, one row that scrolls inside itself on a phone; the box has a clear button and the
+  phone keyboard's own Search key. A quotation is still checked only on Enter.
+- **The Nitnem home on the web, in step with the app.** The time of day brings a set forward: Amrit
+  Vela and the day the five morning banis, the evening Rehras Sahib, the night Kirtan Sohila (to
+  3 AM). The clock only orders the list; every bani is always shown. The hero draws the day as an
+  arc with now marked, a ring for each bani of the set, and one action ("Read Rehras Sahib", or
+  "Continue" where this browser has a place). Hukam is a card under it. Banis are rows in one card
+  per set, each a real button with a ring for how far the kept place is; on a wide screen the hero
+  stays beside the list. The Nitnem reader has the Reader's bar and options panel.
+- **The Reader's controls on the web, in step with the app.** The bar is three things: "Go to", the
+  Ang itself (a button: tap it and type another) and reading options. A page bar sits at the foot,
+  in the thumb's reach: "Ang N of 1430" over a hairline of the Granth, then the Ang before, Hukam
+  and the Ang after, each a full-size target. It slides away while reading down and comes back on
+  the way up. "Go to Ang" is a sheet: a large number that is selected ready to be replaced, the
+  raag that Ang is in, a scrubber across the whole Granth with a tick where each raag begins,
+  steppers, a raag menu, and a button that restates where it goes; nothing is fetched until Go, and
+  going is a lookup, so a place being kept in a long reading does not move. Reading options (text
+  size, transliteration, timing chip, Sehaj) are a small panel. On a phone a quick sideways swipe
+  turns the Ang: one finger, clearly sideways, never from the screen's edge, with text selected,
+  zoomed in, or with anything open over the page.
+- **The Raag Clock on the web, in step with the app.** One face answers "what time is it here, and
+  which raags belong to it": a 24-hour ring of the eight watches with the reader's own clock in its
+  hollow — hour, minute and a sweeping second hand, numerals and the day — and a pointer on the
+  ring for now. The watch it is now is the accent fill; each raag is a bead along its arc (ringed
+  for a disputed variant), so no text is crowded into a wedge. In solar mode the ring is drawn with
+  the sun's own watches, with sunrise and sunset marked on the seam; before, the ring always showed
+  fixed hours. Under the face: the time in words, the eight watches as a list (the full path for a
+  keyboard and a screen reader), and the seasonal raags. Times follow the reader's 12- or 24-hour
+  clock, and the words change on the minute.
+- **Solar mode asks for nothing by itself.** Choosing Solar no longer triggers the browser's
+  location prompt: a place is asked for only by "Use my location", or typed in by hand, and
+  "Forget location" removes it. It is rounded to two decimals (about 1 km, as in the app; it was
+  three) before it is kept in this browser. The privacy page says so.
+- **The Knowledge Base has a home: `/library`.** The current pahar with the raags the timing layer
+  records for it ("traditional timing, sources differ"), a search box, the places this browser was
+  last reading, a Hukam-style random draw, and a door into each of the nine tools. Search and the
+  doors are plain HTML, so the page works before its script loads. "Home" in the Knowledge Base
+  navigation goes there (the footer links to the Gurbani Soul app page), and an installed copy opens
+  on it (`start_url`).
+- **The Reader remembers the Ang you were reading.** `/reader` with no Ang resumes there. The place
+  is saved only when a page is turned: opening an Ang from a search result, or jumping by number,
+  is a lookup and leaves it alone (`sggs_last_ang`, named on the privacy page). The turn is carried
+  from the control that made it (‹ ›, the arrow keys, the links at the foot of an Ang), so turning
+  quickly keeps the last page even though the ones between were never drawn. A stored value that
+  is not exactly an integer from 1 to 1430 is ignored on the home page and in the Reader alike
+  (`validAng`), and the home page redraws the place and the pahar when it is come back to.
+- **The Knowledge Base has thirteen colour themes, on warm paper.** The five accents of the app, with
+  its exact values (Soul Gold, the default, Saffron, Gold, Indigo, Teal), four from Italy (Glicine,
+  Siena, Toscana, Pietra Serena) and four from the south of France (Lavande, Bougainvillea, Azur,
+  Laurier Rose). Each new theme pairs an accent with a decorative companion colour. The header is
+  now cloth: a pale wash of the theme by day and a deep tone by night, with a two-line hem and a
+  faint Phulkari motif; the title is set in Source Serif 4 and the ੴ mark is flat. Reading surfaces
+  sit on paper, with a warmer tone available by day. The themes are data
+  (`docs/brand/web-themes.json`): `scripts/brand/gen_web_themes.py` derives every tinted surface,
+  solves the tint strength per theme, and refuses to write if any text pair is under 4.5:1. The
+  stored choice (`sggs_accent`, `sggs_reader_tone`, the app's key names) is applied before first
+  paint, follows you across tabs, and falls back to the default if unknown or if storage is
+  blocked. A theme is chosen in the display sheet (below).
+- **Colour contrast: every Knowledge Base page passes in the default theme, light and dark, and the
+  base text pairs are proven for all thirteen.** The old palette used its accent as text at about
+  3:1; `--accent` is now the accent's text colour and filled controls use `--accent-fill` with
+  `--on-accent` text. Chips sit on a wash the accent text is proven readable on; search highlights
+  keep the text ink; faded captions use a readable muted ink instead of opacity. The recorded
+  contrast failures in `kb-shell.spec.ts` went from eleven page-and-theme entries to none (every
+  page, default theme), and the generator proves every text colour on six surfaces per mode for
+  every theme — and the neutral inks on a chip over each of them, because a chip is a translucent
+  wash and pages stack them. The soft and faint inks are a shade deeper so that this holds without
+  weakening any theme's tint. The accent's edge colour (`--accent-ui`) holds 3:1 on every tint, the
+  cloth's motif included: it is the accent itself except for Saffron and Gold, which are deepened
+  toward their text colour by day. `kb-contrast.spec.ts` then measures the pages themselves: every
+  visible text node on every Knowledge Base state — and with a composition, a contributor, Saved and
+  the display sheet open — in all thirteen themes, by day, on warm paper and by night, including
+  text over a gradient, text under a faded ancestor and SVG text, which axe reports as "cannot
+  tell". What it found is fixed: the Raag Clock dial's wedge text is ink, the Vaar ladder's pauri
+  numbers are ink on a tint ringed in the author's colour, contributor-kind labels use the kind's
+  colour deepened toward the ink, the landing flash on a verse is the accent wash, and no caption
+  is dimmed with opacity.
+- **Display, in one place.** "Aa" in the top bar opens a sheet on every Knowledge Base page (a
+  panel under the bar on a wide screen, a sheet from the bottom edge on a phone): the thirteen
+  colour themes in their three collections, each a fold of cloth in its two colours; the appearance
+  (system, light, dark); the paper tone, by day; the Gurmukhi text size; and the traditional-saroop
+  switch, which moved here from the bar. A choice applies at once to the page behind the sheet and
+  is kept under the keys the privacy page already names; the sheet shows what is in force after a
+  change made by the theme button, the Reader's size buttons or another tab. The theme button stays
+  in the bar.
+- **One overlay stack** (`scripts/overlay.ts`) under the composition panel, Saved and the display
+  sheet: Escape closes the top one only, Tab stays inside it, and closing returns focus to what
+  opened it. While anything is open the Reader's arrow keys and Sehaj's Escape stand down (an
+  arrow pressed with focus inside the composition used to turn the Ang behind it; one Escape used
+  to close Saved and leave Sehaj mode together). A composition opened again from inside itself
+  ("Another ↻") keeps its first opener, and one that arrives after its panel was closed, or after
+  another was asked for, is dropped instead of replacing the newer one.
+- **The browser's own chrome has the right colour from the first frame.** The inline boot script
+  sets `theme-color` to the header's colour for the stored theme and appearance; it used to start
+  as the default's cream and change once the scripts had loaded.
+- **Moving between Knowledge Base pages, the cloth stays and the paper changes.** The top bar and
+  the phone tab bar are held while the page under them cross-fades (the browser's cross-document
+  view transition: no client router, every page still loads as a page, and a browser without it
+  simply navigates). Only with motion allowed; opacity only; a bar is not held while a panel is
+  open over the page. Navigation links are fetched ahead, on hover on a wide screen and at the
+  touch in the phone tab bar. A page brought back by Back or Forward takes up the appearance, text
+  size and saved verses chosen since, and Saved follows a change made in another tab. A gate reads
+  the built stylesheet, because a minifier that does not know `@view-transition` drops it silently.
+- Two gates: every key the site keeps in the browser must be named on the privacy page
+  (`StoredKeysAreDisclosed`), and a companion colour may never be used for text.
+- **The wiki's front door.** The home page opens on the system-landscape poster, then *Ten minutes to
+  your first search* (clone → `make doctor` → `make dataset` → `serve.py`, with the live search
+  simulator limited to three results), the four learning paths as cards (`<!-- sggs:cards -->`, a
+  build-time widget over a plain Markdown list) and the three newest releases (`sggs:releases
+  limit="3"`).
+- **The integrity chain, for engineers** (`docs/data/integrity-chain.md`): one line of scripture from
+  the source PDF to a screen, and the gate that proves it at each of six stages — build, pin, serve,
+  watch, bundle, launch — every claim cross-read against the code that enforces it.
+- **The Brand section has an index** (`/brand/` was a 404) with the palette rendered from
+  `docs/brand/tokens.json` at build (`<!-- sggs:swatches -->`): every role, light and dark, and its
+  WCAG contrast computed from the file.
+- **The wiki watches itself.** `docs-watch` (every six hours) proves `docs.gurbanisoul.com` serves the
+  commit its last production deploy shipped and runs the new **live suite** (`docs-site/e2e-live`:
+  every API-backed widget against the real API, a line read from `/api/ang/1` verifying exact, axe as
+  deployed, no CSP errors) — the same suite runs after every staging deploy. `uptime` probes the
+  wiki too. `docs-pins` (Mondays) opens a pull request when a sibling repository changes a file the
+  wiki publishes (`tools/docs_pins.py`; with `DOCS_BOT_TOKEN`, else an issue); `docs-freshness`
+  (Mondays) lists the pages whose cited code changed since their `verified` stamp
+  (`tools/docs_check.py --freshness`). Every one keeps a single issue, closed when green.
+- `make review-pack`: the G3 scholar-review pack as one PDF with a sign-off sheet; `make docs-live`,
+  `make docs-freshness`, `make docs-pins`.
+- **A phone safety net for the Knowledge Base, ahead of its redesign.** The `playwright` check now runs
+  the whole suite on the phone project too (iPhone 13, WebKit) as a second step of the same job.
+  `frontend/e2e/kb-shell.spec.ts` covers every Knowledge Base route and the 404 page: no sideways
+  scroll at 375 px, unique ids, a viewport that still pinch-zooms, and axe in the light and the dark
+  theme. What is red today is written down in the spec per page — the pages that scroll sideways
+  (`test.fail`) and the axe rule ids each page violates — and both lists can only shrink. The
+  overflow baseline is per platform, because the Knowledge Base sets its Latin text in the system
+  font: it has a macOS baseline (the font an iPhone renders) and a Linux one per project, recorded
+  from the first CI run, so the runners enforce it too.
+  `npm run shots` (`frontend/scripts/shots.mjs`) takes a route × width × theme screenshot matrix for
+  review. Report-only for now: `web-ci · frontend` compares the committed `webapp/static` with the
+  build's text assets (`scripts/ci/check_static_fresh.py`), and `e2e · kb-lighthouse` runs mobile
+  Lighthouse on three Knowledge Base pages.
+
+### Changed
+- **The Knowledge Base has a new shell.** Twelve pills become five places — Home, Read, Search,
+  Explore, Saved — the same on every screen: a slim cloth top bar on a wide screen, a tab bar above
+  the home indicator on a phone. A place with several pages (Read: Reader, Nitnem, Index; Explore:
+  Themes, Constellation, Verse trail, Contributors, Insights, Raag Clock) lists them in a second
+  row. On a 375px phone content now starts within 120px of the top (it was 449px), the footer is
+  part of the page instead of fixed over it, and no Knowledge Base page scrolls sideways (the
+  Reader toolbar and the Contributors controls wrap; both overflow baselines are empty). Every page
+  has its own heading (in the bar on a phone). The pinned-verses button is the Saved place, with
+  its count; its drawer is titled Saved and its second tab Connections. The home page carries the
+  cloth down into a canopy with the title, and keeps room for the pahar line so nothing jumps.
+  Sehaj hides the bars and now always shows an Exit button (a phone has no Esc key). The page
+  allows for the notch and the home indicator (`viewport-fit=cover` with safe-area insets), and a
+  page of scripture prints as paper: no bars, dark ink, whatever the theme.
+  `frontend/e2e/kb-shell-layout.spec.ts` proves each of these on a phone and a wide screen.
+- **The Knowledge Base stylesheet is twenty ordered partials** (`frontend/src/styles/kb/*.css`);
+  `global.css` only lists them. A move, not a restyle: the built stylesheet is byte-identical (same
+  hashed file, same sha256) and `webapp/static` is unchanged. A gate
+  (`KbStylesheetIsOrderedPartials`) keeps every partial imported once, in order, with the phone
+  control-size rule last.
+- **The wiki names both routing states after #205.** Staging routes the five API contexts to their
+  own functions; production answers every path with `all` until a later release, after the app is
+  live, moves all five at once. The architecture overview,
+  bounded contexts, environments, the API page, the roadmap, the release steps (which now carry the
+  per-context performance gate), ADR-0011 (an amendment note) and posters 08 and 09 say so; found by
+  the docs-freshness gate.
+- **Held back from this release (owner decision 2026-10-11): production keeps the single API
+  function.** `production.services` in `gateway/routes.json` is empty again, as on v1.3.10, so every
+  `/api` path is still answered by `all`. The entry below describes the change as it was merged; it
+  ships in a later release, after the app is live, by listing the five contexts again.
+- **Production's API contexts each answer from their own function** (runbook services-production,
+  step 3). `gateway/routes.json` lists all five contexts for production — reader, search, verify,
+  insights, knowledge — so each is answered by its own Vercel function with its own database slice,
+  and `all` keeps everything else. The deploy verifies every function at the commit with exactly its
+  contexts and runs the golden contract through the new rules before promotion; one context rolls
+  back by removing it from the list. Batched into one release because every release is also an App
+  Store update (owner decision 2026-09-26). No change to responses: the golden contract pins them.
+- **A verified stamp goes stale when the code it cites changes**, not after a fixed number of
+  commits: merging a stack of pull requests moved thirteen pages past the old sixty-commit mark
+  while nothing they describe had changed. Pages that cite no code still warn at 300 commits.
+- **Mermaid diagrams follow the reader's scheme:** each is drawn from both legs of the palette (palette
+  colours in `classDef`/`style` lines swap to their dark twins; a label that would lose contrast takes
+  the better ink) and CSS shows the matching one. Geometry is rounded to two decimals, so the heaviest
+  page is lighter than before (397 KB → 286 KB).
+- **Edit links on pinned sibling pages go to the branch** (GitHub cannot edit at a commit), with a
+  second link to the exact version the wiki pins.
+- The generated API reference sits inside the API group, has an e2e test and passes axe (its
+  "required" label and schema panels now use the brand's status red and the page background).
+- Glossary hover-cards on the first use of key terms across onboarding, architecture, data, search,
+  API and iOS; the phone header keeps "Sri Guru Granth Sahib Ji" whole instead of cutting the title
+  mid-word; the brand book states that phase 2 shipped and that the Swift-to-JSON parity test is still
+  to be written; stale onboarding links fixed.
+- **The wiki's CSP allows inline scripts by sha256 only** (13 hashes; no `'unsafe-inline'`),
+  checked by `docs-site/scripts/csp.mjs`; the e2e server sends the production headers, so every
+  page's e2e and axe run under the real policy. ADR-0012 amended.
+- **The `docs` job equals `make docs`:** types, `check:render`, `check:links` and `check:csp` join
+  the build checks; it also runs every night on `integration`, opening one issue while red. The
+  `main` ruleset requires `docs` to merge; the product's `deploy-production` does not wait on it
+  (`wait_for_checks.py --exclude docs`), so a wiki failure never blocks a product release. `docs-links` also checks the sibling docs and pins its actions by
+  SHA. `docs_check` gates the poster legend and the theme's brand colours against the tokens.
+- `docs-site/scripts/visual-qa.mjs` proxies `/api` to production (`https://gurbanisoul.com`, was
+  the Render rollback origin) and accepts a Vercel bypass for the staging alias.
+- **The `docs` check takes about nine minutes, not eighteen.** Lighthouse was two-thirds of it (twenty
+  pages, three runs each). A pull request or a push to `integration` now audits five representative
+  pages (home, the heaviest page, a poster, a live widget, the largest table); the nightly run and
+  every push to `main` still audit all twenty.
+
+### Fixed
+- **A wiki title no longer jumps as its font arrives.** Until Source Serif loaded, a title was
+  drawn in Georgia, which is a fifth wider: a long title wrapped onto a second line and then
+  snapped back, moving the page under it. The heading font is now fetched with the page and the
+  fallback is one of nearly the same width; a test measures the shift on every build.
+- **Gurmukhi on the wiki is drawn in Sant Lipi everywhere.** Page text was never marked as Punjabi,
+  so the rule that gives Gurmukhi its font did not apply to it: in prose, tables, headings, code
+  and diagrams it took whatever Gurmukhi font the reader's device had, or none. Sant Lipi now leads
+  every font stack; its declared range covers only Gurmukhi and the dandas, so nothing else changes.
+- **The search bar fits a 375px phone in every font.** Its `<input>` would not shrink below 20
+  characters of the system font, which pushed the Search button off the page in wider fonts: 388px
+  (Chromium) and 402px (WebKit) on the Linux runners, on Search and on the new home page.
+  `.searchbar input { min-width:0 }`; the two recorded Linux overflows for Search are gone.
+- **The closed Study Trail drawer no longer shades the page.** Its shadow was cast from off-screen
+  and reached 80px back in — unseen on the old dark page, a grey band down the right edge of every
+  Knowledge Base page on paper. The shadow now belongs to the open drawer only.
+- The Raag Clock link beside the home page's raags has a full 44px touch target.
+- **Found reviewing the themes, fixed before release.** The Constellation's centre label was dark
+  text on the accent's text colour (3.8:1): it is a filled control now (`--accent-fill`, its edge,
+  `--on-accent`). The header's two buttons used `color-mix()` of the ink for their wash, and the
+  build's fallback for browsers without `color-mix()` (Safari before 16.2) was the ink itself — a
+  solid square the colour of its own glyph: the wash is a literal now. The Study Trail's coverage
+  bars and the skip link carry the edge every brand-gold fill must have. Three captions still
+  dimmed by opacity (Themes, Contributors, the Reader's "EN ·" label) use the muted ink. A raag's
+  Gurmukhi name in the divergence table no longer takes the theme colour on hover — the
+  transliteration shows the link. The contributor "term" chip sits on the proven wash.
+- **On the Knowledge Base, Gurmukhi is ink everywhere, and a test now proves it.** The pages
+  coloured scripture: composition headings and the ੴ invocation were gold (the invocation with a
+  glow and extra letter-spacing), refrain lines were orange on a tinted band, and the composition
+  panel set gold inline. Headings and verses are now ink; the refrain is marked by a 3px rule in
+  the margin, as in the app. Three more display faults went with them: the constellation tooltip cut
+  a verse at 64 characters and set it in a system font (it shows the whole line in Sant Lipi); a
+  Gurmukhi search highlight could end inside a word, parting a vowel sign from its consonant (whole
+  words are marked); and Gurmukhi outside a `.gm` element — an author's name, a chip, a button —
+  fell back to a system font (Sant Lipi now leads the interface font stack, scoped to the Gurmukhi
+  block). `frontend/e2e/reverence.spec.ts` walks every rendered Gurmukhi text node on 18 views in
+  light and dark, on desktop and phone: 23 distinct faults before, none after. A source gate
+  (`ScriptureDisplayInSource`) forbids slicing a line or colouring Gurmukhi inline. No scripture
+  text, corpus or API output changes; this is colour and typography only.
+- **Nine shell faults on the Knowledge Base, each with a test that failed before the fix**
+  (`frontend/e2e/kb-shell-bugs.spec.ts`, desktop and phone). The closed pinned-verses drawer was
+  still in the Tab order and closing it dropped focus (it is `inert` until opened, and focus goes
+  back to the button that opened it). Controls under 16px made iOS zoom the page on focus (the Ang
+  field, the chart selectors, the Raag Clock search). The search box took focus on arrival, which
+  raised the keyboard on a phone (desktop only now). The browser's own chrome and native controls
+  followed the OS appearance rather than the page's (one `theme-color` meta that follows the page
+  theme; `color-scheme` set per theme). The Raag Clock could show a stale pahar after Back or a tab
+  switch (it repaints on `pageshow` and when the tab returns). The theme network swallowed the
+  wheel and one-finger drags, trapping the page (a plain wheel and one finger scroll the page; pinch
+  or Ctrl/⌘ + wheel zooms). Load errors asked the public whether `serve.py` was running. Theme
+  links went to `/?q=…`, loading the marketing home before being forwarded (they go straight to
+  `/search`). Knowledge Base pages had no favicon link, and no page had an `apple-touch-icon`.
+- **The Reader no longer loses the page you are on, and Nitnem keeps your place.** Five faults,
+  each reproduced by a test before the fix (`frontend/e2e/reader-nitnem.spec.ts`, desktop and phone):
+  on a weak connection a request for an Ang you had already paged past could fail late and replace
+  the Ang on screen with an error (a superseded request is now cancelled and can never paint); an
+  Ang already being prefetched was fetched a second time when you turned to it; a link to a verse
+  (`/reader?ang=…&line=…`) landed with the navigation and toolbar hidden, because the landing scroll
+  itself — or the page settling as a chip or the font arrived — counted as reading downwards (only a
+  wheel or touch scroll hides them now, and landing is an instant jump); reopening a bani put the
+  saved line in the middle of the screen and then saved the line above it, so the place crept back a
+  few lines every time (saving and resuming now share one anchor, just under the toolbar); and the
+  Gurmukhi size was written inline on every page even when you had never chosen one, which
+  overrode the stylesheet (it is written only once chosen; Reader and Nitnem now share one size
+  control and one range, 16–40px). No change to how any page looks.
+- **Every wiki page is in the sidebar again.** Fourteen of the nineteen sidebar groups rendered empty
+  (Start here, Scripture 101, Architecture, Search, the handbook, Process, Brand, Decisions and the
+  pinned groups), so 87 of 148 pages were reachable only through search and had no previous/next
+  links. Starlight's `autogenerate` matches a page's file path under `src/content/docs`, which this
+  site never uses (it reads `../docs` in place). The sidebar is now built from the pages themselves
+  (`docs-site/plugins/nav.mjs`; the layout in `docs-site/sidebar.mjs`): eleven sections, short
+  labels ("0007 · Three repositories" instead of a 70-character title), pinned sibling pages badged
+  in their topic, only *Get started* open by default, and previous/next naming the section
+  ("Data overview"). New gates: `check-nav` in `check:all` (every page in the sidebar, no empty group,
+  the same sidebar on every page, previous/next everywhere — proven red on the v1.3.10 sidebar), a
+  unit test that every published page is placed exactly once, e2e and a live check (on builds that
+  announce `nav2`, so the watch on the older production stays quiet). API operations carry a short
+  `summary` ("Search the Granth") with the sentence as `description`, so the API reference sidebar
+  reads as labels, and its generated pages' *Edit this page* opens `tools/gen_openapi.py`.
+- **Docs match the live mail setup and the submission gates.** `support@gurbanisoul.com` is a Zoho Mail alias
+  (MX/SPF/DKIM for Zoho, DMARC `p=none` added 2026-09-26); the website README had described Cloudflare Email
+  Routing and a `p=reject` DMARC record that never existed. The brand book records G3 and G4 as closed for the
+  1.3.10 submission.
+- **Two sequence diagrams drew broken paths** (`/data/dataset-pin/`, `/ios/how-the-app-takes-a-release/`):
+  the geometry rounding added with the two-palette diagrams also matched *across* compact SVG numbers
+  (`3.023.043.021` is 3.023, .043, .021) and could fuse a rounded integer with the next `.05`. It now
+  rounds only numbers that start a token, never lets a result fuse, and a test proves every number of a
+  real path survives (count and value within 0.005). The every-page e2e check now fails on any console
+  error, not only CSP ones — it would have caught this. Found by a pre-release sweep of all 150 pages
+  (dark-mode axe, phone overflow, images, console).
+- **The contrast report regenerates as committed.** `scripts/brand/contrast_report.py` dropped the
+  wiki frontmatter `docs/brand/contrast-report.md` gained when `docs-site/` began publishing
+  `docs/`, so the brand book's "edit the JSON, re-run the report, commit both" produced a page the
+  frontmatter gate rejects. It now writes the frontmatter, and its new `--check` (in
+  `make docs-check`, the `docs` job and a tool test) fails when the committed page is stale.
+- **`docs-pins` never loses a bump to a bad token.** Its first run with `DOCS_BOT_TOKEN` failed with a
+  403: the token authenticated but could not push (its resource owner or approval), and the run just
+  went red. It now proves the token with a dry-run push first and falls back to the issue — naming the
+  cause — when the token is missing, cannot push, or the pull-request step fails. The runbook shows
+  how to create the token. Closing that issue uses the workflow's own token, so the bot token needs
+  only Contents and Pull requests (its first successful run opened #212, then failed closing the
+  issue with a token that rightly had no Issues permission).
+- **The wiki's deploy pipeline.** Staging refuses to be the docs project's first Vercel deployment
+  (the first one became production on 2026-09-26 and served an `integration` build at
+  `docs.gurbanisoul.com`) and fails unless its own deployment is a preview. Production's rollback
+  target is the deployment the domain actually serves (`scripts/ci/vercel_api.py`), not the newest
+  production deployment, which can be a failed, never-promoted build; the rollback runs only after a
+  failed public smoke; every production failure opens an issue that says whether production changed,
+  and a `main-guard` job reports a push to `main` whose `docs` job failed. Concurrency groups carry
+  the event, so a manual or nightly run can no longer cancel a staging deploy.
+- **The docs smoke fails on any redirect** (the `trailingSlash` loop would have passed a lenient
+  check), checks `/api/meta`, and finds its poster on the architecture page instead of skipping it.
+- Two wiki links that 404ed: the reader is `/reader?ang=N`, and the website has no verify page.
+- The status strip's "checking /api/health…" state measured 3.17:1 (the whole chip was dimmed); only
+  its dot dims now. Found by the live suite on production; a mocked test now holds axe on that state.
+- **`apply_rulesets.sh` could weaken branch protection:** it PUT each committed ruleset as-is, which
+  resets keys the file does not mention (both trunks have `require_extra_approval_for_unattributed_changes`
+  on). It now merges the file into the live ruleset (`scripts/gh/merge_ruleset.py`, tested) and
+  takes `--dry-run`.
+
 ## [1.3.10] — 2026-09-25 — the API on Vercel functions in production, the engineering wiki
 
 No change to the scripture text, the corpus or the database bytes (`cb6775ff…`). Every legacy

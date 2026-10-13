@@ -232,8 +232,10 @@ class LandingPage(unittest.TestCase):
             if not f.exists():
                 continue
             html = f.read_text(encoding="utf-8")
-            self.assertNotIn("Sri Guru Granth Sahib Ji — Knowledge Base</h1>", html, f"{route}: KB <h1> present")
+            self.assertNotIn("data-topbar", html, f"{route}: KB top bar present")
+            self.assertNotIn('class="kb-tabs"', html, f"{route}: KB tab bar present")
             self.assertNotIn('id="saroopBtn"', html, f"{route}: KB saroop toggle present")
+            self.assertNotIn('id="displaySheet"', html, f"{route}: KB display sheet present")
             self.assertNotIn('id="randomBtn"', html, f"{route}: KB random button present")
             self.assertIn('id="mnav"', html, f"{route}: marketing nav #mnav missing")
 
@@ -323,6 +325,219 @@ def _strip_dark_scope(css):
             j += 1
         i = j
     return "".join(out)
+
+
+def _load_script(rel):
+    """Import a repo script by path (scripts/ is not a package)."""
+    import importlib.util
+    path = ROOT / rel
+    spec = importlib.util.spec_from_file_location(path.stem, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class WebThemesAreGeneratedAndReadable(unittest.TestCase):
+    """The Knowledge Base colour themes: generated files current, every text pair above its floor."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.gen = _load_script("scripts/brand/gen_web_themes.py")
+        cls.src = json.loads((ROOT / "docs/brand/web-themes.json").read_text(encoding="utf-8"))
+
+    def test_generated_files_are_current_and_every_pair_passes(self):
+        import contextlib, io
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = self.gen.main(["--check"])
+        self.assertEqual(code, 0, out.getvalue())
+
+    def test_a_pair_below_its_floor_is_caught(self):
+        import copy
+        bad = copy.deepcopy(self.src)
+        bad["themes"][0]["light"]["accentText"] = "#E0C36A"          # a pale gold: unreadable on paper
+        _, fails = self.gen.derive(bad)
+        self.assertTrue(any("light accent text" in f for f in fails), fails)
+
+    def test_the_default_theme_exists_and_ids_are_unique(self):
+        ids = [t["id"] for t in self.src["themes"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertIn(self.src["default"], ids)
+        for t in self.src["themes"]:
+            self.assertIn(t["status"], ("approved", "review", "held"), t["id"])
+            self.assertIn(t["collection"], self.src["collections"], t["id"])
+
+    def test_an_ink_on_a_chip_is_part_of_the_proof(self):
+        # a chip is a translucent wash: an ink that reads on a surface can fail on a chip over it
+        import copy
+        bad = copy.deepcopy(self.src)
+        bad["surfaces"]["light"]["chip"] = "rgba(43,26,5,.30)"
+        _, fails = self.gen.derive(bad)
+        self.assertTrue(any("light faint ink on a chip on card" in f for f in fails), fails)
+
+    def test_the_accent_edge_holds_on_every_tint_and_is_the_accent_where_it_can_be(self):
+        # --accent-ui edges a filled control and marks the current page: 3:1 on every surface it meets,
+        # the cloth's motif included. It is the theme's own accent unless a tint needs it deeper.
+        themes, fails = self.gen.derive(self.src)
+        self.assertEqual(fails, [])
+        raw = {t["id"]: t for t in self.src["themes"]}
+        deepened = []
+        for t in themes:
+            for mode in ("light", "dark"):
+                ui = t[mode]["accent-ui"]
+                for surface in ("canvas", "tile1", "tile2"):
+                    self.assertGreaterEqual(self.gen.ratio(ui, t[mode][surface]), 3.0, f"{t['id']} {mode} edge on {surface}")
+                if ui.upper() != raw[t["id"]][mode]["accent"].upper():
+                    deepened.append(f"{t['id']} {mode}")
+        self.assertNotIn("soul light", deepened)
+        self.assertNotIn("soul dark", deepened)
+        self.assertLessEqual(len(deepened), 4, f"an edge is the accent itself except where a tint forbids it: {deepened}")
+
+    def test_the_motif_strength_is_the_generated_one(self):
+        # the cloth's text is proved on the motif at the strength in web-themes.json: a stylesheet
+        # that paints it stronger would outrun the proof
+        kb = ROOT / "frontend" / "src" / "styles" / "kb"
+        css = "".join(p.read_text(encoding="utf-8") for p in sorted(kb.glob("*.css")) if p.name != "themes.css")
+        painted = re.findall(r"background:var\(--co\);\s*opacity:([^;]+);", css)
+        self.assertTrue(painted, "the motif layer was not found")
+        self.assertEqual(set(painted), {"var(--motif)"})
+
+    def test_accent_text_is_never_set_on_a_chip(self):
+        # not in the proof (see the generator): accent text sits on --accent-wash instead
+        kb = ROOT / "frontend" / "src" / "styles" / "kb"
+        bad = []
+        for p in sorted(kb.glob("*.css")):
+            for block in re.findall(r"\{([^{}]*)\}", p.read_text(encoding="utf-8")):
+                if "background:var(--chip)" in block and re.search(r"(?<![-\w])color\s*:\s*var\(--(accent|gold|accent-text)\)", block):
+                    bad.append(f"{p.name}: {block.strip()[:80]}")
+        self.assertEqual(bad, [])
+
+    def test_a_companion_colour_is_never_a_text_colour(self):
+        # companions are decorative (hem, motif, tile wash): no rule may set text in --co
+        kb = ROOT / "frontend" / "src" / "styles" / "kb"
+        bad = [p.name for p in sorted(kb.glob("*.css")) if re.search(r"(?<![-\w])color\s*:\s*var\(--co\)", p.read_text(encoding="utf-8"))]
+        self.assertEqual(bad, [], f"text set in the companion colour in: {bad}")
+
+
+class StoredKeysAreDisclosed(unittest.TestCase):
+    """Every key the site keeps in the browser is named on the privacy page.
+
+    A new key must be added here with the words the policy uses for it; the test then requires
+    those words in frontend/src/pages/privacy.astro. None marks a cached copy of public data.
+    """
+
+    DISCLOSED = {
+        "theme": "theme", "sggs_accent": "colour theme", "sggs_reader_tone": "paper tone",
+        "gsize": "text size", "show_t": "transliteration", "sggs_saroop": "traditional-rendering toggle",
+        "show_timing": "raag-timing label", "sehaj": "focus mode",
+        "sggs_last_ang": "Ang you last read",
+        "sggs_bani_pos_": "Nitnem reading positions", "sggs_rehras_variant": "Rehras choice",
+        "sggs_pins": "pin", "pahar_mode": "Raag Clock setting", "pahar_loc": "Location",
+        "sggs_trail": "Semantic Trail",
+        "sggs_meta": None, "sggs_timing_v": None,
+    }
+    PATTERNS = (
+        r"(?:localStorage|sessionStorage)\.(?:getItem|setItem|removeItem)\(\s*['\"]([^'\"]+)['\"]",
+        r"\bstore\.(?:get|set)\(\s*['\"]([^'\"]+)['\"]",
+        r"\b[A-Z_]*KEY[A-Z_]*\s*=\s*['\"]([^'\"]+)['\"]",
+        r"['\"](sggs_[a-z_]+)['\"]",
+    )
+
+    def _keys(self):
+        src = ROOT / "frontend" / "src"
+        files = list((src / "scripts").glob("*.ts")) + list((src / "scripts").glob("*.js")) + list((src / "layouts").glob("*.astro"))
+        found = set()
+        for p in files:
+            text = p.read_text(encoding="utf-8")
+            for pat in self.PATTERNS:
+                found.update(re.findall(pat, text))
+        return found
+
+    def test_every_stored_key_is_known_and_disclosed(self):
+        found = self._keys()
+        self.assertGreaterEqual(len(found), 10, "the scan found too few keys to be working")
+        unknown = sorted(found - set(self.DISCLOSED))
+        self.assertEqual(unknown, [], f"new browser-storage keys: {unknown} — disclose them on the privacy page and add them here")
+        policy = (ROOT / "frontend" / "src" / "pages" / "privacy.astro").read_text(encoding="utf-8")
+        missing = sorted(k for k in found if self.DISCLOSED[k] and self.DISCLOSED[k] not in policy)
+        self.assertEqual(missing, [], f"keys the privacy page does not name: {missing}")
+
+
+class KbStylesheetIsOrderedPartials(unittest.TestCase):
+    """frontend/src/styles/global.css only lists the Knowledge Base partials (styles/kb/*.css).
+
+    Their order is the cascade, so every partial is imported exactly once and the phone rule that
+    must win over the per-component sizes stays last.
+    """
+
+    STYLES = ROOT / "frontend" / "src" / "styles"
+    # The cascade, in full. Equal-specificity rules are settled by this order (a phone rule in
+    # responsive.css over a component rule before it, phone-controls.css over everything), so a
+    # partial moved or inserted is a visual change: it is made here too, deliberately.
+    ORDER = ["theme", "tokens", "themes", "base", "shell", "search", "reader", "tiles", "panel", "display", "palette", "insights",
+             "reader-related", "trail", "sehaj", "timeline", "study-trail", "responsive", "contributors", "raag-timing",
+             "reader-chrome", "nitnem", "library", "motion", "print", "phone-controls"]
+
+    def test_entry_lists_every_partial_once_in_order(self):
+        text = re.sub(r"/\*.*?\*/", "", (self.STYLES / "global.css").read_text(encoding="utf-8"), flags=re.S)
+        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+        self.assertEqual(lines[0], '@import "tailwindcss";')
+        imported = []
+        for ln in lines[1:]:
+            m = re.fullmatch(r'@import "\./kb/([a-z0-9-]+)\.css";', ln)
+            self.assertIsNotNone(m, f"global.css may hold only kb/ imports, found: {ln}")
+            imported.append(m.group(1))
+        on_disk = sorted(p.stem for p in (self.STYLES / "kb").glob("*.css"))
+        self.assertEqual(sorted(imported), on_disk, "every styles/kb/*.css is imported exactly once")
+        self.assertEqual(len(imported), len(set(imported)), "a partial is imported twice")
+        self.assertEqual(imported, self.ORDER, "the import order is the cascade: change it on purpose, and here")
+
+
+class KbPageTransitionsSurviveTheBuild(unittest.TestCase):
+    """The Knowledge Base opts into cross-document view transitions in its stylesheet. A CSS minifier
+    that does not know the at-rule drops it without a word, so the proof is in the BUILT file: the
+    rule is there, only inside the reduced-motion guard, and only in the Knowledge Base's sheet."""
+
+    ASTRO = ROOT / "webapp" / "static" / "_astro"
+
+    def test_the_built_stylesheet_opts_in_under_the_motion_guard_only(self):
+        sheets = sorted(self.ASTRO.glob("Base.*.css"))
+        if not sheets:
+            self.skipTest("webapp/static is not built")
+        self.assertEqual(len(sheets), 1, [p.name for p in sheets])
+        css = sheets[0].read_text(encoding="utf-8")
+        self.assertEqual(css.count("@view-transition"), 1)
+        self.assertRegex(css, r"@media \(prefers-reduced-motion:\s*no-preference\)\s*\{\s*@view-transition\s*\{\s*navigation:\s*auto;?\s*\}")
+        for name in ("kb-chrome", "kb-tabs"):
+            self.assertIn(f"view-transition-name:{name}", css)
+        self.assertRegex(css, r"html\.overlay-open [^{]*\{view-transition-name:none")
+        others = [p.name for p in sorted(self.ASTRO.glob("*.css")) if p != sheets[0] and "@view-transition" in p.read_text(encoding="utf-8")]
+        self.assertEqual(others, [], "the marketing pages have their own router: no cross-document opt-in there")
+
+
+class ScriptureDisplayInSource(unittest.TestCase):
+    """Knowledge Base source never cuts a verse short and never colours Gurmukhi inline.
+
+    The rendered result is proven by the e2e reverence walker (frontend/e2e/reverence.spec.ts);
+    this catches the two source patterns it cannot reach, such as a hover tooltip.
+    """
+
+    SRC = ROOT / "frontend" / "src"
+
+    def _sources(self):
+        files = sorted((self.SRC / "scripts").glob("*.ts")) + sorted((self.SRC / "pages").glob("*.astro"))
+        files.append(self.SRC / "layouts" / "Base.astro")
+        return [(p.relative_to(ROOT).as_posix(), p.read_text(encoding="utf-8")) for p in files]
+
+    def test_a_verse_is_never_truncated(self):
+        cut = re.compile(r"gurmukhi[^;\n]{0,40}\.(?:slice|substring|substr)\(")
+        bad = [name for name, text in self._sources() if cut.search(text)]
+        self.assertEqual(bad, [], f"a Gurmukhi line is sliced in: {bad}")
+
+    def test_gurmukhi_is_never_coloured_inline(self):
+        inline = re.compile(r'class="[^"]*\bgm\b[^"]*"[^>]*style="[^"]*\bcolor\s*:')
+        bad = [name for name, text in self._sources() if inline.search(text)]
+        self.assertEqual(bad, [], f"inline colour on a Gurmukhi element in: {bad}")
 
 
 class BrandDisciplineInSource(unittest.TestCase):

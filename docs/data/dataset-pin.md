@@ -4,8 +4,8 @@ description: "How this platform obtains the scripture database: dataset.lock.jso
 sidebar:
   order: 3
 verified:
-  commit: fe1ff7df
-  date: "2026-09-25"
+  commit: aced1a01
+  date: "2026-09-27"
 ---
 # The dataset pin
 
@@ -49,24 +49,27 @@ make dataset-check    # the pin agrees with contract/_meta.json, and sggs-data@c
 ```mermaid
 sequenceDiagram
     accTitle: A dataset release travels from sggs-data to production as a lock bump
+    accDescr: sggs-data rebuilds behind its gates, fingerprints the database, sets DATASET_VERSION and tags it. A pull request in this repository bumps dataset.lock.json and regenerates the contract; the scripture-integrity workflow proves the pin and the installed database; the merge deploys, every service installing the same pin; the data canary keeps proving production against it.
     participant D as sggs-data
-    participant P as sggs-platform PR
-    participant CI as scripture-integrity workflow
-    participant S as staging → production
-    D->>D: rebuild · gates · fingerprint · DATASET_VERSION · tag
-    D-->>P: bump dataset.lock.json (commit · sha256 · size)
-    P->>P: regenerate contract/ against the new database
+    participant P as platform PR
+    participant CI as scripture-integrity
+    participant S as staging, production
+    D->>D: rebuild, gates, fingerprint, tag
+    D-->>P: bump dataset.lock.json
+    P->>P: regenerate contract/
     P->>CI: pull request
-    CI->>CI: --check-repo · --check-pin · install · quick_check · 60,658 lines · Angs 1–1430
+    CI->>CI: the pin, the install, 60,658 lines
     CI-->>P: green
-    P->>S: merge → deploy chain (each service installs the same pin)
-    S->>S: data canary every 6 h: sampled lines byte-identical to the pin
+    P->>S: merge, deploy the same pin
+    S->>S: the data canary, every 6 h
 ```
 
 1. sggs-data rebuilds, passes its gates, writes the fingerprint and `DATASET_VERSION`, and
    publishes the database by commit.
-2. A pull request here changes **one file**, `dataset.lock.json`, and regenerates the golden
-   contract (`make contract`) so `contract/_meta.json` names the new object.
+2. A pull request here changes `dataset.lock.json` and regenerates what is derived from the
+   database: the golden contract (`make contract`), so `contract/_meta.json` names the new object,
+   and the [data dictionary](data-dictionary.md) (`python3 tools/gen_data_dictionary.py`). The
+   `docs` check fails until both match the new pin.
 3. The `scripture-integrity` workflow proves the pin and the contract agree, that sggs-data
    publishes the object at that commit, that the installed database opens, passes SQLite's
    integrity check and holds 60,658 lines over Angs 1–1430.
@@ -75,6 +78,23 @@ sequenceDiagram
 
 A revert is a lock revert: every pinned object stays available in sggs-data, so rolling back the
 data is the same small pull request in the other direction.
+
+## Which version is which
+
+Three version numbers meet here, and they answer different questions:
+
+| Number | Where it lives | What it names | Today |
+|---|---|---|---|
+| `APP_VERSION` | `webapp/serve.py`; `/api/health` → `version` | the platform release: code, website, API | the release being served |
+| `dataset_version` | `dataset.lock.json` | the sggs-data release the pin points at (`DATASET_VERSION` there) | `1.0.0` |
+| `meta.version` | inside the database; `/api/health` and `/api/meta` → `db_version` | the build that produced the file | `1.1.4` |
+
+`dataset_version` and `db_version` differ today only because the pinned database was built on
+2026-09-18, before sggs-data began stamping `DATASET_VERSION` into `meta.version`; the next rebuild
+makes them one number ([delivery](../engineering/delivery.md)). The object itself is identified by
+its SHA-256, not by either version: to know exactly what a deployment serves, compare the lock's
+`sha256` with `contract/_meta.json` and read `db_version` and `commit` from `/api/health`. The
+[data dictionary](data-dictionary.md) lists every table of the pinned object.
 
 ## The iOS app uses the same pin
 

@@ -9,10 +9,26 @@ sidebar:
 ## Frontmatter and headings
 
 Every page begins with `title` (8–120 characters) and `description` (40–200) and a body whose
-first `# H1` equals the title (GitHub shows it; the site strips it). Order a section's pages with
-`sidebar.order`. Pages under `docs/process/`, `docs/engineering/` and `docs/architecture/` must
+first `# H1` equals the title (GitHub shows it; the site strips it). Pages under `docs/process/`, `docs/engineering/` and `docs/architecture/` must
 carry `verified: {commit, date}` — the commit you last read the page against — and the gate warns
-when a stamp falls sixty commits behind.
+when code the page cites (a code excerpt, a linked source file, a poster's *Source of truth*)
+changes after that commit; the weekly `docs-freshness` issue lists the same pages.
+
+**The description is read by people.** It is shown under the page's title as a summary, as well
+as to search engines and in link previews. Write one or two sentences saying what the page covers,
+and do not open it with the page's first sentence: a description that repeats the opening
+paragraph is left out of the page.
+
+## Where a page appears in the sidebar
+
+A new page in an existing directory appears in that directory's sidebar group by itself, after the
+directory's `README.md` (listed as "Overview"), ordered by `sidebar.order` and then by title. The
+sidebar shows the title unless the page sets a shorter `sidebar.label`; keep labels to 48
+characters. A page at the top of `docs/`, or a new directory, must be placed in
+[`docs-site/sidebar.mjs`](../../docs-site/sidebar.mjs) — the build fails until it is, because
+every published page must be reachable from the sidebar. `draft: true` or `sidebar.hidden: true`
+leaves a page out. The sidebar is read when the site starts, so restart `make docs-dev` after adding
+or removing a page.
 
 ## Links
 
@@ -38,6 +54,19 @@ no scripture at all.
   optionally `— why`. It reads as text on GitHub.
 - `<!-- sggs:code file="…" symbol="…" repo="…" -->` shows a function read from the source at
   build time; never paste code that could drift.
+- `<!-- sggs:steps -->` on the line before an ordered list sets it as a procedure: numbered
+  circles joined by a line. Use it for three to nine actions done in order (a runbook, a set-up).
+  Do not use it for concepts, and never for the structure of scripture. Everywhere else — GitHub,
+  paper, the Markdown export — the list is a plain numbered list.
+
+**Gurmukhi is marked as Punjabi for you.** The build wraps every run of Gurmukhi in prose, tables
+and inline code in `lang="pa"` (`docs-site/plugins/rehype-lang-pa.mjs`), so a screen reader reads
+it as Punjabi. Write the text as it is; do not add `<span lang>` by hand.
+
+**Notes and quotations look different on purpose.** A blockquote that opens with bold text and has
+no Gurmukhi becomes a callout: a tinted box with a thick rule. A blockquote that quotes scripture
+stays a quotation: no tint, no box, a thin rule, the Gurmukhi and its Ang. Never dress a note as a
+quotation, or a quotation as a note.
 
 The full widget list is in `docs-site/plugins/widgets.schema.json`; every widget needs a fallback
 sentence within three lines.

@@ -84,7 +84,7 @@ class Mermaid(Fixture):
     def test_palette_and_init(self):
         self.assertTrue(any("not allowed" in e for e in self.errors(FM + "```mermaid\nflowchart LR\n  classDef x fill:#123456\n```\n")))
         self.assertTrue(any("init" in e for e in self.errors(FM + "```mermaid\n%%{init: {'theme':'dark'}}%%\nflowchart LR\n```\n")))
-        self.assertEqual(self.errors(FM + "```mermaid\nflowchart LR\n  accTitle: t\n  classDef x fill:#FDF6E3,color:#201A12\n```\n"), [])
+        self.assertEqual(self.errors(FM + "```mermaid\nflowchart LR\n  accTitle: t\n  accDescr: d\n  a:::x --> b\n  classDef x fill:#FDF6E3,color:#201A12\n```\n"), [])
 
 
 class Scripture(Fixture):
@@ -136,6 +136,113 @@ class SiteConfig(unittest.TestCase):
             self.assertTrue(any("trailingSlash" in str(p) for p in dc.check_site_config()))
         finally:
             real.write_text(original, encoding="utf-8")
+
+    def test_unsafe_inline_scripts_are_refused(self):
+        # inline scripts are allowed by hash (docs-site/scripts/csp.mjs); 'unsafe-inline' would undo that
+        real = dc.SITE / "vercel.json"
+        original = real.read_text(encoding="utf-8")
+        try:
+            real.write_text(original.replace("script-src 'self'", "script-src 'self' 'unsafe-inline'"), encoding="utf-8")
+            self.assertTrue(any("unsafe-inline" in str(p) for p in dc.check_site_config()))
+        finally:
+            real.write_text(original, encoding="utf-8")
+
+
+class Theme(unittest.TestCase):
+    CSS = ':root {\n  --sgs-paper: #171412;\n}\n:root[data-theme="light"] {\n  --sgs-paper: #fbf7f0;\n}\n'
+
+    def tokens(self):
+        return json.loads((dc.DOCS / "brand" / "tokens.json").read_text(encoding="utf-8"))
+
+    def test_the_site_theme_matches_the_tokens(self):
+        self.assertEqual([str(p) for p in dc.check_theme()], [])
+
+    def test_a_drifted_brand_colour_is_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            css = Path(d) / "theme.css"
+            real = (dc.SITE / "src" / "styles" / "theme.css").read_text(encoding="utf-8")
+            css.write_text(real.replace("--sgs-accent-text: #8a6100", "--sgs-accent-text: #8a6101"), encoding="utf-8")
+            msgs = [p.msg for p in dc.check_theme(css, self.tokens())]
+            self.assertEqual(len(msgs), 1, msgs)
+            self.assertIn("light theme --sgs-accent-text is #8A6101", msgs[0])
+
+    def test_a_missing_role_is_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            css = Path(d) / "theme.css"
+            css.write_text(self.CSS, encoding="utf-8")
+            msgs = [p.msg for p in dc.check_theme(css, self.tokens())]
+            self.assertTrue(any("lacks --sgs-accent" in m for m in msgs))
+            self.assertFalse(any("--sgs-paper " in m and "is #" in m for m in msgs))   # paper matches both legs
+
+
+class MermaidAccessibility(Fixture):
+    """A diagram has a title and a description, no dead classDefs, and fits the column."""
+
+    def block(self, body):
+        return FM + "```mermaid\n" + body + "\n```\n"
+
+    def test_title_and_description_are_required(self):
+        ok = "flowchart TB\n    accTitle: T\n    accDescr: D\n    a --> b"
+        self.assertEqual(self.errors(self.block(ok)), [])
+        self.assertTrue(any("no `accDescr:`" in e for e in self.errors(self.block("flowchart TB\n    accTitle: T\n    a --> b"))))
+        self.assertTrue(any("no `accTitle:`" in e for e in self.errors(self.block("flowchart TB\n    accDescr: D\n    a --> b"))))
+
+    def test_an_unused_classdef_is_refused(self):
+        body = "flowchart TB\n    accTitle: T\n    accDescr: D\n    a --> b\n    classDef gate fill:#B33528,color:#FFFFFF,stroke:#B33528;"
+        self.assertTrue(any("classDef `gate` is never used" in e for e in self.errors(self.block(body))))
+        used = body + "\n    class a gate;"
+        self.assertEqual(self.errors(self.block(used)), [])
+
+    def test_a_wide_left_to_right_chart_is_warned(self):
+        body = "flowchart LR\n    accTitle: T\n    accDescr: D\n" + "\n".join(f"    n{i}[N{i}] --> n{i + 1}[N{i + 1}]" for i in range(8))
+        msgs = [p.msg for p in dc.check_page(self.page(self.block(body)), self.tokens, self.widgets, None)]
+        self.assertTrue(any("draw it top to bottom" in m for m in msgs), msgs)
+
+
+class ContractCounts(Fixture):
+    """The golden contract's size, wherever a page or poster cites it, is today's."""
+
+    def test_the_count_is_the_http_suites_in_meta(self):
+        import json
+        meta = json.loads((ROOT / "contract" / "_meta.json").read_text(encoding="utf-8"))["files"]
+        suites = ("verify", "search", "reader", "timing", "banis", "analytics")
+        self.assertEqual(dc.contract_http_records(), sum(meta[f"golden_{s}.ndjson"] for s in suites))
+
+    def test_a_stale_count_is_refused_and_a_dated_one_is_not(self):
+        n = dc.contract_http_records()
+        good = self.page(f"The whole golden contract ({n} records) replays through the gateway.\n", "good.md")
+        stale = self.page(f"The whole golden contract ({n - 8} records) replays through the gateway.\n", "stale.md")
+        dated = self.page(f"The trial passed the whole golden contract ({n - 8} records at the time).\n", "dated.md")
+        other = self.page("The table holds 300 records of raag timing claims.\n", "other.md")
+        msgs = [p.msg for p in dc.check_contract_counts([good, stale, dated, other])]
+        self.assertEqual(len(msgs), 1, msgs)
+        self.assertIn(f"cites {n - 8} golden-contract records", msgs[0])
+
+
+class PosterLegend(unittest.TestCase):
+    def test_a_poster_without_its_legend_is_refused(self):
+        svg = dc.DOCS / "diagrams" / "posters" / "01-system-landscape.svg"
+        original = svg.read_text(encoding="utf-8")
+        try:
+            svg.write_text(original.replace('<g class="pk-legend">', '<g>'), encoding="utf-8")
+            self.assertTrue(any("legend" in p.msg and p.file == svg for p in dc.check_posters(dc.load_tokens_hex())))
+        finally:
+            svg.write_text(original, encoding="utf-8")
+
+    def test_a_kit2_poster_is_held_to_kit2_sizes(self):
+        svg = dc.DOCS / "diagrams" / "posters" / "03-anatomy-of-a-line-record.svg"
+        original = svg.read_text(encoding="utf-8")
+        self.assertIn('data-kit="2"', original)
+        try:
+            # 18-px text would show at ~9 px
+            svg.write_text(original.replace('font-size="25"', 'font-size="18"', 1), encoding="utf-8")
+            msgs = [p.msg for p in dc.check_posters(dc.load_tokens_hex()) if p.file == svg]
+            self.assertTrue(any("at least 25px" in m for m in msgs), msgs)
+            svg.write_text(original.replace('viewBox="0 0 1200 ', 'viewBox="0 0 1600 ', 1), encoding="utf-8")
+            msgs = [p.msg for p in dc.check_posters(dc.load_tokens_hex()) if p.file == svg]
+            self.assertTrue(any('"0 0 1200 H"' in m for m in msgs), msgs)
+        finally:
+            svg.write_text(original, encoding="utf-8")
 
     def test_repo_docs_pass(self):
         errors = [str(p) for p in dc.run(ROOT / "db" / "sggs.sqlite") if p.level == "error"]
@@ -210,3 +317,47 @@ class Terms(Fixture):
     def test_known_terms_pass_and_unknown_fail(self):
         self.assertEqual(self.errors(FM + "An [[Ang]] and a [[Salok|salok]] are fine; `[[not-a-term]]` in code is ignored.\n"), [])
         self.assertTrue(any("not a glossary term" in e for e in self.errors(FM + "A [[Frobnicator]] here.\n")))
+
+
+class Freshness(unittest.TestCase):
+    def test_cited_files_are_code_not_docs(self):
+        page = dc.DOCS / "architecture" / "request-lifecycle.md"
+        text = ('<!-- sggs:code file="webapp/serve.py" symbol="api" -->\n'
+                '<!-- sggs:code file="pipeline/build_db.py" repo="sggs-data" -->\n'
+                'See [the gateway](../../gateway/routes.json), [a page](overview.md), [gone](../../nope.py).\n'
+                '![Poster 08 — x](../diagrams/posters/08-request-lifecycle.svg)\n')
+        files = dc.cited_files(page, text)
+        self.assertIn("webapp/serve.py", files)
+        self.assertIn("gateway/routes.json", files)
+        self.assertNotIn("pipeline/build_db.py", files)          # a sibling's file: not this repository's history
+        self.assertNotIn("nope.py", files)                       # missing files are dropped
+        self.assertFalse(any(f.startswith("docs/") for f in files))
+        self.assertTrue(len(files) > 2)                          # the poster's source-of-truth files come in
+
+    def test_the_report_orders_moved_pages_first_and_is_empty_when_fresh(self):
+        rows = [{"page": "docs/a.md", "commit": "aaaaaaa", "date": "2026-09-25", "behind": 3, "cited": ["x.py"], "changed": []},
+                {"page": "docs/b.md", "commit": "bbbbbbb", "date": "2026-09-25", "behind": 9, "cited": ["y.py"], "changed": ["y.py"]},
+                {"page": "docs/c.md", "commit": "ccccccc", "date": "2026-09-01", "behind": 400, "cited": [], "changed": []},
+                {"page": "docs/d.md", "commit": "ddddddd", "date": "2026-09-01", "behind": 900, "cited": ["z.py"], "changed": []},
+                {"page": "docs/e.md", "commit": "eeeeeee", "date": "2026-09-01", "behind": 80, "cited": [], "changed": []}]
+        md = dc.freshness_markdown(rows)
+        self.assertLess(md.index("docs/b.md"), md.index("docs/c.md"))
+        self.assertNotIn("docs/a.md", md)
+        self.assertNotIn("docs/d.md", md)      # its cited code did not change: fresh however old
+        self.assertNotIn("docs/e.md", md)      # cites no code, but not old enough to nag
+        self.assertIn("| `docs/b.md` | `bbbbbbb` 2026-09-25 | 9 | `y.py` |", md)
+        self.assertEqual(dc.freshness_markdown([rows[0]]), "")
+
+    def test_the_stamp_warning_follows_the_cited_code(self):
+        page = dc.DOCS / "architecture" / "request-lifecycle.md"
+        text = '<!-- sggs:code file="webapp/serve.py" symbol="api" -->\n'
+        first = dc.subprocess.run(["git", "rev-list", "--max-parents=0", "HEAD"], cwd=dc.ROOT, capture_output=True, text=True).stdout.split()[0]
+        head = dc.subprocess.run(["git", "rev-parse", "HEAD"], cwd=dc.ROOT, capture_output=True, text=True).stdout.strip()
+        self.assertTrue(any("cites changed" in p.msg for p in dc.check_verified_commit(page, first, text)))
+        self.assertEqual(dc.check_verified_commit(page, head, text), [])
+        self.assertTrue(any("not in this repository" in p.msg for p in dc.check_verified_commit(page, "0" * 40, text)))
+
+    def test_the_repository_report_runs(self):
+        rows = dc.freshness()
+        self.assertTrue(any(r["page"] == "docs/process/ci-gates.md" for r in rows))
+        self.assertTrue(all(isinstance(r["behind"], int) for r in rows))

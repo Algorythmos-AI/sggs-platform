@@ -1,0 +1,91 @@
+/* ======================= shell: top bar / places / tab bar / footer =======================
+   The chrome is the cloth: a pale wash of the theme by day (silk), a deep tone by night (velvet),
+   with a faint Phulkari motif and a two-line hem. It carries the mark, the five places and the
+   saroop and theme buttons; a place with several pages lists them in a second row. On a phone
+   the places move to a tab bar at the bottom, above the home indicator.
+   --kb-bottom is what the tab bar takes from the bottom of the screen: anything fixed there
+   (toast, compare tray) sits above it. */
+:root { --kb-tab:0px; --kb-bottom:calc(var(--kb-tab) + env(safe-area-inset-bottom, 0px)); }
+html { scroll-padding-top:calc(var(--nav-h) + 12px); scroll-padding-bottom:calc(var(--kb-bottom) + 12px); }
+body { padding-bottom:var(--kb-bottom); }
+
+.kb-chrome {
+  position:sticky; top:0; z-index:30; isolation:isolate; color:var(--cloth-ink); background:var(--cloth);
+  padding:env(safe-area-inset-top, 0px) 0 4px;              /* the last 4px are the hem */
+}
+.kb-chrome::before {                      /* a faint Phulkari motif woven into the cloth, never behind scripture */
+  content:''; position:absolute; inset:0; z-index:-1; background:var(--co); opacity:var(--motif); pointer-events:none;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px;
+}
+.kb-chrome::after {                       /* the hem: a companion thread over a line of the accent */
+  content:''; position:absolute; left:0; right:0; bottom:0; height:4px;
+  background:linear-gradient(var(--co) 0 2px, transparent 2px 3px, var(--accent-fill) 3px 4px);
+}
+.kb-top { display:flex; align-items:center; gap:6px; min-height:52px; max-width:1180px; margin:0 auto;
+  padding:0 max(8px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px)); }
+.kb-brand { flex:none; display:inline-flex; align-items:center; gap:9px; min-height:44px; color:inherit; text-decoration:none; }
+.kb-mark { font-size:27px; line-height:1; }                 /* the mark: flat, one colour */
+.kb-word { font-weight:650; font-size:15px; letter-spacing:-.01em; }
+.kb-here { display:none; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:650; font-size:16px; }
+.kb-places { display:flex; align-items:center; gap:2px; margin-left:14px; }
+.kb-places a, .kb-places button {
+  font:inherit; font-size:14px; font-weight:550; min-height:40px; padding:0 14px; display:inline-flex; align-items:center; gap:7px;
+  border:0; border-radius:999px; background:transparent; color:var(--cloth-soft); text-decoration:none; cursor:pointer;
+  transition:background .15s, color .15s;
+}
+.kb-places a:hover, .kb-places button:hover { color:var(--cloth-ink); background:color-mix(in srgb, var(--cloth-ink) 7%, transparent); }
+.kb-places a.on { color:var(--cloth-ink); font-weight:650; background:color-mix(in srgb, var(--cloth-ink) 11%, transparent); }
+.kb-grow { flex:1 1 auto; }
+#randomBtn { flex:none; font:inherit; font-size:13.5px; font-weight:600; min-height:40px; padding:0 15px; border-radius:999px; cursor:pointer;
+  color:var(--cloth-ink); background:transparent; border:1px solid color-mix(in srgb, var(--cloth-ink) 30%, transparent); transition:background .15s; }
+#randomBtn:hover { background:color-mix(in srgb, var(--cloth-ink) 8%, transparent); }
+.kb-ibtn { flex:none; width:44px; height:44px; display:inline-grid; place-items:center; font:inherit; font-size:18px; line-height:1; cursor:pointer;
+  color:var(--cloth-ink); background:transparent; border:1px solid transparent; border-radius:13px; transition:background .15s, transform .12s; }
+.kb-ibtn:hover { background:color-mix(in srgb, var(--cloth-ink) 9%, transparent); }
+.kb-ibtn:active { transform:scale(.94); }
+.kb-aa { font-family:var(--font-serif); font-size:17px; font-weight:600; letter-spacing:-.01em; }   /* opens the display sheet (display.css) */
+.kb-aa[aria-expanded="true"] { background:color-mix(in srgb, var(--cloth-ink) 12%, transparent); border-color:color-mix(in srgb, var(--cloth-ink) 38%, transparent); }
+.kb-count { min-width:18px; height:18px; padding:0 5px; border-radius:999px; font-size:11px; font-weight:700; line-height:18px; text-align:center;
+  background:var(--accent-fill); color:var(--on-accent); box-shadow:var(--fill-edge); }
+
+/* the pages of a place with several: one row, scrolls sideways inside itself on a narrow screen */
+.kb-sub { display:flex; gap:2px; max-width:1180px; margin:0 auto; overflow-x:auto; scrollbar-width:none;
+  padding:0 max(8px, env(safe-area-inset-right, 0px)) 4px max(8px, env(safe-area-inset-left, 0px)); }
+.kb-sub::-webkit-scrollbar { display:none; }
+.kb-sub a { flex:none; display:inline-flex; align-items:center; min-height:38px; padding:0 13px; font-size:14px; font-weight:550;
+  color:var(--cloth-soft); text-decoration:none; white-space:nowrap; border-radius:10px 10px 0 0; }
+.kb-sub a:hover { color:var(--cloth-ink); }
+.kb-sub a.on { color:var(--cloth-ink); font-weight:650; box-shadow:inset 0 -3px 0 var(--accent-ui); }
+
+main { max-width:940px; margin:0 auto; padding:20px 18px 40px; }
+.page-title { font-family:var(--font-serif); font-size:26px; font-weight:600; letter-spacing:-.01em; line-height:1.2; margin:2px 2px 16px; }
+
+.kb-foot { max-width:940px; margin:0 auto; padding:18px 18px 30px; text-align:center; font-size:11.5px; line-height:1.75; color:var(--soft);
+  border-top:1px solid var(--line); }
+.kb-foot a { color:var(--soft); text-decoration:underline; text-underline-offset:2px; }
+.kb-foot a:hover { color:var(--ink); }
+
+.kb-tabs { display:none; }
+@media (max-width:840px) {
+  :root { --kb-tab:59px; }                                   /* 50px targets + 4px above and below + the 1px rule */
+  .kb-word, .kb-places, #randomBtn { display:none; }
+  .kb-here { display:block; }
+  /* the bar already names the page; its heading stays for assistive technology */
+  .page-title { position:absolute; width:1px; height:1px; margin:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+  .kb-tabs {
+    display:flex; position:fixed; left:0; right:0; bottom:0; z-index:40; background:var(--card); border-top:1px solid var(--line);
+    padding:4px max(4px, env(safe-area-inset-right, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
+  }
+  .kb-tabs a, .kb-tabs button {
+    position:relative; flex:1 1 0; min-width:0; min-height:50px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    font:inherit; font-size:11px; font-weight:550; color:var(--soft); background:none; border:0; border-radius:12px; text-decoration:none; cursor:pointer;
+  }
+  .kb-tabs svg { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+  .kb-tabs a.on { color:var(--accent); font-weight:650; }
+  .kb-tabs .kb-count { position:absolute; top:3px; left:calc(50% + 5px); }
+}
+
+.skip-link { position:absolute; left:-9999px; top:auto; z-index:100; background:var(--accent-fill); color:var(--accent-ink); box-shadow:var(--fill-edge);
+  padding:8px 16px; border-radius:0 0 12px 0; font-size:14px; font-weight:600; }
+.skip-link:focus { left:0; top:0; }

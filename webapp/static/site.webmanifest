@@ -3,7 +3,7 @@
   "short_name": "Gurbani Soul",
   "description": "A quiet, exact companion to Sri Guru Granth Sahib Ji — verbatim, cited by Ang, fully offline.",
   "id": "/",
-  "start_url": "/",
+  "start_url": "/library",
   "scope": "/",
   "display": "standalone",
   "theme_color": "#171412",

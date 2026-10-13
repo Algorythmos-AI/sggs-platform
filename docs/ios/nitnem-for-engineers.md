@@ -9,7 +9,7 @@ verified:
 ---
 # Nitnem for engineers
 
-Nitnem — the daily banis — is where the app most needs the prime directive spelled out in data
+[[Nitnem]] — the daily banis — is where the app most needs the prime directive spelled out in data
 structures. The corpus has no notion of a bani, several banis are not in Sri Guru Granth Sahib Ji
 at all, and one differs by tradition. [ADR-0006](../adr/0006-bani-registry-over-verbatim-corpus.md)
 answers all three without ever copying or blending text.
@@ -17,14 +17,15 @@ answers all three without ever copying or blending text.
 ## The registry
 
 ```mermaid
-flowchart LR
+flowchart TB
     accTitle: The bani registry points into the verbatim corpus; non-SGGS text is a separate labelled layer
-    banis["banis<br/>key · variant · titleEn"] --> bl["bani_lines<br/>ordered pointers"]
-    bl -->|lines.id| lines[("lines<br/>verbatim, cited by Ang")]
-    bl -.->|no Ang · no English · no FTS · no bookmark| extra[("extra_lines<br/>Sri Dasam Granth · Ardaas<br/>labelled by source")]
-    seed["bani_seed.json · bani_overrides.json<br/>membership from the ShabadOS database"] --> build["build_banis.py"]
-    build --> banis
+    accDescr: build_banis.py reads the seed and the overrides (membership from the ShabadOS database) and writes the banis table and its ordered bani_lines pointers, checked by guard_banis.py and the golden banis vectors. A pointer names a verbatim line of the corpus by id, cited by Ang; non-SGGS text lives in extra_lines, labelled by source, with no Ang, no English, no search and no bookmark.
+    seed["bani_seed.json · bani_overrides.json"] --> build["build_banis.py"]
     build --> guard["guard_banis.py · golden_banis.ndjson"]
+    build --> banis["banis: key · variant · titleEn"]
+    banis --> bl["bani_lines: ordered pointers"]
+    bl -->|lines.id| lines[("lines: verbatim, cited by Ang")]
+    bl -.->|no Ang · no English ·<br/>no search · no bookmark| extra[("extra_lines: Sri Dasam Granth ·<br/>Ardaas, labelled by source")]
 ```
 
 - **A bani is an ordered list of pointers.** For every Sri Guru Granth Sahib Ji line the pointer is
@@ -43,7 +44,7 @@ flowchart LR
   on every build and by `guard_banis.py` in CI, so a corpus rebuild that shifts ids fails loudly.
 - **Proof.** The registry is additive (older databases report `banis_available: false` and the
   apps hide the feature); `contract/golden_banis.ndjson` pins every bani's line sequence and a
-  SHA-256 of its Gurmukhi, replayed by the app's `BaniParityTests`.
+  SHA-256 of its [[Gurmukhi]], replayed by the app's `BaniParityTests`.
 
 ## Numbering without guessing
 
@@ -80,6 +81,8 @@ App Store only after a scholar's review is attested in `ios/Resources/NITNEM-REV
 (`REVIEWED: true`) and the in-app "under scholarly review" label is switched off in the same
 commit. `check_release_license.sh` treats a missing attestation as a warning for a TestFlight
 build and a hard failure for `CHANNEL=appstore`; `make appstore-preflight` refuses to submit a
-build that was not archived on that channel. The full contract — reading steps, frozen XCUITest
+build that was not archived on that channel. The review has been done: all 1,191 non-SGGS lines
+were compared with the SGPC Nitnem Gutka by a Granthi and attested on 2026-09-21, with no
+correction required. The full contract — reading steps, frozen XCUITest
 identifiers, deep links — is the pinned
 [Nitnem spec](https://github.com/Algorythmos-AI/gurbani-soul-ios/blob/main/docs/nitnem/spec.md).

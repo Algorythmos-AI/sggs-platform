@@ -70,10 +70,12 @@ test.describe('data & pipeline', () => {
     const banner = page.locator('aside.canonical');
     await expect(banner).toContainText('Pinned copy');
     await expect(banner.locator('a').first()).toHaveAttribute('href', /github\.com\/Algorythmos-AI\/sggs-data\/blob\/[0-9a-f]{40}\/docs\/architecture\/database-schema\.md/);
-    await expect(page.locator('a.edit-link').first()).toHaveAttribute('href', /sggs-data\/edit\/[0-9a-f]{40}\//);
-    // the landing page's GitHub link to this document now stays on the wiki
-    await page.goto('/');
-    await expect(page.locator('a[href="/data/architecture/database-schema/"]').first()).toBeVisible();
+    // GitHub edits only on a branch: the edit link goes to the lock's ref, a second link to the pinned commit
+    await expect(page.locator('a.edit-link', { hasText: 'Edit this page' })).toHaveAttribute('href', /sggs-data\/edit\/main\/docs\//);
+    await expect(page.locator('a.edit-link', { hasText: 'View the version this wiki pins' })).toHaveAttribute('href', /sggs-data\/blob\/[0-9a-f]{40}\/docs\//);
+    // the Data section's GitHub link to this document now stays on the wiki
+    await page.goto('/data/');
+    await expect(page.locator('main a[href="/data/architecture/database-schema/"]').first()).toBeVisible();   // in the page, not the sidebar
   });
 
   for (const path of ['/data/', '/data/line-record/', '/data/pipeline/', '/data/dataset-pin/', '/data/editorial-ledger/', '/data/architecture/scripture-integrity/', '/engineering/known-issues/']) {

@@ -8,7 +8,7 @@ sidebar:
 
 Wherever a page writes `[[Term]]`, the site shows the definition below in a hover-card and links
 here; the build fails on a term that is not in this table. Scripture terms are explained for
-engineers and students new to the tradition; where the scholar review (gate G3) is still pending
+engineers and students new to the tradition; where the scholar review of those pages is still pending
 the page that uses the term says so. Cite the scripture itself, never this table.
 
 ## The scripture
@@ -116,4 +116,5 @@ the page that uses the term says so. Cite the scripture itself, never this table
 | **Poster** | One of the wiki's large step-through diagrams, generated from a declarative spec and pinned to the code it describes. |
 | **Walkthrough** | The site's step-by-step reader for a poster: Next, Prev, Play, a caption and a link per step, a full-size lightbox. |
 | **Verified stamp** | A page's `verified: {commit, date}`: the commit it was last read against; the docs gate requires it on process, engineering and architecture pages. |
-| **Gate G3** | The scholar review still open before App Store submission: the Nitnem non-SGGS text and the Scripture 101 pages await it. |
+| **Scholar review** | A Granthi or Gurbani scholar reads what engineers cannot judge, and signs it off: the editorial ledger's corrections (approved 2026-09-24), the Nitnem non-SGGS text (attested 2026-09-21), the Scripture 101 explanation pages (pending; `make review-pack` prints them). Engineers never decide a question of the text. |
+| **Brand gates (G1–G4)** | The brand book's four sign-offs for the app (§12): G1 visual (the product owner), G2 contrast (the contrast script), G3 sensitivity (a Granthi or scholar, on the ੴ treatment, the icon and the saroop), G4 legal. G3 and G4 closed on 2026-09-26 for the first App Store submission. |

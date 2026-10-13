@@ -4,8 +4,8 @@ description: "How the stdlib monolith is factored into bounded contexts, and the
 sidebar:
   order: 3
 verified:
-  commit: f25ab970
-  date: "2026-09-25"
+  commit: a6615276
+  date: "2026-09-26"
 ---
 # Microservices Roadmap (monolith → modular → services)
 
@@ -20,12 +20,7 @@ Split the single dispatch ladder into modules behind an app-context object:
 `verify.py`, `static.py`, `http.py` (router). `serve.py` becomes a thin entrypoint.
 Extraction order by coupling (cleanest first):
 
-```mermaid
-flowchart LR
-    accTitle: Order of module extraction
-    accDescr: The order in which bounded contexts are extracted from the monolith on the road to services.
-    verify[Verify] --> timing[Timing] --> analytics[Analytics] --> search[Search] --> reader[Reader]
-```
+verify, then timing (today's knowledge context), analytics (today's insights), search, and reader last.
 
 **Progress.** 2026-09-24 — `api()` is a route table (`serve.ROUTES`): 26 handlers, each tagged with
 its bounded context (reader, search, verify, insights, knowledge). Behaviour proven identical
@@ -57,7 +52,7 @@ and after each move.
 
 `tools/slice_db.py --modules <ctx> --out build/slices/<ctx>.sqlite` (or `make slices`) cuts a
 service's database from the pinned one: the context's declared tables plus their closure (foreign-key
-targets, FTS5 shadow tables and external content tables), VACUUMed, every kept table proven equal in
+targets, [[FTS5]] shadow tables and external content tables), VACUUMed, every kept table proven equal in
 content to the full database and every kept FTS index passing `integrity-check`, installed
 atomically. Each slice was then served on its own (`SGGS_MODULES=<ctx> SGGS_DB=<slice>`):
 
@@ -100,7 +95,7 @@ The contexts first ran on staging as five free Render services. They now run as 
 the web's own Vercel project — one per context plus `all` — generated at deploy time by
 `tools/build_api_functions.py` and routed internally, so production can move with no new hosting
 (the web is already on Vercel Pro; functions are billed by use from the plan's credit). The trial on a
-separate Vercel project passed the whole golden contract (266 records) on Vercel's Python 3.12 /
+separate Vercel project passed the whole golden contract (266 records at the time) on Vercel's Python 3.12 /
 SQLite 3.40.0, with every function ready at its commit and holding exactly its context; it also
 showed why the functions belong in the web project (one edge and one firewall instead of two, and no
 framework-less static output that would publish the databases).
@@ -113,7 +108,9 @@ route is tagged with its context, so a prefix can only go to the service that se
 fails if `vercel.json` drifts. Staging routes contexts one at a time — first `knowledge`
 (`/api/timing/*`, `/api/forms`, and their `/api/v1` twins) — and the `deploy-staging` verify job
 proves each routed context answers through the real gateway with its own `X-Service`. Production
-still sends everything to the single API.
+(v1.3.10, and 1.4.0) still sends everything to `all`; the change that routes all five contexts for
+production is held back (owner decision 2026-10-11), and they go live together in a later release, after the app is on the App Store
+([services-production](../process/runbooks/services-production.md), step 3).
 
 **`dataset_stats` is not needed.** The plan proposed a precomputed table so the reader slice could
 answer `/api/meta`'s cross-context counts. Measured on staging, the reader service's `/api/meta` is

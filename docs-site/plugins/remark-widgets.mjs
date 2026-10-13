@@ -1,9 +1,14 @@
 // `<!-- sggs:<name> key="value" -->` -> `<sggs-<name> key="value"></sggs-<name>>` (src/widgets/).
 // The comment form keeps the Markdown clean on GitHub; unknown widgets or attributes fail the build.
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { visit } from 'unist-util-visit';
+import { toString } from 'mdast-util-to-string';
+import { SITE_DIR } from './paths.mjs';
 
-const SCHEMA = JSON.parse(readFileSync(new URL('./widgets.schema.json', import.meta.url), 'utf8')).widgets;
+// found from the site directory, not import.meta.url: the Markdown routes (src/pages/md/) bundle
+// this module into the build output, where a path beside it would not exist (see paths.mjs)
+const SCHEMA = JSON.parse(readFileSync(path.join(SITE_DIR, 'plugins', 'widgets.schema.json'), 'utf8')).widgets;
 const MARKER = /^<!--\s*sggs:([a-z][a-z0-9-]*)((?:\s+[a-z][a-z0-9-]*="[^"<>]*")*)\s*-->$/;
 const ATTR = /([a-z][a-z0-9-]*)="([^"<>]*)"/g;
 
@@ -29,12 +34,21 @@ export function widgetHtml({ name, attrs }, where = 'page') {
   return `<sggs-${name}${a}></sggs-${name}>`;
 }
 
+// The paragraph after a widget that starts "On the rendered wiki…" is written for GitHub readers
+// (where the comment is invisible). On the site it is marked .sggs-fallback and hidden
+// (src/styles/widgets.css); the widget itself says so when the API is unreachable.
+export const FALLBACK = /^On the rendered wiki\b/;
+
 export function remarkWidgets() {
   return (tree, file) => {
-    visit(tree, 'html', (node) => {
+    visit(tree, 'html', (node, index, parent) => {
       const w = parseWidget(node.value);
       if (!w) return;
       node.value = widgetHtml(w, file.path ?? 'page');
+      const next = parent?.children?.[index + 1];
+      if (next?.type === 'paragraph' && FALLBACK.test(toString(next).trim())) {
+        next.data = { ...(next.data ?? {}), hProperties: { ...(next.data?.hProperties ?? {}), className: ['sggs-fallback'] } };
+      }
     });
   };
 }

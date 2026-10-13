@@ -14,18 +14,18 @@ every push to `main` (a merged release PR) or manually via *Run workflow*. Nothi
 reaches users unless every required check on that exact commit is green.
 
 ```mermaid
-flowchart LR
+flowchart TB
     accTitle: The deploy-production job chain
-    accDescr: Gates, preflight and approval, then the API deploy and its verification, the unaliased web deploy with its API functions and their checks, promotion with the public smoke and rollback edge, and the release tag.
-  G[gates: required checks on SHA] --> A[approve]
-  P[preflight: secrets present] --> A
-  A --> DA[deploy-api: Render hook ref=SHA]
-  DA --> VA[verify-api: commit==SHA, health, superset check]
-  VA --> DW[deploy-web: vercel build + deploy --skip-domain]
-  DW --> VW[verify-web: API functions, golden contract, @smoke on unaliased URL]
-  VW --> PR[promote: vercel promote + @smoke on public domain]
-  PR --> R[release: tag vX.Y.Z + GitHub Release]
-  PR -. smoke fails .-> RB[vercel rollback to previous + incident issue]
+    accDescr: Gates and preflight, then the optional approval; the Render API deploy and its verification by commit; the unaliased web deploy with its API functions, the golden contract and the smoke; promotion with the public smoke, or a rollback to the deployment that served the domain; then the release tag.
+    G[gates: every required check on the SHA] --> A[approve, optional]
+    P[preflight: every secret present] --> A
+    A --> DA[deploy-api: Render hook, ref = SHA]
+    DA --> VA[verify-api: commit, health, superset]
+    VA --> DW[deploy-web: vercel build, unaliased]
+    DW --> VW[verify-web: functions, contract, smoke]
+    VW --> PR[promote, then smoke the domain]
+    PR --> R[release: tag vX.Y.Z]
+    PR -. promote or smoke fails .-> RB[vercel rollback + an incident issue]
 ```
 
 ## What each gate proves
@@ -37,7 +37,7 @@ flowchart LR
 | deploy-api | Render runs **this commit** (`/api/health.commit == SHA`) and is healthy — production's rollback target while `/api` is on the functions | web untouched; old API keeps serving until Render switches |
 | verify-api | 100 sampled compositions serve exact lines, headings present, gaps 404 | incident issue; **roll back Render** (rollback.md) |
 | deploy-web / verify-web | **before** it is live: every API function is ready at this commit with exactly its contexts and the API's files are not downloadable (`verify_functions.py --env production`), the whole golden contract holds through its `/api` (`contract_http.py`), and the heading smoke passes | not promoted — users unaffected |
-| promote | public domain serves this commit and passes smoke | automatic `vercel rollback` to the recorded previous deployment + incident issue |
+| promote | public domain serves this commit and passes smoke | automatic `vercel rollback` to the deployment that served `gurbanisoul.com` when deploy-web started (rollback.md) + incident issue |
 | release | tag + GitHub Release are created only after a verified deploy | re-run the job |
 
 ## One-time setup (owner)
@@ -139,6 +139,13 @@ is therefore **not** a release — the version stays the one the App Store build
 Rehearse on staging first: the same variable on **Preview** + `gh workflow run deploy-staging --ref
 integration`, then remove it and re-run. To take the site back to "Coming soon", delete the
 variable and redeploy the same way.
+
+If a release is about to ship anyway, step 4 can be that release's own deploy: set the variable
+(steps 2–3 unchanged), let the release run, then do step 5. A green pipeline does not prove the
+switch — the `@smoke` spec accepts either state unless `SGGS_EXPECT_APP_STORE` is set — so step 5
+is never skipped. When watching a same-commit redeploy, follow the new run by its id
+(`gh run list --workflow deploy-production.yml --event workflow_dispatch --limit 1`):
+`scripts/release/watch_deploy.sh` selects by commit and can report an older run.
 
 ## Concurrency
 Runs share the `production` group without cancellation: a run in progress always finishes.

@@ -1,0 +1,13 @@
+---
+// Starlight's sidebar, with the five section links (plugins/tabs.mjs) at the top of the phone's
+// menu drawer — where the header's tab row is not shown. On a wide screen this adds nothing.
+import Default from '@astrojs/starlight/components/Sidebar.astro';
+import { TABS, litTab } from '../../plugins/tabs.mjs';
+
+const lit = litTab(Astro.locals.starlightRoute.sidebar);
+---
+
+<ul class="drawer-tabs" aria-label="Sections" data-pagefind-ignore="">
+  {TABS.map((t) => <li><a href={`/${t.slug}/`} aria-current={t === lit ? 'true' : undefined}>{t.label}</a></li>)}
+</ul>
+<Default><slot /></Default>

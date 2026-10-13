@@ -5,21 +5,26 @@ import Base from '../layouts/Base.astro';
   <section id="v-nitnem">
     <div id="nitnemList" class="nitnem-list"></div>
     <div id="nitnemReader" class="nitnem-reader" hidden>
+      <!-- the same bar as the Reader's: the way back, the version where there are two, reading options -->
       <div class="toolbar">
-        <div class="nav">
-          <button id="nitnemBack" type="button" aria-label="Back to the bani list">‹ Banis</button>
-          <span id="nitnemVariants" class="of"></span>
-        </div>
-        <div class="right">
-          <div class="tgl" id="tglT" role="switch" tabindex="0" aria-checked="true" aria-label="show transliteration">
-            <span class="sw"></span> transliteration</div>
-          <button id="fontMinus" type="button" title="smaller text" aria-label="smaller text">ਅ−</button>
-          <button id="fontPlus" type="button" title="larger text" aria-label="larger text">ਅ+</button>
-        </div>
+        <button id="nitnemBack" class="tb-btn" type="button" aria-label="Back to the bani list">‹ Banis</button>
+        <span id="nitnemVariants" class="tb-variants"></span>
+        <button id="nitnemOptsBtn" class="tb-btn tb-aa" type="button" aria-haspopup="dialog" aria-expanded="false"
+                aria-controls="nitnemOpts" aria-label="Reading options">ਅA</button>
       </div>
       <div id="baniHead" class="raagbanner"></div>
       <div id="baniOut"></div>
     </div>
   </section>
+  <div id="nitnemOptsScrim" class="ro-scrim" aria-hidden="true"></div>
+  <div id="nitnemOpts" class="ro" role="dialog" aria-modal="true" aria-label="Reading options" inert>
+    <div class="ro-size">
+      <button id="fontMinus" class="ro-step" type="button" aria-label="Smaller text">ਅ−</button>
+      <span class="ro-sample gm" lang="pa" aria-hidden="true">ੳ ਅ ੲ</span>
+      <button id="fontPlus" class="ro-step" type="button" aria-label="Larger text">ਅ+</button>
+    </div>
+    <div class="tgl" id="tglT" role="switch" tabindex="0" aria-checked="true" aria-label="show transliteration">
+      <span>Transliteration</span><span class="sw"></span></div>
+  </div>
   <script>import '../scripts/nitnem';</script>
 </Base>

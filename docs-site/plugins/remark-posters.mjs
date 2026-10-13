@@ -8,6 +8,12 @@ import { REPO_ROOT, repoRelOf } from './paths.mjs';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/** The walkthrough's steps as a plain numbered list: shown only on paper (src/styles/print.css), where nothing can be stepped through. */
+export function printSteps(steps) {
+  if (!steps.length) return '';
+  return `<ol class="poster__print-steps print-only" data-pagefind-ignore>${steps.map((s) => `<li><strong>${esc(s.title)}.</strong> ${esc(s.caption)}</li>`).join('')}</ol>`;
+}
+
 export function posterHtml(svgPath, alt) {
   const base = path.basename(svgPath, '.svg');
   let svg = readFileSync(svgPath, 'utf8');
@@ -20,7 +26,8 @@ export function posterHtml(svgPath, alt) {
   return `<figure class="poster" data-poster="${base}"><sggs-walkthrough data-poster="${base}" data-steps="${steps.length}">` +
     `<div class="poster__canvas">${svg}</div>` +
     `<script type="application/json" class="poster__steps">${JSON.stringify(steps).replace(/</g, '\\u003c')}</script>` +
-    `</sggs-walkthrough><figcaption>${esc(alt)} · <a href="/posters/${base}.svg" target="_blank" rel="noopener">open full size</a></figcaption></figure>`;
+    `</sggs-walkthrough><figcaption>${esc(alt)}<span class="poster__open"> · <a href="/posters/${base}.svg" target="_blank" rel="noopener">open full size</a></span></figcaption></figure>` +
+    printSteps(steps);
 }
 
 export function remarkPosters() {

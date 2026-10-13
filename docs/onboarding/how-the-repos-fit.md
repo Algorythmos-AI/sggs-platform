@@ -11,32 +11,7 @@ name an exact commit and the checksum of the artifact taken from it
 ([ADR-0007](../adr/0007-three-repositories.md), [ADR-0008](../adr/0008-dataset-by-pin.md)). Nothing
 is copied by hand between them, so nothing can drift.
 
-```mermaid
-flowchart LR
-    accTitle: Three repositories and the pins that join them
-    accDescr: sggs-data builds the corpus and database from the source PDF and publishes them; sggs-platform pins that database by commit and sha256 and serves the API and website; gurbani-soul-ios pins the platform's golden contract and builds its own database from the same pin. This wiki also pins the sibling repositories' docs.
-    subgraph data["Algorythmos-AI/sggs-data — the scripture"]
-      pdf[("source Bir PDF")] --> pipe["pipeline: reconcile · golden gates · ledger"]
-      pipe --> db[("db/sggs.sqlite<br/>published by commit + sha256")]
-    end
-    subgraph platform["Algorythmos-AI/sggs-platform — API + web (this repository)"]
-      lock["dataset.lock.json"] -.pins.-> db
-      lock --> api["webapp/serve.py"]
-      api --> web["frontend/ (gurbanisoul.com)"]
-      api --> contract["contract/ golden vectors + OpenAPI"]
-      api --> wiki["docs/ + docs-site/ (this wiki)"]
-    end
-    subgraph ios["Algorythmos-AI/gurbani-soul-ios — the app"]
-      vendor["vendor.lock.json"] -.pins.-> contract
-      dlock["dataset.lock.json"] -.pins.-> db
-      vendor --> app["SwiftUI app + widgets"]
-      dlock --> app
-    end
-    classDef repo fill:#FDF6E3,stroke:#A87900,color:#201A12;
-    classDef pin fill:#F2F2F7,stroke:#B69A81,color:#201A12;
-    class pipe,api,web,contract,wiki,app repo;
-    class lock,vendor,dlock pin;
-```
+![Poster 02 — three repositories and their pins: sggs-data builds and publishes the database, sggs-platform pins and serves it, gurbani-soul-ios pins the contract and the dataset, one version number](../diagrams/posters/02-three-repositories-and-pins.svg)
 
 ## What lives where
 

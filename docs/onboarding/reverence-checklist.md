@@ -16,10 +16,10 @@ It applies to everyone, whatever their own beliefs.
 - **Only from the pinned database**, through the API or the corpus tools. Never from memory, a
   website, a screenshot, or a colleague's message.
 - In the website and the app, text reaches the screen from `/api/ang`, `/api/shabad`, `/api/search`
-  or `/api/lines`, verbatim, with its Ang. Keep it that way: no code path constructs, trims or
+  or `/api/lines`, verbatim, with its [[Ang]]. Keep it that way: no code path constructs, trims or
   "cleans" a line on the way.
 - In tests and fixtures, refer to a line by **id and Ang** and read it from the database at test
-  time, or quote it verbatim with its Ang as the fixture's source. Do not type Gurmukhi from
+  time, or quote it verbatim with its Ang as the fixture's source. Do not type [[Gurmukhi]] from
   memory into a fixture.
 - In documentation, a verse appears only as a blockquote ending
   `— Sri Guru Granth Sahib Ji · Ang N`; the wiki's gate verifies that quote against the database.
@@ -35,7 +35,7 @@ It applies to everyone, whatever their own beliefs.
 - **Display-only** transforms (the traditional-saroop rendering, the Sant Lipi font) change glyphs on
   screen and nothing else; the copied text stays verbatim. If you add one, prove the copied text is
   unchanged.
-- Transliteration and English are **separate, labelled layers**. Never blend them into the Gurmukhi;
+- [[Transliteration]] and English are **separate, labelled layers**. Never blend them into the Gurmukhi;
   never present a translation as the original.
 
 ## How it is shown and cited
@@ -43,7 +43,10 @@ It applies to everyone, whatever their own beliefs.
 - Cite as **Sri Guru Granth Sahib Ji · Ang N** — everywhere, in every surface. "Gurbani Soul" is
   the app's name, never the text's.
 - Gurmukhi is rendered in Sant Lipi, ink-coloured, never in the brand gold or red, never as
-  decoration.
+  decoration. On the Knowledge Base a test proves it on every view, in light and dark
+  (`frontend/e2e/reverence.spec.ts`): scripture lines and their headings are exactly ink, with no
+  shadow and no letter-spacing; the refrain is marked by a rule in the margin, never by colouring
+  the verse; a line is never cut short; a search highlight never splits a word.
 - Explanation, summary or interpretation is always labelled as such and kept apart from the
   quotation ([answer protocol](https://github.com/Algorythmos-AI/sggs-data/blob/main/Answer-Protocol.md)).
 - Screenshots and marketing images show real, verbatim, cited lines or none.

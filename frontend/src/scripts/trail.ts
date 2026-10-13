@@ -63,7 +63,7 @@ function renderCurrent(line: any) {
       <button id="trailCopy" class="now-btn ghost" type="button">⧉ Copy verse</button>
     </div>`;
   const pb = host.querySelector('.pin-btn');                       // reflect already-pinned state
-  if (pb && isPinned(line.id)) { pb.classList.add('pinned'); pb.setAttribute('aria-pressed', 'true'); }
+  if (pb && isPinned(line.id)) pb.classList.add('pinned');
   ($('#trailCopy') as HTMLElement | null)?.addEventListener('click', () => {
     const txt = [line.gurmukhi, line.translit, line.en, `— Ang ${line.ang}${line.author ? ', ' + line.author : ''}`].filter(Boolean).join('\n');
     (navigator.clipboard?.writeText(txt) || Promise.reject()).then(() => toast('Verse copied'), () => toast('Copy not available in this browser'));

@@ -9,7 +9,7 @@ verified:
 ---
 # The editorial ledger
 
-The Gurmukhi in the corpus is verbatim from the source Bir. The pipeline transforms the PDF's
+The [[Gurmukhi]] in the corpus is verbatim from the source Bir. The pipeline transforms the PDF's
 *glyph stream* into *logical Unicode* — and that is all it does. Every transform it applies is an
 entry in one register, `audit/editorial-ledger.jsonl` in sggs-data, and a CI gate there fails any
 scripture change or any new rule that has no entry. This page explains the register; the register
@@ -33,9 +33,9 @@ The eleven applications, one per affected line:
 |---|---|---|---|
 | E001 · E002 | R1 | 573 · 586 | documented from the start |
 | E003 | R3 | 727 | documented from the start |
-| E004 | R2 | 1354 | approved 2026-09-24 (gate G3) |
-| E005 · E006 | R4 | 1358 · 1387 | approved 2026-09-24 (gate G3) |
-| E007 – E011 | R1 | 1398 · 1402 · 1406 · 1408 · 1409 | approved 2026-09-24 (gate G3) |
+| E004 | R2 | 1354 | approved 2026-09-24 (scholar review) |
+| E005 · E006 | R4 | 1358 · 1387 | approved 2026-09-24 (scholar review) |
+| E007 – E011 | R1 | 1398 · 1402 · 1406 · 1408 · 1409 | approved 2026-09-24 (scholar review) |
 
 The three earliest applications were itemised when the pipeline was written; the other eight were
 applied by the same rules and itemised on 2026-09-23, then reviewed and approved by a scholar on
@@ -56,15 +56,16 @@ cannot change between two commits unless a new application entry names that line
 ## How a fidelity concern travels
 
 ```mermaid
-flowchart LR
+flowchart TB
     accTitle: A reported text concern goes through review and the ledger before any dataset changes
-    r[Reader or Granthi reports a concern] --> i[Issue: scripture-fidelity template<br/>Ang · line · photo of the printed page]
-    i --> c{A person compares<br/>with the source edition}
-    c -->|edition difference,<br/>saroop rendering,<br/>transliteration| n[No change · reply with the explanation]
-    c -->|impossible sequence<br/>confirmed| l[Ledger entry + rule · scholar review G3]
-    l --> b[sggs-data rebuild · gates · new DATASET_VERSION]
-    b --> p[Platform: dataset.lock.json bump]
-    p --> a[App: same pin · re-archive]
+    accDescr: A reader or Granthi reports a concern as a scripture-fidelity issue with the Ang, the line and a photo of the printed page. A person compares it with the source edition. An edition difference, a saroop rendering or a transliteration question gets an explanation and no change. A confirmed impossible sequence becomes a ledger entry and rule, reviewed by a scholar, then an sggs-data rebuild with its gates and a new DATASET_VERSION, a lock bump in the platform and the same pin in the app.
+    r[A reader or Granthi reports a concern] --> i[An issue: Ang, line, photo of the page]
+    i --> c{A person compares it<br/>with the source edition}
+    c -->|an edition difference,<br/>saroop, transliteration| n[No change: an explanation]
+    c -->|an impossible sequence,<br/>confirmed| l[A ledger entry and rule,<br/>scholar review]
+    l --> b[sggs-data: rebuild, gates,<br/>a new DATASET_VERSION]
+    b --> p[Platform: the lock bump]
+    p --> a[App: the same pin, re-archived]
 ```
 
 Most reports are an edition difference, the traditional-saroop rendering (a display choice, the
@@ -83,7 +84,7 @@ never be silently altered (sggs-data's `audit/data-quality-baseline.json`):
   1205) — flagged for scholarly review;
 - the three closing rubrics that stay one-line compositions (`TRAILING_RUBRICS`);
 - roughly twenty verses the source typography sets like headings;
-- one line with an empty `translit_norm` (id 35328, Ang 829), which a rebuild corrects.
+- one line with an empty `translit_norm` (id 35328, [[Ang]] 829), which a rebuild corrects.
 
 None of these is a text edit; each is a review question, and the answer arrives as a ledger entry
 or as "leave it as printed".

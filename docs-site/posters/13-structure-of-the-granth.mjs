@@ -1,7 +1,9 @@
 // Poster 13 — Angs 1–1430 as one bar: the opening banis, the 31 raags in order, the closing sections;
 // the 22 Vaars marked; the voices. Every number is read from the pinned database (/api/meta,
 // /api/analytics/vaars) — the spans are the raags and sections tables' first_ang..last_ang.
-const V = { version: '1.3.9', date: '2026-09-25', commit: 'a5d8d5e0' };
+// Layout (posters/kit.mjs): the bar to scale with square segments in two strong shades, the Vaars as
+// thin ticks in two lanes (adjacent Vaars share an Ang), then every raag named in a two-column list.
+const V = { version: '1.3.10', date: '2026-09-27', commit: 'd85c2adc' };
 // [seq, roman name, first Ang, last Ang, shabads]
 const RAAGS = [
   [1, 'Sireeraag', 14, 93, 208], [2, 'Maajh', 94, 150, 177], [3, 'Gaurhee', 151, 346, 740], [4, 'Aasaa', 347, 488, 448], [5, 'Goojaree', 489, 526, 194],
@@ -13,55 +15,53 @@ const RAAGS = [
 ];
 // the 22 Vaars: first Ang of each (raag, first, last)
 const VAARS = [[83, 91], [137, 150], [300, 317], [318, 323], [462, 475], [508, 517], [517, 524], [548, 556], [585, 594], [642, 653], [705, 710], [785, 792], [849, 855], [947, 956], [957, 966], [966, 968], [1086, 1094], [1094, 1102], [1193, 1193], [1237, 1251], [1278, 1291], [1312, 1318]];
-const X0 = 60, X1 = 1540, ANGS = 1430;
+const X0 = 60, X1 = 1140, ANGS = 1430;
 const ax = (ang) => X0 + ((ang - 1) / ANGS) * (X1 - X0);
-const BAR_Y = 250, BAR_H = 70;
+const BAR_Y = 246, BAR_H = 90, LANE = [BAR_Y + BAR_H + 12, BAR_Y + BAR_H + 34];
+const label = (id, x, y, w, text, step, extra = {}) => ({ id, kind: 'label', x, y, w, h: 54, lines: [{ text, size: 25, weight: 400 }], step, ...extra });
 
 const nodes = [];
-const edges = [];
 // the opening (1–13) and closing (1353–1430) sections
 nodes.push({ id: 'open', kind: 'actor', x: ax(1), y: BAR_Y, w: ax(14) - ax(1), h: BAR_H, lines: [''], title: 'Opening banis · Angs 1–13', step: 'step-02' });
-nodes.push({ id: 'close', kind: 'store', x: ax(1354), y: BAR_Y, w: ax(1431) - ax(1354), h: BAR_H, lines: [''], title: 'After the raags · Angs 1353–1430', step: 'step-04' });
-// the 31 raags, alternating fills for legibility
+nodes.push({ id: 'close', kind: 'good', x: ax(1354), y: BAR_Y, w: ax(1431) - ax(1354), h: BAR_H, lines: [''], title: 'After the raags · Angs 1353–1430', step: 'step-04' });
+// the 31 raags, in two strong alternating shades
 RAAGS.forEach(([seq, name, a, b]) => {
-  nodes.push({ id: `r${seq}`, kind: seq % 2 ? 'box' : 'note', x: ax(a), y: BAR_Y, w: Math.max(2, ax(b + 1) - ax(a)), h: BAR_H, lines: [''], title: `${seq} · ${name} · Angs ${a}–${b}`, step: 'step-03' });
+  nodes.push({ id: `r${seq}`, kind: seq % 2 ? 'band' : 'band2', x: ax(a), y: BAR_Y, w: Math.max(1.5, ax(b + 1) - ax(a)), h: BAR_H, lines: [''], title: `${seq} · ${name} · Angs ${a}–${b}`, step: 'step-03' });
 });
-// callouts for the eight largest raags (by Ang span), staggered above the bar
-const big = [...RAAGS].sort((p, q) => (q[3] - q[2]) - (p[3] - p[2])).slice(0, 8).sort((p, q) => p[2] - q[2]);
-big.forEach(([seq, name, a, b, n], i) => {
-  const cx = (ax(a) + ax(b + 1)) / 2, w = 190;
-  const x = Math.min(X1 - w, Math.max(X0, cx - w / 2)), y = i % 2 ? 130 : 180;
-  nodes.push({ id: `c${seq}`, kind: 'note', x, y, w, h: 42, lines: [{ text: `${name} ${a}–${b}`, size: 16 }], step: 'step-03' });
-  edges.push({ from: `c${seq}`, to: `r${seq}`, step: 'step-03', width: 1.5, arrow: false });
-});
-// the Vaars as ticks under the bar
+// the Vaars as ticks, alternating between two lanes so Vaars that share an Ang stay apart
 VAARS.forEach(([a, b], i) => {
-  nodes.push({ id: `v${i + 1}`, kind: 'gate', x: ax(a), y: BAR_Y + BAR_H + 14, w: Math.max(3, ax(b + 1) - ax(a)), h: 12, lines: [''], title: `Vaar ${i + 1} · Angs ${a}–${b}`, step: 'step-05' });
+  nodes.push({ id: `v${i + 1}`, kind: 'tick', x: ax(a), y: LANE[i % 2], w: Math.max(4, ax(b + 1) - ax(a)), h: 14, lines: [''], title: `Vaar ${i + 1} · Angs ${a}–${b}`, step: 'step-05' });
+});
+// the ruler
+nodes.push(label('ang1', X0, 398, 170, 'Ang 1', 'step-01', { align: 'start' }));
+nodes.push(label('ang715', ax(715) - 85, 398, 170, 'Ang 715', 'step-01'));
+nodes.push(label('ang1430', X1 - 170, 398, 170, 'Ang 1430', 'step-01'));
+// every raag, named, in printed order: two columns of sixteen and fifteen
+RAAGS.forEach(([seq, name, a, b], i) => {
+  const col = i < 16 ? 0 : 1, row = i < 16 ? i : i - 16;
+  nodes.push(label(`n${seq}`, col ? 610 : 60, 520 + row * 56, 530, `${seq} · ${name} · ${a}–${b}`, 'step-03', { align: 'start' }));
 });
 export default {
+  kit: 2,
   number: '13', slug: 'structure-of-the-granth',
   title: 'The structure of the Granth',
-  subtitle: 'Angs 1 to 1430 as one bar — the opening banis, the thirty-one raags in their printed order, the closing sections; the twenty-two Vaars marked; the voices',
+  subtitle: 'Angs 1 to 1430 as one bar to scale — the opening, the thirty-one raags in printed order, the closing sections; the twenty-two Vaars marked',
   description: 'Sri Guru Granth Sahib Ji opens with Japji Sahib, So Dar, So Purakh and Sohila on Angs 1–13, is ordered by thirty-one raags from Sireeraag on Ang 14 to Jaijaavantee on Ang 1353, and closes with the Sahaskriti saloks, Gatha, Phunhe, Chaubole, the Bhatts’ Swaiyye, the saloks beyond the Vaars, Guru Tegh Bahadur Ji’s saloks, Mundavani and Raagmala on Angs 1353–1430. Twenty-two Vaars sit inside the raags. Six Gurus, fifteen Bhagats, eleven Bhatts and three others wrote it; 60,658 lines in 4,527 compositions.',
-  height: 940, verified: V,
+  height: 1700, verified: V,
   sources: ['webapp/sggs/reader.py', 'webapp/sggs/insights.py', 'docs/scripture/structure.md'],
-  legend: ['actor', 'box', 'store', 'gate'],
-  groups: [],
+  badges: false,
+  legendHide: ['band2', 'label'],
+  legendText: { actor: 'the opening, Angs 1–13', band: 'a raag (the shades alternate)', good: 'after the raags, Angs 1353–1430', tick: 'a Vaar, under the bar' },
+  groups: [
+    { label: 'The thirty-one raags, in printed order', x: 40, y: 456, w: 1120, h: 976 },
+  ],
   nodes: [
     ...nodes,
-    { id: 'ruler0', kind: 'note', x: X0, y: BAR_Y + BAR_H + 44, w: 90, h: 30, lines: [{ text: 'Ang 1', size: 16 }], step: 'step-01' },
-    { id: 'ruler14', kind: 'note', x: ax(14) - 45, y: BAR_Y + BAR_H + 78, w: 90, h: 30, lines: [{ text: 'Ang 14', size: 16 }], step: 'step-01' },
-    { id: 'ruler700', kind: 'note', x: ax(700) - 50, y: BAR_Y + BAR_H + 44, w: 100, h: 30, lines: [{ text: 'Ang 700', size: 16 }], step: 'step-01' },
-    { id: 'ruler1353', kind: 'note', x: ax(1353) - 55, y: BAR_Y + BAR_H + 78, w: 110, h: 30, lines: [{ text: 'Ang 1353', size: 16 }], step: 'step-01' },
-    { id: 'ruler1430', kind: 'note', x: X1 - 110, y: BAR_Y + BAR_H + 44, w: 110, h: 30, lines: [{ text: 'Ang 1430', size: 16 }], step: 'step-01' },
-    { id: 'openlbl', kind: 'note', x: 60, y: 460, w: 460, h: 110, lines: ['Angs 1–13 · the opening', { text: 'Japji Sahib (1–8, 385 lines) · So Dar (8–10)', size: 16 }, { text: 'So Purakh (10–12) · Sohila (12–13)', size: 16 }, { text: 'the Mool Mantar opens Ang 1', size: 16 }], step: 'step-02' },
-    { id: 'raaglbl', kind: 'note', x: 560, y: 460, w: 480, h: 110, lines: ['Angs 14–1353 · thirty-one raags', { text: 'Sireeraag first, Jaijaavantee last', size: 16 }, { text: 'a raag’s span: the longest run of Angs', size: 16 }, { text: 'where it is the majority', size: 16 }], step: 'step-03' },
-    { id: 'closelbl', kind: 'note', x: 1080, y: 460, w: 480, h: 110, lines: ['Angs 1353–1430 · after the raags', { text: 'Sahaskriti · Gatha · Phunhe · Chaubole', size: 16 }, { text: 'Swaiyye (1385–1409) · saloks beyond the Vaars', size: 16 }, { text: 'Salok M9 · Mundavani · Raagmala', size: 16 }], step: 'step-04' },
-    { id: 'vaarlbl', kind: 'note', x: 60, y: 610, w: 460, h: 90, lines: ['22 Vaars, marked under the bar', { text: 'pauris by one Guru (or Satta & Balwand),', size: 16 }, { text: 'saloks interleaved from several', size: 16 }], step: 'step-05' },
-    { id: 'voices', kind: 'note', x: 560, y: 610, w: 1000, h: 90, lines: ['The voices · 29 attributed authors', { text: 'six Gurus (M1–M5, M9) · fifteen Bhagats (Kabir Ji, Namdev Ji, Ravidas Ji, Sheikh Farid Ji …)', size: 16 }, { text: 'eleven Bhatts · Satta & Balwand · Bhai Mardana — Japji carries no author line', size: 16 }], step: 'step-06' },
-    { id: 'count', kind: 'note', x: 60, y: 740, w: 1500, h: 60, lines: [{ text: '60,658 lines · 4,527 compositions · 1,430 Angs · 31 raags · 13 named sections · 22 Vaars · 54 themes in the concept index — every number read from the pinned database', size: 16 }], step: 'step-06' },
+    { id: 'vaarlbl', kind: 'note', x: 40, y: 1472, w: 550, h: 96, lines: ['22 Vaars, marked under the bar', 'pauris by one voice, saloks by many'], step: 'step-05' },
+    { id: 'voices', kind: 'note', x: 610, y: 1472, w: 550, h: 96, lines: ['The voices', 'Gurus, Bhagats, Bhatts and others'], step: 'step-06' },
+    { id: 'count', kind: 'note', x: 40, y: 1604, w: 1120, h: 96, lines: ['60,658 lines · 4,527 compositions · 1,430 Angs', '31 raags · 22 Vaars · 54 themes — every number from the pinned database'], step: 'step-06' },
   ],
-  edges,
+  edges: [],
   steps: [
     { id: 'step-01', title: 'One bar, 1,430 Angs', caption: 'The whole scripture drawn to scale: every Ang is the same width, from Ang 1 at the left to Ang 1430 at the right. Hover a segment for its name and span. Every number on this poster comes from the pinned database, the same one the site and the app serve.', link: '/scripture/structure/' },
     { id: 'step-02', title: 'The opening: Angs 1–13', caption: 'The Granth opens with the Mool Mantar and Japji Sahib (Angs 1–8, 385 lines, no author line in the print), then So Dar, So Purakh and Sohila — the evening and night prayers — before the first raag begins on Ang 14.', link: '/scripture/what-sggs-is/' },

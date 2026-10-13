@@ -1,0 +1,165 @@
+/* The reading layout: how a page of the wiki is set. Patterns learned from good help centres — a
+   clear title block, a comfortable measure, callouts that read as callouts, procedures that read as
+   steps, a quiet contents column — in this project's own dress: warm paper or warm ink, serif
+   headings, gold as a fill and never as text.
+
+   What this file must never do: touch how Gurmukhi is drawn (theme.css), or make a note look like
+   a quotation. A blockquote is how the wiki cites scripture; it stays the plainest thing on the page. */
+
+/* ── type and measure ─────────────────────────────────────────────────────────────────────────
+   17px body at 1.7 on a 44rem column is about 70 characters to the line. */
+:root {
+  --sl-text-body: 1.0625rem;
+  --sl-line-height: 1.7;
+  --sl-content-width: 44rem;
+  --sl-text-h1: 2.75rem;
+  --sl-text-h2: 1.625rem;
+  --sl-text-h3: 1.25rem;
+  --sl-text-code: 0.875rem;
+}
+@media (max-width: 50rem) {
+  :root { --sl-text-body: 1rem; --sl-line-height: 1.65; --sl-text-h1: 2rem; --sl-text-h2: 1.4rem; --sl-text-h3: 1.15rem; --sl-text-code: 0.8125rem; }
+}
+/* the article is sized here: Starlight sets the page's base size, not the content's, from its own scale */
+.sl-markdown-content { font-size: var(--sl-text-body); }
+h1#_top { line-height: 1.12; overflow-wrap: anywhere; }
+h1#_top:has(:lang(pa)) { line-height: 1.35; }
+.sl-markdown-content :is(h2, h3, h4) { font-weight: 600; text-wrap: balance; }
+.sl-markdown-content h2 { line-height: 1.25; margin-top: 3rem; }
+.sl-markdown-content h3 { line-height: 1.3; margin-top: 2rem; }
+/* h4 is sized here, not through --sl-text-h4: the site title in the header uses that variable */
+.sl-markdown-content h4 { font-family: var(--sl-font); font-size: 1.0625rem; letter-spacing: 0; line-height: 1.4; }
+
+/* ── links in prose: unmistakably links ───────────────────────────────────────────────────────
+   Only bare links in running text; cards, widgets and the page menu style their own. */
+.sl-markdown-content a:not([class]) { font-weight: 600; text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+.sl-markdown-content a:not([class]):hover { text-decoration-thickness: 2px; }
+.sl-markdown-content :is(h2, h3, h4, th, td, figcaption) a:not([class]) { font-weight: inherit; }
+
+/* ── callouts ─────────────────────────────────────────────────────────────────────────────────
+   A tinted box with a thick rule. The text is always ink; only the rule carries the colour. Each
+   tint is its status colour mixed into the page (10% on paper, 14% on ink), written out as a
+   literal so no browser falls back to the solid colour; plugins/test/look.test.mjs recomputes them
+   from docs/brand/tokens.json and checks ink on tint (4.5:1) and rule on tint (3:1). */
+.starlight-aside {
+  --callout-rule: var(--sgs-info); --callout-tint: #e6e8ec;
+  margin-block: 1.5rem; padding: 1rem 1.25rem; border: 0; border-inline-start: 4px solid var(--callout-rule); border-radius: 8px;
+  background: var(--callout-tint); color: var(--sl-color-white);
+}
+.starlight-aside--tip { --callout-rule: var(--sgs-positive); --callout-tint: #e6eade; }
+.starlight-aside--caution { --callout-rule: var(--sgs-accent); --callout-tint: #f3ead8; }
+.starlight-aside--danger { --callout-rule: var(--sgs-negative); --callout-tint: #f4e4dc; }
+:root:not([data-theme="light"]) .starlight-aside { --callout-tint: #242831; }
+:root:not([data-theme="light"]) .starlight-aside--tip { --callout-tint: #1f2c21; }
+:root:not([data-theme="light"]) .starlight-aside--caution { --callout-tint: #362a10; }
+:root:not([data-theme="light"]) .starlight-aside--danger { --callout-tint: #36211d; }
+.starlight-aside :is(a, a:not([class])) { color: inherit; }
+.starlight-aside > .starlight-aside__content > :first-child { margin-top: 0; }
+.starlight-aside > .starlight-aside__content > :last-child { margin-bottom: 0; }
+
+/* ── a quotation of scripture: no tint, no box, no colour — a thin rule and room ──────────────── */
+.sl-markdown-content blockquote {
+  margin-block: 1.5rem; margin-inline: 0; padding-block: 0.25rem; padding-inline-start: 1.5rem;
+  border: 0; border-inline-start: 2px solid var(--sgs-kraft); border-radius: 0; background: none; color: var(--sl-color-white);
+}
+
+/* ── steps: an ordered list marked <!-- sggs:steps --> is a procedure ─────────────────────────── */
+sggs-steps { display: none; }
+sggs-steps + ol { list-style: none; counter-reset: step; padding-inline-start: 0; margin-block: 1.5rem; }
+sggs-steps + ol > li { counter-increment: step; position: relative; margin: 0; padding-inline-start: 2.75rem; padding-block-end: 1.5rem; }
+sggs-steps + ol > li:last-child { padding-block-end: 0; }
+sggs-steps + ol > li::before {
+  content: counter(step); position: absolute; inset-inline-start: 0; inset-block-start: 0.05rem;
+  inline-size: 1.75rem; block-size: 1.75rem; box-sizing: border-box; border-radius: 50%;
+  border: 1.5px solid var(--sl-color-gray-4); background: var(--sl-color-bg); color: var(--sl-color-white);
+  font: 600 0.875rem/1.55rem var(--sl-font); text-align: center;
+}
+sggs-steps + ol > li::after {
+  content: ""; position: absolute; inset-inline-start: calc(0.875rem - 0.5px); inset-block: 2.05rem 0.2rem;
+  inline-size: 1px; background: var(--sl-color-gray-5);
+}
+sggs-steps + ol > li:last-child::after { display: none; }
+sggs-steps + ol > li > :first-child { margin-top: 0; }
+@media (max-width: 50rem) {
+  sggs-steps + ol > li { padding-inline-start: 2.25rem; }
+  sggs-steps + ol > li::before { inline-size: 1.5rem; block-size: 1.5rem; line-height: 1.3rem; font-size: 0.8125rem; }
+  sggs-steps + ol > li::after { inset-inline-start: calc(0.75rem - 0.5px); inset-block-start: 1.8rem; }
+}
+
+/* ── tables: reference material — hairlines, no stripes ───────────────────────────────────────── */
+.sl-markdown-content :is(th, td) { border-block-end: 1px solid var(--sl-color-hairline); }
+.sl-markdown-content tr:last-child td { border-block-end-color: var(--sl-color-gray-5); }
+.sl-markdown-content tbody tr:nth-child(2n):not(:where(.not-content *)) { background: none; }
+
+/* ── the sidebar and "On this page": quiet, with the place you are marked, not shouted ────────── */
+nav.sidebar a[aria-current="page"],
+nav.sidebar a[aria-current="page"]:hover,
+nav.sidebar a[aria-current="page"]:focus {
+  background: var(--sl-color-accent-low); color: var(--sl-color-white); font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--sgs-accent);
+}
+starlight-toc a { color: var(--sl-color-gray-3); overflow-wrap: anywhere; }
+starlight-toc a:hover { color: var(--sl-color-white); }
+starlight-toc a[aria-current="true"] { color: var(--sl-color-white); font-weight: 600; box-shadow: inset 2px 0 0 var(--sgs-accent); }
+
+@media (forced-colors: active) {
+  .starlight-aside { border: 1px solid CanvasText; border-inline-start-width: 4px; }
+  nav.sidebar a[aria-current="page"], starlight-toc a[aria-current="true"] { outline: 1px solid Highlight; }
+  sggs-steps + ol > li::before { border-color: CanvasText; }
+  sggs-steps + ol > li::after { background: CanvasText; }
+}
+
+/* ---------------------------------------------------------------- section tabs (Header.astro)
+   A second row in the header on wide screens. Starlight sizes everything under the header from
+   --sl-nav-height, so the row is added by making that taller, not by positioning anything. */
+.tabs { display: none; }
+/* the same five links, at the top of the phone's menu drawer (Sidebar.astro) */
+.drawer-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1rem; padding: 0 0 1rem; list-style: none; border-block-end: 1px solid var(--sl-color-hairline); }
+.drawer-tabs a {
+  display: inline-flex; align-items: center; min-block-size: 2.75rem; padding-inline: 0.875rem;
+  border: 1px solid var(--sl-color-gray-5); border-radius: 8px;
+  font-size: var(--sl-text-sm); font-weight: 500; color: var(--sl-color-white); text-decoration: none;
+}
+.drawer-tabs a[aria-current] { font-weight: 600; border-color: var(--sl-color-text-accent); box-shadow: inset 0 -2px 0 var(--sl-color-text-accent); }
+@media (min-width: 50rem) { .drawer-tabs { display: none; } }
+@media (min-width: 50rem) {
+  :root { --sl-nav-height: 6.5rem; }
+  /* the top row has a height of its own, not "what the tabs leave": the page is painted while it
+     is still arriving, and a row centred in the whole header would jump when the tabs came in */
+  header.header { padding-block: 0.625rem 0; }
+  .hdr { display: flex; flex-direction: column; block-size: 100%; }
+  .hdr > .header { flex: none; block-size: calc(var(--sl-nav-height) - 0.625rem - 2.75rem); min-block-size: 0; }
+  .tabs { display: flex; flex: none; gap: 0.25rem; block-size: 2.75rem; margin-inline: -0.75rem; }
+  .tabs a {
+    display: inline-flex; align-items: center; padding-inline: 0.75rem;
+    font-size: var(--sl-text-sm); font-weight: 500; color: var(--sl-color-gray-2); text-decoration: none;
+    border-block-end: 2px solid transparent; white-space: nowrap;
+  }
+  .tabs a:hover { color: var(--sl-color-white); }
+  .tabs a[aria-current] { color: var(--sl-color-white); font-weight: 600; border-block-end-color: var(--sl-color-text-accent); }
+  .tabs a:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: -2px; border-radius: 4px; }
+}
+@media (forced-colors: active) { .tabs a[aria-current] { border-block-end-color: Highlight; } }
+
+/* ---------------------------------------------------------------- "Back to top" (TableOfContents.astro) */
+.toc-top {
+  display: inline-block; margin-block-start: 1rem; padding-block: 0.25rem;
+  font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); text-decoration: none;
+}
+.toc-top::before { content: "\2191\00a0"; }
+.toc-top:hover { color: var(--sl-color-white); text-decoration: underline; }
+
+/* ---------------------------------------------------------------- a wide table on a phone
+   Starlight lets a table scroll sideways. A soft edge shows there is more: the two page-coloured
+   covers travel with the table's content and hide the shade at whichever end has been reached. */
+@media (max-width: 49.99rem) {
+  .sl-markdown-content table {
+    background:
+      linear-gradient(to right, var(--sl-color-bg) 40%, transparent) left center / 2rem 100% no-repeat local,
+      linear-gradient(to left, var(--sl-color-bg) 40%, transparent) right center / 2rem 100% no-repeat local,
+      linear-gradient(to right, var(--sgs-table-shade), transparent) left center / 0.75rem 100% no-repeat scroll,
+      linear-gradient(to left, var(--sgs-table-shade), transparent) right center / 0.75rem 100% no-repeat scroll;
+  }
+  :root { --sgs-table-shade: rgb(0 0 0 / 0.38); }
+  :root[data-theme='light'] { --sgs-table-shade: rgb(32 26 18 / 0.16); }
+}

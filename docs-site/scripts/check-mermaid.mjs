@@ -1,5 +1,6 @@
 // After a build: every Mermaid fence must have become an inline SVG figure. A leftover
-// <pre class="mermaid">, a `language-mermaid` code block or a Mermaid error SVG fails the check.
+// <pre class="mermaid">, a `language-mermaid` code block or a Mermaid error SVG fails the check, and so
+// does a label break written <br></br> (HTML reads it as two breaks and clips the label's second line).
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 
@@ -14,6 +15,7 @@ const walk = (d) => {
       const html = readFileSync(p, 'utf8');
       diagrams += (html.match(/data-diagram="mermaid"/g) ?? []).length;
       if (/class="mermaid"|language-mermaid|Syntax error in text|mermaid version/i.test(html)) bad.push(p);
+      else if (/<br\s*><\/br>/.test(html)) bad.push(`${p} (a label break written <br></br>)`);
     }
   }
 };

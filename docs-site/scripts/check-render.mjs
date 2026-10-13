@@ -24,7 +24,12 @@ for (const src of pages) {
   if (!existsSync(out)) { problems.push(`${rel}: no built page at ${path.relative(dist, out)}`); continue; }
   const md = readFileSync(src, 'utf8');
   const html = readFileSync(out, 'utf8');
-  const body = (html.match(/<div class="sl-markdown-content[^"]*">([\s\S]*?)<\/div>\s*<\/div>/) ?? [, html])[1];
+  // The page body runs from the markdown container to the page footer (or the end of <main>). Never
+  // stop at the first nested </div></div>: an expressive-code block closes two divs after its first line.
+  const start = html.search(/<div class="sl-markdown-content[^"]*">/);
+  const rest = start >= 0 ? html.slice(start) : html;
+  const end = rest.search(/<footer class="sl-flex|<\/main>/);
+  const body = end > 0 ? rest.slice(0, end) : rest;
   const text = body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   const srcText = md.replace(/^---[\s\S]*?\n---\n/, '').replace(/```[\s\S]*?```/g, '').replace(/[#*_`>|\-\[\]()!]/g, ' ').replace(/\s+/g, ' ').trim();
   if (text.length < Math.min(200, srcText.length * 0.3)) problems.push(`${rel}: rendered body is empty or truncated (${text.length} chars of text for ${srcText.length} in the source) — a plugin or renderer failed for this page`);

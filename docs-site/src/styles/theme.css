@@ -16,7 +16,8 @@
   font-weight: 300 700;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0A00-0A7F, U+200C-200D, U+25CC;
+  /* the dandas (U+0964, U+0965) are Devanagari code points that Gurmukhi uses; Sant Lipi has them */
+  unicode-range: U+0A00-0A7F, U+0964-0965, U+200C-200D, U+25CC;
 }
 
 :root {
@@ -55,9 +56,16 @@
   --sgs-info: #7fb0ff;
   --sgs-special: #b79af2;
 
-  --sl-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --sl-font-system-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --sgs-font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  /* Sant Lipi leads every stack. Its @font-face covers only the Gurmukhi block and the dandas
+     (unicode-range), so it draws Gurmukhi wherever it appears — prose, a table, a heading, code, a
+     printed page — and nothing else; without it, text that is not marked lang="pa" took whatever
+     Gurmukhi font the reader's device had, or none. */
+  --sl-font: "Sant Lipi", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sl-font-system-mono: "Sant Lipi", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Times New Roman before Georgia: until Source Serif arrives the fallback is what is drawn, and
+     Times sets a title within 1% of Source Serif's width where Georgia is 20% wider — wide enough
+     to wrap a title onto a second line and then jump back (e2e/look.spec.ts measures the shift) */
+  --sgs-font-serif: "Sant Lipi", "Source Serif 4", "Times New Roman", Georgia, serif;
   --sgs-font-gm: "Sant Lipi", "Mukta Mahee", "Gurmukhi MN", "Noto Sans Gurmukhi", "Raavi", sans-serif;
   --sl-text-h1: 2.25rem;
   --sl-text-h2: 1.625rem;
@@ -126,7 +134,8 @@ h1#_top,
 .sl-markdown-content table { font-size: 0.95em; }
 .sl-markdown-content th { background: var(--sl-color-gray-6); }
 
-/* diagrams: a warm-paper card in both schemes so the one Mermaid theme always reads */
+/* diagrams: each Mermaid diagram is drawn in both legs of the palette (plugins/remark-mermaid.mjs);
+   the card and the drawing follow the reader's scheme — warm paper in light, warm ink in dark */
 .diagram {
   margin: 1.5rem 0;
   padding: 1rem;
@@ -134,14 +143,18 @@ h1#_top,
   border-radius: 12px;
   background: var(--sgs-diagram-bg, #fdf6e3);
 }
-:root:not([data-theme="light"]) .diagram { --sgs-diagram-bg: #fbf7f0; }
+:root:not([data-theme="light"]) .diagram { --sgs-diagram-bg: #1e1a17; }
+.diagram .mmd--dark { display: none; }
+:root:not([data-theme="light"]) .diagram .mmd--light { display: none; }
+:root:not([data-theme="light"]) .diagram .mmd--dark { display: block; }
 .diagram__scroll { overflow-x: auto; overscroll-behavior-x: contain; }
 .diagram__scroll:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 4px; }
 /* diagrams scale to fit the column; a wide one keeps its drawn size and scrolls sideways */
 .diagram__scroll svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
 .diagram--wide .diagram__scroll svg { max-width: none; }
 .diagram__hint { margin: 0.5rem 0 0; font-size: 0.8rem; color: #5a5148; text-align: center; }
-.diagram figcaption { margin-top: 0.75rem; font-size: 0.875rem; color: #5a5148; text-align: center; } /* ink on the cream card in both schemes (6:1) */
+.diagram figcaption { margin-top: 0.75rem; font-size: 0.875rem; color: #5a5148; text-align: center; } /* on the cream card (7.2:1) */
+:root:not([data-theme="light"]) :is(.diagram figcaption, .diagram__hint) { color: #c9bfad; } /* on the ink card (9.5:1) */
 
 /* the frontmatter table GitHub would show is not rendered here; nothing to do */
 
@@ -159,9 +172,6 @@ h1#_top,
 .chip--ok .chip__dot { background: var(--sgs-positive); }
 .chip--bad .chip__dot { background: var(--sgs-negative); }
 
-/* verified-against-commit badge in the page footer */
-.verified { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; margin: 1rem 0 0; font-size: 0.85rem; color: var(--sl-color-gray-3); }
-.verified code { font-size: 0.85em; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
@@ -171,3 +181,17 @@ h1#_top,
 .sl-markdown-content li.task-list-item { list-style: none; margin-inline-start: -1.25rem; }
 .sl-markdown-content .task-box { display: inline-block; width: 1.25rem; color: var(--sl-color-gray-2); }
 .sl-markdown-content .task-box[data-done="1"] { color: var(--sl-color-accent-high); }
+
+/* The generated API reference (starlight-openapi): its "required" label uses Starlight's red and its
+   schema panels a darker grey, both under 4.5:1 with the syntax colours on this palette. Keep them on
+   the brand's status red and the page background so the reference passes axe like every other page. */
+:root { --sl-color-red: #ff7a6b; }                         /* status.negative, dark leg */
+:root[data-theme="light"] { --sl-color-red: #b33528; }     /* status.negative, light leg */
+div.sl-openapi-section-panel.sl-openapi-section-panel,
+div.sl-openapi-section-panel.sl-openapi-section-panel :is(pre, code) { background-color: var(--sl-color-bg); }
+
+/* a Mermaid label's lines (plugins/remark-mermaid.mjs lineBlocks): one block per line, no <br> */
+.mmd .mmd-line { display: block; }
+
+/* shown only on paper (src/styles/print.css): the page's address, and its colophon */
+.print-only { display: none; }

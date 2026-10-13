@@ -36,7 +36,8 @@ INT = {"type": "integer"}
 STR = {"type": "string"}
 IDS = {"type": "string", "pattern": "^[0-9]{1,12}(,[0-9]{1,12})*$"}
 
-# path -> (tag, summary, parameters, samples[(concrete path, query)], extra error codes)
+# path -> (tag, description, parameters, samples[(concrete path, query)], extra error codes)
+# The description is the operation's full sentence; its short sidebar/heading label is in SUMMARIES.
 ROUTES = {
     "/api/meta": ("Meta", "Build identity and corpus statistics (version, commit, counts).", [],
                   [("/api/meta", {})], []),
@@ -126,6 +127,38 @@ ROUTES = {
         [("/api/bani/japji", {})], ["404"]),
 }
 
+# path -> the operation's short, verb-first label: the wiki's API sidebar, page title and try-it
+# picker show it (starlight-openapi reads `summary`), so it stays short; the sentence is `description`.
+SUMMARIES = {
+    "/api/meta": "Get build info",
+    "/api/health": "Run the health check",
+    "/api/search": "Search the Granth",
+    "/api/ang/{n}": "Get an Ang",
+    "/api/shabad/{comp_id}": "Get a composition",
+    "/api/random": "Get a random Hukam",
+    "/api/lines": "Get lines by id",
+    "/api/verify": "Verify a quotation",
+    "/api/word": "Find a word",
+    "/api/themes/network": "Get the theme network",
+    "/api/analytics/author": "Get author profiles",
+    "/api/analytics/raag": "Get raag profiles",
+    "/api/analytics/progression": "Get a raag's theme progression",
+    "/api/analytics/resonance": "Get author resonance",
+    "/api/analytics/vaars": "List the Vaars",
+    "/api/analytics/vaar": "Get a Vaar",
+    "/api/analytics/constellation": "Get a concept constellation",
+    "/api/related": "Get related compositions",
+    "/api/line_concepts": "Get line concepts",
+    "/api/neighbors": "Get semantic neighbours",
+    "/api/timing/clock": "Get the pahar clock",
+    "/api/timing/raag": "Get a raag's timing",
+    "/api/timing/divergence": "List timing disagreements",
+    "/api/forms": "Get composition forms",
+    "/api/banis": "List the banis",
+    "/api/bani/{key}": "Get a bani",
+}
+SUMMARY_MAX = 32
+
 ERROR = {"type": "object", "required": ["error"], "properties": {"error": {"type": "string"}}}
 
 
@@ -202,7 +235,7 @@ def response_schema(samples):
 # ----------------------------------------------------------------------------- document
 def build():
     paths = {}
-    for route, (tag, summary, params, samples, errors) in ROUTES.items():
+    for route, (tag, description, params, samples, errors) in ROUTES.items():
         responses = {
             "200": {"description": "OK", "content": {"application/json": {"schema": response_schema(samples)}}},
             "400": {"description": "Invalid request (bad or out-of-range parameter).",
@@ -214,8 +247,8 @@ def build():
             responses["404"] = {"description": "Not found.",
                                 "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
         op_id = route.strip("/").replace("api/", "").replace("/", "_").replace("{", "").replace("}", "")
-        paths[route] = {"get": {"operationId": op_id, "tags": [tag], "summary": summary,
-                                "parameters": params, "responses": dict(sorted(responses.items()))}}
+        paths[route] = {"get": {"operationId": op_id, "tags": [tag], "summary": SUMMARIES[route],
+                                "description": description, "parameters": params, "responses": dict(sorted(responses.items()))}}
     return {
         "openapi": "3.1.0",
         "info": {

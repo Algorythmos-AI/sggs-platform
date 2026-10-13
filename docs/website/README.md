@@ -10,10 +10,13 @@ The public web property is one Astro static site (`frontend/`) served on the pro
 **`gurbanisoul.com`**. It carries two distinct things, deliberately kept separate (see
 [Brand & domains](../engineering/brand.md)):
 
-- **`/`** — the **Gurbani Soul** landing page: the marketing home for the iOS app.
-- **everything else** (`/search`, `/reader`, `/themes`, `/lineage`, `/insights`, the raag clock,
-  `/privacy`, `/support`, …) — the **Sri Guru Granth Sahib Ji Knowledge Base**, the scholarly
-  study site. It keeps its own name, header and theme; the landing has its own layout.
+- **The Gurbani Soul pages** — `/`, `/features`, `/watch`, `/learn` and its articles, `/privacy`
+  and `/support` — use the marketing layout (`Marketing.astro`): the product's home, its policy
+  pages and the Learn articles.
+- **The Knowledge Base** — `/library` (its home), `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`,
+  `/trail`, `/analytics` (Insights), `/constellation`, `/raag-clock`, `/divergence` — uses
+  `Base.astro`: the **Sri Guru Granth Sahib Ji Knowledge Base**, the scholarly study site, with
+  its own name, header and theme.
 
 Both are built by `astro build` into `frontend/dist/`, synced to `webapp/static/`, and served by
 the stdlib Python server locally and by Vercel in production. There is no second site and no
@@ -45,9 +48,13 @@ there is exactly one indexable host. This is asserted at release time by
 `uptime.yml`.
 
 ### Email
-`support@gurbanisoul.com` is a **Cloudflare Email Routing** address forwarding to the owner's
-mailbox (Cloudflare adds the MX + SPF records; a `p=reject` DMARC TXT is set on `_dmarc`). It is the
-public contact in the App Store listing, `SECURITY.md`, and the privacy/support pages. See
+Mail for `gurbanisoul.com` is hosted by **Zoho Mail** (since 2026-09-26). `support@gurbanisoul.com` is an
+alias of the owner's mailbox, and a catch-all delivers any other address at the domain to it. DNS (Cloudflare,
+DNS only): MX `mx`/`mx2`/`mx3.zoho.com.au`, SPF `v=spf1 include:zohomail.com.au ~all`, DKIM selector `zmail`,
+and DMARC `v=DMARC1; p=none; rua=mailto:support@gurbanisoul.com` on `_dmarc` (move to `p=quarantine` after two
+weeks of clean reports). Do not add Cloudflare Email Routing's SPF include: it would break delivery. The address
+is the public contact in the App Store listing, the EU Digital Services Act trader declaration (verified
+2026-09-26), `SECURITY.md`, and the privacy/support pages. See
 [runbook: support-inbox](../process/runbooks/support-inbox.md).
 
 ---
@@ -62,10 +69,13 @@ SEO/social/PWA block is a shared component, **`frontend/src/components/Seo.astro
 
 - `<link rel="canonical">` and `og:url` built from `SITE_URL` + the path (bare apex host);
 - `description`, `og:title/description/type/image/site_name`, `twitter:card=summary_large_image`;
-- `theme-color` — the Knowledge Base (`themeColor="auto"`) gets one per OS colour scheme; the
-  light-first marketing shell (`themeColor="light"`) gets a single `#themeColorMeta` that
-  `scripts/theme.ts` keeps in step with the *page* theme; `apple-mobile-web-app-title`, `<link rel="manifest">`, an SVG
-  favicon, and — once the app is live (`APP_STORE_LIVE`) — the `apple-itunes-app` Smart App Banner.
+- `theme-color` — always one meta that follows the *page* theme, never the OS. The Knowledge Base
+  (`themeColor="page"`, the default) gets `id="kbThemeColor"`: the inline boot script in
+  `Base.astro` sets it to the header's colour for the stored theme before first paint, and
+  `scripts/core.ts` keeps it equal to `--chrome` afterwards; the light-first marketing shell (`themeColor="light"`) gets
+  `id="themeColorMeta"`, pinned to paper and rewritten by `scripts/theme.ts` on toggle.
+- `apple-mobile-web-app-title`, `<link rel="manifest">`, an `apple-touch-icon`, an SVG favicon, and —
+  once the app is live (`APP_STORE_LIVE`) — the `apple-itunes-app` Smart App Banner.
 
 `og:image` defaults to the page's OG card (`/og/<slug>.png`, see **OG images** below).
 `frontend/public/robots.txt` points crawlers at the canonical host and names `/sitemap.xml`, which
@@ -83,8 +93,8 @@ The `SeoInvariants` gate checks every built page's canonical/description/`og:ima
   is a **fixed** ISO date (never `Date.now()`) so the sitemap is byte-deterministic.
 - **`frontend/src/pages/sitemap.xml.ts`** emits `/sitemap.xml` over the manifest, each URL
   self-referencing its `en` + `x-default` hreflang alternates (no `pa` pages ship yet).
-- **`frontend/src/pages/rss.xml.ts`** emits `/rss.xml` ("Gurbani Soul — Learn") with an **empty**
-  item list for now; PR3 fills it. `RssInvariants` checks it parses and links to the site.
+- **`frontend/src/pages/rss.xml.ts`** emits `/rss.xml` ("Gurbani Soul — Learn"): every
+  non-draft Learn article, newest first. `RssInvariants` checks it parses and links to the site.
 - The old `frontend/public/sitemap.xml` was deleted (Astro forbids a public file colliding with a
   page route).
 
@@ -159,12 +169,12 @@ Vercel Production + Preview envs — see [runbook: newsletter](../process/runboo
 - **`Strict-Transport-Security`** (2-year, `includeSubDomains; preload`),
   **`Permissions-Policy`** (`camera=(), microphone=(), geolocation=(self), payment=()`), and
   **`Cross-Origin-Opener-Policy: same-origin`**.
-- Long-lived immutable `Cache-Control` for `/og/:path*` and `/icons/:path*`.
+- Long-lived immutable `Cache-Control` for `/og/*`, `/icons/*`, `/_astro/*` and `/fonts/*`.
 
 ### Fonts & PWA
 
 - **Sant Lipi** (SIL OFL 1.1) — the bundled Gurmukhi webfont, `unicode-range`-scoped, shared with
-  the Knowledge Base; declared in `marketing.css` (rule copied from `global.css`).
+  the Knowledge Base; declared in `marketing.css` (rule copied from `styles/kb/tokens.css`).
 - **Source Serif 4** (SIL OFL 1.1) — a Latin subset for headings (Brand.heading), regenerated by
   `frontend/scripts/subset-serif.sh` into `frontend/public/fonts/SourceSerif4-latin.woff2`
   (≤ 130 KB; licence at `/fonts/OFL-SourceSerif4.txt`). Declared in `marketing.css` and wired into
@@ -323,14 +333,15 @@ later, self-host the official SVG unmodified per Apple's App Store marketing gui
 Create `frontend/src/pages/<name>.astro` using `Base.astro` (Knowledge Base) or `Marketing.astro`
 (Gurbani Soul). Add its route to `frontend/src/routes.ts` (the sitemap and OG default derive from
 it — the `SitemapInvariants` gate fails if the manifest and the built HTML routes disagree). If it
-is a nav destination, add it to the `Base.astro` nav with a `data-path`. Build + sync.
+is a destination, add it to its place in `PLACES` in `Base.astro` (its path, and its entry in the place's `pages` if it
+should appear in the second row), and give it a state in `frontend/e2e/kb-shell.spec.ts`. Build + sync.
 
 ---
 
 ## What protects the site
 - **Repo gates** (`webapp/tests/test_repo_gates.py`, run by the required `python` check):
   `LandingPage` (verse verbatim, honest copy, alt text, SEO head, page-weight budget),
-  `SubmissionUrlsAreLive`, `InAppLinksMatchTheListing`, and `DocsHygiene` (this doc set is the only
+  `SubmissionUrlsAreLive`, and `DocsHygiene` (this doc set is the only
   place the legacy `vercel.app` alias may be named); plus the PR1 web-foundations gates
   `SeoInvariants`, `SitemapInvariants`, `RssInvariants`, `ExternalRequestAllowlist`,
   `SmartBannerConsistency`, `NoSecretsInFrontend`, and `WebThemeMatchesTokens`; plus the PR4
@@ -340,5 +351,6 @@ is a nav destination, add it to the `Base.astro` nav with a `data-path`. Build +
 - **`@smoke` Playwright** (`frontend/e2e/landing.spec.ts`, run in the production deploy gate against
   `https://gurbanisoul.com`): landing renders, verse present, exactly one App-Store slot, canonical
   host, axe serious/critical = 0.
-- **`uptime.yml`**: `/` (200 + "Gurbani Soul"), `/search`, `/privacy`, `/support` on the canonical host.
+- **`uptime.yml`** (every 15 minutes): `/api/health` all-true, `/` ("Gurbani Soul"), `/privacy`
+  ("Data Not Collected") and `/support` (a `mailto:` link) on the canonical host, plus the wiki.
 - **`sggs-verify-prod`**: after each release, proves the running commit and the no-redirect guard.

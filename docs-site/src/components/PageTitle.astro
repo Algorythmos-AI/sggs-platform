@@ -1,0 +1,121 @@
+---
+// The page title, with where the page sits above it ("Data · Runbooks", and "pinned from
+// sggs-data" for a sibling repository's page) and one quiet line under it: when the page last
+// changed, and for pages that describe code, the commit it was last verified against (frontmatter
+// `verified`, enforced by tools/docs_check.py). The date is the page's own last commit
+// (plugins/git-dates.mjs via src/route-data.ts); Starlight's footer date is not repeated.
+//
+// Beside the eyebrow sits the page menu (PageActions.astro). In the source it comes after the meta
+// line, so a phone reads eyebrow, title, dates, then the menu; from 50rem a grid lifts it to the
+// title's top right. The line under the title also says how long the page takes to read, and on
+// paper a ruled block gives the page's address and how current it is (src/styles/print.css).
+import { originOf } from '../../plugins/paths.mjs';
+import { readingLabel, summaryFor, SITE_ORIGIN } from '../../plugins/export-pages.mjs';
+import { PAGE_ACTIONS } from '../../plugins/features.mjs';
+import PageActions from './PageActions.astro';
+
+const route = Astro.locals.starlightRoute;
+type Entry = (typeof route.sidebar)[number];
+type Crumb = { label: string; href?: string };
+/** The groups that hold the current page, outermost first, each with its overview page when it has one. */
+function trail(entries: Entry[], above: Crumb[] = []): Crumb[] | null {
+  for (const e of entries) {
+    if (e.type === 'group') {
+      const overview = e.entries.find((x) => x.type === 'link' && x.label === 'Overview');
+      const found = trail(e.entries, [...above, { label: e.label, href: overview?.type === 'link' ? overview.href : undefined }]);
+      if (found) return found;
+    } else if (e.isCurrent) {
+      return above;
+    }
+  }
+  return null;
+}
+const here = Astro.url.pathname;
+// a crumb links to its section's overview — unless this page is that overview
+const where = (trail(route.sidebar) ?? []).map((c) => (c.href === here ? { label: c.label } : c));
+const filePath = (route.entry as { filePath?: string }).filePath;
+// entry.filePath is relative to docs-site/: ../docs/x.md, or a pinned page under .sources/
+const origin = filePath ? originOf(filePath.startsWith('../') ? filePath.slice(3) : `docs-site/${filePath}`) : null;
+const pinned = origin?.kind === 'sibling' ? origin.repository.split('/')[1] : null;
+const verified = (route.entry.data as { verified?: { commit: string; date: string } }).verified;
+const updated = route.lastUpdated;
+const repo = 'https://github.com/Algorythmos-AI/sggs-platform';
+const day = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const pageId = route.id || 'index';
+const reading = readingLabel(pageId);
+const pageUrl = SITE_ORIGIN + (pageId === 'index' ? '/' : `/${pageId}/`);
+const summary = summaryFor(pageId);
+const facts = [reading, updated, verified].filter(Boolean).length;
+---
+<div class="page-head">
+  {(where.length > 0 || pinned) && (
+    <p class="page-eyebrow">
+      {where.map((c, i) => (
+        <Fragment>{i > 0 && <span aria-hidden="true"> · </span>}{c.href ? <a href={c.href}>{c.label}</a> : c.label}</Fragment>
+      ))}{pinned && <span class="page-eyebrow__pinned">{where.length ? ' · ' : ''}pinned from {pinned}</span>}
+    </p>
+  )}
+  <h1 id="_top">{route.entry.data.title}</h1>
+  {facts > 0 && (
+    <p class="page-meta">
+      {reading && (
+        <span class="page-meta__read" data-pagefind-ignore><svg class="page-meta__clock" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="5.75" /><path d="M8 5v3.2l2 1.3" /></svg>{reading}</span>
+      )}
+      {reading && updated && <span aria-hidden="true"> · </span>}
+      {updated && <span>Updated <time datetime={updated.toISOString()}>{day(updated)}</time></span>}
+      {(reading || updated) && verified && <span aria-hidden="true"> · </span>}
+      {verified && (
+        <span class="page-meta__verified">Verified against <a href={`${repo}/commit/${verified.commit}`}><code>{verified.commit.slice(0, 7)}</code></a> on {verified.date}</span>
+      )}
+    </p>
+  )}
+  {PAGE_ACTIONS && <PageActions />}
+  {summary && <p class="page-summary" data-pagefind-ignore>{summary}</p>}
+  {pageId !== '404' && (
+    <p class="print-only print-provenance" data-pagefind-ignore>
+      <span class="print-provenance__url">{pageUrl}</span>
+      {pinned && origin?.kind === 'sibling' && <span> · a pinned copy of {origin.repository} at {origin.commit.slice(0, 7)}</span>}
+    </p>
+  )}
+</div>
+
+<style>
+  @layer starlight.core {
+    h1 {
+      margin-top: 0.25rem;
+      font-size: clamp(1.9rem, 1.35rem + 1.9vw, var(--sl-text-h1));
+      line-height: var(--sl-line-height-headings);
+      font-weight: 600;
+      color: var(--sl-color-white);
+      text-wrap: balance;
+    }
+  }
+  /* phone: eyebrow, title, dates, menu — the source order. From 50rem the menu sits at the title's
+     top right, on the eyebrow's row (or alone on it, for a page with no eyebrow). */
+  .page-head { display: grid; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 50rem) {
+    .page-head { grid-template-columns: minmax(0, 1fr) auto; column-gap: 1rem; align-items: end; }
+    .page-head > :global(*) { grid-column: 1 / -1; }
+    .page-head > .page-eyebrow { grid-column: 1; grid-row: 1; }
+    .page-head > :global(sggs-page-actions) { grid-column: 2; grid-row: 1; }
+  }
+  .page-eyebrow {
+    margin: 1rem 0 0;
+    font-size: var(--sl-text-sm);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--sl-color-text-accent);
+  }
+  .page-eyebrow a { color: inherit; text-decoration: none; }
+  .page-eyebrow a:hover, .page-eyebrow a:focus-visible { text-decoration: underline; text-underline-offset: 0.18em; }
+  .page-eyebrow__pinned { font-weight: 500; color: var(--sl-color-gray-3); }
+  .page-meta__clock { inline-size: 0.95em; block-size: 0.95em; margin-inline-end: 0.35em; vertical-align: -0.12em; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+  /* the page in a sentence: quiet, no rule and no icon — a left rule belongs to callouts */
+  .page-summary {
+    margin: 1.25rem 0 0; padding: 1rem 1.25rem; border: 1px solid var(--sl-color-hairline); border-radius: 10px;
+    background: var(--sgs-paper-warm); color: var(--sl-color-gray-1); font-size: var(--sl-text-body); line-height: 1.6;
+  }
+  .page-meta { margin: 0.5rem 0 0; font-size: var(--sl-text-sm); color: var(--sl-color-gray-3); }
+  .page-meta a { color: inherit; }
+  .page-meta code { font-size: 0.95em; }
+</style>

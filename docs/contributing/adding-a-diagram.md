@@ -18,13 +18,16 @@ reader.
   theme is central. Brand red never appears in a diagram.
 - Labels are plain text (`htmlLabels` is off): use `<br/>` for a line break, nothing else.
 - No scripture in a diagram, ever.
+- Draw top to bottom (`flowchart TB`): the page's column is narrow, and a wide left-to-right chart is
+  scaled down until its text cannot be read, or scrolls sideways. Short labels; the detail goes in the prose.
+- Give it an `accDescr` as well as an `accTitle`: the description is what a screen reader says.
 - Keep it under about twelve nodes. Past that, write a [poster](adding-a-poster.md): it steps, it
   zooms, and it carries a verified stamp.
 
 ## Example
 
 ```mermaid
-flowchart LR
+flowchart TB
     accTitle: A pin bump reaches production
     accDescr: sggs-data publishes; the platform bumps its lock in a pull request; the integrity check proves the pin; a merge deploys.
     d[(sggs-data)] -->|publishes| l[dataset.lock.json bump]

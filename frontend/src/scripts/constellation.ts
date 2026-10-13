@@ -4,10 +4,9 @@
 // existing concepts/concept_lines tables); nothing computed client-side. Tap a star → Reader.
 import * as d3 from 'd3';
 import { $, esc, api, guard, failHTML } from './core';
+import { cssVar, viz, onTheme } from './viz';
 
 const titleCase = (k: string) => k.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const PAL = ['#ff9933', '#ffd24a', '#5b8cff', '#23b3a1', '#b07cff', '#ff6b6b', '#7ed957', '#48c6ef', '#f78fb3'];
 // deterministic PRNG so star positions are stable across redraws (no jitter on resize/refocus)
 function rng(seed: number) { let s = seed % 2147483647; if (s <= 0) s += 2147483646; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
 
@@ -59,7 +58,7 @@ async function constellation() {
     clusters.forEach((cl: any, i: number) => {
       const ang = (i / N) * 2 * Math.PI - Math.PI / 2;
       const gx = cx + R * Math.cos(ang), gy = cy + R * Math.sin(ang);
-      const col = PAL[i % PAL.length];
+      const col = viz(i);
       svg.append('line').attr('x1', cx).attr('y1', cy).attr('x2', gx).attr('y2', gy)
         .attr('stroke', col).attr('stroke-opacity', 0.16).attr('stroke-width', 1);
       const g = svg.append('g');
@@ -72,7 +71,7 @@ async function constellation() {
           .style('cursor', 'pointer')
           .on('mouseover focus', (ev: any) => {
             const r = host.getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect();
-            tip.html(`<b>${esc(titleCase(c))} ✦ ${esc(titleCase(cl.co))}</b><br><span>Ang ${v.ang}</span><br>${esc((v.gurmukhi || '').slice(0, 64))}`)
+            tip.html(`<b>${esc(titleCase(c))} ✦ ${esc(titleCase(cl.co))}</b><br><span>Ang ${v.ang}</span><br><i class="gm" lang="pa">${esc(v.gurmukhi || '')}</i>`)
               .style('opacity', 1).style('left', (b.left - r.left + 12) + 'px').style('top', (b.top - r.top + 12) + 'px');
             d3.select(ev.currentTarget).attr('r', 4.6);
           })
@@ -89,10 +88,12 @@ async function constellation() {
     });
 
     // centre concept star
-    svg.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 30).attr('fill', cssVar('--accent') || '#ff9933')
-      .attr('fill-opacity', 0.92).attr('stroke', cssVar('--gold') || '#ffd24a').attr('stroke-width', 2);
+    // a filled control: the fill token with its edge, and the text colour proven on that fill
+    // (--accent is the accent as *text*, dark by day — a dark label on it was 3.8:1)
+    svg.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 30).attr('fill', cssVar('--accent-fill') || '#FFBC0D')
+      .attr('stroke', cssVar('--accent-ui') || '#A87900').attr('stroke-width', 2);
     svg.append('text').attr('x', cx).attr('y', cy).attr('dy', '.35em').attr('text-anchor', 'middle')
-      .attr('font-size', 13).attr('font-weight', 800).attr('fill', '#15171f').text(titleCase(c));
+      .attr('font-size', 13).attr('font-weight', 800).attr('fill', cssVar('--on-accent') || '#2B1A05').text(titleCase(c));
 
     // accessible text equivalent: clusters + Ang links (keyboard/AT path, mirrors the stars)
     const items = clusters.map((cl: any) =>
@@ -103,6 +104,7 @@ async function constellation() {
     host.querySelectorAll('.constel-list a').forEach((a: any) =>
       a.addEventListener('click', (e: any) => { e.preventDefault(); openReader(+a.dataset.ang); }));
   }, () => { host.insertAdjacentHTML('beforeend', failHTML('This constellation')); if (head) head.textContent = 'Could not load this theme.'; });
+  onTheme(draw);
   if (sel) sel.onchange = draw;
   if (authorSel) authorSel.onchange = draw;
   if (raagSel) raagSel.onchange = draw;

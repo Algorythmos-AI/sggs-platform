@@ -1,7 +1,8 @@
 // core.ts — shared across every MPA page: DOM helpers, API, store, toast, META cache,
 // theme (light/dark/system), nav active-state, cross-page navigation, prefs, footer.
 // The theme toggle lives in ./theme (shared with the marketing shell); core just wires it up.
-import { initTheme } from './theme';
+import { initTheme, applyTheme } from './theme';
+import { initAppearance } from './appearance';
 export { applyTheme } from './theme';
 export const $ = (s: string) => document.querySelector(s) as HTMLElement | null;
 export const esc = (s: any) =>
@@ -12,6 +13,11 @@ export const store = {
   set: (k: string, v: any) => { try { localStorage.setItem(k, String(v)); } catch {} },
 };
 
+// A stored Ang is believed only when it is exactly an integer from 1 to 1430. parseInt would take
+// "12abc" for 12 and "7e2" for 7; a value this code did not write is ignored, never repaired.
+export const validAng = (s: unknown): number | null =>
+  typeof s === 'string' && /^[1-9]\d{0,3}$/.test(s) && +s <= 1430 ? +s : null;
+
 let toastTimer: any = null;
 export function toast(msg: string) {
   const t = $('#toast'); if (!t) return;
@@ -19,10 +25,13 @@ export function toast(msg: string) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 3200);
 }
 
-export async function api(p: string): Promise<any> {
+export async function api(p: string, init?: RequestInit): Promise<any> {
   let r: Response;
-  try { r = await fetch('/api/' + p); }
-  catch (e) { toast('Cannot reach the app — is serve.py still running?'); throw e; }
+  try { r = await fetch('/api/' + p, init); }
+  catch (e) {
+    if (init?.signal?.aborted) throw e;        // cancelled on purpose (superseded) — nothing to report
+    toast('Can’t reach the server. Check your connection and try again.'); throw e;
+  }
   if (!r.ok) {
     let m = 'Request failed (' + r.status + ')';
     try { m = (await r.json()).error || m; } catch {}
@@ -36,7 +45,7 @@ export async function api(p: string): Promise<any> {
 export const guard = (fn: (...a: any[]) => Promise<any>, onFail?: (e: any) => void) =>
   async (...a: any[]) => { try { return await fn(...a); } catch (e) { console.error(e); try { onFail?.(e); } catch {} } };
 export const failHTML = (what = 'This section') =>
-  `<div class="hint">${what} could not be loaded — is serve.py still running? Reload to try again.</div>`;
+  `<div class="hint load-fail">${what} couldn’t be loaded. Check your connection, then reload to try again.</div>`;
 
 // Honour the OS "reduce motion" setting for JS-driven animation (D3 transitions / force
 // layout). The global CSS rule only covers CSS transitions; D3 runs its own animation loop.
@@ -77,7 +86,7 @@ export function goReader(ang: number, raag?: string, opts?: { line?: number; com
   location.href = u;
 }
 export function goSearchTheme(concept: string) {
-  location.href = '/?q=' + encodeURIComponent(concept) + '&mode=theme';
+  location.href = '/search?q=' + encodeURIComponent(concept) + '&mode=theme';
 }
 
 // ---- per-page nav active state ----
@@ -94,12 +103,20 @@ function markNav() {
 export function applyPrefs() {
   if (store.get('show_t', '1') === '0') document.body.classList.add('hide-t');
   if (store.get('show_timing', '1') === '0') document.body.classList.add('hide-timing');  // raag timing chip, default ON
-  const gs = parseInt(store.get('gsize', '22')); if (gs) document.documentElement.style.setProperty('--gsize', gs + 'px');
+  // only a size the reader chose is written inline; with nothing stored the stylesheet's default applies
+  const gs = parseInt(store.get('gsize', ''), 10); if (gs) document.documentElement.style.setProperty('--gsize', gs + 'px');
+}
+// one step (2px) larger or smaller Gurmukhi, from the size showing now — shared by Reader and Nitnem
+export function stepFontSize(d: number) {
+  const cur = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gsize'), 10) || 22;
+  const next = Math.max(16, Math.min(40, cur + d * 2));
+  document.documentElement.style.setProperty('--gsize', next + 'px');
+  store.set('gsize', next);
 }
 
 // ---- sticky reader toolbar below the (wrapping) nav ----
 export function syncToolbarTop() {
-  const n = document.querySelector('nav');
+  const n = document.querySelector('[data-topbar]');
   if (n) document.documentElement.style.setProperty('--nav-h', (n as HTMLElement).getBoundingClientRect().height + 'px');
 }
 
@@ -126,10 +143,47 @@ document.addEventListener('click', (e: any) => {
   }
 });
 
+// ---- the browser's own chrome (address bar, status bar) follows the page, not the OS: its colour
+// is the header's, read from the stylesheet whenever the theme or the colour theme changes ----
+function syncChromeColor() {
+  const m = document.getElementById('kbThemeColor');
+  const c = getComputedStyle(document.documentElement).getPropertyValue('--chrome').trim();
+  if (m && c) m.setAttribute('content', c);
+}
+
 // shared init (module scripts are deferred → DOM is ready)
 initTheme();
+initAppearance();
+syncChromeColor();
+document.addEventListener('themechange', syncChromeColor);
 applyPrefs();
 markNav();
+// the row of a place's pages scrolls sideways on a phone: bring the current one into view
+document.querySelector('.kb-sub a[aria-current]')?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'instant' });
 syncToolbarTop();
 window.addEventListener('resize', syncToolbarTop);
+// A page brought back by Back/Forward is exactly as it was left. What was chosen on another page
+// since is applied again — the appearance and the text size here, the colour theme and paper tone
+// in ./appearance — and what was measured is measured again.
+window.addEventListener('pageshow', (e) => {
+  if (!e.persisted) return;
+  const t = store.get('theme', 'system');
+  applyTheme(t === 'light' || t === 'dark' ? t : 'system');
+  const gs = parseInt(store.get('gsize', ''), 10);
+  if (gs) document.documentElement.style.setProperty('--gsize', gs + 'px');
+  else document.documentElement.style.removeProperty('--gsize');
+  syncToolbarTop();
+  syncChromeColor();
+});
 initFooter();
+
+// ---- jump anywhere: ⌘K / Ctrl+K from anywhere, "/" when not typing, or the bar's button. The
+// palette itself is loaded the first time it is asked for. ----
+const jump = () => import('./palette').then((m) => m.openPalette());
+document.getElementById('paletteBtn')?.addEventListener('click', jump);
+document.addEventListener('keydown', (e) => {
+  const t = e.target as HTMLElement | null;
+  const typing = !!t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+  if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey) { e.preventDefault(); jump(); }
+  else if (e.key === '/' && !typing && !e.metaKey && !e.ctrlKey && !e.altKey && !document.documentElement.classList.contains('overlay-open')) { e.preventDefault(); jump(); }
+});

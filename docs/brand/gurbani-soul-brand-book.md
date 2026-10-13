@@ -6,7 +6,7 @@ sidebar:
 ---
 # Gurbani Soul — Brand Book
 
-Status: **adopted** — G1 passed 2026-09-18; phase 2 shipped to `integration` (PRs #28–#31). G3 and G4 remain open before App Store submission. Scope: the iOS app, its widgets, icon and share card.
+Status: **adopted** — G1 passed 2026-09-18; phase 2 shipped to `integration` (PRs #28–#31). G3 and G4 were closed on 2026-09-26 for the first App Store submission (1.3.10, see the gates in §12). Scope: the iOS app, its widgets, icon and share card.
 The Knowledge Base website is a separate scholarly property and keeps its own name and theme.
 
 
@@ -44,7 +44,7 @@ rules; the playful retail voice and tagline.
 
 > **Hard rule — no gold mark on a red square, anywhere** (icon, avatar, launch, widget, marketing).
 > Individual colours are free to use; that *combination* is another company's trade dress.
-> Professional clearance (gate G4) is required before App Store submission.
+> Gate G4 was closed for submission on a documented self-search; professional clearance follows after launch (§12).
 
 The kit's printed contrast ratios are inaccurate (it states 11.2:1 and 1.9:1 where the real figures are
 9.94:1 and 1.69:1). This book quotes only computed values.
@@ -187,8 +187,31 @@ signal of state.
 
 ## 11. Governance
 
-`tokens.json` is the source of truth. Any colour change: edit the JSON, re-run the report, commit both.
-Once phase 2 lands, a unit test pins `DesignTokens.swift` to the JSON. Decisions are logged below.
+`tokens.json` is the source of truth, and the app is pinned to it. gurbani-soul-ios's
+`BrandTokensParityTests` (gurbani-soul-ios PR #20) checks `ios/App/Shared/DesignTokens.swift` against
+this file in all four legs (light, dark, lightHC, darkHC): `AccentPalette.soul` (`accent`, `accentFill`,
+`accentText`, `onAccent`, `accentDeep`), the `Ink` surfaces (`canvas`, `card`, `paper`, `paperWarm`) and
+status colours (`positive`, `negative`, `info`, `special`), and `Theme.Space` / `Theme.Radius`. The test
+reads a copy vendored by the iOS repo's `scripts/vendor_sync.py` and pinned by platform commit and sha256
+in its `vendor.lock.json`, so the app moves only when it re-vendors. It fails closed both ways: a value
+changed on either side, or a role added, renamed or removed here, fails with the role and leg named.
+`brand.red`, `brand.onRed`, `brand.maroon`, `brand.kraft` and `radius.button` are declared there as having
+no Swift token; giving one a token means adding it to the test's mapping.
+
+A colour change, in order:
+
+1. **Here** — edit `tokens.json`, re-run `python3 scripts/brand/contrast_report.py` (must exit 0) and
+   commit both (`contrast_report.py --check`, in `make docs-check` and the wiki's `docs` job, fails if
+   they disagree). CI also holds the web theme (`frontend/src/theme.ts`, `WebThemeMatchesTokens`) and the
+   wiki theme (`docs-site/src/styles/theme.css`, `tools/docs_check.py`) to the light and dark legs, so
+   they change in the same PR.
+2. **Release** — the change reaches a platform release tag (or another ref the iOS repo can pin).
+3. **Vendor** — in gurbani-soul-ios, `make vendor-sync-platform REF=<tag or commit>` re-vendors the file
+   and updates `vendor.lock.json`; `BrandTokensParityTests` now fails on every role and leg that moved.
+4. **Swift** — change the literal in `DesignTokens.swift` to match and commit it with the vendored file
+   and the lock; the test is green again.
+
+Decisions are logged below.
 
 | Date | Decision |
 |---|---|
@@ -199,6 +222,7 @@ Once phase 2 lands, a unit test pins `DesignTokens.swift` to the JSON. Decisions
 | 2026-09-18 | G1 passed: icon concept **A** (gold ੴ on warm ink) and **Source Serif 4** for headings chosen by the product owner |
 | 2026-09-18 | `accentDeep` given Increase Contrast legs so the hero label holds 4.5:1 at both gradient ends |
 | 2026-09-18 | Source Serif 4 (variable, SIL OFL 1.1, from adobe-fonts/source-serif) bundled for navigation titles and hero lines only; widgets stay on the system face |
+| 2026-09-26 | `DesignTokens.swift` pinned to `tokens.json` in all four legs by gurbani-soul-ios `BrandTokensParityTests` (PR #20), against a copy vendored by commit; a colour change now flows JSON → release → `make vendor-sync-platform` → Swift literal |
 
 ### Visual audit set
 
@@ -215,7 +239,20 @@ token, type or icon change and compare with the previous dated set. First set: `
 | G3 Sensitivity | Granthi / scholar, with the scripture-fidelity charter | ੴ treatment, icon, and any red near Gurbani accepted |
 | G4 Legal | Professional clearance, with the pending trademark review | Gold-and-red palette without Arches or Token cleared for the App Store |
 
-## 13. Implementation map (phase 2 — not started)
+Status at the first submission (1.3.10, 2026-09-26):
+- **G3 closed 2026-09-26.** The ੴ icon treatment, the launch screen and the default traditional saroop were
+  accepted with no change requested, recorded by the owner. The review pack is kept with the release records.
+- **G4 closed 2026-09-26** by the owner on a documented self-search (trademark registers in Australia, the US, the EU and
+  WIPO, both app stores, and the trade-dress rule above); full professional clearance is scheduled after launch.
+  The search record is private and stays out of the public repositories.
+
+Status at the Knowledge Base redesign (web 1.4.0):
+- **G3 for the web themes is open.** The five themes copied from the app are `approved`. The eight web-only
+  themes, and the rule that Gurmukhi is ink in every theme, have not been seen by a scholar; they ship
+  marked `review` in `docs/brand/web-themes.json`. The owner waived the review for the 1.4.0 release on
+  2026-10-13; it runs after the release, and a theme can be withdrawn by setting it to `held`.
+
+## 13. Implementation map (phase 2 — shipped in PRs #28–#31; kept as the record)
 
 One pull request per step, tests green at each:
 
@@ -223,7 +260,7 @@ One pull request per step, tests green at each:
    default read from it in `RootView.swift` (two sites), `PaletteKey`, `Theme.accent`; `AccentColor.colorset`
    -> `#A87900` / `#FFBC0D`. For the four existing palettes `accentFill == accent`, so nothing of theirs moves.
    Tests: existing assertions kept; `onAccent` asserted on `accentFill`; asset-parity pinned to `brandDefault`;
-   JSON-to-Swift parity added.
+   JSON-to-Swift parity planned (it landed after the repo split as gurbani-soul-ios PR #20; see §11).
 2. **Components** — fills to `accentFill` + border (`Buttons.swift`, `ModePill.swift`, Explore hero);
    `VerseCard`, `FocusHighlight`; hard-coded saffron in `Widgets/SGGSWidgets.swift`; Lineage "Guru" colour.
 3. **Type** — bundle the serif and its OFL text; `UIAppFonts` in `project.yml` for app and widget;

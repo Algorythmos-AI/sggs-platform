@@ -3,11 +3,11 @@ import AxeBuilder from '@axe-core/playwright';
 import { mockApi } from './helpers';
 
 test.describe('delivery, CI and the archive', () => {
-  test('process pages carry their verified stamp in the footer', async ({ page }) => {
+  test('process pages carry their verified stamp under the title', async ({ page }) => {
     await mockApi(page);
     await page.goto('/process/ci-gates/');
-    const stamp = page.locator('p.verified');
-    await expect(stamp).toContainText('Last verified against');
+    const stamp = page.locator('.page-meta .page-meta__verified');
+    await expect(stamp).toContainText('Verified against');
     await expect(stamp.locator('a')).toHaveAttribute('href', /github\.com\/Algorythmos-AI\/sggs-platform\/commit\/[0-9a-f]{7,40}/);
   });
 

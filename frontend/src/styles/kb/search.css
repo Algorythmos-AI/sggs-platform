@@ -1,0 +1,75 @@
+/* ============================== search ============================== */
+.searchbar { display:flex; gap:10px; margin:6px 0 12px; }
+/* min-width:0 — a flex item will not shrink below its content width, and an <input>'s is 20
+   characters of the system font: in a wide one it pushed the Search button off a 375px phone. */
+.sb-field { position:relative; flex:1; min-width:0; display:flex; }
+.searchbar input {
+  flex:1; min-width:0; padding:15px 48px 15px 20px; -webkit-appearance:none; appearance:none; font-size:17px; color:var(--ink); border-radius:16px; outline:none;
+  background:var(--card); border:1.5px solid var(--line); box-shadow:var(--shadow);
+  transition:border-color .15s, box-shadow .15s;
+}
+.searchbar input::placeholder { color:var(--faint); }
+.searchbar input::-webkit-search-cancel-button { -webkit-appearance:none; display:none; }
+.sb-clear { position:absolute; right:4px; top:50%; transform:translateY(-50%); width:44px; height:44px; font:inherit; font-size:22px; line-height:1; color:var(--soft);
+  background:transparent; border:0; border-radius:50%; cursor:pointer; }
+.sb-clear:hover { color:var(--ink); background:var(--chip); }
+.sb-clear[hidden] { display:none; }
+.searchbar input:focus { border-color:var(--accent); box-shadow:0 0 0 4px var(--glow); }
+.searchbar .sb-go {
+  border:none; color:var(--accent-ink); font-size:15px; font-weight:700; padding:0 26px; border-radius:16px; cursor:pointer;
+  background:var(--accent-fill); box-shadow:var(--fill-edge), 0 8px 22px var(--glow); transition:transform .12s, filter .15s;
+}
+.searchbar .sb-go:hover { filter:brightness(1.05); }
+.searchbar .sb-go:active { transform:scale(.97); }
+
+/* the ways to search: one row, which scrolls sideways inside itself on a phone */
+.modes { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:14px; }
+.modes button, .modes span {
+  flex:none; display:inline-flex; align-items:center; font:inherit; font-size:13.5px; font-weight:550; min-height:40px; padding:0 16px; white-space:nowrap; border-radius:999px; cursor:pointer;
+  color:var(--soft); background:var(--chip); border:1px solid transparent; transition:color .15s, border-color .15s;
+}
+.modes button:hover, .modes span:hover { color:var(--ink); border-color:var(--line); }
+.modes button.on, .modes span.on { color:var(--accent); background:var(--accent-wash);
+  border-color:color-mix(in srgb, var(--accent) 45%, transparent); font-weight:650; }
+.modes button:focus-visible, .modes span:focus-visible, .sb-clear:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+@media (max-width:840px) {
+  .modes { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; }
+  .modes::-webkit-scrollbar { display:none; }
+  .modes button, .modes span { min-height:44px; }
+  .searchbar .sb-go { display:none; }             /* the keyboard's own Search key, and results as you type */
+}
+/* before anything is typed */
+.search-idle { text-align:center; padding:44px 16px 20px; }
+.search-idle[hidden] { display:none; }
+.si-mark { font-size:44px; line-height:1.3; color:var(--ink); }
+.search-idle h2 { font-size:18px; font-weight:700; margin:6px 0 8px; }
+.search-idle p { font-size:14.5px; color:var(--soft); line-height:1.6; max-width:46ch; margin:2px auto; }
+.search-idle .si-sample { font-size:20px; color:var(--ink); margin-bottom:6px; }
+#results.busy { opacity:.55; transition:opacity .15s; }
+.hint { font-size:12.5px; color:var(--soft); margin-bottom:16px; line-height:1.65; }
+.hint i { color:var(--accent); font-style:normal; font-weight:550; }
+.hint-note { display:block; margin-top:6px; font-size:.88em; color:var(--faint); }
+.count { font-size:13px; color:var(--soft); margin:6px 2px 14px; }
+
+.card {
+  background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:16px 20px; margin-bottom:11px;
+  cursor:pointer; box-shadow:var(--shadow); transition:transform .16s, box-shadow .16s, border-color .16s, background .16s;
+}
+.card:hover { transform:translateY(-3px); background:var(--card-hover);
+  border-color:color-mix(in srgb, var(--accent) 45%, transparent); box-shadow:0 16px 40px var(--glow); }
+.card .g { font-size:calc(var(--gsize) - 1px); line-height:1.9; }
+.card .t { font-size:13.5px; color:var(--soft); font-style:italic; margin-top:3px; }
+.meta { display:flex; gap:7px; flex-wrap:wrap; margin-top:11px; }
+.meta span { font-size:11px; font-weight:500; background:var(--chip); color:var(--soft); padding:3px 11px; border-radius:999px; }
+.meta .ang { background:var(--accent-wash); color:var(--accent); font-weight:650; }
+.meta .rahao { box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); font-weight:650; }
+.themedesc { background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, transparent), transparent);
+  border:1px solid color-mix(in srgb, var(--accent) 32%, transparent); border-radius:14px; padding:13px 17px; font-size:13px; color:var(--ink); margin-bottom:14px; }
+.more { display:block; margin:14px auto 0; background:var(--chip); border:1px solid var(--line); color:var(--ink);
+  padding:11px 30px; border-radius:14px; cursor:pointer; font-size:13.5px; font-weight:550; transition:all .15s; }
+.more:hover { border-color:var(--accent); color:var(--accent); }
+mark { background:color-mix(in srgb, var(--accent-fill) 30%, transparent); color:var(--ink); border-radius:4px; padding:0 2px; }
+mark mark { background:transparent; padding:0; }
+.gm mark { padding:0; }
+
+.rel-theme { color:var(--accent); text-decoration:underline; text-underline-offset:2px; }

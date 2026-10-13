@@ -48,6 +48,15 @@ class OpenApi(unittest.TestCase):
                 if prm["in"] == "path":
                     self.assertIn("{" + prm["name"] + "}", path)
 
+    def test_summaries_are_short_labels(self):
+        # the wiki's API sidebar, page titles and try-it picker show `summary`; the sentence is `description`
+        self.assertEqual(set(go.SUMMARIES), set(go.ROUTES))
+        for path, item in SPEC["paths"].items():
+            op = item["get"]
+            self.assertLessEqual(len(op["summary"]), go.SUMMARY_MAX, path)
+            self.assertFalse(op["summary"].endswith("."), path)
+            self.assertTrue(op.get("description"), path)
+
     def test_operation_ids_unique(self):
         ids = [i["get"]["operationId"] for i in SPEC["paths"].values()]
         self.assertEqual(len(ids), len(set(ids)))

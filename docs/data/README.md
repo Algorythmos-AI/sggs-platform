@@ -22,14 +22,16 @@ platform never edits it and never commits a copy — it **pins** a commit and a 
 > sequences the font emitted — are registered in the [editorial ledger](editorial-ledger.md) and
 > enforced by a gate in sggs-data.
 
-## The four pages
+## The pages
 
-| Page | What you learn | Interactive |
-|---|---|---|
-| [Anatomy of a line record](line-record.md) | The 23 columns of the `lines` table, how a page becomes rows, what search reads | Poster 03 walkthrough · a live Ang explorer against the real API |
-| [Corpus pipeline and gates](pipeline.md) | `rebuild_all.sh` stage by stage, and the gates that stop it | Poster 04 walkthrough · code read from sggs-data at the pinned commit |
-| [The dataset pin](dataset-pin.md) | How this platform obtains the database, what it verifies, how a new dataset arrives | The lock, the fetcher's guarantees, a pin bump end to end |
-| [The editorial ledger](editorial-ledger.md) | What may change in the text, what never does, and how a fidelity concern travels | The rules and their applications, the review flow |
+<!-- sggs:cards -->
+- [Anatomy of a line record](line-record.md) — The 23 columns of the `lines` table, how a page becomes rows, what search reads (Poster 03 walkthrough · a live Ang explorer against the real API)
+- [Corpus pipeline and gates](pipeline.md) — `rebuild_all.sh` stage by stage, and the gates that stop it (Poster 04 walkthrough · code read from sggs-data at the pinned commit)
+- [Data dictionary](data-dictionary.md) — Every table in the pinned database: its layer, columns, row count and the API context that reads it (Generated from the database; CI fails if it drifts)
+- [The dataset pin](dataset-pin.md) — How this platform obtains the database, what it verifies, how a new dataset arrives (The lock, the fetcher's guarantees, a pin bump end to end)
+- [The editorial ledger](editorial-ledger.md) — What may change in the text, what never does, and how a fidelity concern travels (The rules and their applications, the review flow)
+- [The English translation layer](translation-layer.md) — Where the English comes from, how it is matched to lines, how it stays separate, English search, and its licence status (Two sources, one translator)
+- [The integrity chain](integrity-chain.md) — One line of scripture from the source PDF to a screen, and the gate that proves it at each stage (Six stages, each read against the code that enforces it)
 
 ## Pinned from sggs-data
 

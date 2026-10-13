@@ -1,0 +1,52 @@
+/* ============================== home (/library) ============================== */
+.hub { display:flex; flex-direction:column; gap:14px; }
+.hub-continue:empty, .hub-now[hidden] { display:none; }
+/* the canopy: the cloth of the bar carried down over the title, ending in the hem */
+.hub-canopy { position:relative; isolation:isolate; color:var(--cloth-ink); background:var(--cloth); padding:10px 18px 30px; }
+.hub-canopy::before { content:''; position:absolute; inset:0; z-index:-1; background:var(--co); opacity:var(--motif); pointer-events:none;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 6l6 6-6 6-6-6zM24 30l6 6-6 6-6-6zM12 18l6 6-6 6-6-6zM36 18l6 6-6 6-6-6zM24 20l4 4-4 4-4-4zM0 0h5L0 5zM48 0h-5l5 5zM0 48h5l-5-5zM48 48h-5l5-5z'/%3E%3C/svg%3E") 0 0/44px 44px; }
+.hub-canopy::after { content:''; position:absolute; left:0; right:0; bottom:0; height:4px;
+  background:linear-gradient(var(--co) 0 2px, transparent 2px 3px, var(--accent-fill) 3px 4px); }
+.hub-canopy-in { max-width:904px; margin:0 auto; }
+.hub-canopy h1 { font-family:var(--font-serif); font-weight:600; font-size:clamp(28px, 6.4vw, 46px); line-height:1.1; letter-spacing:-.01em; text-wrap:balance; }
+.hub-canopy p { margin-top:8px; font-size:13.5px; color:var(--cloth-soft); }
+/* on the home page the hem moves from the bar to the foot of the canopy */
+body.has-hero .kb-chrome { padding-bottom:0; }
+body.has-hero .kb-chrome::after { display:none; }
+/* room is kept for the pahar line and one row of raags, so the doors do not jump when they arrive */
+.hub-now { min-height:88px; }
+.hub-eyebrow { font-size:13.5px; color:var(--soft); }
+.hub-eyebrow b { color:var(--ink); font-weight:650; }
+.hub-note { font-size:12px; color:var(--faint); margin-left:6px; }
+/* a link on its own in a row of chips: it gets a full 44px touch target, like them */
+.hub-more { display:inline-flex; align-items:center; align-self:center; min-height:44px; padding:0 6px; font-size:12.5px; font-weight:600; color:var(--accent); text-decoration:none; margin-left:4px; }
+.hub-more:hover { text-decoration:underline; }
+.hub-search { margin:0; }
+.hub-row { display:flex; gap:10px; flex-wrap:wrap; align-items:stretch; }
+.hub-continue { display:flex; gap:10px; flex-wrap:wrap; flex:1 1 280px; }
+.hub-cont { flex:1 1 200px; display:flex; flex-direction:column; gap:2px; min-height:60px; justify-content:center; padding:10px 16px;
+  border-radius:16px; text-decoration:none; color:var(--ink); background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow);
+  transition:border-color .15s, transform .12s; }
+.hub-cont:hover { border-color:var(--accent); transform:translateY(-1px); }
+.hub-cont span { font-size:12px; color:var(--soft); }
+.hub-cont b { font-size:17px; font-weight:650; }
+.hub-random { min-height:48px; align-self:center; }
+@media (min-width:841px) { .hub-random { display:none; } }   /* a wide screen has it in the top bar */
+.hub-h { font-family:var(--font-serif); font-size:20px; font-weight:600; margin:8px 2px 0; }
+/* the doors: a row of façades, washed alternately in the theme's two colours */
+.doors { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px; }
+.door { display:flex; flex-direction:column; gap:5px; min-height:112px; padding:15px 16px; border-radius:18px; text-decoration:none;
+  color:var(--ink); background:var(--tile2); border:1px solid var(--line); transition:transform .14s, border-color .15s, box-shadow .15s; }
+.door:nth-child(odd) { background:var(--tile1); }
+.door:hover { transform:translateY(-3px); border-color:var(--accent); box-shadow:var(--shadow); }
+.door svg { width:22px; height:22px; margin-bottom:3px; fill:none; stroke:var(--accent); stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.door b { font-size:15.5px; font-weight:650; }
+.door small { font-size:12.5px; color:var(--soft); line-height:1.4; }
+@media (max-width:720px) {
+  .doors { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
+  .door { background:var(--tile2); }
+  .door:first-child { grid-column:1 / -1; min-height:0; }
+  .door:nth-child(4n+2), .door:nth-child(4n+5) { background:var(--tile1); }
+  .door:nth-child(odd):not(:nth-child(4n+5)) { background:var(--tile2); }
+}

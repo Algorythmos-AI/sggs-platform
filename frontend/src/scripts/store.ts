@@ -10,7 +10,7 @@ export type Pin = { line_id: number; gm: string; ang: number; comp_id: number; t
 // DOM, which the display-only saroop painter rewrites (see saroop.ts / docs/engineering/known-issues.md).
 const escAttr = (s: string) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 export function pinButtonHTML(id: number, ang: number, cid: number, gm: string): string {
-  return `<button class="pin-btn" data-id="${id}" data-ang="${ang}" data-cid="${cid}" data-gm="${escAttr(gm)}" type="button" aria-label="Pin to study trail" title="Pin to study trail">📌</button>`;
+  return `<button class="pin-btn" data-id="${id}" data-ang="${ang}" data-cid="${cid}" data-gm="${escAttr(gm)}" type="button" aria-haspopup="dialog" aria-label="Verse actions" title="Pin, open, copy or share this verse">⋯</button>`;
 }
 // Variation Selectors (U+FE00–FE0F) only ever exist in the display layer; a stored pin that
 // carries one was captured from painted DOM by an older build and must be re-fetched verbatim.

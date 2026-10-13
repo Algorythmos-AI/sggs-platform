@@ -1,0 +1,10 @@
+---
+// Starlight's "On this page", with a way back to the top under it on a page long enough to need one.
+import Default from '@astrojs/starlight/components/TableOfContents.astro';
+
+const { toc } = Astro.locals.starlightRoute;
+const long = (toc?.items ?? []).reduce((n, i) => n + 1 + i.children.length, 0) >= 4;
+---
+
+<Default><slot /></Default>
+{long && <a class="toc-top" href="#" data-pagefind-ignore="">Back to top</a>}

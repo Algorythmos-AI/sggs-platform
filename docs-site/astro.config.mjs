@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 // @ts-check
 // docs.gurbanisoul.com — the SGGS engineering + domain wiki. Starlight renders the Markdown that
 // lives in ../docs (ADR-0003: the wiki is PR-reviewed Markdown in the repository; ADR-0012: this
@@ -8,6 +9,8 @@ import { unified } from '@astrojs/markdown-remark';
 import starlight from '@astrojs/starlight';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
 import { remarkStripTitleH1 } from './plugins/remark-strip-title-h1.mjs';
+import { remarkAdr } from './plugins/remark-adr.mjs';
+import { remarkAlerts } from './plugins/remark-alerts.mjs';
 import { remarkRepoLinks } from './plugins/remark-repo-links.mjs';
 import { remarkWidgets } from './plugins/remark-widgets.mjs';
 import { remarkCodeExcerpt } from './plugins/remark-code-excerpt.mjs';
@@ -18,10 +21,16 @@ import { remarkQuiz } from './plugins/remark-quiz.mjs';
 import { remarkRepoMap } from './plugins/remark-repo-map.mjs';
 import { remarkAdrTimeline } from './plugins/remark-adr-timeline.mjs';
 import { remarkReleases } from './plugins/remark-releases.mjs';
+import { remarkAppBuilds } from './plugins/remark-app-builds.mjs';
+import { remarkCards } from './plugins/remark-cards.mjs';
+import { remarkSwatches } from './plugins/remark-swatches.mjs';
 import { remarkMermaid } from './plugins/remark-mermaid.mjs';
 import { remarkPosters } from './plugins/remark-posters.mjs';
 import { remarkTaskLists } from './plugins/remark-task-lists.mjs';
+import { rehypeLangPa } from './plugins/rehype-lang-pa.mjs';
 import { SIDEBAR } from './sidebar.mjs';
+import { FEATURES, PDFS } from './plugins/features.mjs';
+import { buildPdfs } from './scripts/build-pdfs.mjs';
 
 // The commit this build documents: CI passes PUBLIC_DOCS_COMMIT; locally, git. Emitted as
 // <meta name="sggs-docs-commit"> and checked by scripts/ci/docs_smoke.py after every deploy.
@@ -40,38 +49,62 @@ export default defineConfig({
     // Order matters: links and widgets are rewritten before Starlight's own plugins see the tree;
     // Mermaid renders at the remark stage, before Expressive Code sees code blocks. Links in the
     // built HTML are validated afterwards by scripts/check-links.mjs.
-    processor: unified({ remarkPlugins: [remarkStripTitleH1, remarkRepoLinks, remarkWidgets, remarkCodeExcerpt, remarkApiTry, remarkQuiz, remarkRepoMap, remarkAdrTimeline, remarkReleases, remarkTerms, remarkGlossaryAnchors, remarkMermaid, remarkPosters, remarkTaskLists] }),
+    processor: unified({ remarkPlugins: [remarkStripTitleH1, remarkAdr, remarkAlerts, remarkRepoLinks, remarkWidgets, remarkCodeExcerpt, remarkApiTry, remarkQuiz, remarkRepoMap, remarkAdrTimeline, remarkReleases, remarkAppBuilds, remarkCards, remarkSwatches, remarkTerms, remarkGlossaryAnchors, remarkMermaid, remarkPosters, remarkTaskLists], rehypePlugins: [rehypeLangPa] }),
   },
   integrations: [
     starlight({
       title: 'Sri Guru Granth Sahib Ji — Knowledge Base',
+      titleDelimiter: '·',
       description: 'The engineering and domain wiki of the SGGS Knowledge Base and the Gurbani Soul app: how the verbatim scripture corpus is built, proven, searched, verified, served and shipped.',
       favicon: '/favicon.svg',
       defaultLocale: 'root',
       locales: { root: { label: 'English', lang: 'en' } },
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Algorythmos-AI/sggs-platform' }],
       lastUpdated: true,
+      routeMiddleware: './src/route-data.ts',
       pagination: true,
-      customCss: ['./src/styles/theme.css', './src/styles/widgets.css'],
+      customCss: ['./src/styles/theme.css', './src/styles/widgets.css', './src/styles/look.css', './src/styles/page-actions.css', './src/styles/print.css'],
       components: {
         Head: './src/components/Head.astro',
+        Header: './src/components/Header.astro',
         EditLink: './src/components/EditLink.astro',
         Footer: './src/components/Footer.astro',
+        SiteTitle: './src/components/SiteTitle.astro',
+        Sidebar: './src/components/Sidebar.astro',
+        TableOfContents: './src/components/TableOfContents.astro',
+        PageTitle: './src/components/PageTitle.astro',
+        LastUpdated: './src/components/LastUpdated.astro',
       },
       head: [
         { tag: 'meta', attrs: { name: 'sggs-docs-commit', content: process.env.PUBLIC_DOCS_COMMIT } },
+        // what this build can be held to (scripts/ci/docs_smoke.py, e2e-live): plugins/features.mjs
+        { tag: 'meta', attrs: { name: 'sggs-docs-features', content: FEATURES.join(' ') } },
       ],
-      sidebar: [...SIDEBAR, ...openAPISidebarGroups],
+      // the generated API reference sits inside the API group, not after Reference
+      sidebar: SIDEBAR.map((/** @type {any} */ g) => (g.label === 'API' ? { ...g, items: [...g.items, ...openAPISidebarGroups] } : g)),
       plugins: [
         starlightOpenAPI([
           {
             base: 'api/reference',
-            label: 'API reference',
             schema: '../contract/openapi.json',
+            // operation labels are the spec's short `summary` (tools/gen_openapi.py SUMMARIES), with a GET badge
+            sidebar: { label: 'Reference', collapsed: true, operations: { labels: 'summary', badges: true } },
           },
         ]),
       ],
     }),
+    // A PDF of every page, made here — inside the build — because the deploy jobs run their own
+    // `vercel build` and deploy only what it writes to dist/ (scripts/build-pdfs.mjs explains the rest).
+    {
+      name: 'sggs-pdfs',
+      hooks: {
+        'astro:build:done': async ({ dir }) => {
+          // imported at the top, not here: this file is loaded through Vite, whose module runner has
+          // closed by the time this hook runs, so an import() at this point fails
+          if (PDFS) await buildPdfs(fileURLToPath(dir));
+        },
+      },
+    },
   ],
   vite: {
     server: {

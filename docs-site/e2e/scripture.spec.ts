@@ -43,13 +43,20 @@ test.describe('Scripture 101', () => {
     await page.goto('/scripture/structure/');
     const poster = page.locator('figure.poster[data-poster="13-structure-of-the-granth"]');
     await expect(poster.locator('g[data-step]')).toHaveCount(6);
-    await expect(poster.locator('svg title')).toHaveCount(1 + 2 + 31 + 22);   // the poster title, two ends, 31 raags, 22 Vaars
+    // each segment of the bar names itself: two ends, 31 raags, 22 Vaars (every node's tooltip is its own)
+    const segments = poster.locator('g.pk-node > title', { hasText: /· Angs \d/ });
+    await expect(segments).toHaveCount(2 + 31 + 22);
+    await expect(poster.locator('g.pk-node[data-node="r3"] > title')).toHaveText('3 · Gaurhee · Angs 151–346');
+    // and every raag is named in the list beside the bar
+    await expect(poster.locator('g.pk-node[data-node^="n"] text')).toHaveCount(31);
   });
 
   test('cited scripture is verbatim from the API, with its Ang', async ({ page }) => {
     await mockApi(page, { '/api/health': 'health.json', '/api/ang/1': 'ang-1.json' });
     await page.goto('/scripture/what-sggs-is/');
-    const quote = page.locator('.sl-markdown-content blockquote').nth(1);
+    // the page's note is a callout, not a blockquote: a blockquote on this site is a quotation
+    await expect(page.locator('.sl-markdown-content aside.starlight-aside').first()).toContainText('Explanation, not scripture');
+    const quote = page.locator('.sl-markdown-content blockquote', { hasText: 'Sri Guru Granth Sahib Ji · Ang 1' }).first();
     await expect(quote).toContainText('Sri Guru Granth Sahib Ji · Ang 1');
     const shown = (await quote.locator('p').first().textContent())?.trim();
     const data = JSON.parse(readFileSync(resolve(here, 'fixtures', 'ang-1.json'), 'utf8'));   // a verbatim capture of /api/ang/1

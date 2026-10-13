@@ -18,16 +18,16 @@ your head.
    know; the poster's segments name every raag and Vaar.
 3. [Gurmukhi and Unicode](../scripture/gurmukhi-and-unicode.md) — the table of what the pipeline
    may and may not do. This is the heart of a fidelity review.
-4. [The editorial ledger](../data/editorial-ledger.md) — the four rules and eleven applications
-   awaiting or holding your review; and the canonical
+4. [The editorial ledger](../data/editorial-ledger.md) — the four rules and eleven applications,
+   approved in the scholar review of 2026-09-24; and the canonical
    [scripture integrity](https://github.com/Algorythmos-AI/sggs-data/blob/main/docs/architecture/scripture-integrity.md) page.
 5. [The Answer Protocol](../scripture/answer-protocol-for-engineers.md) — the eight rules any
    answer from this knowledge base must follow.
 6. Try the [Ang explorer](../data/line-record.md#explore-real-records) on an Ang you know well,
    and the [verify playground](../search/verification-engine.md#try-it) with a line from memory:
    the engine should refuse to guess.
-7. [Nitnem for engineers](../ios/nitnem-for-engineers.md) — the non-SGGS layer that awaits the
-   scholar's `REVIEWED: true`, and what that attestation gates.
+7. [Nitnem for engineers](../ios/nitnem-for-engineers.md) — the non-SGGS layer, reviewed line by line
+   against the SGPC Nitnem Gutka (attested `REVIEWED: true` on 2026-09-21), and what that attestation gates.
 8. [The reverence checklist](../onboarding/reverence-checklist.md) and
    [who to ask](../onboarding/who-to-ask.md).
 9. **[Exercise 05 — fix a poster](../exercises/05-fix-a-poster.md)**, reading part only: find a

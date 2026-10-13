@@ -8,13 +8,13 @@
   {
     "id": "step-02",
     "title": "A page becomes units",
-    "caption": "segment_units splits the page stream on the double danda. Numeral markers such as ॥੧॥ stay attached to the unit they close, and a ਰਹਾਉ marker sets the rahao flag. One unit becomes one row: is_rahao is 1 on a refrain line, is_header is 1 on a heading.",
+    "caption": "segment_units splits the page stream on the double danda. Numeral markers stay attached to the unit they close, and a rahao marker sets the rahao flag. One unit becomes one row: is_rahao is 1 on a refrain line, is_header is 1 on a heading.",
     "link": "/data/line-record/"
   },
   {
     "id": "step-03",
     "title": "Headings carry the metadata",
-    "caption": "detect_header decides whether a unit is a structural heading — a raag title, the ੴ invocation, a ਮਹਲਾ or Bhagat label — and reads the raag, section, author, ghar and composition type from it. Those values are inherited by the lines that follow. A verse that merely contains a raag word or a form word is not a heading (the v1.1.4 weak-signal rule). Japji has no ਮਹਲਾ line in the print, so its author is null.",
+    "caption": "detect_header decides whether a unit is a structural heading — a raag title, the invocation, a Mahalla or Bhagat label — and reads the raag, section, author, ghar and composition type (comp_type) from it. Those values are inherited by the lines that follow. A verse that merely contains a raag word or a form word is not a heading (the v1.1.4 weak-signal rule). Japji has no Mahalla line in the print, so its author is null.",
     "link": "/data/line-record/"
   },
   {
@@ -26,7 +26,7 @@
   {
     "id": "step-05",
     "title": "The text, three ways",
-    "caption": "gurmukhi is the line as printed, dandas and markers included — verbatim, proven character for character against the PDF, and never edited anywhere in the system. text is the same line without markers, for indexing. markers is the JSON list of the numerals that closed the unit. The API returns gurmukhi and translit for every line, never a rewritten form.",
+    "caption": "gurmukhi is the line as printed, dandas and markers included — verbatim, proven character for character against the PDF, and never edited anywhere in the system. text is the same line without markers, for indexing. markers is the JSON list of the numerals that closed the unit. /api/ang/{n} returns 15 of the columns for every line, gurmukhi verbatim, never a rewritten form.",
     "link": "/data/editorial-ledger/"
   },
   {
@@ -44,7 +44,7 @@
   {
     "id": "step-08",
     "title": "The FTS index",
-    "caption": "fts is an FTS5 table with external content over lines: text, translit, translit_norm, fl_g, fl_r and skeleton, tokenised so Gurmukhi signs and ੴ stay inside tokens. do_search ranks with bm25 and column weights 10, 5, 4, 3, 3, 1 — the verbatim text outranks a transliteration hit, which outranks a first-letter or skeleton hit. fts_en, fts_shabad and fts_tri serve the English, passage and typo tiers; translations live in their own table.",
+    "caption": "fts is an FTS5 table with external content over lines: text, translit, translit_norm, fl_g, fl_r and skeleton, tokenised so Gurmukhi signs stay inside tokens. Search ranks with bm25 and column weights 10, 5, 4, 3, 3, 1 — the verbatim text outranks a transliteration hit, which outranks a first-letter or skeleton hit. Beside it, fts_en serves the English tier and fts_shabad the passage tier; translations live in their own, labelled table. (The database also carries a trigram index, fts_tri, which no route reads.)",
     "link": "/architecture/search-waterfall/"
   }
 ]

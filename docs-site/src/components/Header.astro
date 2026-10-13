@@ -1,0 +1,16 @@
+---
+// Starlight's header, with one row added under it on wide screens: the section tabs
+// (plugins/tabs.mjs). On a phone the row is not shown — the same five links open the menu drawer
+// (Sidebar.astro). Starlight's own header is rendered as it is, so an upgrade changes nothing here.
+import Default from '@astrojs/starlight/components/Header.astro';
+import { TABS, litTab } from '../../plugins/tabs.mjs';
+
+const lit = litTab(Astro.locals.starlightRoute.sidebar);
+---
+
+<div class="hdr">
+  <Default><slot /></Default>
+  <nav class="tabs" aria-label="Sections" data-pagefind-ignore="">
+    {TABS.map((t) => <a href={`/${t.slug}/`} aria-current={t === lit ? 'true' : undefined}>{t.label}</a>)}
+  </nav>
+</div>

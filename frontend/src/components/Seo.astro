@@ -5,6 +5,7 @@
 // live only in sitemap.xml until the `pa` pages exist.
 import { SITE_URL, APP_STORE_ID, APP_STORE_LIVE } from "../site";
 import { ogForPath } from "../routes";
+import kbThemes from "../generated/kb-themes.json";
 
 export interface Props {
   title: string;
@@ -12,17 +13,20 @@ export interface Props {
   path: string;          // root-relative, e.g. "/" or "/search"
   ogImage?: string;      // root-relative or absolute; defaults to the path's OG card
   type?: string;         // og:type, default "website"
-  // Browser-chrome colour. "auto" (default, the Knowledge Base) = two media-query metas that
-  // follow the OS appearance. "light" (the light-first marketing shell) = ONE meta pinned to paper,
-  // id="themeColorMeta", which scripts/theme.ts rewrites to follow the PAGE theme on toggle — so a
-  // dark-OS visitor never gets dark browser chrome over a light page.
-  themeColor?: "auto" | "light";
+  // Browser-chrome colour: always ONE meta that follows the PAGE theme, never the OS, so a
+  // dark-OS visitor never gets dark browser chrome over a light page (or the reverse).
+  // "page" (default, the Knowledge Base) = id="kbThemeColor", the header's colour: the default
+  // theme's by day here, corrected before first paint by Base.astro's boot script and kept current
+  // by scripts/core.ts. "light" (the light-first marketing shell) = id="themeColorMeta", pinned to
+  // paper and rewritten by scripts/theme.ts on toggle.
+  themeColor?: "page" | "light";
 }
-const { title, description, path, ogImage, type = "website", themeColor = "auto" } = Astro.props;
+const { title, description, path, ogImage, type = "website", themeColor = "page" } = Astro.props;
 
 const canonical = new URL(path, SITE_URL).href;
 const ogPath = ogImage ?? `/og/${ogForPath(path)}.png`;
 const ogAbsolute = new URL(ogPath, SITE_URL).href;
+const kbChrome = kbThemes.themes.find((t) => t.id === kbThemes.default)!.chrome.light;
 ---
 <link rel="canonical" href={canonical} />
 <meta name="description" content={description} />
@@ -41,11 +45,9 @@ const ogAbsolute = new URL(ogPath, SITE_URL).href;
 
 {themeColor === "light"
   ? <meta name="theme-color" content="#FBF7F0" id="themeColorMeta" />
-  : <Fragment>
-      <meta name="theme-color" content="#FBF7F0" media="(prefers-color-scheme: light)" />
-      <meta name="theme-color" content="#171412" media="(prefers-color-scheme: dark)" />
-    </Fragment>}
+  : <meta name="theme-color" content={kbChrome} id="kbThemeColor" />}
 
 <link rel="manifest" href="/site.webmanifest" />
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 <meta name="apple-mobile-web-app-title" content="Gurbani Soul" />
 {APP_STORE_LIVE && <meta name="apple-itunes-app" content={`app-id=${APP_STORE_ID}`} />}

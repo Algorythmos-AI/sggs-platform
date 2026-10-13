@@ -3,69 +3,45 @@
 // gravity + semantic echoes). Pin buttons everywhere are handled here in the CAPTURE phase
 // so a pin click never fires the underlying verse card's own onclick.
 import { $, esc, api } from './core';
+import { overlayOpened, overlayClosed } from './overlay';
+import { openVerse, markVerseButtons } from './verse';
 import {
-  getPins, count, isPinned, togglePin, removePin, clearPins, subscribe, mostRecent,
-  enrichThemes, centerOfGravity, label, toJSON, toText, MAX_PINS, pinButtonHTML, repairPins, type Pin,
+  getPins, count, isPinned, removePin, clearPins, subscribe, mostRecent,
+  enrichThemes, centerOfGravity, label, toJSON, toText, pinButtonHTML, repairPins, type Pin,
 } from './store';
 
-/* ---------- transient toast (self-contained, no CSS dependency) ---------- */
-function toast(msg: string) {
-  let t = document.getElementById('sggs-toast') as HTMLDivElement | null;
-  if (!t) {
-    t = document.createElement('div'); t.id = 'sggs-toast';
-    t.setAttribute('role', 'status'); t.setAttribute('aria-live', 'polite');
-    t.style.cssText = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%);z-index:9999;'
-      + 'background:rgba(20,22,30,.95);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;'
-      + 'max-width:80vw;text-align:center;box-shadow:0 10px 34px rgba(0,0,0,.45);opacity:0;transition:opacity .2s;';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg; t.style.opacity = '1';
-  clearTimeout((t as any)._h);
-  (t as any)._h = setTimeout(() => { if (t) t.style.opacity = '0'; }, 3400);
-}
-
-/* ---------- pin-button capture delegate (verse cards keep their own click intact) ---------- */
+/* ---------- a verse's "⋯" button opens its actions (capture phase: the card under it keeps its own click) ---------- */
 document.addEventListener('click', (e: any) => {
   const btn = e.target?.closest?.('.pin-btn');
   if (!btn) return;
-  e.stopPropagation(); e.preventDefault();                 // capture-phase: beat the card's onclick
-  const id = +btn.dataset.id, ang = +btn.dataset.ang, cid = +btn.dataset.cid;
-  // verbatim scripture comes from the data model (data-gm), NEVER from rendered text — the
-  // display-only saroop painter rewrites .g text nodes, and that must never reach storage.
-  const gm = btn.dataset.gm || '';
-  const r = togglePin({ line_id: id, gm, ang, comp_id: cid });
-  if (r === 'cap' || r === 'quota') {            // save failed → keep the button truthful + tell the user
-    btn.classList.remove('pinned'); btn.setAttribute('aria-pressed', 'false');
-    toast(r === 'cap'
-      ? `Study trail is full (max ${MAX_PINS}) — unpin a verse to add more.`
-      : 'Could not save — your browser storage is full.');
-    return;
-  }
-  const on = r === 'pinned';
-  btn.classList.toggle('pinned', on);
-  btn.setAttribute('aria-pressed', String(on));
+  e.stopPropagation(); e.preventDefault();
+  openVerse(btn);
 }, true);
+const markPins = markVerseButtons;
 
-// reflect pinned state on every pin button currently in the DOM
-function markPins() {
-  document.querySelectorAll('.pin-btn').forEach((b: any) => {
-    const on = isPinned(+b.dataset.id);
-    b.classList.toggle('pinned', on); b.setAttribute('aria-pressed', String(on));
-  });
-}
-
-/* ---------- drawer open / close ---------- */
+/* ---------- drawer open / close ----------
+   Closed, the drawer is only moved off-screen, so it is `inert` until opened: Tab and screen
+   readers skip it. Closing returns focus to whatever opened it. */
 function openDrawer() {
-  $('#trailDrawer')?.classList.add('on');
+  const d = $('#trailDrawer') as HTMLElement | null;
+  if (!d) return;
+  d.removeAttribute('inert');
+  d.classList.add('on');
   $('#trailScrim')?.classList.add('on');
   document.body.classList.add('drawer-open');
   renderAll();
-  setTimeout(() => ($('#trailClose') as HTMLElement | null)?.focus(), 0);
+  // Escape, the Tab trap and the return of focus are the overlay stack's; where the opener has
+  // gone (or was never focused: Safari does not focus a button on click), the Saved button
+  overlayOpened(d, closeDrawer, { focus: $('#trailClose') as HTMLElement | null, fallback: savedButton });
 }
 function closeDrawer() {
-  $('#trailDrawer')?.classList.remove('on');
+  const d = $('#trailDrawer') as HTMLElement | null;
+  if (!d || !d.classList.contains('on')) return;
+  d.classList.remove('on');
+  d.setAttribute('inert', '');
   $('#trailScrim')?.classList.remove('on');
   document.body.classList.remove('drawer-open');
+  overlayClosed(d);
 }
 
 /* ---------- tabs ---------- */
@@ -79,12 +55,15 @@ function showTab(which: 'pinned' | 'insights') {
 }
 
 /* ---------- renderers ---------- */
+// "Saved" is in the top bar on a wide screen and in the tab bar on a phone: both open the
+// drawer and both carry the count. Only one of the two is displayed at a time.
+const savedButton = () =>
+  (Array.from(document.querySelectorAll('[data-open-saved]')) as HTMLElement[]).find((b) => b.offsetParent !== null) || null;
 function fabBadge() {
   const n = count();
-  const fab = $('#trailFab'); if (!fab) return;
-  fab.setAttribute('data-n', String(n));
-  fab.classList.toggle('has', n > 0);
-  const b = $('#trailFabN'); if (b) b.textContent = String(n);
+  document.querySelectorAll('[data-saved-count]').forEach((b: any) => { b.textContent = String(n); b.hidden = n === 0; });
+  document.querySelectorAll('[data-open-saved]').forEach((b) =>
+    b.setAttribute('aria-label', n ? `Saved: ${n} pinned verse${n === 1 ? '' : 's'}` : 'Saved verses'));
 }
 
 function verseRow(p: Pin): string {
@@ -103,7 +82,7 @@ function renderPinned() {
   const host = $('#tab-pinned'); if (!host) return;
   const pins = getPins();
   if (!pins.length) {
-    host.innerHTML = `<div class="trail-empty">No verses pinned yet.<br><span>Tap 📌 on any verse — in Search, the Reader, or a composition — to begin building a study collection.</span></div>`;
+    host.innerHTML = `<div class="trail-empty">No verses pinned yet.<br><span>Tap ⋯ on any verse, then Pin — in Search, the Reader, or a composition — to begin building a study collection.</span></div>`;
     return;
   }
   host.innerHTML = `<div class="pv-head"><span>${pins.length} verse${pins.length > 1 ? 's' : ''}</span>
@@ -186,6 +165,9 @@ function renderAll() {
 
 /* ---------- wire up ---------- */
 subscribe(renderAll);
+// pins changed on another page (then Back) or in another tab: the count, the marks and the list follow
+window.addEventListener('pageshow', (e) => { if (e.persisted) renderAll(); });
+window.addEventListener('storage', (e) => { if (e.key === 'sggs_pins') renderAll(); });
 window.addEventListener('DOMContentLoaded', markPins);
 // pages re-render results with innerHTML; reflect pinned state on every newly added button
 new MutationObserver((muts) => {
@@ -194,21 +176,9 @@ new MutationObserver((muts) => {
       if (n.nodeType === 1 && ((n as Element).matches('.pin-btn') || (n as Element).querySelector('.pin-btn'))) { markPins(); return; }
 }).observe(document.body, { childList: true, subtree: true });
 repairPins().then(markPins);              // heal pins captured from painted DOM by older builds
-$('#trailFab')?.addEventListener('click', openDrawer);
+document.addEventListener('click', (e: any) => { if (e.target?.closest?.('[data-open-saved]')) openDrawer(); });
 $('#trailClose')?.addEventListener('click', closeDrawer);
 $('#trailScrim')?.addEventListener('click', closeDrawer);
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#trailDrawer')?.classList.contains('on')) closeDrawer(); });
-// focus trap while the drawer is open (WCAG 2.1.2) — mirrors panel.ts's dialog trap
-$('#trailDrawer')?.addEventListener('keydown', (e: any) => {
-  const d = $('#trailDrawer');
-  if (e.key !== 'Tab' || !d || !d.classList.contains('on')) return;
-  const f = Array.from(d.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'))
-    .filter((el: any) => el.offsetParent !== null) as HTMLElement[];
-  if (!f.length) return;
-  const first = f[0], last = f[f.length - 1];
-  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-});
 document.querySelectorAll('#trailTabs [data-tab]').forEach((t: any) => t.onclick = () => showTab(t.dataset.tab));
 (window as any).openStudyTrail = openDrawer;
 fabBadge(); markPins();
