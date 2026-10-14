@@ -5,6 +5,13 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 
 ## [Unreleased]
 
+### Changed
+- **A new icon on the sites, matching the app's icon v2.** The favicon, the home-screen and PWA icons
+  and the wiki's icons now show a bold ੴ above an open pothi, warm ink on gold, in place of the thin
+  gold ੴ on black. They are built from the app icon's own outlines, so no Gurmukhi font is needed to
+  draw the favicon any more. The brand book (§5) describes the icon and its rules. The icon goes back
+  to the scholar review (gate G3) before a release carries it.
+
 ## [1.4.0] — 2026-10-14 — the Knowledge Base, redressed: thirteen themes, a new shell, and the app's Reader, Nitnem, Search and Raag Clock on the web
 
 ### Added
