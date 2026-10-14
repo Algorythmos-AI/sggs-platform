@@ -154,8 +154,13 @@ run when a rule above is broken. The web, PWA and wiki icons are built from the 
 `frontend/scripts/gen-icons.mjs` (`frontend/scripts/app-icon/`). The favicons carry the mark and the pothi
 without the rings, which are noise at 16–32 px.
 
-The launch screen and the ੴ set inside the app and on the open-graph cards stay the light weight in a single
-colour; they are the mark in a layout, not the icon.
+**Launch screen:** the icon's ੴ and pothi without the field or the rings — warm ink on paper, brand gold on
+warm ink in dark — 200 pt with the artwork about 186 pt wide, written by the same `make app-icon`. While the
+integrity check runs, the app shows the same logo on the same background, centred on the screen, so the
+launch screen hands over without a jump.
+
+The ੴ set inside the app (About, widgets) and on the open-graph cards stays the light weight in a single
+colour; it is the mark in a layout, not the icon.
 
 <details><summary>Icon v1 (2026-09-18 to 2026-10-14)</summary>
 
@@ -218,7 +223,7 @@ signal of state.
 - [ ] Red under ~10% and never text
 - [ ] Light, dark, Increase Contrast and AX5 screenshots reviewed
 - [ ] Widgets and share card match the app
-- [ ] Icon: no red; mark and pothi one flat colour; three flat variants and the layered icon present; `make app-icon` runs clean
+- [ ] Icon: no red; mark and pothi one flat colour; three flat variants, the layered icon and the launch logo present; `make app-icon` runs clean
 - [ ] Scripture text, corpus and database untouched
 
 ## 11. Governance
@@ -284,8 +289,9 @@ Status at the first submission (1.3.10, 2026-09-26):
   The search record is private and stays out of the public repositories.
 
 Status at icon v2 (2026-10-14):
-- **G3 is open again for the icon.** The 2026-09-26 acceptance covered icon v1. Icon v2 changes the weight and
-  the field and adds an open pothi beneath ੴ, so it goes back to the scholar before any release that carries it.
+- **G3 is open again for the icon and the launch screen.** The 2026-09-26 acceptance covered icon v1 and the
+  v1 launch screen. Icon v2 changes the weight and the field and adds an open pothi beneath ੴ, and the launch
+  screen now matches it, so both go back to the scholar before any release that carries them.
 - **G4 to be re-checked** for the gold field: the self-search note should record that an ink mark on gold,
   with no red and no arch, was considered.
 
@@ -308,6 +314,6 @@ One pull request per step, tests green at each:
    `VerseCard`, `FocusHighlight`; hard-coded saffron in `Widgets/SGGSWidgets.swift`; Lineage "Guru" colour.
 3. **Type** — bundle the serif and its OFL text; `UIAppFonts` in `project.yml` for app and widget;
    `Brand.heading(_:relativeTo:)` beside `Brand.gurmukhi`.
-4. **Icon and launch** — new values in `ios/tools/make_app_icon.swift` and `tint_launch_logo.swift`; regenerate
-   (since the repo split these live in `gurbani-soul-ios`; the icon is `make app-icon`, see §5).
+4. **Icon and launch** — new values in `ios/tools/make_app_icon.swift`; regenerate with `make app-icon`, which
+   writes the icon and the launch logo (since the repo split this lives in `gurbani-soul-ios`; see §5).
 5. **Docs and CI** — store listing, test plan, screenshots, changelog; script the token-leak check.
