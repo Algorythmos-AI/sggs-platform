@@ -123,16 +123,52 @@ Style: sentence case everywhere. No all-caps. Emphasis by weight, not by colour.
 ## 5. The mark and the app icon
 
 The mark is **ੴ set in Sant Lipi** — flat, single colour, never outlined, shadowed, tilted or gradient-filled.
-Clear space: half the mark's height on every side. Minimum size 16 pt.
+It is never cropped, redrawn or merged with another symbol.
+Clear space in a layout: half the mark's height on every side. Minimum size 16 pt.
 Permitted colours: brand gold, warm ink `#171412`, paper `#FBF7F0`, white.
+
+### The app icon — v2, "Pothi & Naad" (chosen by the product owner 2026-10-14)
+
+ੴ above an open pothi drawn in two lines, with rings of naad rising from the pothi's spine.
+
+| Appearance | Field | Mark and pothi | Rings |
+|---|---|---|---|
+| Default | Top-lit gold, `#FFCE45` → `#F09A00` | Warm ink `#171412` | White, one even tone |
+| Dark | Top-lit warm ink, `#2B221B` → `#0E0C0A` | Brand gold `#FFBC0D` | Gold, faint |
+| Tinted | Black (the system applies the tint) | White | White, faint |
+
+The icon has its own grid; the layout clear-space rule above would keep it too small to read.
+
+- **Mark:** Sant Lipi at weight 800, 80% of the tile width, centred on visual mass rather than its bounding box.
+  The stroke must stay at or above 2 px at the 58 px size, and the kaar at least 8% inside the icon mask.
+- **Pothi:** two lines, 40 px on the 1024 canvas. A plain open book, not a depiction of a Bir.
+- **Light and depth live in the field only.** The mark and the pothi are one flat colour in every appearance.
+  The icon field is a permitted gradient, alongside the Explore hero and the share-card rule (§6).
+- **Layered icon (iOS 26 and later):** the same geometry as an Icon Composer document, with the system's
+  specular highlight turned off so the mark is never embossed.
+- Red is not used in the icon. The field is warmer and deeper than the literal brand gold, and the mark on
+  it is ink, so the tile cannot be read as a gold mark on red (§2).
+
+Source of truth: `ios/tools/make_app_icon.swift` in `gurbani-soul-ios` (`make app-icon`), which refuses to
+run when a rule above is broken. The web, PWA and wiki icons are built from the same outlines by
+`frontend/scripts/gen-icons.mjs` (`frontend/scripts/app-icon/`). The favicons carry the mark and the pothi
+without the rings, which are noise at 16–32 px.
+
+The launch screen and the ੴ set inside the app and on the open-graph cards stay the light weight in a single
+colour; they are the mark in a layout, not the icon.
+
+<details><summary>Icon v1 (2026-09-18 to 2026-10-14)</summary>
 
 | Concept | Description | Notes |
 |---|---|---|
-| **A (recommended)** | Gold ੴ on warm ink `#171412` | Distinctive on a home screen; furthest from any food-brand look; dark and tinted variants are trivial |
+| **A (chosen for v1)** | Gold ੴ on warm ink `#171412` | Distinctive on a home screen; furthest from any food-brand look; dark and tinted variants are trivial |
 | B | Ink ੴ on brand gold | Strongest colour ownership; closer to retail yellow |
 | C | Gold ੴ on paper | Softest; weakest contrast at small sizes |
 
-1024 x 1024, flat, not pre-rounded; iOS 18 dark and tinted variants supplied. Red is not used in the icon.
+Flat ExtraLight ੴ at about half the tile width. Replaced because the stroke was about 1.3 px at 58 px and
+the black tile disappeared on dark backgrounds.
+
+</details>
 
 ## 6. Components
 
@@ -182,7 +218,7 @@ signal of state.
 - [ ] Red under ~10% and never text
 - [ ] Light, dark, Increase Contrast and AX5 screenshots reviewed
 - [ ] Widgets and share card match the app
-- [ ] Icon: no red, flat, three variants present
+- [ ] Icon: no red; mark and pothi one flat colour; three flat variants and the layered icon present; `make app-icon` runs clean
 - [ ] Scripture text, corpus and database untouched
 
 ## 11. Governance
@@ -220,6 +256,7 @@ Decisions are logged below.
 | 2026-09-18 | New palette case `soul`; existing `gold` palette left untouched |
 | 2026-09-18 | Brand red is fill-only; `Ink.negative` stays the text red |
 | 2026-09-18 | G1 passed: icon concept **A** (gold ੴ on warm ink) and **Source Serif 4** for headings chosen by the product owner |
+| 2026-10-14 | Icon **v2, "Pothi & Naad"** chosen by the product owner: a bold ੴ above an open pothi, ink on gold; gold on warm ink in dark mode. G3 to be re-run on it |
 | 2026-09-18 | `accentDeep` given Increase Contrast legs so the hero label holds 4.5:1 at both gradient ends |
 | 2026-09-18 | Source Serif 4 (variable, SIL OFL 1.1, from adobe-fonts/source-serif) bundled for navigation titles and hero lines only; widgets stay on the system face |
 | 2026-09-26 | `DesignTokens.swift` pinned to `tokens.json` in all four legs by gurbani-soul-ios `BrandTokensParityTests` (PR #20), against a copy vendored by commit; a colour change now flows JSON → release → `make vendor-sync-platform` → Swift literal |
@@ -246,6 +283,12 @@ Status at the first submission (1.3.10, 2026-09-26):
   WIPO, both app stores, and the trade-dress rule above); full professional clearance is scheduled after launch.
   The search record is private and stays out of the public repositories.
 
+Status at icon v2 (2026-10-14):
+- **G3 is open again for the icon.** The 2026-09-26 acceptance covered icon v1. Icon v2 changes the weight and
+  the field and adds an open pothi beneath ੴ, so it goes back to the scholar before any release that carries it.
+- **G4 to be re-checked** for the gold field: the self-search note should record that an ink mark on gold,
+  with no red and no arch, was considered.
+
 Status at the Knowledge Base redesign (web 1.4.0):
 - **G3 for the web themes is open.** The five themes copied from the app are `approved`. The eight web-only
   themes, and the rule that Gurmukhi is ink in every theme, have not been seen by a scholar; they ship
@@ -265,5 +308,6 @@ One pull request per step, tests green at each:
    `VerseCard`, `FocusHighlight`; hard-coded saffron in `Widgets/SGGSWidgets.swift`; Lineage "Guru" colour.
 3. **Type** — bundle the serif and its OFL text; `UIAppFonts` in `project.yml` for app and widget;
    `Brand.heading(_:relativeTo:)` beside `Brand.gurmukhi`.
-4. **Icon and launch** — new values in `ios/tools/make_app_icon.swift` and `tint_launch_logo.swift`; regenerate.
+4. **Icon and launch** — new values in `ios/tools/make_app_icon.swift` and `tint_launch_logo.swift`; regenerate
+   (since the repo split these live in `gurbani-soul-ios`; the icon is `make app-icon`, see §5).
 5. **Docs and CI** — store listing, test plan, screenshots, changelog; script the token-leak check.
