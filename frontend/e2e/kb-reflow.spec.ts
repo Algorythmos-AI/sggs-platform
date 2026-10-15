@@ -25,16 +25,28 @@ test.describe('text at 200%', () => {
   }
 });
 
-test.describe('at 320px', () => {
-  test.use({ viewport: { width: 320, height: 640 }, isMobile: true, hasTouch: true });
-  for (const s of STATES) {
-    test(`${s.url} reflows at 320px`, async ({ page }) => {
-      await open(page, s);
-      const w = await width(page);
-      expect(w.scroll, `${s.url} is ${w.scroll}px wide at 320px`).toBeLessThanOrEqual(w.client);
-    });
-  }
-});
+// The system font differs by machine: a page that fits in San Francisco on a Mac overflowed by a
+// few px in the Linux runners' wider fonts (/lineage, 324px at 320). So each narrow width is also
+// checked in a deliberately wide stand-in — Verdana with extra tracking, wider than any runner
+// font — and a layout that fits in it fits everywhere. The fix for an overflow is in the CSS
+// (`minmax(0,1fr)`, `min-width:0`, `flex-wrap`), never a baseline here.
+const WIDE_FONT = '*,*::before,*::after{font-family:Verdana,"DejaVu Sans",sans-serif !important;letter-spacing:.6px !important}';
+
+for (const vw of [320, 375]) {
+  test.describe(`at ${vw}px`, () => {
+    test.use({ viewport: { width: vw, height: 700 }, isMobile: true, hasTouch: true });
+    for (const s of STATES) {
+      for (const wide of [false, true]) {
+        test(`${s.url} reflows at ${vw}px${wide ? ' in a wide font' : ''}`, async ({ page }) => {
+          await open(page, s);
+          if (wide) { await page.addStyleTag({ content: WIDE_FONT }); await page.waitForTimeout(100); }
+          const w = await width(page);
+          expect(w.scroll, `${s.url} is ${w.scroll}px wide at ${vw}px${wide ? ' (wide font)' : ''}`).toBeLessThanOrEqual(w.client);
+        });
+      }
+    }
+  });
+}
 
 test.describe('keyboard', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
