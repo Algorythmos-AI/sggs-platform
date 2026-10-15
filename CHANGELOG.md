@@ -5,6 +5,11 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 
 ## [Unreleased]
 
+### Tooling
+- **The review screenshot script covers every colour theme.** `npm run shots -- --accents all`
+  shoots all 13 themes (read from `docs/brand/web-themes.json`) in light and dark; `--tones both`
+  adds the Paper and Warm reading tones; the hub joins the default routes.
+
 ### Fixed
 - **Contributors no longer scrolls sideways on a 320px phone in wider system fonts.** The
   timeline cards and the sort/compare pill row now shrink and wrap.
