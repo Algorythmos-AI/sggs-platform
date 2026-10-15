@@ -4,7 +4,7 @@
 // (store.ts pinButtonHTML), which carries the verse as DATA: the text copied, shared or pinned is
 // always the verbatim line from the API model (data-gm), never the painted glyphs, and it always
 // goes out with its citation — Sri Guru Granth Sahib Ji · Ang N.
-import { $ } from './core';
+import { $, api, esc } from './core';
 import { togglePin, isPinned, MAX_PINS } from './store';
 import { overlayOpened, overlayClosed } from './overlay';
 
@@ -45,9 +45,23 @@ export function openVerse(btn: HTMLElement) {
   const comp = el('vsComp'); if (comp) comp.hidden = !cur.cid || !!btn.closest('#panel');
   const share = el('vsShare'); if (share) share.hidden = typeof navigator.share !== 'function';
   reflectPin();
+  showThemes(cur.id);
   if (sheet.classList.contains('on')) return;
   sheet.removeAttribute('inert'); sheet.classList.add('on'); el('verseScrim')?.classList.add('on');
   overlayOpened(sheet, closeVerse, { focus: el('vsPin'), fallback: () => (document.contains(btn) ? btn : null) });
+}
+// the verse's themes (corpus-verified tags), each a way into every verse that carries it
+const themesOf = new Map<number, Promise<string[]>>();
+function showThemes(id: number) {
+  const box = el('vsThemes'); if (!box) return;
+  box.hidden = true; box.innerHTML = '';
+  let p = themesOf.get(id);
+  if (!p) { p = api(`line_concepts?ids=${id}`).then((d: any) => (d?.concepts?.[String(id)] || []) as string[]).catch(() => []); themesOf.set(id, p); }
+  p.then((list) => {
+    if (!cur || cur.id !== id || !list.length) return;
+    box.innerHTML = 'Themes: ' + list.map((c) => `<a href="/search?q=${encodeURIComponent(c)}&mode=theme">${esc(c.replace(/_/g, ' '))}</a>`).join('');
+    box.hidden = false;
+  });
 }
 function closeVerse() {
   const sheet = el('verseSheet'); if (!sheet || !sheet.classList.contains('on')) return;

@@ -5,6 +5,14 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 
 ## [Unreleased]
 
+### Added
+- **A verse's themes in its actions.** The sheet a verse's ⋯ opens now shows the corpus-verified
+  themes of that line, each a link to every verse that carries it.
+
+### Changed
+- **On a phone the composition rises from the bottom edge as a sheet**, full width, instead of a
+  card floating in the middle.
+
 ### Changed
 - **A new icon on the sites, matching the app's icon v2.** The favicon, the home-screen and PWA icons
   and the wiki's icons now show a bold ੴ above an open pothi, warm ink on gold, in place of the thin
