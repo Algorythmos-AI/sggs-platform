@@ -5,6 +5,11 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 
 ## [Unreleased]
 
+### Tests
+- **Reflow and keyboard checks on every Knowledge Base page**: text at 200% fits a tablet
+  width, every page reflows at 320px, and the first 30 Tab stops each show a focus ring and
+  are never hidden under a bar (WCAG 1.4.4, 1.4.10, 2.4.7, 2.4.11).
+
 ### Added
 - **Every Insights chart has a data table.** The resonance chord and the raag progression now
   carry the same keyboard- and screen-reader-friendly table the theme network had.
