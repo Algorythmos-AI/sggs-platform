@@ -71,8 +71,9 @@ body {
 h1, h2, h3 { font-family: var(--serif-display); font-weight: 600; letter-spacing: -.02em; line-height: 1.12; }
 a { color: var(--accent-text); }
 /* :where() keeps this at its old specificity (so nav/footer link rules still win) while leaving
-   gold-filled .btn links to their own on-accent ink — without it, page-dark painted them gold on gold. */
-:root[data-theme="dark"] a:where(:not(.btn)) { color: var(--accent-text); }
+   gold-filled .btn and .pill links to their own on-accent ink — without it, page-dark painted them gold
+   on gold (the .btn hero links first, then the App Store pills on launch day, 2026-10-15). */
+:root[data-theme="dark"] a:where(:not(.btn, .pill)) { color: var(--accent-text); }
 /* Buttons: gold fill always carries a border in light (brand rule §3.1). */
 .btn {
   display: inline-flex; align-items: center; gap: 8px; font-weight: 650; font-family: var(--sans);
@@ -144,6 +145,7 @@ html.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity .6s
 #mobileMenu .mm-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 #mobileMenu a { color: var(--ink); text-decoration: none; font-size: 18px; padding: 14px 2px; border-bottom: 1px solid var(--line); }
 #mobileMenu .mm-cta { margin-top: 18px; }
+#mobileMenu a.pill.mm-cta { color: var(--on-accent); border-bottom: 1px solid var(--accent); justify-content: center; }
 #mobileMenu .mm-close { background: transparent; border: 1px solid var(--line); border-radius: 10px; width: 40px; height: 38px; color: var(--ink); font-size: 20px; cursor: pointer; }
 @media (max-width: 839px) {
   :root { --mnav-h: 67px; }

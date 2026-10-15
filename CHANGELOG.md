@@ -5,6 +5,12 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 
 ## [Unreleased]
 
+### Fixed
+- **The App Store buttons are readable in dark mode.** "Download on the App Store" and "Get the
+  app" rendered gold on gold: the dark link colour exempted `.btn` but not `.pill`. The menu's
+  button also gets its own dark ink. A new test plants the live buttons in both appearances and
+  requires 4.5:1, because CI builds never render them otherwise.
+
 ### Changed
 - **The Knowledge Base footer points to the App Store once the app is live**: "Gurbani Soul for
   iPhone" links to the store page under the same launch switch as the rest of the site
