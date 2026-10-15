@@ -4,7 +4,7 @@
 // (store.ts pinButtonHTML), which carries the verse as DATA: the text copied, shared or pinned is
 // always the verbatim line from the API model (data-gm), never the painted glyphs, and it always
 // goes out with its citation — Sri Guru Granth Sahib Ji · Ang N.
-import { $, api, esc } from './core';
+import { $, esc } from './core';
 import { togglePin, isPinned, MAX_PINS } from './store';
 import { overlayOpened, overlayClosed } from './overlay';
 
@@ -56,7 +56,13 @@ function showThemes(id: number) {
   const box = el('vsThemes'); if (!box) return;
   box.hidden = true; box.innerHTML = '';
   let p = themesOf.get(id);
-  if (!p) { p = api(`line_concepts?ids=${id}`).then((d: any) => (d?.concepts?.[String(id)] || []) as string[]).catch(() => []); themesOf.set(id, p); }
+  // optional extra: fetched quietly (no api() toast), so a server without the Insights context or a
+  // dropped connection leaves the sheet as it was instead of announcing an error
+  if (!p) {
+    p = fetch(`/api/line_concepts?ids=${id}`).then((r) => (r.ok ? r.json() : null))
+      .then((d: any) => (d?.concepts?.[String(id)] || []) as string[]).catch(() => []);
+    themesOf.set(id, p);
+  }
   p.then((list) => {
     if (!cur || cur.id !== id || !list.length) return;
     box.innerHTML = 'Themes: ' + list.map((c) => `<a href="/search?q=${encodeURIComponent(c)}&mode=theme">${esc(c.replace(/_/g, ' '))}</a>`).join('');
