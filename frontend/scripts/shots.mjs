@@ -10,13 +10,19 @@
 //   --routes   comma-separated paths, query strings allowed (default: ROUTES below)
 //   --widths   comma-separated viewport widths (default: WIDTHS below)
 //   --browser  chromium (default) or webkit — the engine an iPhone uses
+//   --accents  colour themes to shoot: `default` (the site's default only), `all` (every theme in
+//              docs/brand/web-themes.json — 13 today), or a comma list of ids (`soul,azur`)
+//   --tones    reader paper tones by day: paper, warm, or both (default: the stored default)
+// Example — every theme, light and dark, on the hub and the Reader at phone and desktop width:
+//   npm run shots -- --accents all --routes /library,/reader?ang=712 --widths 390,1280
 import { chromium, webkit } from '@playwright/test';
-import { mkdirSync, mkdtempSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-const ROUTES = ['/search', '/reader?ang=712', '/nitnem', '/browse', '/themes', '/raag-clock'];
+const ROUTES = ['/library', '/search', '/reader?ang=712', '/nitnem', '/browse', '/themes', '/raag-clock'];
 const WIDTHS = [375, 390, 768, 1280];
 const THEMES = ['light', 'dark'];
 // A viewport height per width (the shot is the full page; this only sets the fold).
@@ -25,10 +31,20 @@ const HEIGHT = { 375: 812, 390: 844, 768: 1024, 1280: 800 };
 const { values: opt } = parseArgs({ options: {
   out: { type: 'string' }, base: { type: 'string', default: 'http://localhost:7777' },
   routes: { type: 'string' }, widths: { type: 'string' }, browser: { type: 'string', default: 'chromium' },
+  accents: { type: 'string', default: 'default' }, tones: { type: 'string' },
 } });
 const base = opt.base.replace(/\/+$/, '');
 const routes = opt.routes ? opt.routes.split(',').map((r) => r.trim()).filter(Boolean) : ROUTES;
 const widths = opt.widths ? opt.widths.split(',').map(Number).filter((w) => w > 0) : WIDTHS;
+// The theme ids come from the one source of truth, so a new theme is shot without editing this file.
+const themeFile = join(dirname(fileURLToPath(import.meta.url)), '../../docs/brand/web-themes.json');
+const allAccents = JSON.parse(readFileSync(themeFile, 'utf8')).themes.map((t) => t.id);
+const accents = opt.accents === 'default' ? [null]
+  : opt.accents === 'all' ? allAccents
+  : opt.accents.split(',').map((a) => a.trim()).filter(Boolean);
+const unknown = accents.filter((a) => a && !allAccents.includes(a));
+if (unknown.length) { console.error(`unknown theme id(s): ${unknown.join(', ')} — known: ${allAccents.join(', ')}`); process.exit(2); }
+const tones = opt.tones ? (opt.tones === 'both' ? ['paper', 'warm'] : opt.tones.split(',')) : [null];
 const engine = { chromium, webkit }[opt.browser];
 if (!engine) { console.error(`--browser must be chromium or webkit, not "${opt.browser}"`); process.exit(2); }
 
@@ -45,7 +61,7 @@ const slug = (route) => route.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g,
 const browser = await engine.launch();
 let failed = 0;
 for (const width of widths) {
-  for (const theme of THEMES) {
+  for (const theme of THEMES) for (const accent of accents) for (const tone of tones) {
     const phone = width < 500;
     const context = await browser.newContext({
       viewport: { width, height: HEIGHT[width] ?? 900 },
@@ -53,10 +69,17 @@ for (const width of widths) {
       colorScheme: theme, reducedMotion: 'reduce',
     });
     // The stored choice the theme toggle writes; read by the inline pre-paint script.
-    await context.addInitScript((t) => { try { localStorage.setItem('theme', t); } catch (e) {} }, theme);
+    // The stored choices the appearance controls write; read by the inline pre-paint script.
+    await context.addInitScript(([t, a, r]) => {
+      try {
+        localStorage.setItem('theme', t);
+        if (a) localStorage.setItem('sggs_accent', a);
+        if (r) localStorage.setItem('sggs_reader_tone', r);
+      } catch (e) {}
+    }, [theme, accent, tone]);
     const page = await context.newPage();
     for (const route of routes) {
-      const file = `${slug(route)}--${width}--${theme}.png`;
+      const file = `${slug(route)}--${width}--${theme}${accent ? '--' + accent : ''}${tone ? '--' + tone : ''}.png`;
       try {
         await page.goto(base + route, { waitUntil: 'networkidle' });
         await page.evaluate(() => document.fonts.ready);
@@ -75,6 +98,6 @@ for (const width of widths) {
 }
 await browser.close();
 
-const total = routes.length * widths.length * THEMES.length;
-console.log(`shots: ${total - failed} of ${total} (${routes.length} routes × ${widths.length} widths × ${THEMES.length} themes, ${opt.browser}) → ${out}`);
+const total = routes.length * widths.length * THEMES.length * accents.length * tones.length;
+console.log(`shots: ${total - failed} of ${total} (${routes.length} routes × ${widths.length} widths × ${THEMES.length} appearances × ${accents.length} colour themes × ${tones.length} tones, ${opt.browser}) → ${out}`);
 process.exit(failed ? 1 : 0);
