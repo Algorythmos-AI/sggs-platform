@@ -5,6 +5,11 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 
 ## [Unreleased]
 
+### Changed
+- **The Knowledge Base footer points to the App Store once the app is live**: "Gurbani Soul for
+  iPhone" links to the store page under the same launch switch as the rest of the site
+  (`PUBLIC_APP_STORE_LIVE`); before it, the footer still links home.
+
 ### Tests
 - **The Knowledge Base stylesheet has a size budget**: 26 KB gzipped and 132 KB raw (24.5 KB and
   129 KB today), enforced by the required `python` check, so it can only grow by a reviewed change.
