@@ -6,6 +6,13 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 ## [Unreleased]
 
 ### Added
+- **Every Insights chart has a data table.** The resonance chord and the raag progression now
+  carry the same keyboard- and screen-reader-friendly table the theme network had.
+
+### Changed
+- **Insights charts size themselves to the screen**: shorter on a phone, unchanged on a desktop.
+
+### Added
 - **A verse's themes in its actions.** The sheet a verse's ⋯ opens now shows the corpus-verified
   themes of that line, each a link to every verse that carries it.
 

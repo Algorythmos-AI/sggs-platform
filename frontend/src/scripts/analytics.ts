@@ -23,7 +23,7 @@ async function themeNetwork() {
   const soft = cssVar('--soft') || '#93a0bd';
   const rNode = (c: string) => 7 + 30 * Math.sqrt((size[c] || 1) / sizeMax);
 
-  const W = host.clientWidth || 800, H = 560;
+  const W = host.clientWidth || 800, H = fitH(W, 0.7, 380, 560);
   host.innerHTML = '';
   const svg = d3.select(host).append('svg')
     .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', H)
@@ -162,15 +162,25 @@ function buildNetworkTable(edgesAll: any[], _size: Record<string, number>, _desc
   const rows = top.map((e) =>
     `<tr><td>${esc(titleCase(id(e.source)))}</td><td>${esc(titleCase(id(e.target)))}</td>` +
     `<td>${(+e.ppmi).toFixed(2)}</td><td>${(+e.sc).toLocaleString()}</td></tr>`).join('');
-  const det = document.createElement('details');
-  det.id = 'networkTable'; det.className = 'viz-table';
-  det.innerHTML =
-    '<summary>Theme co-occurrences — data table (text alternative)</summary>' +
-    `<p class="faint">The ${top.length} strongest of ${edgesAll.length.toLocaleString()} co-occurrence links, ranked by PPMI. Each theme is searchable from the Search page.</p>` +
-    '<table><thead><tr><th scope="col">Theme</th><th scope="col">Co-occurs with</th>' +
-    '<th scope="col">PPMI</th><th scope="col">Shabads</th></tr></thead><tbody>' + rows + '</tbody></table>';
-  host.after(det);
+  dataTable(host, 'networkTable', 'Theme co-occurrences — data table (text alternative)',
+    `The ${top.length} strongest of ${edgesAll.length.toLocaleString()} co-occurrence links, ranked by PPMI. Each theme is searchable from the Search page.`,
+    ['Theme', 'Co-occurs with', 'PPMI', 'Shabads'], rows);
 }
+
+/* One text alternative per chart: a closed <details> table after the chart, rebuilt on
+   every draw. `rows` is pre-escaped <tr> markup. The open state survives a redraw. */
+function dataTable(host: Element, id: string, summary: string, note: string, heads: string[], rows: string) {
+  const old = document.getElementById(id);
+  const det = document.createElement('details');
+  det.id = id; det.className = 'viz-table'; det.open = !!(old as HTMLDetailsElement | null)?.open;
+  det.innerHTML = `<summary>${esc(summary)}</summary><p class="faint">${esc(note)}</p>` +
+    '<table><thead><tr>' + heads.map((h) => `<th scope="col">${esc(h)}</th>`).join('') +
+    '</tr></thead><tbody>' + rows + '</tbody></table>';
+  if (old) old.replaceWith(det); else host.after(det);
+}
+
+/* Chart height follows the width it is given, inside a floor and a ceiling. */
+const fitH = (w: number, ratio: number, min: number, max: number) => Math.round(Math.max(min, Math.min(max, w * ratio)));
 
 /* ============================ Chart.js author radar ============================ */
 let radar: Chart | null = null;
@@ -277,7 +287,7 @@ async function resonanceChord() {
     host.querySelectorAll('svg').forEach((s) => s.remove());
     if (N < 2) { host.insertAdjacentHTML('beforeend', '<div class="hint">No resonances at this threshold.</div>'); return; }
     const W = 560, outerR = W * 0.5 - 96, innerR = outerR - 12;
-    const svg = d3.select(host).append('svg').attr('viewBox', `${-W / 2} ${-W / 2} ${W} ${W}`).attr('width', '100%').attr('height', 540)
+    const svg = d3.select(host).append('svg').attr('viewBox', `${-W / 2} ${-W / 2} ${W} ${W}`).attr('width', '100%').attr('height', fitH(host.clientWidth || 560, 1, 320, 540))
       .attr('role', 'img').attr('aria-label', 'Cross-contributor resonance chord diagram, showing how strongly different voices echo each other in meaning. Summarised in the caption above.');
     const chord = d3.chordDirected().padAngle(0.05).sortSubgroups(d3.descending)(matrix);
     const arc = d3.arc().innerRadius(innerR).outerRadius(outerR);
@@ -311,6 +321,15 @@ async function resonanceChord() {
       })
       .on('mousemove', (ev: any) => { const r = host.getBoundingClientRect(); tip.style('left', (ev.clientX - r.left + 12) + 'px').style('top', (ev.clientY - r.top + 12) + 'px'); })
       .on('mouseout', () => { tip.style('opacity', 0); ribs.transition().duration(prefersReducedMotion() ? 0 : 120).attr('fill-opacity', 0.6); });
+
+    const top: [number, string, string, number][] = [];
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if (matrix[i][j] > 0)
+      top.push([matrix[i][j], names[i], names[j], (meta[names[i] + '>' + names[j]] || {}).edges || 0]);
+    top.sort((a, b) => b[0] - a[0]);
+    dataTable(host, 'chordTable', 'Resonances — data table (text alternative)',
+      `${top.length} directed resonances between ${N} voices at this threshold, strongest first.`,
+      ['Voice', 'Echoes', 'Lift', 'Neighbour links'],
+      top.map(([l, a, b, n]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td><td>${(+l).toFixed(2)}×</td><td>${(+n).toLocaleString()}</td></tr>`).join(''));
 
     function fadeNode(i: number | null) {
       ribs.transition().duration(prefersReducedMotion() ? 0 : 120).attr('fill-opacity', (c: any) =>
@@ -350,7 +369,7 @@ async function ribbonStream() {
     const data = Array.from({ length: B }, (_, b) => {
       const o: any = { i: b, ang: d.ang_axis[b] }; concepts.forEach((c) => o[c] = series[c][b]); return o;
     });
-    const W = host.clientWidth || 820, H = 360, pad = { t: 14, r: 14, b: 28, l: 14 };
+    const W = host.clientWidth || 820, H = fitH(W, 0.45, 260, 360), pad = { t: 14, r: 14, b: 28, l: 14 };
     const svg = d3.select(host).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', H)
       .attr('role', 'img').attr('aria-label', 'Raag theme-progression streamgraph: how a raag\'s themes ebb and flow from its first Ang to its last. Summarised in the caption above.');
     const layers = d3.stack().keys(concepts).offset(d3.stackOffsetWiggle).order(d3.stackOrderInsideOut)(data);
@@ -373,6 +392,12 @@ async function ribbonStream() {
       ax.append('text').attr('x', x(b)).attr('y', H - 9)
         .attr('text-anchor', t === 0 ? 'start' : (t === ticks - 1 ? 'end' : 'middle')).text('Ang ' + d.ang_axis[b]);
     }
+    const total = (c: string) => (series[c] as number[]).reduce((a, v) => a + (+v || 0), 0);
+    const peak = (c: string) => { const v = series[c] as number[]; let k = 0; v.forEach((x, i) => { if (+x > +v[k]) k = i; }); return d.ang_axis[k]; };
+    dataTable(host, 'streamTable', 'Raag progression — data table (text alternative)',
+      `The ${concepts.length} leading themes of this raag across ${B} spans from Ang ${d.ang_axis[0]} to Ang ${d.ang_axis[B - 1]}.`,
+      ['Theme', 'Weight across the raag', 'Strongest near'],
+      concepts.map((c) => `<tr><td>${esc(titleCase(c))}</td><td>${total(c).toFixed(1)}</td><td>Ang ${esc(String(peak(c)))}</td></tr>`).join(''));
     const lg = $('#streamLegend');
     if (lg) lg.innerHTML = concepts.map((c, i) => `<span><i class="lg" style="background:${color(i)}"></i>${esc(titleCase(c))}</span>`).join('');
   }
