@@ -3,6 +3,56 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.4.1] — 2026-10-15
+
+Gurbani Soul is live on the App Store; this release makes the site say so cleanly and finishes the
+redesign's follow-ups. Web and API only — no scripture, corpus or dataset change.
+
+### Fixed
+- **The App Store buttons are readable in dark mode.** "Download on the App Store" and "Get the
+  app" rendered gold on gold: the dark link colour exempted `.btn` but not `.pill`. The menu's
+  button also gets its own dark ink. A new test plants the live buttons in both appearances and
+  requires 4.5:1, because CI builds never render them otherwise.
+- **A verse's themes load quietly.** The optional themes row in a verse's actions no longer shows
+  an error toast when they cannot load (a reader-only server, a dropped connection).
+- **Contributors no longer scrolls sideways on a 320px phone in wider system fonts.** The
+  timeline cards and the sort/compare pill row now shrink and wrap.
+
+### Added
+- **Every Insights chart has a data table.** The resonance chord and the raag progression now
+  carry the same keyboard- and screen-reader-friendly table the theme network had.
+- **A verse's themes in its actions.** The sheet a verse's ⋯ opens now shows the corpus-verified
+  themes of that line, each a link to every verse that carries it.
+
+### Changed
+- **The Knowledge Base footer points to the App Store once the app is live**: "Gurbani Soul for
+  iPhone" links to the store page under the same launch switch as the rest of the site
+  (`PUBLIC_APP_STORE_LIVE`); before it, the footer still links home.
+- **Insights charts size themselves to the screen**: shorter on a phone, unchanged on a desktop.
+- **On a phone the composition rises from the bottom edge as a sheet**, full width, instead of a
+  card floating in the middle.
+- **A new icon on the sites, matching the app's icon v2.** The favicon, the home-screen and PWA icons
+  and the wiki's icons now show a bold ੴ above an open pothi, warm ink on gold, in place of the thin
+  gold ੴ on black. They are built from the app icon's own outlines, so no Gurmukhi font is needed to
+  draw the favicon any more. The brand book (§5) describes the icon and its rules. The icon goes back
+  to the scholar review (gate G3) before a release carries it.
+
+### Tests
+- **The Knowledge Base stylesheet has a size budget**: 26 KB gzipped and 132 KB raw (24.5 KB and
+  129 KB today), enforced by the required `python` check, so it can only grow by a reviewed change.
+- **Reflow and keyboard checks on every Knowledge Base page**: text at 200% fits a tablet
+  width, every page reflows at 320px, and the first 30 Tab stops each show a focus ring and
+  are never hidden under a bar (WCAG 1.4.4, 1.4.10, 2.4.7, 2.4.11). The 320 and 375px checks
+  also run in a deliberately wide font, so an overflow that only Linux fonts show fails on a Mac too.
+
+### Tooling
+- **The review screenshot script covers every colour theme.** `npm run shots -- --accents all`
+  shoots all 13 themes (read from `docs/brand/web-themes.json`) in light and dark; `--tones both`
+  adds the Paper and Warm reading tones; the hub joins the default routes.
+
+### Data
+- None. `dataset.lock.json` unchanged.
+
 ## [Unreleased]
 
 ## [1.4.0] — 2026-10-14 — the Knowledge Base, redressed: thirteen themes, a new shell, and the app's Reader, Nitnem, Search and Raag Clock on the web

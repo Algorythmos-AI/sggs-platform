@@ -29,6 +29,19 @@ hardware pass (10 of 10) and the App Store Connect listing (no drift; "Data Not 
 Manual release means an approved version waits at *Pending Developer Release* until the owner
 releases it; approval alone does not put it on the store.
 
+Apple approved 1.3.10 (1) on 2026-10-13. When this page was last edited it was waiting at
+*Pending Developer Release*.
+
+## The first update
+
+**1.4.0 (1)** was uploaded on 2026-10-13 from the app's tag `v1.4.0`, built against platform
+`2c41123` with the public profile and the same bundled database as 1.3.10. It is the first build
+archived and uploaded by the hosted workflow instead of a maintainer's Mac. It adds "Forget
+location", "Clear reading history" and the Spotlight clean-up
+([privacy and on-device data](privacy-and-on-device-data.md)). App Store Connect accepts a new
+version only after the previous one is released, so it is submitted after 1.3.10 goes live; its
+sign-off record in the TestFlight test plan is open until then.
+
 ## Every upload
 
 <!-- sggs:app-builds -->

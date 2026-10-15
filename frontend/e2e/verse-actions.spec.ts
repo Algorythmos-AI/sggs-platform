@@ -117,3 +117,44 @@ test('the sheet stays inside the screen and every action is a finger tall', asyn
   expect(m.sw).toBeLessThanOrEqual(m.iw);
   expect(m.minH).toBeGreaterThanOrEqual(43.5);
 });
+
+test('a verse shows its themes, each leading to every verse that carries it', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/trail?line_id=30729');
+  const btn = page.locator('#trailNow .pin-btn');
+  await expect(btn).toBeVisible({ timeout: 15_000 });
+  const tags = (await (await page.request.get('/api/line_concepts?ids=30729')).json()).concepts['30729'];
+  await btn.click();
+  const t = page.locator('#vsThemes a');
+  await expect(t).toHaveCount(tags.length);
+  await expect(t.first()).toHaveAttribute('href', `/search?q=${encodeURIComponent(tags[0])}&mode=theme`);
+});
+
+// The themes are an optional extra: a server without the Insights context (SGGS_MODULES=reader)
+// answers 404, and a dropped connection fails — neither may raise an error toast.
+for (const fail of ['404', 'network'] as const) {
+  test(`a verse whose themes cannot load opens quietly (${fail})`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.route('**/api/line_concepts**', (r) => fail === '404'
+      ? r.fulfill({ status: 404, contentType: 'application/json', body: '{"error":"not in this module"}' })
+      : r.abort());
+    await page.goto('/trail?line_id=30729');
+    const btn = page.locator('#trailNow .pin-btn');
+    await expect(btn).toBeVisible({ timeout: 15_000 });
+    await btn.click();
+    await expect(sheet(page)).toHaveClass(/(^|\s)on(\s|$)/);
+    await page.waitForTimeout(400);
+    await expect(page.locator('#vsThemes')).toBeHidden();
+    await expect(page.locator('#toast')).not.toHaveClass(/(^|\s)on(\s|$)/);
+  });
+}
+
+test('on a phone the composition rises as a sheet from the bottom edge', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'a phone layout');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/search?q=sochai+soch+na+hovee');
+  await page.locator('#results .card').first().click();
+  await expect(page.locator('#pbody .sline').first()).toBeVisible({ timeout: 15_000 });
+  const m = await page.evaluate(() => { const r = document.querySelector('#panel .inner')!.getBoundingClientRect(); return { left: r.left, right: r.right, iw: innerWidth, sw: document.documentElement.scrollWidth, radius: getComputedStyle(document.querySelector('#panel .inner')!).borderBottomLeftRadius }; });
+  expect(m.left).toBe(0); expect(Math.round(m.right)).toBe(m.iw); expect(m.radius).toBe('0px'); expect(m.sw).toBeLessThanOrEqual(m.iw);
+});

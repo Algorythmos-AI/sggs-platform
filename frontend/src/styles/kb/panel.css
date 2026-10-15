@@ -7,6 +7,13 @@
 .panel .x { position:absolute; top:10px; right:12px; width:44px; height:44px; display:flex; align-items:center; justify-content:center;
   font-size:24px; cursor:pointer; color:var(--soft); background:none; border:none; border-radius:12px; transition:all .15s; }
 .panel .x:hover { background:var(--chip); color:var(--ink); }
+/* on a phone the composition rises from the bottom edge as a sheet; the panel itself still scrolls */
+@media (max-width:840px) {
+  .panel { padding:max(48px, 7dvh) 0 0; }
+  .panel .inner { max-width:none; min-height:calc(100dvh - max(48px, 7dvh)); border-radius:22px 22px 0 0; border-width:1px 0 0;
+    padding:22px max(18px, env(safe-area-inset-right, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px)); }
+  .panel .inner::before { content:''; display:block; width:38px; height:4px; margin:-12px auto 10px; border-radius:999px; background:var(--line-strong); }
+}
 .ptitle { text-align:center; margin:0 0 18px; padding-bottom:14px; border-bottom:1px solid var(--line); }
 .ptitle .pt-main { font-size:20px; font-weight:600; }
 .ptitle .pt-sub { color:var(--soft); font-size:12.5px; margin-top:4px; }

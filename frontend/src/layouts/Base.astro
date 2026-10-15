@@ -7,6 +7,7 @@
 import '../styles/global.css';
 import Seo from '../components/Seo.astro';
 import { normPath } from '../routes';
+import { APP_STORE_URL, APP_STORE_LIVE } from '../site';
 import kbThemes from '../generated/kb-themes.json';
 export interface Props { title?: string; description?: string; heading?: string | false; }
 const {
@@ -117,7 +118,7 @@ const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri 
     {pageName && <h1 class="page-title">{pageName}</h1>}
     <slot />
   </main>
-  <footer class="kb-foot">Scripture is shown verbatim from your edition with its Ang. Transliteration is a mechanical reading aid, not the scripture. · <span class="gm" lang="pa">ਧੁਰ ਕੀ ਬਾਣੀ</span><span id="ver"></span> · <a href="/">Gurbani Soul app</a> · <a href="/support">Support</a> · <a href="/privacy">Privacy</a></footer>
+  <footer class="kb-foot">Scripture is shown verbatim from your edition with its Ang. Transliteration is a mechanical reading aid, not the scripture. · <span class="gm" lang="pa">ਧੁਰ ਕੀ ਬਾਣੀ</span><span id="ver"></span> · {APP_STORE_LIVE ? <a href={APP_STORE_URL} aria-label="Get Gurbani Soul for iPhone and iPad on the App Store">Gurbani Soul for iPhone</a> : <a href="/">Gurbani Soul app</a>} · <a href="/support">Support</a> · <a href="/privacy">Privacy</a></footer>
   <nav class="kb-tabs" aria-label="Places">
     {PLACES.map((p) => (
       <a href={p.href} data-place={p.id} class:list={[place?.id === p.id && 'on']} data-astro-prefetch="tap"
@@ -173,7 +174,7 @@ const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri 
   <div id="verseScrim" class="vs-scrim" aria-hidden="true"></div>
   <div id="verseSheet" class="vs" role="dialog" aria-modal="true" aria-labelledby="vsCite" inert>
     <div class="vs-head">
-      <div class="vs-verse"><p id="vsText" class="gm" lang="pa"></p><p id="vsCite" class="vs-cite"></p></div>
+      <div class="vs-verse"><p id="vsText" class="gm" lang="pa"></p><p id="vsCite" class="vs-cite"></p><p id="vsThemes" class="vs-themes" hidden></p></div>
       <button id="vsClose" class="vs-x" type="button" aria-label="Close">×</button>
     </div>
     <div class="vs-acts">
