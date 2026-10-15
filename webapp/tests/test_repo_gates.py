@@ -515,6 +515,33 @@ class KbPageTransitionsSurviveTheBuild(unittest.TestCase):
         self.assertEqual(others, [], "the marketing pages have their own router: no cross-document opt-in there")
 
 
+class KbStylesheetStaysInBudget(unittest.TestCase):
+    """The Knowledge Base's one stylesheet is render-blocking on every page, so its size is held to a
+    budget. What a reader downloads is the compressed size (24.5 KB on 2026-10-15, release 1.4.x);
+    the raw size is what the browser parses (129 KB). A change that needs more must raise the number
+    here, in review, with the reason — the stylesheet never grows by accident.
+
+    Why one sheet rather than one per page: the partials are ordered cascade layers whose classes are
+    shared across pages (timing chips, trail stones, verse rows), so a split would move rules past
+    each other and save about 3 KB compressed. The plan's 95 KB raw target was set before the
+    thirteen themes and their colour-mix() fallbacks (about 14 KB of @supports blocks that Safari
+    before 16.2 needs) existed; the compressed budget is the one that measures a reader's wait."""
+
+    ASTRO = ROOT / "webapp" / "static" / "_astro"
+    GZIP_MAX = 26_000
+    RAW_MAX = 132_000
+
+    def test_the_built_stylesheet_is_within_budget(self):
+        import gzip
+        sheets = sorted(self.ASTRO.glob("Base.*.css"))
+        if not sheets:
+            self.skipTest("webapp/static is not built")
+        raw = sheets[0].read_bytes()
+        packed = len(gzip.compress(raw, compresslevel=9))
+        self.assertLessEqual(packed, self.GZIP_MAX, f"{sheets[0].name} is {packed:,} bytes gzipped (budget {self.GZIP_MAX:,})")
+        self.assertLessEqual(len(raw), self.RAW_MAX, f"{sheets[0].name} is {len(raw):,} bytes raw (budget {self.RAW_MAX:,})")
+
+
 class ScriptureDisplayInSource(unittest.TestCase):
     """Knowledge Base source never cuts a verse short and never colours Gurmukhi inline.
 

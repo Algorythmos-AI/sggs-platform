@@ -5,6 +5,10 @@ entries prior to v1.1.0 are the project's original prose style and are preserved
 
 ## [Unreleased]
 
+### Tests
+- **The Knowledge Base stylesheet has a size budget**: 26 KB gzipped and 132 KB raw (24.5 KB and
+  129 KB today), enforced by the required `python` check, so it can only grow by a reviewed change.
+
 ### Tooling
 - **The review screenshot script covers every colour theme.** `npm run shots -- --accents all`
   shoots all 13 themes (read from `docs/brand/web-themes.json`) in light and dark; `--tones both`
