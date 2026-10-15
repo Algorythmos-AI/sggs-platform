@@ -28,7 +28,7 @@ export const STATES: State[] = [
   { route: '/lineage', url: '/lineage', ready: ['#timeline .tl-node', '#linStats .lin-stat'] },
   { route: '/trail', url: '/trail?line_id=30729', ready: ['#trailNow .g', '#trailStones .stone'] },
   { route: '/analytics', url: '/analytics', ready: [
-    '#network svg circle', '#networkTable summary', '#radarNote:not(:empty)',
+    '#network svg circle', '#networkTable summary', '#chordTable summary', '#streamTable summary', '#radarNote:not(:empty)',
     '#chord svg path.res-ribbon', '#stream svg path', '#streamLegend span', '#vaar .vaar-ladder',
   ] },
   { route: '/constellation', url: '/constellation', ready: ['#constel svg circle', '#constel .constel-list li'] },
