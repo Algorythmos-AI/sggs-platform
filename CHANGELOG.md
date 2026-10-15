@@ -13,6 +13,8 @@ redesign's follow-ups. Web and API only — no scripture, corpus or dataset chan
   app" rendered gold on gold: the dark link colour exempted `.btn` but not `.pill`. The menu's
   button also gets its own dark ink. A new test plants the live buttons in both appearances and
   requires 4.5:1, because CI builds never render them otherwise.
+- **A verse's themes load quietly.** The optional themes row in a verse's actions no longer shows
+  an error toast when they cannot load (a reader-only server, a dropped connection).
 - **Contributors no longer scrolls sideways on a 320px phone in wider system fonts.** The
   timeline cards and the sort/compare pill row now shrink and wrap.
 
