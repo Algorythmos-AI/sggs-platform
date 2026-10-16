@@ -63,13 +63,13 @@ the page that uses the term says so. Cite the scripture itself, never this table
 | **Matra** | A vowel sign attached to a consonant (`ਾ ਿ ੀ ੁ ੂ ੇ ੈ ੋ ੌ`). The skeleton column strips them. |
 | **Sihari** | The short-i sign ਿ, written *before* its consonant in print but stored *after* it in logical Unicode — the reordering the pipeline performs. |
 | **Halant** | The virama ੍ that joins a consonant to the next as a subjoined letter (pairin). |
-| **Addha-yayya** | The subjoined ya ੍ਯ; the source font doubles it in Sahaskriti words, and the saroop display collapses the pair without touching the stored text. |
+| **Addha-yayya** | The subjoined ya ੍ਯ; the source font doubles it in Sahaskriti words, and the saroop display draws the pair as the yakash ੵ under the letter, as the Bir prints it, without touching the stored text. |
 | **Tippi / Bindi** | The two nasal signs ੰ and ਂ; editions differ in which they print, so the project keeps this edition's choice. |
 | **Nukta** | The dot ਼ under a consonant for borrowed sounds; kept verbatim wherever the Bir prints it. |
 | **Danda** | The line divider: the double danda ॥ ends a line or unit and carries the numerals (॥੧॥); the single danda । is rare. The pipeline cuts units on ॥. |
 | **ੴ** | Ik Onkar — the invocation opening compositions and the Granth (U+0A74); restored by the pipeline from the font's two-glyph form. |
 | **Sant Lipi** | The open-licence Gurmukhi font (SIL OFL) the site and the app bundle so the Granth renders the same everywhere. |
-| **Saroop** | The traditional printed rendering of the Granth; also the app's display toggle that collapses the doubled ya in rendered glyphs only — the stored text stays verbatim. |
+| **Saroop** | The traditional printed rendering of the Granth; also the app's display toggle that draws the doubled ya as the printed yakash ੵ in rendered glyphs only — the stored text stays verbatim. |
 | **NFC** | Unicode's canonical composition; the pipeline and the verifier normalise to it before comparing. |
 | **Transliteration** | The Roman spelling of a Gurmukhi line (`translit`), a reading aid built by the pipeline — never scripture, never cited. |
 

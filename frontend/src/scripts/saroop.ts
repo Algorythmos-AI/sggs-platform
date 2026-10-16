@@ -1,27 +1,33 @@
 /* ============================================================================
    saroop.ts — optional, DISPLAY-ONLY "traditional saroop" rendering toggle.
    ----------------------------------------------------------------------------
-   The bundled Sant Lipi font renders the traditional tucked addha/half-yayya
-   only when the text run carries its Variation-Selector markup. This module
-   injects that markup into the *rendered* Gurmukhi glyphs ONLY. It never mutates
-   the stored corpus, the DB, the API payloads, full-text search, or the explicit
-   "Copy verse" action (which copies from the data model, not the DOM). A copy
-   interceptor strips the selectors from any text the user selects, so the
-   clipboard always carries verbatim Unicode. Default ON since v2.10.1; the header
-   toggle (ਯ) turns it off, persisted in localStorage. Scripture bytes are never touched.
+   The corpus stores the subjoined yayya exactly as the source PDF's font encoded
+   it: a doubled  ੍ਯ੍ਯ  (268 words on 78 Angs; a single  ੍ਯ  never occurs). The
+   printed Bir draws that as ONE yayya tucked under the letter — Unicode's
+   GURMUKHI SIGN YAKASH  ੵ  (U+0A75), which the bundled Sant Lipi draws as that
+   deep subscript in every context, sihari included (checked against the source
+   PDF on Angs 1354, 1359 and 1400).
 
-   Transform rule (Sant Lipi spec): a subjoined-ya run  ੍ਯ  — single, and the
-   source-faithful doubled  ੍ਯ੍ਯ  — becomes  VS1 + ਯ  (one tucked addha-yayya).
-   A yayya immediately followed by a sihari ਿ is LEFT PLAIN (Sant Lipi cannot
-   shape that combination). Pairin haha/rara/vava, ੴ and all else are untouched.
+   This module rewrites the *rendered* Gurmukhi glyphs ONLY. It never mutates the
+   stored corpus, the DB, the API payloads, full-text search, or the explicit
+   "Copy verse" action (which copies from the data model, not the DOM). A copy
+   interceptor turns any selected text back into verbatim Unicode, so the
+   clipboard never carries the display form. The corpus contains no  ੵ  at all
+   (webapp/tests/test_saroop_invariant.py), so  ੵ  on the page can only be ours
+   and maps back without ambiguity. Default ON since v2.10.1; the reader can turn
+   it off, persisted in localStorage. Scripture bytes are never touched.
+
+   Transform rule: every subjoined-ya run  (੍ਯ)+  becomes  ੵ . Pairin haha/rara/
+   vava, ੴ and everything else are untouched.
    ============================================================================ */
 
-const VIRAMA = 0x0a4d, YA = 0x0a2f, VS1 = 0xfe00, SIHARI = 0x0a3f;
-const VS_LO = 0xfe00, VS_HI = 0xfe0f;                 // Variation Selectors 1–16
+const VIRAMA = 0x0a4d, YA = 0x0a2f, YAKASH = 0x0a75;
+const VS_LO = 0xfe00, VS_HI = 0xfe0f;                 // Variation Selectors 1–16 (older builds' markup)
 const KEY = 'sggs_saroop';
 const SUBJOINED_YA = '੍ਯ';                            // ੍ + ਯ
+const VERBATIM_YA = '੍ਯ੍ਯ';                           // how the corpus stores every subjoined yayya
 
-/** Collapse subjoined-ya runs to Sant Lipi's half-yayya markup. Pure; display only. */
+/** Draw each subjoined-ya run as the printed Bir does: one yakash under the letter. Pure; display only. */
 export function toTraditional(s: string): string {
   if (s.indexOf(SUBJOINED_YA) === -1) return s;               // fast path: nothing to do
   const cp = Array.from(s, c => c.codePointAt(0) as number);
@@ -30,11 +36,7 @@ export function toTraditional(s: string): string {
     if (cp[i] === VIRAMA && i + 1 < n && cp[i + 1] === YA) {
       let j = i;                                              // consume the whole (virama+ya)+ run
       while (j + 1 < n && cp[j] === VIRAMA && cp[j + 1] === YA) j += 2;
-      if (j < n && cp[j] === SIHARI) {                        // sihari-on-yayya → unsupported, leave plain
-        for (let k = i; k < j; k++) out.push(String.fromCodePoint(cp[k]));
-      } else {
-        out.push(String.fromCodePoint(VS1), String.fromCodePoint(YA));
-      }
+      out.push(String.fromCodePoint(YAKASH));
       i = j;
     } else { out.push(String.fromCodePoint(cp[i])); i++; }
   }
@@ -42,8 +44,17 @@ export function toTraditional(s: string): string {
 }
 
 const isVS = (c: number) => c >= VS_LO && c <= VS_HI;
-const hasVS = (s: string) => { for (let k = 0; k < s.length; k++) if (isVS(s.charCodeAt(k))) return true; return false; };
-const stripVS = (s: string) => { let o = ''; for (const ch of s) if (!isVS(ch.codePointAt(0) as number)) o += ch; return o; };
+const isDisplayOnly = (c: number) => c === YAKASH || isVS(c);
+const hasDisplayMarks = (s: string) => { for (const ch of s) if (isDisplayOnly(ch.codePointAt(0) as number)) return true; return false; };
+/** A painted fragment back to verbatim Unicode: yakash → the stored doubled form, selectors dropped. */
+const toVerbatim = (s: string) => {
+  let o = '';
+  for (const ch of s) {
+    const c = ch.codePointAt(0) as number;
+    if (c === YAKASH) o += VERBATIM_YA; else if (!isVS(c)) o += ch;
+  }
+  return o;
+};
 
 // Default ON — the Granth shows the traditional saroop unless the reader turns it off.
 let ON = true;
@@ -77,8 +88,8 @@ function paint(root: ParentNode | HTMLElement, on: boolean): void {
 }
 
 /** Reconstruct verbatim Unicode for a selection: a wholly-selected transformed .gm text
-    node is restored byte-for-byte from its stored original; partial selections at least
-    drop the display-only selectors. Keeps copied sacred text verbatim. */
+    node is restored byte-for-byte from its stored original; a partial selection is mapped
+    back mark by mark. Keeps copied sacred text verbatim. */
 function verbatimSelection(sel: Selection): string {
   const parts: string[] = [];
   for (let i = 0; i < sel.rangeCount; i++) {
@@ -96,7 +107,7 @@ function verbatimSelection(sel: Selection): string {
       const a = node === range.startContainer ? range.startOffset : 0;
       const b = node === range.endContainer ? range.endOffset : v.length;
       const base = orig.get(node);
-      parts.push(base !== undefined && a === 0 && b === v.length ? base : stripVS(v.slice(a, b)));
+      parts.push(base !== undefined && a === 0 && b === v.length ? base : toVerbatim(v.slice(a, b)));
     }
   }
   return parts.join('');
@@ -133,12 +144,12 @@ function init(): void {
   });
   mo.observe(target, { childList: true, subtree: true });
 
-  // Clipboard safety: any copied scripture comes out as verbatim Unicode — the display-only
-  // selectors are removed and wholly-selected verses are restored byte-for-byte from the original.
+  // Clipboard safety: any copied scripture comes out as verbatim Unicode — wholly-selected verses
+  // are restored byte-for-byte from the original, and partial selections are mapped back.
   document.addEventListener('copy', e => {
     if (!ON) return;
     const sel = document.getSelection();
-    if (!sel || sel.isCollapsed || !sel.rangeCount || !hasVS(sel.toString())) return;
+    if (!sel || sel.isCollapsed || !sel.rangeCount || !hasDisplayMarks(sel.toString())) return;
     (e as ClipboardEvent).clipboardData?.setData('text/plain', verbatimSelection(sel));
     e.preventDefault();
   });

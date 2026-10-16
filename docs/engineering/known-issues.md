@@ -48,5 +48,6 @@ and live verification passes live under [reports](../reports/README.md).
 What each of these means for the text is on [the editorial ledger](../data/editorial-ledger.md) page.
 
 Closed since the last list: the traditional saroop rendering was accepted as the app's default at the
-brand sensitivity gate on 2026-09-26 (an exact match to the printed Bir's deep-subscript ya would still
-need a licensed or commissioned font); `Validation-Report.md` is archived.
+brand sensitivity gate on 2026-09-26. The deep-subscript ya that acceptance said would need another font
+was in Sant Lipi all along, as the yakash sign U+0A75: since 2026-10-16 the saroop draws it, matching the
+printed Bir, and goes back to the scholar with icon v2; `Validation-Report.md` is archived.

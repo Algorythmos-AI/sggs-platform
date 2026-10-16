@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 
 // A verse's actions, in one sheet, wherever a verse appears. What is pinned, copied or shared is
 // the verbatim line from the API, with its citation — never the painted glyphs (the traditional
-// saroop adds display-only selectors, U+FE00–FE0F, which must not leave the page).
+// saroop draws the subjoined yayya as the yakash sign U+0A75, which must not leave the page).
 
 const stored = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key);
 const sheet = (page: Page) => page.locator('#verseSheet');
@@ -26,9 +26,9 @@ test('the button on a verse opens its actions, showing the verse verbatim with i
   await btn.click();
   await expect(sheet(page)).toHaveClass(/\bon\b/);
   await expect(page.locator('#vsCite')).toHaveText('Sri Guru Granth Sahib Ji · Ang 1400');
-  // the sheet shows the line; under the display layer its text is still the API's, selector for selector
-  const shown = await page.locator('#vsText').evaluate((el) => (el.textContent || '').replace(/[︀-️]/g, ''));
-  expect(shown.replace(/੍ਯ/g, 'ਯ')).toBe(line.gurmukhi.replace(/(੍ਯ)+/g, 'ਯ'));
+  // the sheet shows the line; mapped back from the display layer, it is the API's, byte for byte
+  const shown = (await page.locator('#vsText').textContent()) || '';
+  expect(shown.replace(/ੵ/g, '੍ਯ੍ਯ')).toBe(line.gurmukhi);
   await expect(page.locator('#vsRelated')).toHaveAttribute('href', `/trail?line_id=${line.id}`);
   await page.keyboard.press('Escape');
   await expect(sheet(page)).toHaveAttribute('inert', '');

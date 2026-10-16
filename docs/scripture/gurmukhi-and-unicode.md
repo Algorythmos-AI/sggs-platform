@@ -34,11 +34,13 @@ signs, which is why a typo-tolerant search still finds a line.
 The **[[Halant]]** `੍` joins a consonant to a subjoined one — `ਰ`, `ਹ`, `ਵ` and `ਯ` most often. The
 source font emitted several of these as private-use glyphs and, for the
 **[[Addha-yayya|subjoined ya]]** in Sahaskriti words, doubled the sequence (`੍ਯ੍ਯ`): 234 lines in
-the corpus carry a subjoined ya. The text keeps what the Bir prints; the *traditional saroop*
-display toggle on the website collapses the doubled ya in rendered glyphs only, and a copy-event
-handler strips the display markup from anything you copy. The stored text, the API, search and the
-app's database are untouched — the [[Saroop]] is a display layer, and the glossary says why its
-rendering is a different, legitimate typographic tradition from the printed Bir's deep subscript.
+the corpus (268 words on 78 Angs) carry a subjoined ya, always as that doubled pair. The printed Bir
+draws one ya tucked under the letter — Unicode's yakash sign `ੵ` (U+0A75), which Sant Lipi draws
+the same way. The *traditional saroop* on the website and in the app draws each doubled pair as
+`ੵ` in rendered glyphs only (Ang 1400's ਜਲੵਨ, ਧਰੵਉ), and anything you copy is mapped back to the
+stored characters. The stored text, the API, search and the app's database are untouched — the
+[[Saroop]] is a display layer. The corpus contains no `ੵ` of its own, which is what makes that
+mapping exact; a test fails if a dataset ever changes either fact.
 
 ## Nasal signs, nukta and editions
 
