@@ -3,6 +3,17 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.4.2] — 2026-10-16
+
+The privacy policy now covers the wiki's assistant links. Web only — no scripture, corpus or
+dataset change.
+
+### Changed
+- **The privacy policy says what the wiki's *Ask ChatGPT* and *Ask Claude* links share.** Under
+  *This website*: the links open that service with the address of the page being read, the
+  reader is then under that service's own policy, and the wiki records nothing. Page date
+  16 October 2026.
+
 ## [1.4.1] — 2026-10-15
 
 Gurbani Soul is live on the App Store; this release makes the site say so cleanly and finishes the
