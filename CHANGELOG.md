@@ -3,6 +3,17 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [Unreleased]
+
+### Fixed
+- **The subjoined ya now looks as it does in the printed Bir.** Words such as ਜਲੵਨ and ਧਰੵਉ (Ang 1400)
+  were drawn with an inline half-ya that read like ਜਲਜਨ. The traditional saroop now draws each of the
+  268 doubled ya in the corpus as the yakash sign `ੵ`, tucked under the letter as the Bir prints it,
+  including the words where a sihari follows, which were left undrawn before. Display only: the stored
+  text, search, the API and Copy are unchanged, a copied selection is mapped back to the stored
+  characters, and a pinned verse carrying the display form is re-fetched. A test checks on every build
+  that the corpus has no `ੵ` of its own and stores every subjoined ya as one doubled pair.
+
 ## [1.4.2] — 2026-10-16
 
 The privacy policy now covers the wiki's assistant links. Web only — no scripture, corpus or
@@ -63,8 +74,6 @@ redesign's follow-ups. Web and API only — no scripture, corpus or dataset chan
 
 ### Data
 - None. `dataset.lock.json` unchanged.
-
-## [Unreleased]
 
 ## [1.4.0] — 2026-10-14 — the Knowledge Base, redressed: thirteen themes, a new shell, and the app's Reader, Nitnem, Search and Raag Clock on the web
 
