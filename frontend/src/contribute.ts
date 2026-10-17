@@ -46,13 +46,22 @@ const TEST: LinkSet = {
   portal: "https://billing.stripe.com/p/login/test_4gM6oG22vh0M16caHg18c00", // Stripe customer portal login link (cancel / update a monthly contribution)
 };
 
-// LIVE links — filled in a later PR, after the test flow is reviewed on staging. While any is
-// null, a "live" build fails on purpose.
+// LIVE links from the Algorythmos Stripe account (real payments; card only, Algorythmos is the
+// merchant). They redirect to https://gurbanisoul.com/contribute#thank-you.
 const LIVE: LinkSet = {
-  once: TEST.once.map((t) => ({ ...t, url: null })),
-  monthly: TEST.monthly.map((t) => ({ ...t, url: null })),
-  custom: null,
-  portal: null,
+  once: [
+    { ...TEST.once[0], url: "https://buy.stripe.com/aFaaEW8jTgAI4BPbx2d3i00" },
+    { ...TEST.once[1], url: "https://buy.stripe.com/14A5kC43D0BKfgtdFad3i01" },
+    { ...TEST.once[2], url: "https://buy.stripe.com/bJe14mcA9cks9W9fNid3i02" },
+    { ...TEST.once[3], url: "https://buy.stripe.com/8x2dR8eIh7082tH30wd3i03" },
+  ],
+  monthly: [
+    { ...TEST.monthly[0], url: "https://buy.stripe.com/7sY4gy57H0BK1pDfNid3i04" },
+    { ...TEST.monthly[1], url: "https://buy.stripe.com/dRmdR80Rr98g8S50Sod3i05" },
+    { ...TEST.monthly[2], url: "https://buy.stripe.com/14A3cu2Zzack3xL9oUd3i06" },
+  ],
+  custom: "https://buy.stripe.com/28E14m2ZzfwE8S5cB6d3i07",
+  portal: "https://billing.stripe.com/p/login/aFaaEW8jTgAI4BPbx2d3i00",
 };
 
 const TEST_RE = /^https:\/\/buy\.stripe\.com\/test_[A-Za-z0-9]+$/;
