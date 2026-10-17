@@ -1,0 +1,145 @@
+---
+// contribute.astro — optional support for Gurbani Soul (Stripe-hosted Payment Links, web only).
+// Links and mode come from src/contribute.ts (PUBLIC_CONTRIBUTE_MODE off|test|live). No script
+// runs on this page: amounts are plain links, and the thank-you note is the #thank-you section,
+// revealed by CSS :target when Stripe redirects back to /contribute#thank-you after payment.
+// Separate from /support (the App Store help page, path frozen). Never linked from the iOS app
+// (App Store guideline 3.1.1); the app gets its own in-app tip jar.
+import Marketing from "../layouts/Marketing.astro";
+import LegalPage from "../components/LegalPage.astro";
+import { SUPPORT_EMAIL } from "../site.ts";
+import { CONTRIBUTE_MODE, LINKS, type Tier } from "../contribute.ts";
+
+const on = LINKS !== null;
+const toc = [
+  { id: "why", label: "Why support" },
+  ...(on ? [{ id: "contribute", label: "Contribute" }] : []),
+  { id: "where-it-goes", label: "Where it goes" },
+  { id: "questions", label: "Questions" },
+];
+const desc = "Gurbani Soul is free, offline and ad-free. An optional contribution helps keep it that way.";
+const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Gurbani Soul contribution")}`;
+---
+<Marketing title="Contribute — Gurbani Soul" description={desc} path="/contribute">
+  <LegalPage
+    eyebrow="Contribute"
+    title="Keep Gurbani Soul free, offline and ad-free"
+    lede="Every feature of Gurbani Soul and this Knowledge Base is free for everyone, with no ads and no tracking. If it serves your seva and study, you can help cover what it costs to run. Contributing is optional and unlocks nothing."
+    id="v-contribute"
+    toc={toc}
+  >
+    <section id="thank-you" class="thanks" tabindex="-1" aria-labelledby="thanks-h">
+      <span class="thanks-mark" aria-hidden="true">✓</span>
+      <h2 id="thanks-h">Thank you</h2>
+      <p>If your payment went through, Stripe has emailed your receipt. Thank you for helping keep Gurbani Soul free for everyone.</p>
+    </section>
+
+    <section id="why">
+      <h2>Why support</h2>
+      <p>Gurbani Soul has no advertising, sells no data and has no paid tier. The scripture will never be behind a paywall. Contributions pay for the work that keeps the text exact and the app available: hosting, scholarly review, licensing and the yearly developer fees.</p>
+    </section>
+
+    {on && LINKS && (
+      <section id="contribute">
+        <h2>Contribute</h2>
+        {CONTRIBUTE_MODE === "test" && (
+          <p class="test-note" role="note"><strong>Test mode.</strong> These links use Stripe's test environment; no real payment is taken.</p>
+        )}
+        <h3>Once</h3>
+        <ul class="tiers tiers-4">
+          {LINKS.once.map((t: Tier) => <li>{t.url
+            ? <a class="tier" href={t.url} rel="noopener"><span class="tier-amt">{t.amount}</span><span class="tier-note">{t.note}</span><span class="tier-go" aria-hidden="true">Contribute <span class="arr">→</span></span></a>
+            : <span class="tier" aria-disabled="true"><span class="tier-amt">{t.amount}</span><span class="tier-note">Link not connected yet</span></span>}</li>)}
+        </ul>
+        {LINKS.custom
+          ? <p class="custom-row"><a class="custom" href={LINKS.custom} rel="noopener"><span>Choose your own amount <span class="custom-min">from A$5</span></span><span class="arr" aria-hidden="true">→</span></a></p>
+          : <p class="pending">Choose your own amount — link not connected yet.</p>}
+        <h3>Monthly</h3>
+        <ul class="tiers tiers-3">
+          {LINKS.monthly.map((t: Tier) => <li>{t.url
+            ? <a class="tier" href={t.url} rel="noopener"><span class="tier-amt">{t.amount}</span><span class="tier-note">{t.note}</span><span class="tier-go" aria-hidden="true">Contribute <span class="arr">→</span></span></a>
+            : <span class="tier" aria-disabled="true"><span class="tier-amt">{t.amount}</span><span class="tier-note">Link not connected yet</span></span>}</li>)}
+        </ul>
+        <p class="detail">Payments are handled on Stripe's secure checkout page; we never see your card details. Prices are in Australian dollars; your bank may convert them.</p>
+      </section>
+    )}
+
+    {!on && (
+      <p class="pending" id="opening-soon">Contributions are opening soon. Thank you for your patience.</p>
+    )}
+
+    <section id="where-it-goes">
+      <h2>Where it goes</h2>
+      <ul>
+        <li><strong>Hosting</strong> for the website, search and the Knowledge Base.</li>
+        <li><strong>Scholarly review</strong> of the text and of how it is presented.</li>
+        <li><strong>Licensing</strong>, including a licence for an English translation layer, and typefaces.</li>
+        <li><strong>Fees</strong>: the Apple Developer Program and the domain.</li>
+      </ul>
+    </section>
+
+    <section id="questions">
+      <h2>Questions</h2>
+      <h3>Is my contribution tax-deductible?</h3>
+      <p>No. Gurbani Soul is built by Algorythmos Pty Ltd, an Australian company, not a registered charity. A contribution is a payment to the company to support the project, not a charitable gift.</p>
+      <h3>Does contributing unlock anything?</h3>
+      <p>No. Everything stays free for everyone, whether or not they contribute.</p>
+      <h3 id="refunds">Can I get a refund?</h3>
+      <p>Yes. Email <a href={mailto}>{SUPPORT_EMAIL}</a> within 30 days and we will refund it in full.</p>
+      <h3>How do I stop a monthly contribution?</h3>
+      {on && LINKS?.portal
+        ? <p>Any time, yourself, from the <a href={LINKS.portal} rel="noopener">Stripe customer portal</a> (sign in with the email on your receipt), or email us.</p>
+        : <p>Any time: use the link in your Stripe receipt, or email <a href={mailto}>{SUPPORT_EMAIL}</a>.</p>}
+      <h3>What do you keep about me?</h3>
+      <p>Stripe processes the payment and keeps the details it needs, under its own privacy policy. We see your name, email, the amount and the date, use them only for receipts, refunds and our accounts, and never share them. See the <a href="/privacy">Privacy Policy</a>.</p>
+    </section>
+  </LegalPage>
+
+  <style>
+    /* Brand rules (docs/brand): #FFBC0D is a FILL only, always with a 1px --accent border; text on it
+       is --on-accent. Gold text uses --accent-text. Washes are literal rgba (never color-mix: Lightning
+       CSS would fall back to a solid --accent behind ink text on old Safari). */
+    :global(.legal) { --tier-wash: rgba(255,188,13,.10); --tier-wash-hi: rgba(255,188,13,.18); --tier-edge: rgba(168,121,0,.35); }
+    :global(:root[data-theme="dark"] .legal) { --tier-wash: rgba(255,188,13,.07); --tier-wash-hi: rgba(255,188,13,.13); --tier-edge: rgba(255,188,13,.30); }
+
+    :global(.legal) section.thanks { display: none; position: relative; background: var(--tier-wash); border: 1px solid var(--accent); border-radius: 18px; padding: 20px 22px 18px 72px; margin: 0 0 28px; }
+    :global(.legal) section.thanks:target { display: block; }
+    .thanks:focus { outline: none; }
+    .thanks h2 { margin: 0 0 6px; }
+    .thanks p { margin: 0; }
+    .thanks-mark { position: absolute; left: 22px; top: 22px; width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center; background: var(--accent-fill); color: var(--on-accent); border: 1px solid var(--accent); font-weight: 700; }
+
+    :global(.legal) ul.tiers { list-style: none; padding: 0; margin: 0 0 18px; display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    :global(.legal) ul.tiers-3 { grid-template-columns: minmax(0, 1fr); }
+    @media (min-width: 560px) { :global(.legal) ul.tiers-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (min-width: 1100px) { :global(.legal) ul.tiers-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    :global(.legal) ul.tiers li { display: flex; margin: 0; padding: 0; }
+    :global(.legal) ul.tiers li::before { content: none; }
+
+    :global(.legal) .tier { position: relative; overflow: hidden; flex: 1; display: flex; flex-direction: column; gap: 6px; min-height: 44px; padding: 20px 18px 16px; border: 1px solid var(--tier-edge); border-radius: 16px; background: var(--tier-wash); color: var(--ink); text-decoration: none; transition: transform .18s ease, border-color .18s ease, background-color .18s ease, box-shadow .18s ease; }
+    :global(.legal) .tier::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--accent-fill); }
+    :global(.legal) a.tier:hover, :global(.legal) a.tier:focus-visible { border-color: var(--accent); background: var(--tier-wash-hi); transform: translateY(-2px); box-shadow: 0 10px 24px -14px rgba(43,26,5,.45); }
+    :global(.legal) a.tier:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    :global(.legal) .tier-amt { font-family: var(--serif-display); font-size: clamp(22px, 2.6vw, 27px); font-weight: 600; line-height: 1.15; }
+    :global(.legal) .tier-note { font-size: 14.5px; line-height: 1.45; color: var(--ink-soft); flex: 1; }
+    :global(.legal) .tier-go { align-self: flex-start; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; background: var(--accent-fill); color: var(--on-accent); border: 1px solid var(--accent); font-size: 13.5px; font-weight: 650; }
+    :global(.legal) .arr { display: inline-block; transition: transform .18s ease; }
+    :global(.legal) a.tier:hover .arr, :global(.legal) a.custom:hover .arr { transform: translateX(3px); }
+    :global(.legal) .tier[aria-disabled="true"] { opacity: .6; border-style: dashed; }
+    :global(.legal) .tier[aria-disabled="true"]::before { display: none; }
+
+    .custom-row { margin: 0 0 30px; }
+    :global(.legal) a.custom { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 12px 18px; border: 1px dashed var(--accent); border-radius: 16px; color: var(--ink); text-decoration: none; font-weight: 600; transition: background-color .18s ease; }
+    :global(.legal) a.custom:hover, :global(.legal) a.custom:focus-visible { background: var(--tier-wash); }
+    :global(.legal) .custom-min { font-weight: 400; color: var(--ink-soft); margin-left: 6px; }
+    :global(.legal) a.custom .arr { color: var(--accent-text); font-size: 18px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      :global(.legal) .tier, :global(.legal) .arr { transition: none; }
+      :global(.legal) a.tier:hover, :global(.legal) a.tier:focus-visible { transform: none; }
+    }
+    .pending { color: var(--ink-soft); font-style: italic; }
+    .test-note { padding: 10px 14px; border: 1px dashed var(--line); border-radius: 10px; }
+  </style>
+</Marketing>
+
