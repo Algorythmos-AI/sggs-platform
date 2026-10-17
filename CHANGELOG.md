@@ -3,7 +3,17 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
-## [Unreleased]
+## [1.4.3] — 2026-10-17
+
+The subjoined ya is drawn as the printed Bir draws it, on the website and in the app. The iPhone
+app also gains safety work: its CI now fails on any failing test, and deep links, saved verses,
+Spotlight and the Nitnem files are hardened (gurbani-soul-ios #37, #38). No scripture, corpus or
+dataset change.
+
+**Gate note.** The scholar review (brand gate G3) of this display was still open at release. The
+owner accepted it for this release on 2026-10-17; the review continues, and if the scholar asks for
+a change it ships in the next release (the default is `let ON` in `saroop.ts` and the
+`sggs_saroop` default in the app).
 
 ### Fixed
 - **The subjoined ya now looks as it does in the printed Bir.** Words such as ਜਲੵਨ and ਧਰੵਉ (Ang 1400)
