@@ -3,6 +3,27 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.4.3] — 2026-10-17
+
+The subjoined ya is drawn as the printed Bir draws it, on the website and in the app. The iPhone
+app also gains safety work: its CI now fails on any failing test, and deep links, saved verses,
+Spotlight and the Nitnem files are hardened (gurbani-soul-ios #37, #38). No scripture, corpus or
+dataset change.
+
+**Gate note.** The scholar review (brand gate G3) of this display was still open at release. The
+owner accepted it for this release on 2026-10-17; the review continues, and if the scholar asks for
+a change it ships in the next release (the default is `let ON` in `saroop.ts` and the
+`sggs_saroop` default in the app).
+
+### Fixed
+- **The subjoined ya now looks as it does in the printed Bir.** Words such as ਜਲੵਨ and ਧਰੵਉ (Ang 1400)
+  were drawn with an inline half-ya that read like ਜਲਜਨ. The traditional saroop now draws each of the
+  268 doubled ya in the corpus as the yakash sign `ੵ`, tucked under the letter as the Bir prints it,
+  including the words where a sihari follows, which were left undrawn before. Display only: the stored
+  text, search, the API and Copy are unchanged, a copied selection is mapped back to the stored
+  characters, and a pinned verse carrying the display form is re-fetched. A test checks on every build
+  that the corpus has no `ੵ` of its own and stores every subjoined ya as one doubled pair.
+
 ## [1.4.2] — 2026-10-16
 
 The privacy policy now covers the wiki's assistant links. Web only — no scripture, corpus or
@@ -63,8 +84,6 @@ redesign's follow-ups. Web and API only — no scripture, corpus or dataset chan
 
 ### Data
 - None. `dataset.lock.json` unchanged.
-
-## [Unreleased]
 
 ## [1.4.0] — 2026-10-14 — the Knowledge Base, redressed: thirteen themes, a new shell, and the app's Reader, Nitnem, Search and Raag Clock on the web
 

@@ -12,10 +12,11 @@ const escAttr = (s: string) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&
 export function pinButtonHTML(id: number, ang: number, cid: number, gm: string): string {
   return `<button class="pin-btn" data-id="${id}" data-ang="${ang}" data-cid="${cid}" data-gm="${escAttr(gm)}" type="button" aria-haspopup="dialog" aria-label="Verse actions" title="Pin, open, copy or share this verse">⋯</button>`;
 }
-// Variation Selectors (U+FE00–FE0F) only ever exist in the display layer; a stored pin that
-// carries one was captured from painted DOM by an older build and must be re-fetched verbatim.
-const HAS_VS = /[\uFE00-\uFE0F]/;
-export const needsRepair = (p: Pin) => !p.gm || HAS_VS.test(p.gm);
+// The saroop's marks — yakash U+0A75 and the Variation Selectors U+FE00–FE0F an older build used —
+// only ever exist in the display layer (the corpus has neither); a stored pin that carries one was
+// captured from painted DOM and must be re-fetched verbatim.
+const DISPLAY_ONLY = /[\u0A75\uFE00-\uFE0F]/;
+export const needsRepair = (p: Pin) => !p.gm || DISPLAY_ONLY.test(p.gm);
 const KEY = 'sggs_pins';
 export const MAX_PINS = 500;                    // hard cap so the pin set can't outgrow the localStorage quota
 export type ToggleResult = 'pinned' | 'unpinned' | 'cap' | 'quota';
