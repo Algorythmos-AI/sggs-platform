@@ -3,6 +3,16 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.4.4] — 2026-10-18
+
+### Added
+- **`/contribute`**: optional support for Gurbani Soul through Stripe-hosted Payment Links. The amounts are one-time A$11/21/51/101, monthly A$5/11/21, or your own amount from A$5. Monthly contributions can be cancelled in the Stripe customer portal. Contributing unlocks nothing and is not tax-deductible (Algorythmos Pty Ltd is not a charity). The page loads no Stripe script. After payment, Stripe returns visitors to `/contribute#thank-you`, which shows the thank-you note.
+- **`PUBLIC_CONTRIBUTE_MODE`** (`off` | `test` | `live`): a build-time switch. The build fails if any link doesn't match the mode, so a test link can't reach production. Production is `live`; staging (Preview) is `test`.
+- **Privacy policy:** a Contributions section (Stripe processes the payment; we never see card details). It is shown only when contributions are on.
+
+### Changed
+- `/support` and the marketing footer link to `/contribute`.
+
 ## [1.4.3] — 2026-10-17
 
 The subjoined ya is drawn as the printed Bir draws it, on the website and in the app. The iPhone
