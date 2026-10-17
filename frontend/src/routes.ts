@@ -63,6 +63,7 @@ export const routes: Route[] = [
   { path: "/divergence",   lastmod: LASTMOD, changefreq: "monthly", priority: 0.4, og: "knowledge-base" },
   { path: "/privacy",      lastmod: LASTMOD, changefreq: "yearly",  priority: 0.4, og: "privacy" },
   { path: "/support",      lastmod: LASTMOD, changefreq: "yearly",  priority: 0.5, og: "support" },
+  { path: "/contribute",   lastmod: "2026-10-17", changefreq: "yearly",  priority: 0.4, og: "support" },
   ...learnRoutes,
 ];
 
