@@ -28,23 +28,22 @@ export type Tier = {
 
 type LinkSet = { once: Tier[]; monthly: Tier[]; custom: string | null; portal: string | null };
 
-// PLACEHOLDER — every url below is null until the owner creates the Stripe TEST-mode Payment
-// Links (Dashboard → Payment Links) and pastes them here. While null, the page shows the tier
-// as "not connected yet" instead of a link.
+// Stripe TEST-mode links from the "Algorythmos sandbox" account (no real money). They redirect to
+// https://sggs-staging.vercel.app/contribute#thank-you. Pay with card 4242 4242 4242 4242.
 const TEST: LinkSet = {
   once: [
-    { key: "once-11", amount: "A$11", note: "A small offering", url: null },
-    { key: "once-21", amount: "A$21", note: "Helps cover a month of hosting", url: null },
-    { key: "once-51", amount: "A$51", note: "Helps fund scholarly review", url: null },
-    { key: "once-101", amount: "A$101", note: "Helps fund licensing and fonts", url: null },
+    { key: "once-11", amount: "A$11", note: "A small offering", url: "https://buy.stripe.com/test_6oU6oGfTl4e0dSYeXw18c05" },
+    { key: "once-21", amount: "A$21", note: "Helps cover a month of hosting", url: "https://buy.stripe.com/test_7sYaEW9uXaCog16cPo18c06" },
+    { key: "once-51", amount: "A$51", note: "Helps fund scholarly review", url: "https://buy.stripe.com/test_4gM9AS36z9yk3ekdTs18c07" },
+    { key: "once-101", amount: "A$101", note: "Helps fund licensing and fonts", url: "https://buy.stripe.com/test_3cIaEW5eH4e0eX202C18c04" },
   ],
   monthly: [
-    { key: "monthly-5", amount: "A$5 / month", note: "Steady sewa", url: null },
-    { key: "monthly-11", amount: "A$11 / month", note: "Steady sewa", url: null },
-    { key: "monthly-21", amount: "A$21 / month", note: "Steady sewa", url: null },
+    { key: "monthly-5", amount: "A$5 / month", note: "Steady sewa", url: "https://buy.stripe.com/test_28EfZgaz111O2ag4iS18c03" },
+    { key: "monthly-11", amount: "A$11 / month", note: "Steady sewa", url: "https://buy.stripe.com/test_cNi14m8qTcKwaGM2aK18c01" },
+    { key: "monthly-21", amount: "A$21 / month", note: "Steady sewa", url: "https://buy.stripe.com/test_5kQ28q7mPfWI0289Dc18c02" },
   ],
-  custom: null, // "customer chooses what to pay" link (A$5 minimum, A$1,000 maximum)
-  portal: null, // Stripe customer portal login link (cancel / update a monthly contribution)
+  custom: "https://buy.stripe.com/test_4gM6oG22vh0M16caHg18c00", // "customer chooses what to pay" link (A$5 minimum, A$1,000 maximum)
+  portal: "https://billing.stripe.com/p/login/test_4gM6oG22vh0M16caHg18c00", // Stripe customer portal login link (cancel / update a monthly contribution)
 };
 
 // LIVE links — filled in a later PR, after the test flow is reviewed on staging. While any is
