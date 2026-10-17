@@ -29,6 +29,7 @@ const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Gurbani So
     toc={toc}
   >
     <section id="thank-you" class="thanks" tabindex="-1" aria-labelledby="thanks-h">
+      <span class="thanks-mark" aria-hidden="true">✓</span>
       <h2 id="thanks-h">Thank you</h2>
       <p>If your payment went through, Stripe has emailed your receipt. Thank you for helping keep Gurbani Soul free for everyone.</p>
     </section>
@@ -45,18 +46,18 @@ const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Gurbani So
           <p class="test-note" role="note"><strong>Test mode.</strong> These links use Stripe's test environment; no real payment is taken.</p>
         )}
         <h3>Once</h3>
-        <ul class="tiers">
+        <ul class="tiers tiers-4">
           {LINKS.once.map((t: Tier) => <li>{t.url
-            ? <a class="tier" href={t.url} rel="noopener"><span class="tier-amt">{t.amount}</span><span class="tier-note">{t.note}</span></a>
+            ? <a class="tier" href={t.url} rel="noopener"><span class="tier-amt">{t.amount}</span><span class="tier-note">{t.note}</span><span class="tier-go" aria-hidden="true">Contribute <span class="arr">→</span></span></a>
             : <span class="tier" aria-disabled="true"><span class="tier-amt">{t.amount}</span><span class="tier-note">Link not connected yet</span></span>}</li>)}
         </ul>
         {LINKS.custom
-          ? <p><a href={LINKS.custom} rel="noopener">Choose your own amount</a> (from A$5).</p>
+          ? <p class="custom-row"><a class="custom" href={LINKS.custom} rel="noopener"><span>Choose your own amount <span class="custom-min">from A$5</span></span><span class="arr" aria-hidden="true">→</span></a></p>
           : <p class="pending">Choose your own amount — link not connected yet.</p>}
         <h3>Monthly</h3>
-        <ul class="tiers">
+        <ul class="tiers tiers-3">
           {LINKS.monthly.map((t: Tier) => <li>{t.url
-            ? <a class="tier" href={t.url} rel="noopener"><span class="tier-amt">{t.amount}</span><span class="tier-note">{t.note}</span></a>
+            ? <a class="tier" href={t.url} rel="noopener"><span class="tier-amt">{t.amount}</span><span class="tier-note">{t.note}</span><span class="tier-go" aria-hidden="true">Contribute <span class="arr">→</span></span></a>
             : <span class="tier" aria-disabled="true"><span class="tier-amt">{t.amount}</span><span class="tier-note">Link not connected yet</span></span>}</li>)}
         </ul>
         <p class="detail">Payments are handled on Stripe's secure checkout page; we never see your card details. Prices are in Australian dollars; your bank may convert them.</p>
@@ -95,15 +96,48 @@ const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Gurbani So
   </LegalPage>
 
   <style>
-    .thanks { display: none; background: var(--card); border: 1px solid var(--accent); border-radius: 18px; padding: 18px 22px; margin: 0 0 24px; }
-    .thanks:target { display: block; }
-    .thanks h2 { margin-top: 0; }
-    .tiers { list-style: none; padding: 0; margin: 0 0 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 12px; }
-    :global(.legal) .tier { display: flex; flex-direction: column; gap: 4px; min-height: 44px; padding: 14px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink); text-decoration: none; }
-    :global(.legal) a.tier:hover, :global(.legal) a.tier:focus-visible { border-color: var(--accent); }
-    :global(.legal) .tier-amt { font-family: var(--serif-display); font-size: 22px; font-weight: 600; }
-    :global(.legal) .tier-note { font-size: 14.5px; color: var(--ink-soft); }
+    /* Brand rules (docs/brand): #FFBC0D is a FILL only, always with a 1px --accent border; text on it
+       is --on-accent. Gold text uses --accent-text. Washes are literal rgba (never color-mix: Lightning
+       CSS would fall back to a solid --accent behind ink text on old Safari). */
+    :global(.legal) { --tier-wash: rgba(255,188,13,.10); --tier-wash-hi: rgba(255,188,13,.18); --tier-edge: rgba(168,121,0,.35); }
+    :global(:root[data-theme="dark"] .legal) { --tier-wash: rgba(255,188,13,.07); --tier-wash-hi: rgba(255,188,13,.13); --tier-edge: rgba(255,188,13,.30); }
+
+    :global(.legal) section.thanks { display: none; position: relative; background: var(--tier-wash); border: 1px solid var(--accent); border-radius: 18px; padding: 20px 22px 18px 72px; margin: 0 0 28px; }
+    :global(.legal) section.thanks:target { display: block; }
+    .thanks:focus { outline: none; }
+    .thanks h2 { margin: 0 0 6px; }
+    .thanks p { margin: 0; }
+    .thanks-mark { position: absolute; left: 22px; top: 22px; width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center; background: var(--accent-fill); color: var(--on-accent); border: 1px solid var(--accent); font-weight: 700; }
+
+    :global(.legal) ul.tiers { list-style: none; padding: 0; margin: 0 0 18px; display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    :global(.legal) ul.tiers-3 { grid-template-columns: minmax(0, 1fr); }
+    @media (min-width: 560px) { :global(.legal) ul.tiers-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (min-width: 1100px) { :global(.legal) ul.tiers-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    :global(.legal) ul.tiers li { display: flex; margin: 0; padding: 0; }
+    :global(.legal) ul.tiers li::before { content: none; }
+
+    :global(.legal) .tier { position: relative; overflow: hidden; flex: 1; display: flex; flex-direction: column; gap: 6px; min-height: 44px; padding: 20px 18px 16px; border: 1px solid var(--tier-edge); border-radius: 16px; background: var(--tier-wash); color: var(--ink); text-decoration: none; transition: transform .18s ease, border-color .18s ease, background-color .18s ease, box-shadow .18s ease; }
+    :global(.legal) .tier::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--accent-fill); }
+    :global(.legal) a.tier:hover, :global(.legal) a.tier:focus-visible { border-color: var(--accent); background: var(--tier-wash-hi); transform: translateY(-2px); box-shadow: 0 10px 24px -14px rgba(43,26,5,.45); }
+    :global(.legal) a.tier:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    :global(.legal) .tier-amt { font-family: var(--serif-display); font-size: clamp(22px, 2.6vw, 27px); font-weight: 600; line-height: 1.15; }
+    :global(.legal) .tier-note { font-size: 14.5px; line-height: 1.45; color: var(--ink-soft); flex: 1; }
+    :global(.legal) .tier-go { align-self: flex-start; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; background: var(--accent-fill); color: var(--on-accent); border: 1px solid var(--accent); font-size: 13.5px; font-weight: 650; }
+    :global(.legal) .arr { display: inline-block; transition: transform .18s ease; }
+    :global(.legal) a.tier:hover .arr, :global(.legal) a.custom:hover .arr { transform: translateX(3px); }
     :global(.legal) .tier[aria-disabled="true"] { opacity: .6; border-style: dashed; }
+    :global(.legal) .tier[aria-disabled="true"]::before { display: none; }
+
+    .custom-row { margin: 0 0 30px; }
+    :global(.legal) a.custom { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 12px 18px; border: 1px dashed var(--accent); border-radius: 16px; color: var(--ink); text-decoration: none; font-weight: 600; transition: background-color .18s ease; }
+    :global(.legal) a.custom:hover, :global(.legal) a.custom:focus-visible { background: var(--tier-wash); }
+    :global(.legal) .custom-min { font-weight: 400; color: var(--ink-soft); margin-left: 6px; }
+    :global(.legal) a.custom .arr { color: var(--accent-text); font-size: 18px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      :global(.legal) .tier, :global(.legal) .arr { transition: none; }
+      :global(.legal) a.tier:hover, :global(.legal) a.tier:focus-visible { transform: none; }
+    }
     .pending { color: var(--ink-soft); font-style: italic; }
     .test-note { padding: 10px 14px; border: 1px dashed var(--line); border-radius: 10px; }
   </style>
