@@ -9,15 +9,19 @@
 // the path /privacy is frozen (App Store Connect + the app's AppLinks).
 import Marketing from "../layouts/Marketing.astro";
 import LegalPage from "../components/LegalPage.astro";
-const updated = "16 October 2026";
+import { CONTRIBUTE_MODE } from "../contribute.ts";
+const updated = "17 October 2026";
 // The launch-notice sign-up (Newsletter.astro) renders only when this build-time env var is set;
 // the disclosure below follows it, so the policy never describes a form the site does not show.
 const newsletterOn = !!import.meta.env.PUBLIC_NEWSLETTER_FORM_URL;
+// Likewise the Contributions section follows /contribute's mode (src/contribute.ts).
+const contributeOn = CONTRIBUTE_MODE !== "off";
 const desc = "The Gurbani Soul app collects nothing: no accounts, no network connections, no analytics. Exactly what stays on your device, and what this website does.";
 const toc = [
   { id: "short-version", label: "The short version" },
   { id: "the-app", label: "The app" },
   { id: "this-website", label: "This website" },
+  ...(contributeOn ? [{ id: "contributions", label: "Contributions" }] : []),
   { id: "children", label: "Children" },
   { id: "your-data", label: "Your data, your control" },
   { id: "changes", label: "Changes" },
@@ -74,6 +78,11 @@ const toc = [
         <li>Searches and page requests are answered by our API. The hosting providers we use (Vercel for the site, Render for the API) keep standard server logs — IP address, user agent, request path and time — for security and operations, under their own retention rules. We do not add tracking to those logs, do not build profiles from them, and do not share them.</li>
       </ul>
     </section>
+
+    {contributeOn && <section id="contributions">
+      <h2>Contributions</h2>
+      <p>If you choose to contribute on <a href="/contribute">gurbanisoul.com/contribute</a>, you leave this site for a checkout page run by <strong>Stripe</strong>, which processes the payment under its own <a href="https://stripe.com/privacy">privacy policy</a>. Our pages load no Stripe code before you click. We never see or store your card details. Stripe gives us your email address, name, the amount and the date, which we use only for receipts, refunds and our business records (kept as long as Australian tax law requires) and never share or use for marketing.</p>
+    </section>}
 
     <section id="children">
       <h2>Children</h2>

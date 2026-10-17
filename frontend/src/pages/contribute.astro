@@ -1,0 +1,111 @@
+---
+// contribute.astro — optional support for Gurbani Soul (Stripe-hosted Payment Links, web only).
+// Links and mode come from src/contribute.ts (PUBLIC_CONTRIBUTE_MODE off|test|live). No script
+// runs on this page: amounts are plain links, and the thank-you note is the #thank-you section,
+// revealed by CSS :target when Stripe redirects back to /contribute#thank-you after payment.
+// Separate from /support (the App Store help page, path frozen). Never linked from the iOS app
+// (App Store guideline 3.1.1); the app gets its own in-app tip jar.
+import Marketing from "../layouts/Marketing.astro";
+import LegalPage from "../components/LegalPage.astro";
+import { SUPPORT_EMAIL } from "../site.ts";
+import { CONTRIBUTE_MODE, LINKS, type Tier } from "../contribute.ts";
+
+const on = LINKS !== null;
+const toc = [
+  { id: "why", label: "Why support" },
+  ...(on ? [{ id: "contribute", label: "Contribute" }] : []),
+  { id: "where-it-goes", label: "Where it goes" },
+  { id: "questions", label: "Questions" },
+];
+const desc = "Gurbani Soul is free, offline and ad-free. An optional contribution helps keep it that way.";
+const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Gurbani Soul contribution")}`;
+---
+<Marketing title="Contribute — Gurbani Soul" description={desc} path="/contribute">
+  <LegalPage
+    eyebrow="Contribute"
+    title="Keep Gurbani Soul free, offline and ad-free"
+    lede="Every feature of Gurbani Soul and this Knowledge Base is free for everyone, with no ads and no tracking. If it serves your seva and study, you can help cover what it costs to run. Contributing is optional and unlocks nothing."
+    id="v-contribute"
+    toc={toc}
+  >
+    <section id="thank-you" class="thanks" tabindex="-1" aria-labelledby="thanks-h">
+      <h2 id="thanks-h">Thank you</h2>
+      <p>If your payment went through, Stripe has emailed your receipt. Thank you for helping keep Gurbani Soul free for everyone.</p>
+    </section>
+
+    <section id="why">
+      <h2>Why support</h2>
+      <p>Gurbani Soul has no advertising, sells no data and has no paid tier. The scripture will never be behind a paywall. Contributions pay for the work that keeps the text exact and the app available: hosting, scholarly review, licensing and the yearly developer fees.</p>
+    </section>
+
+    {on && LINKS && (
+      <section id="contribute">
+        <h2>Contribute</h2>
+        {CONTRIBUTE_MODE === "test" && (
+          <p class="test-note" role="note"><strong>Test mode.</strong> These links use Stripe's test environment; no real payment is taken.</p>
+        )}
+        <h3>Once</h3>
+        <ul class="tiers">
+          {LINKS.once.map((t: Tier) => <li>{t.url
+            ? <a class="tier" href={t.url} rel="noopener"><span class="tier-amt">{t.amount}</span><span class="tier-note">{t.note}</span></a>
+            : <span class="tier" aria-disabled="true"><span class="tier-amt">{t.amount}</span><span class="tier-note">Link not connected yet</span></span>}</li>)}
+        </ul>
+        {LINKS.custom
+          ? <p><a href={LINKS.custom} rel="noopener">Choose your own amount</a> (from A$5).</p>
+          : <p class="pending">Choose your own amount — link not connected yet.</p>}
+        <h3>Monthly</h3>
+        <ul class="tiers">
+          {LINKS.monthly.map((t: Tier) => <li>{t.url
+            ? <a class="tier" href={t.url} rel="noopener"><span class="tier-amt">{t.amount}</span><span class="tier-note">{t.note}</span></a>
+            : <span class="tier" aria-disabled="true"><span class="tier-amt">{t.amount}</span><span class="tier-note">Link not connected yet</span></span>}</li>)}
+        </ul>
+        <p class="detail">Payments are handled on Stripe's secure checkout page; we never see your card details. Prices are in Australian dollars; your bank may convert them.</p>
+      </section>
+    )}
+
+    {!on && (
+      <p class="pending" id="opening-soon">Contributions are opening soon. Thank you for your patience.</p>
+    )}
+
+    <section id="where-it-goes">
+      <h2>Where it goes</h2>
+      <ul>
+        <li><strong>Hosting</strong> for the website, search and the Knowledge Base.</li>
+        <li><strong>Scholarly review</strong> of the text and of how it is presented.</li>
+        <li><strong>Licensing</strong>, including a licence for an English translation layer, and typefaces.</li>
+        <li><strong>Fees</strong>: the Apple Developer Program and the domain.</li>
+      </ul>
+    </section>
+
+    <section id="questions">
+      <h2>Questions</h2>
+      <h3>Is my contribution tax-deductible?</h3>
+      <p>No. Gurbani Soul is built by Algorythmos Pty Ltd, an Australian company, not a registered charity. A contribution is a payment to the company to support the project, not a charitable gift.</p>
+      <h3>Does contributing unlock anything?</h3>
+      <p>No. Everything stays free for everyone, whether or not they contribute.</p>
+      <h3 id="refunds">Can I get a refund?</h3>
+      <p>Yes. Email <a href={mailto}>{SUPPORT_EMAIL}</a> within 30 days and we will refund it in full.</p>
+      <h3>How do I stop a monthly contribution?</h3>
+      {on && LINKS?.portal
+        ? <p>Any time, yourself, from the <a href={LINKS.portal} rel="noopener">Stripe customer portal</a> (sign in with the email on your receipt), or email us.</p>
+        : <p>Any time: use the link in your Stripe receipt, or email <a href={mailto}>{SUPPORT_EMAIL}</a>.</p>}
+      <h3>What do you keep about me?</h3>
+      <p>Stripe processes the payment and keeps the details it needs, under its own privacy policy. We see your name, email, the amount and the date, use them only for receipts, refunds and our accounts, and never share them. See the <a href="/privacy">Privacy Policy</a>.</p>
+    </section>
+  </LegalPage>
+
+  <style>
+    .thanks { display: none; background: var(--card); border: 1px solid var(--accent); border-radius: 18px; padding: 18px 22px; margin: 0 0 24px; }
+    .thanks:target { display: block; }
+    .thanks h2 { margin-top: 0; }
+    .tiers { list-style: none; padding: 0; margin: 0 0 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 12px; }
+    :global(.legal) .tier { display: flex; flex-direction: column; gap: 4px; min-height: 44px; padding: 14px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink); text-decoration: none; }
+    :global(.legal) a.tier:hover, :global(.legal) a.tier:focus-visible { border-color: var(--accent); }
+    :global(.legal) .tier-amt { font-family: var(--serif-display); font-size: 22px; font-weight: 600; }
+    :global(.legal) .tier-note { font-size: 14.5px; color: var(--ink-soft); }
+    :global(.legal) .tier[aria-disabled="true"] { opacity: .6; border-style: dashed; }
+    .pending { color: var(--ink-soft); font-style: italic; }
+    .test-note { padding: 10px 14px; border: 1px dashed var(--line); border-radius: 10px; }
+  </style>
+</Marketing>
+

@@ -1,0 +1,87 @@
+// contribute.ts — the single source for /contribute (optional support for Gurbani Soul via
+// Stripe-hosted Payment Links). Plain <a> links only: no Stripe.js and no script from Stripe ever
+// loads on our pages; the visitor leaves for buy.stripe.com only when they click.
+//
+// Mode is a build-time switch, PUBLIC_CONTRIBUTE_MODE (Vercel project env):
+//   * "off"  (default, also any unknown value) — the page explains support is opening soon and
+//            renders NO payment link.
+//   * "test" — staging: only Stripe TEST-mode links (https://buy.stripe.com/test_…) or null.
+//   * "live" — production: every link must be a live link (never test_, never null).
+// assertLinks() runs at import time, so a wrong link for the mode FAILS THE BUILD rather than
+// shipping a test link to production or a live link to staging.
+//
+// Wording rules (constraint 1 of the plan): Algorythmos Pty Ltd is a company, not a charity —
+// these are contributions, never "donations", and they are not tax-deductible. Support unlocks
+// nothing; every feature stays free.
+
+export type ContributeMode = "off" | "test" | "live";
+
+const raw = import.meta.env.PUBLIC_CONTRIBUTE_MODE;
+export const CONTRIBUTE_MODE: ContributeMode = raw === "test" || raw === "live" ? raw : "off";
+
+export type Tier = {
+  key: string;
+  amount: string;   // display text, e.g. "A$21" — the price itself lives in Stripe
+  note: string;
+  url: string | null; // null = not created yet (allowed in test mode only)
+};
+
+type LinkSet = { once: Tier[]; monthly: Tier[]; custom: string | null; portal: string | null };
+
+// PLACEHOLDER — every url below is null until the owner creates the Stripe TEST-mode Payment
+// Links (Dashboard → Payment Links) and pastes them here. While null, the page shows the tier
+// as "not connected yet" instead of a link.
+const TEST: LinkSet = {
+  once: [
+    { key: "once-11", amount: "A$11", note: "A small offering", url: null },
+    { key: "once-21", amount: "A$21", note: "Helps cover a month of hosting", url: null },
+    { key: "once-51", amount: "A$51", note: "Helps fund scholarly review", url: null },
+    { key: "once-101", amount: "A$101", note: "Helps fund licensing and fonts", url: null },
+  ],
+  monthly: [
+    { key: "monthly-5", amount: "A$5 / month", note: "Steady sewa", url: null },
+    { key: "monthly-11", amount: "A$11 / month", note: "Steady sewa", url: null },
+    { key: "monthly-21", amount: "A$21 / month", note: "Steady sewa", url: null },
+  ],
+  custom: null, // "customer chooses what to pay" link (A$5 minimum, A$1,000 maximum)
+  portal: null, // Stripe customer portal login link (cancel / update a monthly contribution)
+};
+
+// LIVE links — filled in a later PR, after the test flow is reviewed on staging. While any is
+// null, a "live" build fails on purpose.
+const LIVE: LinkSet = {
+  once: TEST.once.map((t) => ({ ...t, url: null })),
+  monthly: TEST.monthly.map((t) => ({ ...t, url: null })),
+  custom: null,
+  portal: null,
+};
+
+const TEST_RE = /^https:\/\/buy\.stripe\.com\/test_[A-Za-z0-9]+$/;
+const LIVE_RE = /^https:\/\/buy\.stripe\.com\/(?!test_)[A-Za-z0-9]+$/;
+const PORTAL_TEST_RE = /^https:\/\/billing\.stripe\.com\/p\/login\/test_[A-Za-z0-9]+$/;
+const PORTAL_LIVE_RE = /^https:\/\/billing\.stripe\.com\/p\/login\/(?!test_)[A-Za-z0-9]+$/;
+
+export function assertLinks(mode: ContributeMode, set: LinkSet): void {
+  if (mode === "off") return;
+  const urls = [...set.once, ...set.monthly].map((t) => [t.key, t.url] as const);
+  urls.push(["custom", set.custom]);
+  const problems: string[] = [];
+  for (const [key, url] of urls) {
+    if (url === null) {
+      if (mode === "live") problems.push(`${key}: missing live link`);
+    } else if (!(mode === "live" ? LIVE_RE : TEST_RE).test(url)) {
+      problems.push(`${key}: ${url} is not a ${mode} Payment Link`);
+    }
+  }
+  if (set.portal === null) {
+    if (mode === "live") problems.push("portal: missing live link");
+  } else if (!(mode === "live" ? PORTAL_LIVE_RE : PORTAL_TEST_RE).test(set.portal)) {
+    problems.push(`portal: ${set.portal} is not a ${mode} customer-portal link`);
+  }
+  if (problems.length) {
+    throw new Error(`contribute.ts: PUBLIC_CONTRIBUTE_MODE=${mode} has bad links:\n  ${problems.join("\n  ")}`);
+  }
+}
+
+export const LINKS: LinkSet | null = CONTRIBUTE_MODE === "live" ? LIVE : CONTRIBUTE_MODE === "test" ? TEST : null;
+if (LINKS) assertLinks(CONTRIBUTE_MODE, LINKS);
