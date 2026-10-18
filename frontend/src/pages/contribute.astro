@@ -45,15 +45,15 @@ const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Gurbani So
         {CONTRIBUTE_MODE === "test" && (
           <p class="test-note" role="note"><strong>Test mode.</strong> These links use Stripe's test environment; no real payment is taken.</p>
         )}
+        {LINKS.custom
+          ? <p class="custom-row custom-top"><a class="custom" href={LINKS.custom} rel="noopener"><span>Choose your own amount <span class="custom-min">from A$0.50</span></span><span class="arr" aria-hidden="true">→</span></a></p>
+          : <p class="pending">Choose your own amount — link not connected yet.</p>}
         <h3>Once</h3>
         <ul class="tiers tiers-4">
           {LINKS.once.map((t: Tier) => <li>{t.url
             ? <a class="tier" href={t.url} rel="noopener"><span class="tier-amt">{t.amount}</span><span class="tier-note">{t.note}</span><span class="tier-go" aria-hidden="true">Contribute <span class="arr">→</span></span></a>
             : <span class="tier" aria-disabled="true"><span class="tier-amt">{t.amount}</span><span class="tier-note">Link not connected yet</span></span>}</li>)}
         </ul>
-        {LINKS.custom
-          ? <p class="custom-row"><a class="custom" href={LINKS.custom} rel="noopener"><span>Choose your own amount <span class="custom-min">from A$0.50</span></span><span class="arr" aria-hidden="true">→</span></a></p>
-          : <p class="pending">Choose your own amount — link not connected yet.</p>}
         <h3>Monthly</h3>
         <ul class="tiers tiers-3">
           {LINKS.monthly.map((t: Tier) => <li>{t.url
@@ -129,6 +129,9 @@ const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Gurbani So
     :global(.legal) .tier[aria-disabled="true"]::before { display: none; }
 
     .custom-row { margin: 0 0 30px; }
+    .custom-row.custom-top { margin: 6px 0 28px; }
+    :global(.legal) .custom-top a.custom { border-style: solid; border-width: 1.5px; background: var(--tier-wash); min-height: 60px; font-size: 17px; }
+    :global(.legal) .custom-top a.custom:hover, :global(.legal) .custom-top a.custom:focus-visible { background: var(--tier-wash-hi); }
     :global(.legal) a.custom { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 12px 18px; border: 1px dashed var(--accent); border-radius: 16px; color: var(--ink); text-decoration: none; font-weight: 600; transition: background-color .18s ease; }
     :global(.legal) a.custom:hover, :global(.legal) a.custom:focus-visible { background: var(--tier-wash); }
     :global(.legal) .custom-min { font-weight: 400; color: var(--ink-soft); margin-left: 6px; }
