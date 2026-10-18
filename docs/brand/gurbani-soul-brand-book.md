@@ -191,6 +191,8 @@ the black tile disappeared on dark backgrounds.
 | Widgets | Card surface, gold rule, `accentText` labels; same tokens as the app. The Raag Now dial (`PaharDialRenderer`) is the same face as the app: `accentFill` current watch with an `accent` stroke, `accent` hand; lock-screen accessories render it mono. The 12-hour analog face (`ClockHandsLayer`) uses ink tapered hands and an `accent` seconds hand (app only; widgets show hour/minute at the entry minute); the day/date number is `accentText`. |
 | Badge / count | Brand red fill, white label — the only routine use of red |
 
+**Website exception (owner decision, 2026-10-18):** the marketing site never uses red, except the **Contribute heart** — a small filled heart in the "Contribute" nav pill (desktop) and round button (phones). It is the heart's fill only, set through the single `--contribute-heart` token in `frontend/src/styles/marketing.css`; never text, never a background, never beside Gurmukhi. `BrandDisciplineInSource` allows exactly that one declaration.
+
 ## 7. Voice
 
 Reverent, plain, exact. Short sentences. Say what a thing is. Never playful about the text, never promotional
@@ -264,6 +266,7 @@ Decisions are logged below.
 | 2026-10-14 | Icon **v2, "Pothi & Naad"** chosen by the product owner: a bold ੴ above an open pothi, ink on gold; gold on warm ink in dark mode. G3 to be re-run on it |
 | 2026-09-18 | `accentDeep` given Increase Contrast legs so the hero label holds 4.5:1 at both gradient ends |
 | 2026-09-18 | Source Serif 4 (variable, SIL OFL 1.1, from adobe-fonts/source-serif) bundled for navigation titles and hero lines only; widgets stay on the system face |
+| 2026-10-18 | Website exception: brand red allowed only as the fill of the Contribute heart (`--contribute-heart`), chosen by the product owner; the `BrandDisciplineInSource` gate allows exactly that one declaration |
 | 2026-09-26 | `DesignTokens.swift` pinned to `tokens.json` in all four legs by gurbani-soul-ios `BrandTokensParityTests` (PR #20), against a copy vendored by commit; a colour change now flows JSON → release → `make vendor-sync-platform` → Swift literal |
 
 ### Visual audit set
