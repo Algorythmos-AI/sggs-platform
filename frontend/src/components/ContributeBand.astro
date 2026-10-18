@@ -1,0 +1,40 @@
+---
+// ContributeBand.astro — the one quiet "keep it free" invitation that points to /contribute from
+// the marketing pages (home, features). Links ONLY to /contribute: no Stripe URL is ever copied
+// here, so src/contribute.ts stays the single source. Renders nothing when CONTRIBUTE_MODE is
+// "off". Wording: "contribute", never "donate" — Algorythmos Pty Ltd is not a charity.
+import { CONTRIBUTE_MODE } from "../contribute";
+
+export interface Props { surface?: "paper" | "warm" }
+const { surface = "warm" } = Astro.props;
+const on = CONTRIBUTE_MODE !== "off";
+---
+{on && (
+  <section class:list={["sec-thin give-band", `surface-${surface}`]} id="contribute-band" aria-labelledby="give-h">
+    <div class="wrap give-in reveal">
+      <div class="give-copy">
+        <p class="eyebrow">Free for everyone</p>
+        <h2 class="h-story" id="give-h">Kept free by the sangat.</h2>
+        <p class="body-lg">No ads, no paid tier, nothing behind a paywall. If Gurbani Soul serves your study, you can help cover hosting, scholarly review and licensing. It is optional and unlocks nothing.</p>
+      </div>
+      <div class="give-act">
+        <a class="btn" href="/contribute" data-astro-prefetch>Contribute</a>
+        <p class="give-fine">From A$5 · once or monthly</p>
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .give-band { border-top: 1px solid var(--line); }
+  .give-in { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; align-items: end; }
+  .give-copy .h-story { margin-bottom: 14px; }
+  .give-copy .body-lg { margin: 0; }
+  .give-act { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .give-act .btn { min-height: 44px; }
+  .give-fine { margin: 0; font-size: 14px; color: var(--ink-soft); }
+  @media (min-width: 860px) {
+    .give-in { grid-template-columns: minmax(0, 1fr) auto; gap: 56px; }
+    .give-act { align-items: flex-end; text-align: right; }
+  }
+</style>
