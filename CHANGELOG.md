@@ -3,6 +3,15 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.4.5] — 2026-10-18
+
+### Added
+- **Brand token `ink.muted`** (`docs/brand/tokens.json`): an AA-contrast muted text colour for warm paper (#287). The contrast report is regenerated and has 0 failures. The iOS app adopts it in its accessibility pass.
+
+### Changed
+- **`/contribute`: "choose your own amount" now starts at A$0.50** (Stripe's AUD floor), down from A$5. New live and test Payment Links; the old A$5 link is retired after deploy (#289).
+- **`/contribute` shows the company ABN**: "Algorythmos Pty Ltd (ABN 22 701 006 626)", in the answer that explains contributions are not tax-deductible (#288).
+
 ## [1.4.4] — 2026-10-18
 
 ### Added

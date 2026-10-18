@@ -42,7 +42,7 @@ const TEST: LinkSet = {
     { key: "monthly-11", amount: "A$11 / month", note: "Steady sewa", url: "https://buy.stripe.com/test_cNi14m8qTcKwaGM2aK18c01" },
     { key: "monthly-21", amount: "A$21 / month", note: "Steady sewa", url: "https://buy.stripe.com/test_5kQ28q7mPfWI0289Dc18c02" },
   ],
-  custom: "https://buy.stripe.com/test_4gM6oG22vh0M16caHg18c00", // "customer chooses what to pay" link (A$5 minimum, A$1,000 maximum)
+  custom: "https://buy.stripe.com/test_3cIcN49uXcKwdSY3eO18c09", // "customer chooses what to pay" link (A$0.50 minimum — Stripe's AUD floor — A$1,000 maximum)
   portal: "https://billing.stripe.com/p/login/test_4gM6oG22vh0M16caHg18c00", // Stripe customer portal login link (cancel / update a monthly contribution)
 };
 
@@ -60,7 +60,7 @@ const LIVE: LinkSet = {
     { ...TEST.monthly[1], url: "https://buy.stripe.com/dRmdR80Rr98g8S50Sod3i05" },
     { ...TEST.monthly[2], url: "https://buy.stripe.com/14A3cu2Zzack3xL9oUd3i06" },
   ],
-  custom: "https://buy.stripe.com/28E14m2ZzfwE8S5cB6d3i07",
+  custom: "https://buy.stripe.com/28E28qas11FOc4h1Wsd3i0h",
   portal: "https://billing.stripe.com/p/login/aFaaEW8jTgAI4BPbx2d3i00",
 };
 

@@ -6,7 +6,10 @@
 // otherwise a "Coming soon" chip.
 // The nav's coming-soon chip is tagged data-app-store="coming-soon-nav" so the page's single
 // canonical "coming soon" element (data-app-store="coming-soon") remains the hero one.
+// "♡ Contribute" is a quiet text link beside the CTA (never a gold fill: the app download stays the
+// one gold button). It renders only when /contribute has live/test links (CONTRIBUTE_MODE).
 import { APP_STORE_URL, APP_STORE_LIVE } from "../site";
+import { CONTRIBUTE_MODE } from "../contribute";
 
 // `overHero` (default) floats the bar over the dark hero with white text until scrolled. Pages with
 // no dark hero (e.g. Learn, Features, The watch) pass overHero={false} so the resting bar uses ink
@@ -19,6 +22,8 @@ const { overHero = true } = Astro.props;
 // landing.ts re-asserts this after each ClientRouter swap (see wireNavActive).
 const here = (Astro.url.pathname || "/").replace(/\/+$/, "") || "/";
 const isCurrent = (href: string) => (href.replace(/\/+$/, "") || "/") === here;
+const giveOn = CONTRIBUTE_MODE !== "off";
+const heart = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z"/></svg>';
 
 const links = [
   { href: "/features", label: "Features", prefetch: true },
@@ -45,6 +50,12 @@ const links = [
 
     <div class="mnav-right">
       <button id="themeBtn" aria-label="Theme">◐</button>
+      {giveOn && (
+        <a class="mnav-give" href="/contribute" data-astro-prefetch
+           aria-current={isCurrent("/contribute") ? "page" : undefined}>
+          <Fragment set:html={heart} /><span class="lbl">Contribute</span>
+        </a>
+      )}
       {APP_STORE_LIVE
         ? <a class="pill" href={APP_STORE_URL} aria-label="Get Gurbani Soul on the App Store">Get the app</a>
         : <span class="pill soon" data-app-store="coming-soon-nav">Coming soon</span>}
@@ -67,6 +78,12 @@ const links = [
       <a href={l.href} data-astro-prefetch={l.prefetch ? "" : undefined}
          aria-current={isCurrent(l.href) ? "page" : undefined}>{l.label}</a>
     ))}
+    {giveOn && (
+      <a class="mm-give" href="/contribute" data-astro-prefetch
+         aria-current={isCurrent("/contribute") ? "page" : undefined}>
+        <Fragment set:html={heart} /><span>Contribute</span>
+      </a>
+    )}
     {APP_STORE_LIVE
       ? <a class="pill mm-cta" href={APP_STORE_URL} aria-label="Get Gurbani Soul on the App Store">Get the app</a>
       : <span class="pill soon mm-cta" data-app-store="coming-soon-nav">Coming soon</span>}

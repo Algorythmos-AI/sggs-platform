@@ -7,6 +7,7 @@
 // imagery-credit gate reads every `who` from the built HTML, so a new photo cannot ship uncredited.
 import { getCollection } from "astro:content";
 import { SUPPORT_EMAIL, IMAGE_CREDITS } from "../site";
+import { CONTRIBUTE_MODE } from "../contribute";
 import { LEARN_SLUGS } from "../routes";
 
 // The first three Learn articles, in the curated LEARN_SLUGS order (drafts excluded).
@@ -15,6 +16,9 @@ const learnTop = (await getCollection("learn"))
   .filter((a) => !a.data.draft)
   .sort((a, b) => (order.get(a.id) ?? 999) - (order.get(b.id) ?? 999))
   .slice(0, 3);
+
+// Contribute sits under the brand blurb, not in the Support (help) column. Only when links exist.
+const giveOn = CONTRIBUTE_MODE !== "off";
 
 const artwork = IMAGE_CREDITS.filter((c) => !c.url);
 const photos = IMAGE_CREDITS.filter((c) => c.url);
@@ -42,7 +46,6 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
       { href: "/support", label: "Support" },
       { href: `mailto:${SUPPORT_EMAIL}`, label: SUPPORT_EMAIL },
       { href: "/support#contact", label: "Report a text error" },
-      { href: "/contribute", label: "Contribute" },
     ],
   },
 ];
@@ -52,6 +55,7 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
     <div class="mfoot-brand">
       <p class="mfoot-name"><span class="gm" aria-hidden="true">ੴ</span> <span>Gurbani Soul</span></p>
       <p class="mfoot-blurb">Built by Algorythmos · Sri Guru Granth Sahib Ji is shown verbatim from the source edition, cited by Ang.</p>
+      {giveOn && <p class="mfoot-give">Gurbani Soul is free and ad-free. <a href="/contribute">Contribute <span aria-hidden="true">→</span></a></p>}
     </div>
     <nav aria-label="Footer" class="mfoot-nav">
       {columns.map((col) => (
@@ -92,6 +96,9 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
   .mfoot-name { margin: 0 0 8px; display: flex; align-items: baseline; gap: 10px; font-family: var(--serif-display); font-size: 19px; font-weight: 600; color: var(--ink); }
   .mfoot-name .gm { font-size: 22px; line-height: 1; color: var(--ink); }
   .mfoot-blurb { margin: 0; max-width: 44ch; line-height: 1.55; }
+  .mfoot-give { margin: 14px 0 0; max-width: 44ch; line-height: 1.55; }
+  .mfoot-give a { color: var(--accent-text); font-weight: 650; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; display: inline-flex; align-items: center; gap: 5px; min-height: 44px; }
+  .mfoot-give a:hover { text-decoration-color: var(--accent); }
   .mfoot-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 24px; }
   .mfoot-h { font-family: var(--sans); font-size: 12.5px; font-weight: 700; letter-spacing: .14em; color: var(--ink); margin: 0 0 12px; }
   .mfoot-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }

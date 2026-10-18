@@ -7,6 +7,7 @@ import MarketingFooter from '../components/MarketingFooter.astro';
 import DeviceFrame from '../components/DeviceFrame.astro';
 import PhotoBand from '../components/PhotoBand.astro';
 import Newsletter from '../components/Newsletter.astro';
+import ContributeBand from '../components/ContributeBand.astro';
 import JsonLd from '../components/JsonLd.astro';
 import { SITE_URL, APP_STORE_URL, APP_STORE_LIVE, SUPPORT_EMAIL } from '../site.ts';
 import { LEARN_SLUGS } from '../routes';
@@ -400,6 +401,9 @@ const softwareApplication = {
       </div>
     </div>
   </section>
+
+  <!-- 13b · KEEP IT FREE — quiet invitation to /contribute (renders nothing when contributions are off) -->
+  <ContributeBand />
 
   <!-- 14 · DOWNLOAD BAND (dark) — the artwork again, faint, behind a warm-ink scrim -->
   <section class="dl-band surface-ink" id="download" data-theme="dark">

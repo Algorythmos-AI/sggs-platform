@@ -82,7 +82,7 @@ function wireNavScrolled() {
     The server renders this correctly per page; this re-asserts it after each ClientRouter swap. */
 function wireNavActive() {
   const here = (location.pathname || "/").replace(/\/+$/, "") || "/";
-  document.querySelectorAll<HTMLAnchorElement>(".mnav-links a[href], #mobileMenu a[href]").forEach((a) => {
+  document.querySelectorAll<HTMLAnchorElement>(".mnav-links a[href], .mnav-give[href], #mobileMenu a[href]").forEach((a) => {
     const href = a.getAttribute("href") || "";
     if (!href.startsWith("/") || href.startsWith("//")) return; // route links only
     const route = href.replace(/\/+$/, "") || "/";
