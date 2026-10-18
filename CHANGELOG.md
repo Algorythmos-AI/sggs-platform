@@ -3,6 +3,12 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.4.6] — 2026-10-18
+
+### Changed
+- **HELP heart in the top bar**: a solid red heart with "HELP" inside links to `/contribute` on every page, on desktop and phones (it was hidden on phones before). This is the one place brand red is allowed on the website, through a single `--contribute-heart` token. The brand book and the `BrandDisciplineInSource` gate record the exception (#293).
+- **`/contribute`**: "Choose your own amount" (from A$0.50) now sits above the cards, and the one-time tiers are A$5, A$11, A$21 and A$51, with new A$5 Stripe links. Larger gifts go through the custom amount (#293).
+
 ## [1.4.5] — 2026-10-18
 
 ### Added

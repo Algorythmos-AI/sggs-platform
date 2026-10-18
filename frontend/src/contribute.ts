@@ -32,10 +32,10 @@ type LinkSet = { once: Tier[]; monthly: Tier[]; custom: string | null; portal: s
 // https://sggs-staging.vercel.app/contribute#thank-you. Pay with card 4242 4242 4242 4242.
 const TEST: LinkSet = {
   once: [
-    { key: "once-11", amount: "A$11", note: "A small offering", url: "https://buy.stripe.com/test_6oU6oGfTl4e0dSYeXw18c05" },
+    { key: "once-5", amount: "A$5", note: "A small offering", url: "https://buy.stripe.com/test_dRmeVc9uXh0McOUaHg18c0a" },
+    { key: "once-11", amount: "A$11", note: "Helps keep the lights on", url: "https://buy.stripe.com/test_6oU6oGfTl4e0dSYeXw18c05" },
     { key: "once-21", amount: "A$21", note: "Helps cover a month of hosting", url: "https://buy.stripe.com/test_7sYaEW9uXaCog16cPo18c06" },
     { key: "once-51", amount: "A$51", note: "Helps fund scholarly review", url: "https://buy.stripe.com/test_4gM9AS36z9yk3ekdTs18c07" },
-    { key: "once-101", amount: "A$101", note: "Helps fund licensing and fonts", url: "https://buy.stripe.com/test_3cIaEW5eH4e0eX202C18c04" },
   ],
   monthly: [
     { key: "monthly-5", amount: "A$5 / month", note: "Steady sewa", url: "https://buy.stripe.com/test_28EfZgaz111O2ag4iS18c03" },
@@ -50,10 +50,10 @@ const TEST: LinkSet = {
 // merchant). They redirect to https://gurbanisoul.com/contribute#thank-you.
 const LIVE: LinkSet = {
   once: [
-    { ...TEST.once[0], url: "https://buy.stripe.com/aFaaEW8jTgAI4BPbx2d3i00" },
-    { ...TEST.once[1], url: "https://buy.stripe.com/14A5kC43D0BKfgtdFad3i01" },
-    { ...TEST.once[2], url: "https://buy.stripe.com/bJe14mcA9cks9W9fNid3i02" },
-    { ...TEST.once[3], url: "https://buy.stripe.com/8x2dR8eIh7082tH30wd3i03" },
+    { ...TEST.once[0], url: "https://buy.stripe.com/aFacN48jTfwE4BP58Ed3i0i" },
+    { ...TEST.once[1], url: "https://buy.stripe.com/aFaaEW8jTgAI4BPbx2d3i00" },
+    { ...TEST.once[2], url: "https://buy.stripe.com/14A5kC43D0BKfgtdFad3i01" },
+    { ...TEST.once[3], url: "https://buy.stripe.com/bJe14mcA9cks9W9fNid3i02" },
   ],
   monthly: [
     { ...TEST.monthly[0], url: "https://buy.stripe.com/7sY4gy57H0BK1pDfNid3i04" },

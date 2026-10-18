@@ -578,7 +578,11 @@ class BrandDisciplineInSource(unittest.TestCase):
     def test_no_red_and_gold_discipline(self):
         norm = lambda s: re.sub(r"\s+", "", s).lower()
         for name, text in _marketing_style_sources():
-            self.assertNotIn("#da291c", text.lower(), f"brand red #DA291C appears in {name}")
+            # One owner-approved exception (brand book §3, 2026-10-18): the Contribute heart's fill, via
+            # exactly one `--contribute-heart: #DA291C` declaration. Anything else red still fails.
+            allowed = re.compile(r"--contribute-heart\s*:\s*#da291c\s*;", re.I)
+            self.assertLessEqual(len(allowed.findall(text)), 1, f"{name}: --contribute-heart declared more than once")
+            self.assertNotIn("#da291c", allowed.sub("", text).lower(), f"brand red #DA291C appears in {name}")
             # Literal gold as a text colour is only allowed inside a [data-theme=\"dark\"] scope.
             light = norm(_strip_dark_scope(text))
             self.assertNotIn("color:#ffbc0d", light,
