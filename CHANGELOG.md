@@ -3,6 +3,17 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.4.7] — 2026-10-20
+
+The iPhone app's reader and bani reader are reworked. The website and API are unchanged apart from the version (one-version-number policy).
+
+### Changed (iOS, gurbani-soul-ios #47, #48)
+- **Reader:** one set of page controls. The end-of-page buttons are gone and the bottom page bar turns the page; "Continues on Ang N" stays.
+- **Reading options:** named text sizes with step dots and Reset, toggles with explanations, and Sehaj focus in its own card.
+- **Sehaj focus:** only the Gurmukhi, with room to breathe. The page bar, the tab bar and the raag banner step aside, and an "Exit Sehaj" chip brings them back.
+- **Bani reader:** a gutka layout for short-line banis (Jaap, Chaupai, Savaiye, Shabad Hazare P10, Aarti), with two half-lines per row, centred. Bold, centred chhand headings for the Sri Dasam Granth layer.
+- **Display repair:** Jaap pauris 79 and 80 (ਜਤ੍ਰ ਤਤ੍ਰ) now draw without a dotted circle. The stored text is unchanged, and the repair is flagged for scholar review.
+
 ## [1.4.6] — 2026-10-18
 
 ### Changed
