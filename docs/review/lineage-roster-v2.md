@@ -234,7 +234,8 @@ Review: **draft** · reviewer: ________ · date: ________
 | Dates note | No birth or death year is recorded. He flourished under Rajas of Orissa of AD 1142–56 and 1170–80, and Raja Lakshman Sen of Bengal (AD 1175–1200) became his disciple. | [EoS: JAIDEV (JAYADEVA)](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/JAIDEV%20%28JAYADEVA%29.html) |
 | Birthplace | Kindu Bilva: Kenduli (Birbhum, West Bengal) or Kenduli-Sasan (near Puri, Odisha), as sources differ | [EoS: JAIDEV (JAYADEVA)](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/JAIDEV%20%28JAYADEVA%29.html) |
 | Map pin | Kenduli (Birbhum) (23.64, 87.4; approximate) | [EoS: JAIDEV (JAYADEVA)](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/JAIDEV%20%28JAYADEVA%29.html) |
-| Pen-name (chhap) | ਜੈਦੇਵ | corpus (whole-word match; the verse below) |
+| Pen-name (chhap) | ਜੈਦੇਵ, ਜੈਦੇਉ | corpus (whole-word match; the verse below) |
+| Notable Bani | Maru shabad (`ਰਾਗੁ ਮਾਰੂ ਬਾਣੀ ਜੈਦੇਉ ਜੀਉ ਕੀ`) — comp 4251, Ang 1106 | corpus (anchor `ਚੰਦ ਸਤ ਭੇਦਿਆ ਨਾਦ ਸਤ ਪੂਰਿਆ ਸੂਰ ਸਤ ਖੋੜਸਾ ਦਤੁ ਕੀਆ`) |
 
 **Context.** Jaidev is chiefly known as the author of the Gita Govinda. He was born at Kindu Bilva, identified with Kenduli in Bengal or Kenduli-Sasan near Puri, and died in his birth village. Two of his hymns are in the Granth.
 
@@ -267,8 +268,6 @@ Review: **draft** · reviewer: ________ · date: ________
 **Context.** Shaikh Farid was born in AD 1173 (569 AH) at Kothewal, near Multan, and died in 1265. A Sufi of the Chishti order, he set up a centre at Hansi and later at Ajodhan, now Pakpattan. He is known as the first recorded poet of the Punjabi language.
 
 *Sources:* [EoS: FARĪD, SHAIKH (569-664 AH/AD 1173-1265)](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/FARID%20SHAIKH%20%28569-664%20AH%20OR%20AD%201173-1265%29.html)
-
-**In the corpus today.** The corpus credits about 90 lines to Farid; a cross-check finds many of his numbered saloks (Angs 1377–1384) tagged to the Guru whose header precedes them. The attribution repair in sggs-data will change his line count.
 
 The pen-name in a verse:
 
@@ -376,8 +375,6 @@ Review: **draft** · reviewer: ________ · date: ________
 
 *Sources:* [EoS: SADHNĀ](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/SADHNA.html)
 
-**In the corpus today.** Until the attribution repair lands, the corpus files his hymn under Ravidas.
-
 The pen-name in a verse:
 
 > ਅਉਸਰ ਲਜਾ ਰਾਖਿ ਲੇਹੁ ਸਧਨਾ ਜਨੁ ਤੋਰਾ ॥੪॥੧॥
@@ -434,8 +431,6 @@ Review: **draft** · reviewer: ________ · date: ________
 
 *Sources:* [EoS: DHANNĀ, BHAGAT (b. 1415)](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/DHANNA%2520BHAGAT%2520%28B.%25201415%29.html)
 
-**In the corpus today.** Until the attribution repair lands, the corpus files his lines under Ravidas (Ang 487) and Trilochan (Ang 695).
-
 **For the scholar.** Birthplace: the EoS names Dhuan (Tonk district). Discovery sources also name Dhuan Kalan and Chauru; no tier-2 source for either was found. Scholar to rule before any variant is shown.
 
 The pen-name in a verse:
@@ -462,8 +457,6 @@ Review: **draft** · reviewer: ________ · date: ________
 **Context.** Pipa was a prince, born at Gagraun about 1425, who renounced his throne after initiation by Ramanand at Kashi. He later lived at Dwarka and gave up idol-worship. His one hymn in the Granth (Dhanasri, Ang 695) finds the Divine within the body.
 
 *Sources:* [EoS: PĪPĀ](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/PIPA.html)
-
-**In the corpus today.** Until the attribution repair lands, the corpus files his hymn under Trilochan.
 
 The pen-name in a verse:
 
@@ -519,8 +512,6 @@ Review: **draft** · reviewer: ________ · date: ________
 
 **Where sources differ.** Where he served is disputed: one tradition places him at the court of Rewa (Bandhavgarh) in Central India, another at Bidar in the South. No birthplace is given. *([EoS: SAIṆ](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/SAIN.html))*
 
-**In the corpus today.** Until the attribution repair lands, the corpus files his hymn under Trilochan.
-
 The pen-name in a verse:
 
 > ਸੈਨੁ ਭਣੈ ਭਜੁ ਪਰਮਾਨੰਦੇ ॥੪॥੨॥
@@ -571,8 +562,6 @@ Review: **draft** · reviewer: ________ · date: ________
 
 *Sources:* [EoS: PARMĀNAND](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/PARMANAND.html); [Darpan: Ang 1253: Sahib Singh's note on the Sarang Bhagat Bani tally (Parmanand 1 shabad)](https://www.gurugranthdarpan.net/1253.html)
 
-**In the corpus today.** Until the attribution repair lands, the corpus files his hymn under Namdev.
-
 The pen-name in a verse:
 
 > ਪਰਮਾਨੰਦ ਸਾਧਸੰਗਤਿ ਮਿਲਿ ਕਥਾ ਪੁਨੀਤ ਨ ਚਾਲੀ ॥੩॥੧॥੬॥
@@ -600,7 +589,7 @@ Review: **draft** · reviewer: ________ · date: ________
 
 **Where sources differ.** Only one line is his, and it carries no pen-name. The EoS and Sahib Singh agree that the following shabad is Guru Arjan's, though it names Surdas where the Gurus usually sign ਨਾਨਕ. This Surdas is distinct from the blind poet of the Sur Sagar; Sahib Singh notes that some scholars hold there were two Surdases. *([EoS: SŪRDĀS](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/SURDAS.html); [Darpan: Ang 1253: Sahib Singh's note: the single line is Surdas's; the next shabad is Mahala 5](https://www.gurugranthdarpan.net/1253.html))*
 
-**In the corpus today.** Until the attribution repair lands, the corpus files his line under Namdev.
+**In the corpus today.** The corpus files his single line (Ang 1253, `ਛਾਡਿ ਮਨ ਹਰਿ ਬਿਮੁਖਨ ਕੋ ਸੰਗੁ`) under Namdev; no heading or signature is printed with it, so the attribution is with a scholar for review.
 
 Review: **draft** · reviewer: ________ · date: ________
 
@@ -1012,8 +1001,6 @@ Review: **draft** · reviewer: ________ · date: ________
 **Context.** Sundar was the great-grandson of Guru Amar Das: his father was Anand Das, son of Baba Mohri. His six-stanza Ramkali Sadu tells of Guru Amar Das's last counsel, not to mourn him, and of his appointing Ram Das as successor. The Sadu is commonly read when a reading of the Granth concludes as part of the obsequies.
 
 *Sources:* [EoS: SUNDAR, BĀBĀ](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/SUNDAR%20BABA.html); [EoS: RĀMKALĪ SADU](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/RAMKALI%20SADU.html)
-
-**In the corpus today.** Until the attribution repair lands, the corpus files the Sadu under Guru Amar Das (M3).
 
 The pen-name in a verse:
 

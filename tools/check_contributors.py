@@ -33,10 +33,7 @@ DB = ROOT / "db" / "sggs.sqlite"
 
 EXPECTED = 36
 # Voices the sggs-data attribution repair adds to `authors`; until the pinned DB carries them, a missing join warns.
-PENDING_ATTRIBUTION = {
-    "Bhagat Dhanna Ji", "Bhagat Sain Ji", "Bhagat Pipa Ji", "Bhagat Sadhna Ji",
-    "Bhagat Parmanand Ji", "Bhagat Surdas Ji", "Baba Sundar Ji",
-}
+PENDING_ATTRIBUTION = {"Bhagat Surdas Ji"}   # dataset 1.1.0 carries the other six; his line is with a scholar
 KINDS = {"guru", "bhagat", "bhatt", "gursikh"}
 TIER2 = {"EoS", "Darpan", "SGPC"}
 LIFE_FACTS = ("born", "died", "birthplace", "place", "range_note", "fl_century", "context", "disputed")
