@@ -15,8 +15,12 @@ test('the contributors open in Granth order, with full names and honest counts',
   const bands = await page.locator('#timeline .tl-band-n').allTextContents();
   for (const b of bands) expect(b).toMatch(/^1 voice$|^\d+ voices$/);
   // a roster voice whose Bani is not yet credited to them in this dataset says so, never "0 lines"
+  // (dataset 1.1.0: only Bhagat Surdas Ji's single line awaits a scholar's attribution)
+  const surdas = page.locator(node('Bhagat Surdas Ji'));
+  await expect(surdas.locator('.tl-lines')).toHaveText('Bani not yet indexed under this name');
+  // the attribution repair credits Bhagat Dhanna Ji with his own Bani, on the Angs that print it
   const dhanna = page.locator(node('Bhagat Dhanna Ji'));
-  await expect(dhanna.locator('.tl-lines')).toHaveText('Bani not yet indexed under this name');
+  await expect(dhanna.locator('.tl-lines')).toHaveText(/^\d+ lines · Angs 487–695$/);
 });
 
 test('a Bhatt\'s profile names the Swaiyye and shows only counts of the Bani', async ({ page }) => {
