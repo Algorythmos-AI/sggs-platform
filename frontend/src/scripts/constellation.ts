@@ -1,9 +1,9 @@
 // constellation.ts — Concept Constellation (/constellation), v2 "the Granth, seen by idea".
 // Focus: one theme at the centre; its companion themes placed so that distance = the corpus bond
 // (closer = higher PPMI), line weight = Jaccard, size = verses shared, colour = theological group.
-// "Most shared" ranks companions by verses shared; "Most distinctive" by PPMI (base-rate controlled).
+// "Most shared" orders companions by verses shared; "Most distinctive" by PPMI (base-rate controlled).
 // The caption always adds up: total = shared + alone. Sky: all 54 themes at once, a deterministic
-// force layout over the PPMI network. Lenses (voice, raag, this hour, refrains, brightest stars,
+// force layout over the PPMI network. Lenses (voice, raag, this hour, refrains, many themes,
 // an Ang bin) re-run the same server query. All numbers come from the API; nothing is invented.
 import * as d3 from 'd3';
 import { $, esc, api, guard, failHTML, goReader } from './core';
@@ -63,7 +63,7 @@ function lensQs(): string {
 }
 function lensWords(): string {
   const w: string[] = [];
-  if (st.author) w.push(st.author.replace(' Ji', ''));
+  if (st.author) w.push(st.author);   // names in full, as stored
   if (st.raag) w.push('Raag ' + (raagRoman[st.raag] || st.raag));
   if (st.hour) w.push('this hour');
   if (st.rahao) w.push('refrains');
@@ -222,10 +222,11 @@ async function openCard() {
     el.innerHTML = `<div class="con-panel-head"><div><div class="viz-title">${esc(T(st.theme))}</div>`
       + `<div class="viz-sub">${g ? esc(g.title) + ' · ' : ''}${nf(c.n_verses)} verses in ${nf(c.n_shabads)} shabads · ${nf(c.n_rahao)} refrains</div></div>`
       + `<button type="button" class="con-close" data-close="conCard" aria-label="Close">×</button></div>`
-      + `<p class="con-desc">${esc(c.description || '')}</p>`
+      // an editorial note about the theme: set apart from scripture and labelled as such
+      + (c.description ? `<div class="con-sub">About this theme</div><p class="con-desc">${esc(c.description)}</p><p class="con-note">An editorial note, not scripture.</p>` : '')
       + `<div class="con-sub">The Gurmukhi words that tag it</div><div class="con-terms">${(c.terms || []).map((t: string) => `<span class="gm" lang="pa">${esc(t)}</span>`).join('')}</div>`
-      + (c.raags.length ? `<div class="con-sub">Concentrates in</div><ul class="con-rows">${c.raags.map((x: any) => row(x, 'Raag ' + (raagRoman[x.entity_id] || x.entity_id))).join('')}</ul>` : '')
-      + (c.authors.length ? `<div class="con-sub">Voiced most by</div><ul class="con-rows">${c.authors.map((x: any) => row(x, x.entity_id.replace(' Ji', ''))).join('')}</ul>` : '')
+      + (c.raags.length ? `<div class="con-sub">Raags where it appears more often</div><ul class="con-rows">${c.raags.map((x: any) => row(x, 'Raag ' + (raagRoman[x.entity_id] || x.entity_id))).join('')}</ul>` : '')
+      + (c.authors.length ? `<div class="con-sub">Voices where it appears more often</div><ul class="con-rows">${c.authors.map((x: any) => row(x, x.entity_id)).join('')}</ul>` : '')
       + `<p class="con-note">Rates only where the sample is large enough to be reliable. Descriptive, never a ranking.</p>`
       + `<a class="con-more" href="/search?q=${encodeURIComponent(st.theme)}&mode=theme">See all ${nf(c.n_verses)} verses →</a>`;
   } catch { el.innerHTML = failHTML('This theme card'); }
@@ -239,9 +240,9 @@ async function loadPair(append: boolean) {
   const head = st.alone ? `${T(st.theme)} alone` : `${T(st.theme)} ✦ ${T(st.pair)}`;
   const why = st.alone
     ? `Shown because it carries a word of ${T(st.theme)} and no other theme's word.`
-    : `Shown because it carries a word of each theme (marked) — a verified word match, not an interpretation.`;
+    : `Shown because it carries a word of each theme (marked): matched by a shared word, not by meaning.`;
   const shabads = (d.shabads || []).map((sh: any) => `<div class="con-shabad"><div class="con-eyebrow">`
-    + [sh.raag ? 'Raag ' + (raagRoman[sh.raag] || sh.raag) : '', (sh.author || '').replace(' Ji', ''), 'Ang ' + sh.ang].filter(Boolean).map(esc).join(' · ')
+    + [sh.raag ? 'Raag ' + (raagRoman[sh.raag] || sh.raag) : '', sh.author || '', 'Ang ' + sh.ang].filter(Boolean).map(esc).join(' · ')
     + `</div>` + sh.verses.map((v: any) => `<div class="sline${v.is_rahao ? ' rahao' : ''}">`
       + `<div class="g gm" lang="pa">${gmMarked(v.gurmukhi || '', v.terms || [])}</div><div class="t">${esc(v.translit || '')}</div>`
       + `<div class="con-vmeta">${v.is_rahao ? '<span class="con-badge">Rahao</span>' : ''}<a href="/reader?ang=${v.ang}" data-ang="${v.ang}" data-line="${v.id}" data-comp="${sh.comp_id}">Ang ${v.ang} · open in the Reader</a></div></div>`).join('')
@@ -300,7 +301,7 @@ async function constellation() {
     return rest.length ? `<optgroup label="More themes">${rest.map((c) => `<option value="${esc(c.concept)}">${esc(T(c.concept))} · ${nf(c.n)} verses</option>`).join('')}</optgroup>` : '';
   })();
   sel.value = st.theme;
-  authorSel.innerHTML = '<option value="">All voices</option>' + (list.authors || []).map((a: string) => `<option value="${esc(a)}">${esc(a.replace(' Ji', ''))}</option>`).join('');
+  authorSel.innerHTML = '<option value="">All voices</option>' + (list.authors || []).map((a: string) => `<option value="${esc(a)}">${esc(a)}</option>`).join('');
   raagSel.innerHTML = '<option value="">All raags</option>' + (list.raags || []).map((r: any) => `<option value="${esc(r.name)}">${esc(r.roman || r.name)}</option>`).join('');
   (list.raags || []).forEach((r: any) => { raagRoman[r.name] = r.roman || r.name; });
   authorSel.value = st.author; raagSel.value = st.raag;

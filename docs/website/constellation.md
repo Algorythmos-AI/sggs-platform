@@ -10,8 +10,8 @@ The Constellation lets a reader pick one of the 54 corpus themes and see which o
 also carry. It exists on the website (`/constellation`) and in the iOS app (Explore → Constellation).
 Both read the same data, and the golden contract proves that they give the same numbers. Everything it
 shows comes from tables the shipped database already has (`concept_lines`, `theme_network`,
-`theme_fingerprint`, `concepts`, `lines`, and the raag-timing claims). Nothing is computed by a model
-and nothing is ranked.
+`theme_fingerprint`, `concepts`, `lines`, and the raag-timing claims). Nothing is computed by a model,
+and no verse, raag or voice is ranked: only the companion themes are put in order.
 
 ## What a verse "carrying" a theme means
 
@@ -27,7 +27,7 @@ size.
 - **The caption adds up.** "5,672 verses carry Naam · 3,720 also carry another theme · 1,952 carry
   Naam alone." A verse is *shared* when it also carries another theme. The verses that carry the theme
   alone sit in a halo round the centre and can be opened.
-- **Two rankings.**
+- **Two orders for the companions.**
   - **Most shared** orders companions by how many of the centre's verses also carry them.
   - **Most distinctive** orders them by PPMI, which measures how much more often the two themes share
     a shabad than chance would give. Raw counts favour the largest themes (Satguru, Man, Sach) for
@@ -53,9 +53,9 @@ Every lens re-runs the same parameterised query, so the caption still adds up un
 |---|---|
 | Voice | Verses by one author |
 | Raag | Verses in one raag |
-| This hour | Verses in the raags whose attributed timing claim names the current watch (claims, never facts; the Raag Clock shows the sources) |
+| This hour | Verses in the raags whose attributed timing claim names the current watch (attributed timing claims, as the Raag Clock shows them with their sources) |
 | Refrains only | Rahao lines |
-| Brightest stars | Verses that carry five or more themes |
+| Many themes | Verses that carry five or more themes |
 | Ang bin | Verses in one 100-Ang span |
 
 ## The pair view

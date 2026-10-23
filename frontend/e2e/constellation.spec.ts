@@ -58,7 +58,7 @@ test('the centre opens the theme card', async ({ page }) => {
   const card = page.locator('#conCard');
   await expect(card.locator('.con-terms .gm').first()).toBeVisible({ timeout: 15_000 });
   await expect(card).toContainText('5,672 verses');
-  await expect(card).toContainText('Concentrates in');
+  await expect(card).toContainText('Raags where it appears more often');
 });
 
 test('a lens narrows the caption and still adds up', async ({ page }) => {
