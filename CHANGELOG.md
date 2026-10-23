@@ -3,6 +3,33 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.4.8] — 2026-10-23
+
+Constellation v2: the Granth, seen by idea. It ships on the website, the API and the iPhone app together.
+
+### Added
+- **Constellation v2 on the website** (`/constellation`, #300):
+  - Focus has a caption that adds up (total = alone + shared) and two rankings, Most shared and Most distinctive (PPMI).
+  - Lenses: voice, raag, This hour, Refrains only, Brightest stars and Ang bin.
+  - The Ang strip and the theme card (description, Gurmukhi words, reliable raag and voice concentration).
+  - The pair view: verses grouped by shabad, with each theme's matched word marked.
+  - The Sky: all 54 themes in one deterministic layout.
+  - Deep links: `?theme=&with=&rank=`.
+  - Every drawing has a list twin.
+- **API:** the lens parameters on `/api/analytics/constellation` (which also gains solo, shared, companions and Ang bins), plus three new routes: `/api/analytics/sky`, `/api/analytics/pair` and `/api/analytics/theme`. That makes 29 routes, in the OpenAPI spec and the route table (#300).
+- **Golden contract:** a `golden_constellation` suite of 31 vectors, replayed over HTTP and by the iOS app's `ConstellationParityTests`. That makes 305 records in total (#300).
+- **Brand token `themeGroup.*`:** six theme-group colours in light, dark and both high-contrast legs. Each passes 4.5:1 on every surface, and none is red or brand gold. The contrast report, the brand book §3.7 and the docs-site swatches are updated (#299).
+- **Docs:** a new page, `website/constellation`, covering the caption, the rankings, the encodings, the lenses, the Sky and their caveats (#301).
+
+### Changed (iOS, gurbani-soul-ios #51–#53)
+- **Constellation** is rebuilt to match the website. It has Focus, the two rankings, the lenses, the Ang strip, This hour, the theme card, the pair sheet and the Sky.
+- **Deep links and Siri:** `sggs://constellation?theme=&with=` opens a constellation, and so does "Show the constellation in Gurbani Soul".
+- **Share card:** a verse shared from a constellation names the pair it came from. The verse text is unchanged.
+- **Themes:** the screen uses the six shared group colours.
+
+### Fixed
+- Dependency advisories in vite and dompurify: the lockfiles are updated by `npm audit fix` (#299).
+
 ## [1.4.7] — 2026-10-20
 
 The iPhone app's reader and bani reader are reworked. The website and API are unchanged apart from the version (one-version-number policy).
