@@ -212,7 +212,7 @@ def strip_code_spans(line: str) -> str:
 def load_tokens_hex() -> set[str]:
     t = json.loads((DOCS / "brand" / "tokens.json").read_text(encoding="utf-8"))
     hexes = {"#FFFFFF", "#201A12", "#F3ECDD"}  # white and the two inks the site theme adds
-    for group in ("surfaces", "soul", "brand", "status"):
+    for group in ("surfaces", "soul", "brand", "status", "themeGroup"):
         for legs in t[group].values():
             hexes.update(h.upper() for h in legs)
     hexes.discard("#DA291C")  # brand red never appears in diagrams

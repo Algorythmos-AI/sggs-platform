@@ -106,6 +106,25 @@ Meaning is never carried by colour alone — pair with a label or symbol. With g
 kinds and chart series must stay clear of `#FFBC0D` and `#DA291C`; keep the existing info-blue / special-violet /
 teal set, and move "Guru" from saffron to `accent` so it follows the palette.
 
+### 3.7 Theme-group colours (Constellation, theme chips)
+
+The 54 corpus themes sit in six theological groups (web `/themes` and iOS `ThemesScreen`). Each group has one
+colour, `themeGroup.*` in `tokens.json`, so a theme's star, chip or legend swatch says which family it belongs to:
+
+| Role | Group | Light | Dark |
+|---|---|---|---|
+| `themeGroup.divine` | The Divine Reality | kesri `#9C4D10` | `#F2A060` |
+| `themeGroup.condition` | The Human Condition & Illusions | earth `#6B5440` | `#CDB39A` |
+| `themeGroup.vices` | The Five Vices | plum `#7B3F91` | `#D7A0EA` |
+| `themeGroup.path` | The Path & Praxis | teal `#1D6B67` | `#62CEC4` |
+| `themeGroup.virtues` | Virtues & Divine Attributes | leaf `#3E6A1E` | `#A6D47A` |
+| `themeGroup.states` | Spiritual States | sky `#1F62A6` | `#8EC2F5` |
+
+Rules: every leg clears 4.5:1 on all four surfaces (the contrast report checks it), so a group colour may label
+text as well as fill a star. None is red or brand gold — the Five Vices are plum, never red beside Gurmukhi, and
+the centre of any constellation stays Soul Gold (`accentFill` with its `accent` edge). Colour never carries the
+group alone: the legend names it and every star has a text label or list twin.
+
 ## 4. Typography
 
 | Text | Face | Rule |
@@ -234,7 +253,7 @@ signal of state.
 `BrandTokensParityTests` (gurbani-soul-ios PR #20) checks `ios/App/Shared/DesignTokens.swift` against
 this file in all four legs (light, dark, lightHC, darkHC): `AccentPalette.soul` (`accent`, `accentFill`,
 `accentText`, `onAccent`, `accentDeep`), the `Ink` surfaces (`canvas`, `card`, `paper`, `paperWarm`) and
-status colours (`positive`, `negative`, `info`, `special`), and `Theme.Space` / `Theme.Radius`. The test
+status colours (`positive`, `negative`, `info`, `special`), the theme-group colours (`themeGroup.*`), and `Theme.Space` / `Theme.Radius`. The test
 reads a copy vendored by the iOS repo's `scripts/vendor_sync.py` and pinned by platform commit and sha256
 in its `vendor.lock.json`, so the app moves only when it re-vendors. It fails closed both ways: a value
 changed on either side, or a role added, renamed or removed here, fails with the role and leg named.
@@ -268,6 +287,7 @@ Decisions are logged below.
 | 2026-09-18 | Source Serif 4 (variable, SIL OFL 1.1, from adobe-fonts/source-serif) bundled for navigation titles and hero lines only; widgets stay on the system face |
 | 2026-10-18 | Website exception: brand red allowed only as the fill of the HELP heart (links to /contribute) (`--contribute-heart`), chosen by the product owner; the `BrandDisciplineInSource` gate allows exactly that one declaration |
 | 2026-09-26 | `DesignTokens.swift` pinned to `tokens.json` in all four legs by gurbani-soul-ios `BrandTokensParityTests` (PR #20), against a copy vendored by commit; a colour change now flows JSON → release → `make vendor-sync-platform` → Swift literal |
+| 2026-10-23 | Six theme-group colours (`themeGroup.*`) added for Constellation v2 (a new mini-palette, decided by the product owner; values proposed in the palette PR): one per theological group, AA as text on every surface, no red, no gold |
 
 ### Visual audit set
 

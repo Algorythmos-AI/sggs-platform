@@ -38,7 +38,7 @@ test('swatches: every token, both legs, with contrast computed from the file', (
   const tokens = JSON.parse(readFileSync(path.join(REPO_ROOT, 'docs/brand/tokens.json'), 'utf8'));
   const html = swatchesHtml(tokens);
   for (const [group, roles] of Object.entries(tokens)) {
-    if (!['surfaces', 'soul', 'brand', 'status'].includes(group)) continue;
+    if (!['surfaces', 'soul', 'brand', 'status', 'themeGroup'].includes(group)) continue;
     for (const name of Object.keys(roles)) assert.match(html, new RegExp(`<code>${group}\\.${name}</code>`));
   }
   assert.match(html, /#FFBC0D<\/code> <span class="swatch__ratio">1\.58:1</);   // gold on paper: why it is a fill, never text
