@@ -7,12 +7,15 @@
 import { $, esc, api, goSearchTheme } from './core';
 import { plural, granthOrder } from './voices';
 
+// Roster v2 (frontend/public/contributors.json): a source is {ref, entry, url} keyed into source_index;
+// review is {status, reviewer, date}. load() normalises them into the shape the views below draw.
 type Source = { title: string; publisher?: string; url?: string };
+type RawSource = { ref?: string; entry?: string; url?: string };
 type C = {
   name: string; roman: string; kind: string; seq: number | null;
   born: number | null; died: number | null; circa: boolean;
   era: string; region: string; tradition: string; blurb: string;
-  gurmukhi_name?: string | null; sources?: Source[]; review?: string;
+  gurmukhi_name?: string | null; sources?: Source[]; review?: string; context?: string | null;
   first_ang?: number; last_ang?: number; n_lines?: number;
 };
 
@@ -63,8 +66,14 @@ async function load() {
 
   const live: Record<string, any> = {};
   (meta.authors || []).forEach((a: any) => { live[a.name] = a; });
-  LIST = (data.contributors || []).map((c: C) => ({
+  const index: Record<string, { title?: string }> = data.source_index || {};
+  LIST = (data.contributors || []).map((c: any) => ({
     ...c,
+    gurmukhi_name: c.gurmukhi ?? c.gurmukhi_name ?? null,
+    // the corpus itself is not a biographical source: list only the references the life facts rest on
+    sources: ((c.sources || []) as RawSource[]).filter((s) => s && s.ref !== 'SGGS' && s.entry)
+      .map((s) => ({ title: String(s.entry), publisher: index[s.ref || '']?.title, url: s.url })),
+    review: c.review?.status === 'approved' ? 'approved' : 'pending',
     first_ang: live[c.name]?.first_ang, last_ang: live[c.name]?.last_ang, n_lines: live[c.name]?.n_lines,
   }));
   LIST.forEach((c) => byName.set(c.name, c));
@@ -232,7 +241,7 @@ function profileHTML(c: C, d: any, compact: boolean): string {
   // where the dates and region come from; a roster entry stays "awaiting review" until a scholar signs it
   const srcs = (c.sources || []).filter((x) => x && x.title);
   const sourcesHTML = compact || !srcs.length ? '' :
-    `<div class="ld-sec ld-sources"><div class="ld-h">Sources <span class="ld-note">— for the dates and region${c.review === 'pending' ? ' · awaiting scholar review' : ''}</span></div><ul>` +
+    `<div class="ld-sec ld-sources"><div class="ld-h">Sources <span class="ld-note">— for the dates, places and context${c.review === 'pending' ? ' · awaiting scholar review' : ''}</span></div><ul>` +
     srcs.map((x) => {
       const t = esc(x.title) + (x.publisher ? ` <span class="ld-note">· ${esc(x.publisher)}</span>` : '');
       const u = safeUrl(x.url);
@@ -287,7 +296,7 @@ function profileHTML(c: C, d: any, compact: boolean): string {
         </div>
       </div>
     </div>
-    <p class="ld-blurb${compact ? ' ld-blurb-c' : ''}">${esc(c.blurb)}</p>
+    <p class="ld-blurb${compact ? ' ld-blurb-c' : ''}">${esc((!compact && c.context) || c.blurb)}</p>
     ${statsHTML}${themesHTML}${termsHTML}${sourcesHTML}${actions}
   </div>`;
 }

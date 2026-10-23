@@ -18,6 +18,7 @@ const PAGES = [
   ['/scripture/answer-protocol-for-engineers/', null],
   ['/glossary/', 'The data'],            // the scripture and script sections only: stop at this heading
   ['/reference/contributors/', null],
+  ['/review/lineage-roster-v2/', null],
 ];
 const port = 4361;
 const base = `http://127.0.0.1:${port}`;
