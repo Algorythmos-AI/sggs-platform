@@ -26,7 +26,7 @@ Two rules shape everything here:
 ```mermaid
 flowchart TB
     accTitle: The insights context reads tables that the sggs-data rebuild precomputes
-    accDescr: In sggs-data, build_db.py writes the lines and the 54 theme tags. ml_analytics_builder.py derives the theme network, fingerprints, author and raag statistics and related compositions. build_semantic_vectors_lite.py writes line neighbours, build_resonance.py writes author resonance from them, and build_vaars.py writes the Vaar tables. The installed database is sliced for the insights service, which answers eleven read-only routes used by the website's themes, lineage, insights, trail and constellation pages.
+    accDescr: In sggs-data, build_db.py writes the lines and the 54 theme tags. ml_analytics_builder.py derives the theme network, fingerprints, author and raag statistics and related compositions. build_semantic_vectors_lite.py writes line neighbours, build_resonance.py writes author resonance from them, and build_vaars.py writes the Vaar tables. The installed database is sliced for the insights service, which answers fourteen read-only routes used by the website's themes, lineage, insights, trail and constellation pages.
     t[sggs-data: build_db.py<br/>lines and 54 theme tags] --> m[ml_analytics_builder.py<br/>network, fingerprints, statistics]
     t --> s[build_semantic_vectors_lite.py<br/>line neighbours]
     s --> r[build_resonance.py<br/>author resonance]
@@ -54,7 +54,10 @@ flowchart TB
 | `/api/analytics/resonance` | Whose lines land nearest whose, relative to their share of the Granth? | `authors`, `author_resonance` |
 | `/api/analytics/vaars` | The 22 Vaars: span, pauris, saloks, and who wrote each part | `vaars` |
 | `/api/analytics/vaar?id=` | One Vaar's salok-and-pauri sequence | `vaars`, `vaar_units` |
-| `/api/analytics/constellation` | Verses carrying one theme, grouped by the theme they share next | `concepts`, `concept_lines`, `lines` |
+| `/api/analytics/constellation` | One theme's verses: how many also carry another theme and how many carry it alone, every companion theme with its bond, and where the theme falls across the Angs. Lenses narrow it by voice, raag, refrains, theme count or Ang range | `concept_lines`, `lines`, `theme_network` |
+| `/api/analytics/sky` | Every theme at once, with the theme pairs whose PPMI clears a threshold (the Constellation sky) | `concept_lines`, `theme_network` |
+| `/api/analytics/pair?concept=&with=` | The verses two themes share, grouped by shabad, with the matched Gurmukhi word of each theme | `concept_lines`, `lines`, `theme_network` |
+| `/api/analytics/theme?concept=` | A theme card: description, Gurmukhi terms, counts, and the raags and voices where it concentrates (reliable lifts only) | `concepts`, `concept_lines`, `lines`, `theme_fingerprint` |
 | `/api/related?comp_id=` | Compositions with the most similar theme profile | `shabad_neighbors` |
 | `/api/line_concepts?ids=` | The theme tags on a set of lines (the Study Trail) | `concept_lines` |
 | `/api/neighbors?line_id=` | Lines whose English meaning is closest | `line_neighbors`, `translations` |
@@ -104,9 +107,9 @@ split of one theme into two, which made it 54.
   build", so a database without the analytics layer still serves the reader and search.
 - **Bounded input.** Every integer goes through `_int()` with a range; `min_ppmi` and `min_lift`
   are clamped, and a non-finite value (`NaN`, `inf`) is replaced by the default before clamping;
-  `line_concepts` accepts at most 300 ids; the constellation returns at most 9 groups of 40
-  verses. SQL is parameterised; the only built strings are `?` placeholder lists.
-- **Scripture passes through verbatim.** Routes that return verses (`constellation`, `related`,
+  `line_concepts` accepts at most 300 ids; the constellation's v1 `clusters` hold at most 9 groups of 40
+  verses, and a `pair` page at most 200 verses. SQL is parameterised; the only built strings are `?` placeholder lists.
+- **Scripture passes through verbatim.** Routes that return verses (`constellation`, `pair`, `related`,
   `neighbors`) return the stored `gurmukhi` unchanged; the English comes from the labelled
   translation layer through `attach_translations`.
 

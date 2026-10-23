@@ -37,3 +37,22 @@
   --viz-1:#E08A1E; --viz-2:#5B8CFF; --viz-3:#B07CFF; --viz-4:#23B3A1; --viz-5:#FF6B6B;
   --viz-6:#7ED957; --viz-7:#48C6EF; --viz-8:#F78FB3; --viz-9:#C9A227; --viz-10:#8A92A8;                 /* a tint the accent text is proven readable on */
 }
+
+/* ---------- theme-group colours (docs/brand/tokens.json themeGroup.*, light + dark legs) ----------
+   One per theological group of the 54 themes (scripts/themegroups.ts): a Constellation star, a
+   legend swatch. Each clears 4.5:1 on every surface, so it may also label text; none is red or
+   brand gold. Pinned to tokens.json by webapp/tests/test_repo_gates.py (WebThemeGroupColours). */
+:root, :root[data-theme="light"] {
+  --tg-divine:#9C4D10; --tg-condition:#6B5440; --tg-vices:#7B3F91;
+  --tg-path:#1D6B67; --tg-virtues:#3E6A1E; --tg-states:#1F62A6;
+}
+:root[data-theme="dark"] {
+  --tg-divine:#F2A060; --tg-condition:#CDB39A; --tg-vices:#D7A0EA;
+  --tg-path:#62CEC4; --tg-virtues:#A6D47A; --tg-states:#8EC2F5;
+}
+@media (prefers-color-scheme: dark) {            /* no-JS fallback only */
+  :root:not([data-theme]) {
+    --tg-divine:#F2A060; --tg-condition:#CDB39A; --tg-vices:#D7A0EA;
+    --tg-path:#62CEC4; --tg-virtues:#A6D47A; --tg-states:#8EC2F5;
+  }
+}

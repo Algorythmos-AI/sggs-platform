@@ -205,7 +205,7 @@ class ContractCounts(Fixture):
     def test_the_count_is_the_http_suites_in_meta(self):
         import json
         meta = json.loads((ROOT / "contract" / "_meta.json").read_text(encoding="utf-8"))["files"]
-        suites = ("verify", "search", "reader", "timing", "banis", "analytics")
+        suites = ("verify", "search", "reader", "timing", "banis", "analytics", "constellation")
         self.assertEqual(dc.contract_http_records(), sum(meta[f"golden_{s}.ndjson"] for s in suites))
 
     def test_a_stale_count_is_refused_and_a_dated_one_is_not(self):

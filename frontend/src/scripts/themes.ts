@@ -1,26 +1,10 @@
 // themes.ts — the Themes page (/themes) : the 54 corpus concepts grouped theologically.
 // Ported 1:1; a tile deep-links into Search as a theme query via goSearchTheme.
 import { $, esc, guard, meta, goSearchTheme } from './core';
-
-const titleCase = (k: string) => k.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+import { THEME_GROUPS, titleCase } from './themegroups';
 
 let META: any = null;
 
-// theological grouping of the 54 corpus concepts (every key assigned; leftover -> "More")
-const THEME_CATS: [string, string, string[]][] = [
-  ['The Divine Reality', 'God, the Names, and the cosmic Word',
-    ['ik_onkar', 'vahiguru', 'karta', 'akal', 'kaal', 'hukam', 'naam', 'shabad', 'bani', 'jot', 'anhad', 'patit_pavan']],
-  ['The Human Condition & Illusions', 'Ego, mind, attachment, and the wheel of birth–death',
-    ['haumai', 'maya', 'man', 'sansar', 'janam_maran', 'avagavan', 'manmukh', 'bharam', 'dukh_sukh', 'garab', 'trishna', 'bhavjal', 'jam']],
-  ['The Five Vices', 'The panj chor that rob the soul',
-    ['kaam', 'krodh', 'lobh', 'moh', 'ahankar']],
-  ['The Path & Praxis', 'The Guru, the Sangat, and the daily practice',
-    ['satguru', 'gurmukh', 'simran', 'bhagti', 'seva', 'sangat', 'sant_sadh', 'sifat_salah', 'darshan', 'charan', 'marag_panth']],
-  ['Virtues & Divine Attributes', 'The qualities the gurmukh cultivates and the Lord embodies',
-    ['prem_pyar', 'daya', 'nimrata', 'santokh', 'bhau', 'bhana', 'karam_nadar']],
-  ['Spiritual States', 'The fruits of the path — poise, bliss, liberation',
-    ['anand', 'sahaj', 'sach', 'mukti', 'amrit', 'maran_jeevan']],
-];
 const themes = guard(async () => {
   const m = await meta(); META = m;
   const idx: Record<string, number> = {}; m.concepts.forEach((c: any, i: number) => idx[c.concept] = i);
@@ -35,7 +19,7 @@ const themes = guard(async () => {
       <div class="explore">Explore ${n} lines →</div></div>`;
   };
   let html = '';
-  for (const [cat, sub, keys] of THEME_CATS) {
+  for (const { title: cat, caption: sub, keys } of THEME_GROUPS) {
     const cards = keys.filter((k) => k in idx).map((k) => card(idx[k])).join('');
     if (cards) html += `<div class="gridtitle" role="heading" aria-level="3">${esc(cat)} <span class="ct">· ${esc(sub)}</span></div><div class="grid">${cards}</div>`;
   }

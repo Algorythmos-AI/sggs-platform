@@ -2604,13 +2604,13 @@
      "Insights"
     ],
     "summary": "Get a concept constellation",
-    "description": "Concept constellation: verses carrying a concept, clustered by co-concept.",
+    "description": "Concept constellation: a theme's verses, the solo/shared split, every companion theme with its bond, and the Ang strip.",
     "parameters": [
      {
       "name": "concept",
       "in": "query",
-      "required": true,
-      "description": "Concept key.",
+      "required": false,
+      "description": "Concept key (omit for the theme list).",
       "schema": {
        "type": "string"
       }
@@ -2619,7 +2619,7 @@
       "name": "author",
       "in": "query",
       "required": false,
-      "description": "Only verses by this author.",
+      "description": "Lens: only verses by this author.",
       "schema": {
        "type": "string"
       }
@@ -2628,9 +2628,67 @@
       "name": "raag",
       "in": "query",
       "required": false,
-      "description": "Only verses in this raag.",
+      "description": "Lens: only verses in this raag.",
       "schema": {
        "type": "string"
+      }
+     },
+     {
+      "name": "raags",
+      "in": "query",
+      "required": false,
+      "description": "Lens: only verses in these raags (comma-separated; the \"This hour\" lens).",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "rahao",
+      "in": "query",
+      "required": false,
+      "description": "Lens: refrains (Rahao lines) only.",
+      "schema": {
+       "type": "string",
+       "enum": [
+        "1",
+        "true"
+       ]
+      }
+     },
+     {
+      "name": "min_themes",
+      "in": "query",
+      "required": false,
+      "description": "Lens: verses carrying at least this many themes.",
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "maximum": 8,
+       "default": 0
+      }
+     },
+     {
+      "name": "ang_min",
+      "in": "query",
+      "required": false,
+      "description": "Lens: first Ang.",
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1430,
+       "default": 1
+      }
+     },
+     {
+      "name": "ang_max",
+      "in": "query",
+      "required": false,
+      "description": "Lens: last Ang.",
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1430,
+       "default": 1430
       }
      }
     ],
@@ -2651,7 +2709,49 @@
           "raag": {
            "type": "string"
           },
+          "lens": {
+           "type": "object",
+           "properties": {
+            "author": {
+             "type": "string"
+            },
+            "raag": {
+             "type": "string"
+            },
+            "raags": {
+             "type": "array",
+             "items": {}
+            },
+            "rahao": {
+             "type": "boolean"
+            },
+            "min_themes": {
+             "type": "integer"
+            },
+            "ang_min": {
+             "type": "integer"
+            },
+            "ang_max": {
+             "type": "integer"
+            }
+           },
+           "required": [
+            "ang_max",
+            "ang_min",
+            "author",
+            "min_themes",
+            "raag",
+            "raags",
+            "rahao"
+           ]
+          },
           "total": {
+           "type": "integer"
+          },
+          "solo": {
+           "type": "integer"
+          },
+          "shared": {
            "type": "integer"
           },
           "clusters": {
@@ -2699,17 +2799,678 @@
             ]
            }
           },
+          "companions": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "co": {
+              "type": "string"
+             },
+             "n": {
+              "type": "integer"
+             },
+             "ppmi": {
+              "type": "number"
+             },
+             "jaccard": {
+              "type": "number"
+             },
+             "shabad_count": {
+              "type": "integer"
+             }
+            },
+            "required": [
+             "co",
+             "jaccard",
+             "n",
+             "ppmi",
+             "shabad_count"
+            ]
+           }
+          },
+          "ang_bins": {
+           "type": "array",
+           "items": {
+            "type": "integer"
+           }
+          },
           "note": {
            "type": "string"
           }
          },
          "required": [
+          "ang_bins",
           "author",
           "clusters",
+          "companions",
           "concept",
+          "lens",
           "note",
           "raag",
+          "shared",
+          "solo",
           "total"
+         ]
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Invalid request (bad or out-of-range parameter).",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "Internal error (generic body; details are logged, never returned).",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/analytics/sky": {
+   "get": {
+    "operationId": "analytics_sky",
+    "tags": [
+     "Insights"
+    ],
+    "summary": "Get the whole theme sky",
+    "description": "Every theme with its verse count, and the theme pairs whose PPMI clears min_ppmi.",
+    "parameters": [
+     {
+      "name": "min_ppmi",
+      "in": "query",
+      "required": false,
+      "description": "Minimum PPMI (finite).",
+      "schema": {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 4,
+       "default": 0.7
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "nodes": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "concept": {
+              "type": "string"
+             },
+             "n": {
+              "type": "integer"
+             }
+            },
+            "required": [
+             "concept",
+             "n"
+            ]
+           }
+          },
+          "edges": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "source": {
+              "type": "string"
+             },
+             "target": {
+              "type": "string"
+             },
+             "ppmi": {
+              "type": "number"
+             },
+             "jaccard": {
+              "type": "number"
+             },
+             "shabad_count": {
+              "type": "integer"
+             }
+            },
+            "required": [
+             "jaccard",
+             "ppmi",
+             "shabad_count",
+             "source",
+             "target"
+            ]
+           }
+          },
+          "min_ppmi": {
+           "type": "number"
+          },
+          "note": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "edges",
+          "min_ppmi",
+          "nodes",
+          "note"
+         ]
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Invalid request (bad or out-of-range parameter).",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "Internal error (generic body; details are logged, never returned).",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/analytics/pair": {
+   "get": {
+    "operationId": "analytics_pair",
+    "tags": [
+     "Insights"
+    ],
+    "summary": "Get the verses two themes share",
+    "description": "Verses carrying two themes, grouped by shabad, with the matched words.",
+    "parameters": [
+     {
+      "name": "concept",
+      "in": "query",
+      "required": true,
+      "description": "First theme.",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "with",
+      "in": "query",
+      "required": false,
+      "description": "Second theme (or alone=1).",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "alone",
+      "in": "query",
+      "required": false,
+      "description": "The theme's verses that carry no other theme (instead of with).",
+      "schema": {
+       "type": "string",
+       "enum": [
+        "1",
+        "true"
+       ]
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "description": "Verses to skip.",
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "maximum": 100000,
+       "default": 0
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "description": "Verses per page.",
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 200,
+       "default": 50
+      }
+     },
+     {
+      "name": "author",
+      "in": "query",
+      "required": false,
+      "description": "Lens: only verses by this author.",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "raag",
+      "in": "query",
+      "required": false,
+      "description": "Lens: only verses in this raag.",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "raags",
+      "in": "query",
+      "required": false,
+      "description": "Lens: only verses in these raags (comma-separated; the \"This hour\" lens).",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "rahao",
+      "in": "query",
+      "required": false,
+      "description": "Lens: refrains (Rahao lines) only.",
+      "schema": {
+       "type": "string",
+       "enum": [
+        "1",
+        "true"
+       ]
+      }
+     },
+     {
+      "name": "min_themes",
+      "in": "query",
+      "required": false,
+      "description": "Lens: verses carrying at least this many themes.",
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "maximum": 8,
+       "default": 0
+      }
+     },
+     {
+      "name": "ang_min",
+      "in": "query",
+      "required": false,
+      "description": "Lens: first Ang.",
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1430,
+       "default": 1
+      }
+     },
+     {
+      "name": "ang_max",
+      "in": "query",
+      "required": false,
+      "description": "Lens: last Ang.",
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1430,
+       "default": 1430
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "concept": {
+           "type": "string"
+          },
+          "with": {
+           "anyOf": [
+            {
+             "type": "null"
+            },
+            {
+             "type": "string"
+            }
+           ]
+          },
+          "alone": {
+           "type": "boolean"
+          },
+          "lens": {
+           "type": "object",
+           "properties": {
+            "author": {
+             "type": "string"
+            },
+            "raag": {
+             "type": "string"
+            },
+            "raags": {
+             "type": "array",
+             "items": {}
+            },
+            "rahao": {
+             "type": "boolean"
+            },
+            "min_themes": {
+             "type": "integer"
+            },
+            "ang_min": {
+             "type": "integer"
+            },
+            "ang_max": {
+             "type": "integer"
+            }
+           },
+           "required": [
+            "ang_max",
+            "ang_min",
+            "author",
+            "min_themes",
+            "raag",
+            "raags",
+            "rahao"
+           ]
+          },
+          "total": {
+           "type": "integer"
+          },
+          "offset": {
+           "type": "integer"
+          },
+          "limit": {
+           "type": "integer"
+          },
+          "bond": {
+           "anyOf": [
+            {
+             "type": "object",
+             "properties": {
+              "ppmi": {
+               "type": "number"
+              },
+              "jaccard": {
+               "type": "number"
+              },
+              "shabad_count": {
+               "type": "integer"
+              }
+             },
+             "required": [
+              "jaccard",
+              "ppmi",
+              "shabad_count"
+             ]
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "shabads": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "comp_id": {
+              "type": "integer"
+             },
+             "ang": {
+              "type": "integer"
+             },
+             "raag": {
+              "anyOf": [
+               {
+                "type": "null"
+               },
+               {
+                "type": "string"
+               }
+              ]
+             },
+             "author": {
+              "anyOf": [
+               {
+                "type": "null"
+               },
+               {
+                "type": "string"
+               }
+              ]
+             },
+             "verses": {
+              "type": "array",
+              "items": {
+               "type": "object",
+               "properties": {
+                "id": {
+                 "type": "integer"
+                },
+                "ang": {
+                 "type": "integer"
+                },
+                "is_rahao": {
+                 "type": "integer"
+                },
+                "gurmukhi": {
+                 "type": "string"
+                },
+                "translit": {
+                 "type": "string"
+                },
+                "terms": {}
+               },
+               "required": [
+                "ang",
+                "gurmukhi",
+                "id",
+                "is_rahao",
+                "terms",
+                "translit"
+               ]
+              }
+             }
+            },
+            "required": [
+             "ang",
+             "author",
+             "comp_id",
+             "raag",
+             "verses"
+            ]
+           }
+          },
+          "note": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "alone",
+          "bond",
+          "concept",
+          "lens",
+          "limit",
+          "note",
+          "offset",
+          "shabads",
+          "total",
+          "with"
+         ]
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Invalid request (bad or out-of-range parameter).",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "Internal error (generic body; details are logged, never returned).",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/analytics/theme": {
+   "get": {
+    "operationId": "analytics_theme",
+    "tags": [
+     "Insights"
+    ],
+    "summary": "Get a theme card",
+    "description": "A theme card: description, Gurmukhi terms, counts, and where it concentrates.",
+    "parameters": [
+     {
+      "name": "concept",
+      "in": "query",
+      "required": true,
+      "description": "Concept key.",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "concept": {
+           "type": "string"
+          },
+          "description": {
+           "type": "string"
+          },
+          "terms": {
+           "type": "array",
+           "items": {
+            "type": "string"
+           }
+          },
+          "n_verses": {
+           "type": "integer"
+          },
+          "n_shabads": {
+           "type": "integer"
+          },
+          "n_rahao": {
+           "type": "integer"
+          },
+          "raags": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "entity_id": {
+              "type": "string"
+             },
+             "n_tagged": {
+              "type": "integer"
+             },
+             "entity_rate": {
+              "type": "number"
+             },
+             "corpus_rate": {
+              "type": "number"
+             },
+             "lift": {
+              "type": "number"
+             }
+            },
+            "required": [
+             "corpus_rate",
+             "entity_id",
+             "entity_rate",
+             "lift",
+             "n_tagged"
+            ]
+           }
+          },
+          "authors": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "entity_id": {
+              "type": "string"
+             },
+             "n_tagged": {
+              "type": "integer"
+             },
+             "entity_rate": {
+              "type": "number"
+             },
+             "corpus_rate": {
+              "type": "number"
+             },
+             "lift": {
+              "type": "number"
+             }
+            },
+            "required": [
+             "corpus_rate",
+             "entity_id",
+             "entity_rate",
+             "lift",
+             "n_tagged"
+            ]
+           }
+          },
+          "note": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "authors",
+          "concept",
+          "description",
+          "n_rahao",
+          "n_shabads",
+          "n_verses",
+          "note",
+          "raags",
+          "terms"
          ]
         }
        }

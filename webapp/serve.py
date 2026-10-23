@@ -61,6 +61,7 @@ from sggs.reader import (_BANI_KEY_RE, _BANI_VARIANTS, _route_ang, _route_bani, 
     _route_health, _route_lines, _route_meta, _route_random, _route_shabad, hukam_package)   # noqa: F401  (re-exported)
 from sggs.verification import (MAX_CLAIM_CHARS, _route_verify)   # noqa: F401  (re-exported)
 from sggs.insights import (_route_analytics_author, _route_analytics_constellation,   # noqa: F401
+    _route_analytics_pair, _route_analytics_sky, _route_analytics_theme,   # noqa: F401
     _route_analytics_progression, _route_analytics_raag, _route_analytics_resonance,   # noqa: F401
     _route_analytics_vaar, _route_analytics_vaars, _route_line_concepts, _route_neighbors,   # noqa: F401
     _route_related, _route_themes_network)   # noqa: F401  (re-exported)
@@ -144,6 +145,9 @@ ROUTES = {
     ('analytics', 'vaars'): (_route_analytics_vaars, 'insights'),
     ('analytics', 'vaar'): (_route_analytics_vaar, 'insights'),
     ('analytics', 'constellation'): (_route_analytics_constellation, 'insights'),
+    ('analytics', 'sky'): (_route_analytics_sky, 'insights'),
+    ('analytics', 'pair'): (_route_analytics_pair, 'insights'),
+    ('analytics', 'theme'): (_route_analytics_theme, 'insights'),
     ('related', None): (_route_related, 'insights'),
     ('lines', None): (_route_lines, 'reader'),
     ('line_concepts', None): (_route_line_concepts, 'insights'),

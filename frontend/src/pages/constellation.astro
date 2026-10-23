@@ -1,24 +1,50 @@
 ---
 import Base from '../layouts/Base.astro';
+import '../styles/constellation.css';
 ---
 <Base title="ੴ Sri Guru Granth Sahib Ji — Concept Constellation">
   <section id="v-constel">
-    <div class="hint">Pick a theme and every verse that carries it becomes a <i>star</i>. The stars gather into clusters by the <i>other</i> theme each verse shares most — so you can see which "Naam" verses also lean toward grace, or fear, or surrender. <b>Tap any star</b> (or its Ang) to open the verse in the Reader.<span class="hint-note">Built from the corpus's verified theme tags — a way to explore, never a ranking of scripture.</span></div>
+    <div class="hint">Pick one of the 54 themes and see which other themes its verses carry. Near stars appear together more often than chance (PPMI); thicker lines share more shabads (Jaccard). <b>Tap a star</b> to read the verses two themes share, or the centre for the theme itself.<span class="hint-note">A verse carries a theme when it contains one of that theme's verified Gurmukhi words. A way to explore, never a ranking of scripture.</span></div>
 
     <div class="viz-card">
       <div class="viz-head">
         <div>
           <div class="viz-title">Concept Constellation</div>
-          <div class="viz-sub" id="conHead">Loading…</div>
+          <div class="viz-sub" id="conHead" aria-live="polite">Loading…</div>
         </div>
         <div class="viz-ctl">
-          <select id="conSel" class="viz-sel" aria-label="Concept"></select>
-          <select id="conAuthor" class="viz-sel" aria-label="Filter by author"></select>
-          <select id="conRaag" class="viz-sel" aria-label="Filter by raag"></select>
+          <select id="conSel" class="viz-sel" aria-label="Theme"></select>
+          <div class="con-seg" role="group" aria-label="View">
+            <button type="button" data-view="focus" aria-pressed="true">Focus</button>
+            <button type="button" data-view="sky" aria-pressed="false">See the whole sky</button>
+          </div>
         </div>
       </div>
+
+      <div class="con-bar" id="conFocusBar">
+        <div class="con-seg" role="group" aria-label="Which companions">
+          <button type="button" data-rank="shared" aria-pressed="true">Most shared</button>
+          <button type="button" data-rank="distinctive" aria-pressed="false">Most distinctive</button>
+        </div>
+        <details class="con-lens" id="conLens">
+          <summary>Lens <span id="conLensOn"></span></summary>
+          <div class="con-lens-body">
+            <label>Voice <select id="conAuthor" class="viz-sel" aria-label="Filter by voice"></select></label>
+            <label>Raag <select id="conRaag" class="viz-sel" aria-label="Filter by raag"></select></label>
+            <label class="con-check"><input type="checkbox" id="conHour"> This hour <span class="con-note">raags attributed to the current watch (claims, never facts)</span></label>
+            <label class="con-check"><input type="checkbox" id="conRahao"> Refrains only <span class="con-note">Rahao lines</span></label>
+            <label class="con-check"><input type="checkbox" id="conBright"> Brightest stars <span class="con-note">verses carrying 5 or more themes</span></label>
+          </div>
+        </details>
+      </div>
+
       <div id="constel" class="viz-stage constel-stage"></div>
+      <div id="conStrip" class="con-strip" hidden></div>
+      <div id="conLegend" class="con-legend" aria-label="Theme groups"></div>
     </div>
+
+    <div id="conCard" class="viz-card con-panel" hidden></div>
+    <div id="conPair" class="viz-card con-panel" hidden></div>
   </section>
   <script>import '../scripts/constellation';</script>
 </Base>

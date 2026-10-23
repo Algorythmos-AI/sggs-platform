@@ -14,7 +14,7 @@
   {
     "id": "step-03",
     "title": "One read-only API",
-    "caption": "The API is Python standard-library code (webapp/serve.py and the five bounded contexts in webapp/sggs/: reader, search, verify, insights, knowledge) answering 26 routes. It runs as Python functions inside the same Vercel project as the website, so the browser calls it same-origin under /api/* with no CORS; gateway/routes.json decides which function answers which path. The wiki’s live widgets call it the same way.",
+    "caption": "The API is Python standard-library code (webapp/serve.py and the five bounded contexts in webapp/sggs/: reader, search, verify, insights, knowledge) answering 29 routes. It runs as Python functions inside the same Vercel project as the website, so the browser calls it same-origin under /api/* with no CORS; gateway/routes.json decides which function answers which path. The wiki’s live widgets call it the same way.",
     "link": "/architecture/request-lifecycle/"
   },
   {
