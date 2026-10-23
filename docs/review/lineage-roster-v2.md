@@ -297,6 +297,8 @@ Review: **draft** · reviewer: ________ · date: ________
 
 **Where sources differ.** Scholars disagree on his birthplace: Barsi (Sholapur district) or Uttar Pradesh. *([EoS: TRILOCHAN](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/TRILOCHAN.html))*
 
+**For the scholar.** Inside the Saloks of Bhagat Kabir (Angs 1364–1377), saloks 212–213 (Ang 1375–1376) are a dialogue signed by Namdev and Trilochan, salok 241 is signed by Namdev and salok 242 by Ravidas (Ang 1377). Today's corpus credits them to Guru Arjan (a header bleed); sggs-data 1.1.0 credits them to Bhagat Kabir Ji as part of his collection and flags them for review. Scholar to rule whether each is shown under Kabir or under the voice that signs it.
+
 The pen-name in a verse:
 
 > ਬਦਤਿ ਤ੍ਰਿਲੋਚਨ ਰਾਮ ਜੀ ॥੬॥੧॥
@@ -321,6 +323,8 @@ Review: **draft** · reviewer: ________ · date: ________
 **Context.** Namdev was born in 1270 at Narasi-Vamani in Maharashtra, to a tailor's family, and turned to bhakti under Jnanadeva. He is said to have lived for over twenty years at Ghuman in the Punjab, and later settled at Pandharpur. Sixty-one of his hymns are in the Granth.
 
 *Sources:* [EoS: NĀMDEV (1270-1350)](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/NAMDEV%20%281270-1350%29.html)
+
+**For the scholar.** Inside the Saloks of Bhagat Kabir (Angs 1364–1377), saloks 212–213 (Ang 1375–1376) are a dialogue signed by Namdev and Trilochan, salok 241 is signed by Namdev and salok 242 by Ravidas (Ang 1377). Today's corpus credits them to Guru Arjan (a header bleed); sggs-data 1.1.0 credits them to Bhagat Kabir Ji as part of his collection and flags them for review. Scholar to rule whether each is shown under Kabir or under the voice that signs it.
 
 The pen-name in a verse:
 
@@ -403,6 +407,8 @@ Review: **draft** · reviewer: ________ · date: ________
 
 *Sources:* [EoS: KABĪR](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/KABIR.html)
 
+**For the scholar.** Inside the Saloks of Bhagat Kabir (Angs 1364–1377), saloks 212–213 (Ang 1375–1376) are a dialogue signed by Namdev and Trilochan, salok 241 is signed by Namdev and salok 242 by Ravidas (Ang 1377). Today's corpus credits them to Guru Arjan (a header bleed); sggs-data 1.1.0 credits them to Bhagat Kabir Ji as part of his collection and flags them for review. Scholar to rule whether each is shown under Kabir or under the voice that signs it.
+
 The pen-name in a verse:
 
 > ਕਹਤ ਕਬੀਰ ਛੋਡਿ ਬਿਖਿਆ ਰਸ ਇਤੁ ਸੰਗਤਿ ਨਿਹਚਉ ਮਰਣਾ ॥
@@ -483,6 +489,8 @@ Review: **draft** · reviewer: ________ · date: ________
 **Context.** Ravidas was born near Varanasi to a family of leather-workers and followed the family trade. He came to reject idol-worship and distinctions of caste, and Mirabai was among his followers. Forty of his hymns are in the Granth.
 
 *Sources:* [EoS: RAVIDĀS](https://web.archive.org/web/2023/http://eos.learnpunjabi.org/RAVIDAS.html)
+
+**For the scholar.** Inside the Saloks of Bhagat Kabir (Angs 1364–1377), saloks 212–213 (Ang 1375–1376) are a dialogue signed by Namdev and Trilochan, salok 241 is signed by Namdev and salok 242 by Ravidas (Ang 1377). Today's corpus credits them to Guru Arjan (a header bleed); sggs-data 1.1.0 credits them to Bhagat Kabir Ji as part of his collection and flags them for review. Scholar to rule whether each is shown under Kabir or under the voice that signs it.
 
 The pen-name in a verse:
 
