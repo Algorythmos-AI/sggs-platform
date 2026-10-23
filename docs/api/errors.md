@@ -54,7 +54,7 @@ nothing. These requests all return `200`; check the body, not only the status:
 
 | Request | What happens | Status | Body (lists shown as their length, Gurmukhi as ‹Gurmukhi›) |
 |---|---|--:|---|
-| `/api/ang/0` | an Ang below 1 is clamped to 1 | 200 | `{"ang": 1, "lines": [23 items], "continued_from": null, "raag": null, "section": ‹Gurmukhi›, "authors": [0 items]}` |
+| `/api/ang/0` | an Ang below 1 is clamped to 1 | 200 | `{"ang": 1, "lines": [23 items], "continued_from": null, "raag": null, "section": ‹Gurmukhi›, "authors": [1 item]}` |
 | `/api/ang/1431` | an Ang above 1430 is clamped to 1430 | 200 | `{"ang": 1430, "lines": [57 items], "continued_from": 1429, "raag": null, "section": ‹Gurmukhi›, "authors": [1 item]}` |
 | `/api/search?q=naam&limit=999` | `limit` above 200 is clamped to 200 | 200 | `{"mode": "theme", "concept": {…}, "results": [200 items], "related_themes": [0 items]}` |
 | `/api/lines?ids=abc` | ids that are not digits are ignored | 200 | `{"lines": [0 items], "note": "verbatim Gurmukhi by line id, cited by Ang"}` |
