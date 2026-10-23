@@ -25,7 +25,7 @@ the code named in its footer; the wiki gate keeps the footer honest.
 3. **Two API surfaces.** `/api/v1/*` is strict: unknown endpoint → 404; every error is
    `{error: {code, message, request_id}}`. `/api/*` is the legacy surface whose bodies the golden
    contract pins byte for byte. Anything else is a static file from a realpath jail.
-4. **Dispatch.** `api()` looks up `(first segment, second segment)` in `ROUTES` — 26 routes, each
+4. **Dispatch.** `api()` looks up `(first segment, second segment)` in `ROUTES` — 29 routes, each
    tagged with its bounded context. In split mode a route outside `ENABLED` is a 404.
 5. **The context reads SQLite.** The handler runs parameterised SQL on a connection opened
    `mode=ro&immutable=1` with `query_only`; the app can never write to the scripture.

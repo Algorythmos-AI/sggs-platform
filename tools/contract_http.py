@@ -9,7 +9,7 @@ contract/golden_<suite>.ndjson by parsed-JSON equality. Nothing is forked: a pro
 change is a change to the generator, and both paths pick it up.
 
 Scope and documented normalisations:
-  * suites: verify, search, reader, timing, banis, analytics (roman_norm / difflib are
+  * suites: verify, search, reader, timing, banis, analytics, constellation (roman_norm / difflib are
     pure functions with no endpoint)
   * reader: the seeded Hukam records are skipped — /api/random has no seed
   * verify: /api/verify rejects an empty (whitespace-only) claim with HTTP 400 — input
@@ -40,7 +40,7 @@ _ARGV = sys.argv[1:]
 sys.argv = sys.argv[:1]          # the generator reads its DB path from argv; use its default
 import gen_golden_vectors as g  # noqa: E402
 
-HTTP_SUITES = ("verify", "search", "reader", "timing", "banis", "analytics")
+HTTP_SUITES = ("verify", "search", "reader", "timing", "banis", "analytics", "constellation")
 
 
 class Http:

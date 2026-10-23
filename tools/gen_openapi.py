@@ -38,6 +38,17 @@ IDS = {"type": "string", "pattern": "^[0-9]{1,12}(,[0-9]{1,12})*$"}
 
 # path -> (tag, description, parameters, samples[(concrete path, query)], extra error codes)
 # The description is the operation's full sentence; its short sidebar/heading label is in SUMMARIES.
+LENS = [
+    q("author", STR, "Lens: only verses by this author."),
+    q("raag", STR, "Lens: only verses in this raag."),
+    q("raags", STR, "Lens: only verses in these raags (comma-separated; the \"This hour\" lens)."),
+    q("rahao", {"type": "string", "enum": ["1", "true"]}, "Lens: refrains (Rahao lines) only."),
+    q("min_themes", dict(INT, minimum=0, maximum=8, default=0), "Lens: verses carrying at least this many themes."),
+    q("ang_min", dict(INT, minimum=1, maximum=1430, default=1), "Lens: first Ang."),
+    q("ang_max", dict(INT, minimum=1, maximum=1430, default=1430), "Lens: last Ang."),
+]
+
+
 ROUTES = {
     "/api/meta": ("Meta", "Build identity and corpus statistics (version, commit, counts).", [],
                   [("/api/meta", {})], []),
@@ -95,11 +106,24 @@ ROUTES = {
     "/api/analytics/vaar": ("Insights", "One Vaar's anatomy (pauris and saloks, attributed).", [
         q("id", dict(INT, minimum=0, maximum=ID_MAX), "Vaar id.", True)],
         [("/api/analytics/vaar", {"id": ["1"]})], []),
-    "/api/analytics/constellation": ("Insights", "Concept constellation: verses carrying a concept, clustered by co-concept.", [
-        q("concept", STR, "Concept key.", True),
-        q("author", STR, "Only verses by this author."),
-        q("raag", STR, "Only verses in this raag.")],
-        [("/api/analytics/constellation", {"concept": ["naam"]})], []),
+    "/api/analytics/constellation": ("Insights", "Concept constellation: a theme's verses, the solo/shared split, every companion theme with its bond, and the Ang strip.", [
+        q("concept", STR, "Concept key (omit for the theme list).")] + LENS,
+        [("/api/analytics/constellation", {"concept": ["naam"]}),
+         ("/api/analytics/constellation", {"concept": ["naam"], "rahao": ["1"]})], []),
+    "/api/analytics/sky": ("Insights", "Every theme with its verse count, and the theme pairs whose PPMI clears min_ppmi.", [
+        q("min_ppmi", {"type": "number", "minimum": 0, "maximum": 4, "default": 0.7}, "Minimum PPMI (finite).")],
+        [("/api/analytics/sky", {})], []),
+    "/api/analytics/pair": ("Insights", "Verses carrying two themes, grouped by shabad, with the matched words.", [
+        q("concept", STR, "First theme.", True),
+        q("with", STR, "Second theme (or alone=1)."),
+        q("alone", {"type": "string", "enum": ["1", "true"]}, "The theme's verses that carry no other theme (instead of with)."),
+        q("offset", dict(INT, minimum=0, maximum=100000, default=0), "Verses to skip."),
+        q("limit", dict(INT, minimum=1, maximum=200, default=50), "Verses per page.")] + LENS,
+        [("/api/analytics/pair", {"concept": ["naam"], "with": ["haumai"], "limit": ["5"]}),
+         ("/api/analytics/pair", {"concept": ["naam"], "alone": ["1"], "limit": ["5"]})], []),
+    "/api/analytics/theme": ("Insights", "A theme card: description, Gurmukhi terms, counts, and where it concentrates.", [
+        q("concept", STR, "Concept key.", True)],
+        [("/api/analytics/theme", {"concept": ["naam"]})], []),
     "/api/related": ("Insights", "Related compositions (theme-profile cosine).", [
         q("comp_id", dict(INT, minimum=0, maximum=ID_MAX), "Composition id.", True)],
         [("/api/related", {"comp_id": ["2"]})], []),
@@ -147,6 +171,9 @@ SUMMARIES = {
     "/api/analytics/vaars": "List the Vaars",
     "/api/analytics/vaar": "Get a Vaar",
     "/api/analytics/constellation": "Get a concept constellation",
+    "/api/analytics/sky": "Get the whole theme sky",
+    "/api/analytics/pair": "Get the verses two themes share",
+    "/api/analytics/theme": "Get a theme card",
     "/api/related": "Get related compositions",
     "/api/line_concepts": "Get line concepts",
     "/api/neighbors": "Get semantic neighbours",

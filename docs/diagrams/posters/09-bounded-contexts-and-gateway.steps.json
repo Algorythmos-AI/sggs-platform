@@ -1,7 +1,7 @@
 [
   {
     "id": "step-01",
-    "title": "Five contexts, 26 routes",
+    "title": "Five contexts, 29 routes",
     "caption": "Every route in serve.ROUTES is tagged with the bounded context that owns it: reader (meta, health, Angs, compositions, random, lines, banis), search (search, word), verify, insights (the theme network, analytics, related, line concepts, neighbours) and knowledge (raag timing and forms). No two contexts share a path prefix, so any route can be sent to exactly one function.",
     "link": "/architecture/overview/"
   },
@@ -26,7 +26,7 @@
   {
     "id": "step-05",
     "title": "Proven on every deploy",
-    "caption": "CI fails if vercel.json is not what the code generates, if a function bundles anything but its own code and slice, if any context answers with the wrong X-Service (or an unknown prefix does not fall through to all), or if the golden contract — the 274 records the six HTTP suites replay — does not pass through the gateway on the staging site.",
+    "caption": "CI fails if vercel.json is not what the code generates, if a function bundles anything but its own code and slice, if any context answers with the wrong X-Service (or an unknown prefix does not fall through to all), or if the golden contract — the 305 records the seven HTTP suites replay — does not pass through the gateway on the staging site.",
     "link": "/process/ci-gates/"
   },
   {
