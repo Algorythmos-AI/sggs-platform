@@ -88,7 +88,7 @@ function ([bounded contexts and the gateway](bounded-contexts-and-gateway.md)).
 | `/reader` | `ang/{n}` (and prefetches the next and previous Ang), `neighbors`, `timing/clock` |
 | `/nitnem` | `banis`, `bani/{key}` |
 | `/lineage`, `/analytics` | `analytics/*`, `themes/network`, the build-time `contributors.json` |
-| `/constellation` | `analytics/constellation` |
+| `/constellation` | `analytics/constellation`, `analytics/sky`, `analytics/pair`, `analytics/theme`, `timing/clock` (the This hour lens) |
 | `/raag-clock`, `/divergence` | `timing/clock`, `timing/divergence` |
 
 The Gurbani Soul pages make no API calls.
