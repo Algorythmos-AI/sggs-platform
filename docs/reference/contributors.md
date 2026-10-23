@@ -139,7 +139,7 @@ historical context, never a ranking, and it awaits the same scholar review as
 | Baba Sundar Ji | Baba Sundar | not established | late 16th century | Punjab | Great-grandson of Guru Amar Das |
 | Satta & Balwand | Satta & Balwand | not established | late 16th – early 17th century | Punjab (Lahore / Amritsar) | Rababis (rebeck players) to Guru Arjan |
 
-- **Bhai Mardana** — Guru Nanak's Muslim companion and rabab player on his travels; one salok of his is in the Guru Granth Sahib.
+- **Bhai Mardana** — Guru Nanak's companion and rabab player on his travels. Saloks at Ang 553 carry his name (ਮਰਦਾਨਾ ੧); many read them as Guru Nanak's words addressed to him — under scholarly review.
   Sources: [Mardana, Bhai (1459-1534) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/MARDANA%20BHAI%20%281459-1534%29.html).
 - **Baba Sundar Ji** — Great-grandson of Guru Amar Das; author of the Ramkali Sadu, on Guru Amar Das's passing.
   Sources: [Sundar, Baba (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/SUNDAR%20BABA.html); [Amar Das, Guru (1479-1574) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/AMAR%20DAS%20GURU%20%281479-1574%29.html).
