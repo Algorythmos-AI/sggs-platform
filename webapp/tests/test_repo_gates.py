@@ -10,6 +10,7 @@ success" (a failure), and the decorator must be removed in the same PR — so a 
 move from "known-open" to "enforcing", never silently back.
 """
 import json
+import sys
 import re
 import sqlite3
 import unittest
@@ -1091,6 +1092,38 @@ class WebThemeMatchesTokens(unittest.TestCase):
             legs = tokens[grp][tkey]
             self.assertEqual(light[key].upper(), legs[0].upper(), f"theme.ts light.{key} != tokens {grp}.{tkey}[0]")
             self.assertEqual(dark[key].upper(), legs[1].upper(), f"theme.ts dark.{key} != tokens {grp}.{tkey}[1]")
+
+
+class WebThemeGroupColours(unittest.TestCase):
+    """frontend/src/styles/kb/tokens.css --tg-* equal tokens.json themeGroup (light and dark legs), and
+    each clears 4.5:1 on every surface the web's light and dark neutrals define (themes.css)."""
+
+    def _blocks(self, css):
+        out = {}
+        for leg, sel in (("light", r':root, :root\[data-theme="light"\] \{'), ("dark", r':root\[data-theme="dark"\] \{')):
+            tg, surf = {}, {}
+            for m in re.finditer(sel + r"(.*?)\}", css, re.S):
+                tg.update(re.findall(r"--tg-(\w+):\s*(#[0-9A-Fa-f]{6})", m.group(1)))
+                surf.update(re.findall(r"--(surface-card|surface-raised|paper|canvas|surface-2|tile1|tile2|chrome):\s*(#[0-9A-Fa-f]{6})", m.group(1)))
+            out[leg] = (tg, surf)
+        return out
+
+    def test_group_colours_equal_tokens_and_clear_aa(self):
+        sys.path.insert(0, str(ROOT / "scripts" / "brand"))
+        from contrast_report import ratio
+        groups = json.loads((ROOT / "docs/brand/tokens.json").read_text(encoding="utf-8"))["themeGroup"]
+        tokens_css = self._blocks((FRONTEND / "src/styles/kb/tokens.css").read_text(encoding="utf-8"))
+        themes_css = self._blocks((FRONTEND / "src/styles/kb/themes.css").read_text(encoding="utf-8"))
+        for i, leg in enumerate(("light", "dark")):
+            tg, surfaces = tokens_css[leg][0], themes_css[leg][1]
+            self.assertTrue(surfaces, f"no {leg} surfaces parsed from themes.css")
+            self.assertEqual(set(tg), set(groups), f"tokens.css {leg} --tg-* roles != tokens.json themeGroup")
+            for role, legs in groups.items():
+                self.assertEqual(tg[role].upper(), legs[i].upper(), f"--tg-{role} {leg} != tokens themeGroup.{role}[{i}]")
+                for name, bg in surfaces.items():
+                    self.assertGreaterEqual(ratio(legs[i], bg), 4.5, f"--tg-{role} {leg} on --{name}")
+        names = set(re.findall(r"key: '(\w+)'", (FRONTEND / "src/scripts/themegroups.ts").read_text(encoding="utf-8")))
+        self.assertEqual(names, set(groups), "themegroups.ts group keys != tokens.json themeGroup roles")
 
 
 class JsonLdInvariants(unittest.TestCase):

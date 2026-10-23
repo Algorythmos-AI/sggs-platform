@@ -1,6 +1,6 @@
 ---
 title: "The JSON API"
-description: "The read-only JSON API over the verbatim corpus: what it promises, its 26 routes in five bounded contexts, the two surfaces (/api and /api/v1), caching, and a console to try any route live."
+description: "The read-only JSON API over the verbatim corpus: what it promises, its 29 routes in five bounded contexts, the two surfaces (/api and /api/v1), caching, and a console to try any route live."
 sidebar:
   order: 0
 verified:

@@ -477,6 +477,46 @@ def analytics_vectors():
     return out
 
 
+# ---------------------------------------------------------------------------
+# 8. constellation vectors — Constellation v2 (the Focus model under each lens, the Sky, pair
+#    pages and theme cards). Their own suite, so the Swift readers of the older suites never
+#    decode a shape they do not know.
+# ---------------------------------------------------------------------------
+def constellation_vectors():
+    out = []
+    # Constellation v2: the Focus model under each lens, the Sky, a pair page and a theme card.
+    lenses = [{}, {'rahao': ['1']}, {'min_themes': ['5']}, {'author': ['Bhagat Kabir Ji']},
+              {'raags': ['ਗਉੜੀ,ਆਸਾ']}, {'ang_min': ['101'], 'ang_max': ['200']}]
+    for con in ('naam', 'seva', 'kaam'):
+        for lens in lenses:
+            r = API('/api/analytics/constellation', dict(lens, concept=[con]))
+            out.append({'kind': 'constellation_v2', 'concept': con, 'lens': {k: v[0] for k, v in lens.items()},
+                        'total': r['total'], 'solo': r['solo'], 'shared': r['shared'], 'ang_bins': r['ang_bins'],
+                        'companions': [[c['co'], c['n'], round(c['ppmi'], 6), round(c['jaccard'], 6), c['shabad_count']]
+                                       for c in r['companions']]})
+    sky = API('/api/analytics/sky', {})
+    out.append({'kind': 'sky', 'nodes': [[n['concept'], n['n']] for n in sky['nodes']],
+                'edges': [[e['source'], e['target'], round(e['ppmi'], 6), round(e['jaccard'], 6)] for e in sky['edges']]})
+    for a, b, lens in (('naam', 'haumai', {}), ('kaam', 'krodh', {}), ('naam', 'simran', {'rahao': ['1']})):
+        for off in ('0', '50'):
+            r = API('/api/analytics/pair', dict(lens, concept=[a], **{'with': [b], 'offset': [off]}))
+            out.append({'kind': 'pair', 'concept': a, 'with': b, 'lens': {k: v[0] for k, v in lens.items()},
+                        'offset': int(off), 'total': r['total'],
+                        'shabads': [[sh['comp_id'], [[v['id'], v['terms'][0], v['terms'][1]] for v in sh['verses']]]
+                                    for sh in r['shabads']]})
+    for con in ('naam', 'seva'):
+        r = API('/api/analytics/pair', {'concept': [con], 'alone': ['1']})
+        out.append({'kind': 'pair_alone', 'concept': con, 'total': r['total'],
+                    'shabads': [[sh['comp_id'], [[v['id'], v['terms'][0]] for v in sh['verses']]] for sh in r['shabads']]})
+    for con in ('naam', 'kaal', 'vahiguru', 'akal'):
+        r = API('/api/analytics/theme', {'concept': [con]})
+        out.append({'kind': 'theme_card', 'concept': con, 'n_verses': r['n_verses'], 'n_shabads': r['n_shabads'],
+                    'n_rahao': r['n_rahao'], 'terms': r['terms'],
+                    'raags': [[x['entity_id'], round(x['lift'], 6)] for x in r['raags']],
+                    'authors': [[x['entity_id'], round(x['lift'], 6)] for x in r['authors']]})
+    return out
+
+
 SUITES = {
     'roman_norm': ('golden_roman_norm.ndjson', roman_norm_vectors),
     'difflib':    ('golden_difflib.ndjson',    difflib_vectors),
@@ -486,6 +526,7 @@ SUITES = {
     'timing':     ('golden_timing.ndjson',     timing_vectors),
     'banis':      ('golden_banis.ndjson',      bani_vectors),
     'analytics':  ('golden_analytics.ndjson',  analytics_vectors),
+    'constellation': ('golden_constellation.ndjson', constellation_vectors),
 }
 
 

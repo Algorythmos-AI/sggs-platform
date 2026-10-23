@@ -59,6 +59,7 @@ export const LAYOUT = [
     page('reference/releases'),
     page('diagrams'),
     page('website'),
+    page('website/constellation'),
     page('risk-register'),
     page('reports'),
     page('archive'),

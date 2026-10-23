@@ -59,7 +59,7 @@ method for almost every API route, so a screen asks the actor what a web page as
 | reader | `ang`, `shabad`, `random`, `meta`, `banis`, `bani` | `ang(_:)`, `shabad(compId:)`, `randomHukam()`, `meta()`, `banis()`, `bani(key:variant:)` |
 | search | `search` (every mode, including theme) | `search(_:mode:limit:offset:)`, `theme(_:)`, `english(forLine:)` |
 | verify | `verify` | `verify(_:ang:)` |
-| insights | `analytics/*`, `themes/network`, `neighbors` | `authorAnalytics()`, `raagAnalytics()`, `themeNetwork(…)`, `constellation(…)`, `resonance(…)`, `progression(…)`, `vaars()`, `vaar(id:)`, `authorProfile(_:)`, `neighbors(lineId:)` |
+| insights | `analytics/*`, `themes/network`, `neighbors` | `authorAnalytics()`, `raagAnalytics()`, `themeNetwork(…)`, `constellation(…)`, `constellationFocus(concept:lens:)`, `constellationSky(minPPMI:)`, `constellationPair(…)`, `themeCard(concept:)`, `resonance(…)`, `progression(…)`, `vaars()`, `vaar(id:)`, `authorProfile(_:)`, `neighbors(lineId:)` |
 | knowledge | `timing/*`, `forms` | `timingClock()`, `timingRaag(name:)`, `timingDivergence()`, `forms(compId:)` |
 
 Being an actor, it serialises every query on one connection, off the main thread. Opening it

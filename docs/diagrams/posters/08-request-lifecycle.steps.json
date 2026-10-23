@@ -20,7 +20,7 @@
   {
     "id": "step-04",
     "title": "The dispatcher",
-    "caption": "api() splits the path, ensures FTS5 is detected, and looks up (first segment, second segment) in ROUTES — 26 routes, each tagged with its bounded context. In split mode a route whose context is not enabled in this process is a 404: a service never answers for another.",
+    "caption": "api() splits the path, ensures FTS5 is detected, and looks up (first segment, second segment) in ROUTES — 29 routes, each tagged with its bounded context. In split mode a route whose context is not enabled in this process is a 404: a service never answers for another.",
     "link": "/architecture/bounded-contexts-and-gateway/"
   },
   {

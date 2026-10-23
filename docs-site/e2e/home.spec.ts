@@ -72,7 +72,7 @@ test.describe('brand, the API reference and the header', () => {
     const res = await page.goto('/brand/');
     expect(res?.status()).toBe(200);
     const groups = page.locator('.swatches table.swatches__group');
-    await expect(groups).toHaveCount(4);
+    await expect(groups).toHaveCount(5);   // surfaces, soul, brand, status, theme groups
     const gold = page.locator('tr', { has: page.locator('th code', { hasText: 'soul.accentFill' }) });
     await expect(gold.locator('td').first()).toContainText('#FFBC0D');
     await expect(gold.locator('td').first()).toContainText('1.58:1');   // why gold is a fill, never text

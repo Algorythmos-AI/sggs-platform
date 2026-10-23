@@ -75,7 +75,7 @@ docs-pins: ## re-pin the sibling docs, keeping a new pin only where a published 
 review-pack: docs ## the G3 scholar-review pack: Scripture 101, the glossary, the contributors, one PDF
 	cd docs-site && npm run review-pack
 
-openapi: ## regenerate contract/openapi.json (26 routes; schemas inferred from real responses) — test-web fails if stale
+openapi: ## regenerate contract/openapi.json (29 routes; schemas inferred from real responses) — test-web fails if stale
 	python3 tools/gen_openapi.py
 
 contract-http: ## replay the golden contract over HTTP against a running API: make contract-http BASE=http://127.0.0.1:7777

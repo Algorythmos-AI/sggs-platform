@@ -2,7 +2,7 @@
 """Insights context: precomputed analytics — theme network, author/raag stylometry, progression,
 resonance, Vaars, constellation, related compositions, line concepts, semantic neighbours."""
 import json, sqlite3, math
-from .core import _FALLTHROUGH, _ID_MAX, _int, attach_translations, db, rows_to_list
+from .core import _FALLTHROUGH, _ID_MAX, ApiError, _int, attach_translations, db, rows_to_list
 
 # Tables this context reads (precomputed analytics plus verse text). The platform split cuts each service's database
 # slice from this declaration; webapp/tests/test_declared_tables.py runs every route of the
@@ -210,13 +210,47 @@ def _route_analytics_vaar(p, qs):   # /api/analytics/vaar?id=N (anatomy)
     return _FALLTHROUGH
 
 
+ANG_BIN = 100      # Ang strip: 15 bins of 100 Angs (the last holds Angs 1401-1430)
+ANG_BINS = 15
+
+
+def _lens(qs):
+    """The Constellation lens: optional filters every constellation query shares, compiled into
+    one parameterised WHERE fragment over `lines l`. Echoed back so a client can show what is on.
+    author / raag: one voice or raag · raags: a comma list (the "This hour" lens) · rahao=1: refrains
+    only · min_themes=N: verses carrying at least N themes · ang_min/ang_max: an Ang-strip bin."""
+    au = qs.get('author', [''])[0].strip()
+    rg = qs.get('raag', [''])[0].strip()
+    rgs = [r.strip() for r in qs.get('raags', [''])[0].split(',') if r.strip()][:40]
+    rahao = qs.get('rahao', [''])[0].strip() in ('1', 'true')
+    min_themes = _int(qs, 'min_themes', 0, 0, 8)
+    ang_min = _int(qs, 'ang_min', 1, 1, 1430)
+    ang_max = _int(qs, 'ang_max', 1430, 1, 1430)
+    where, params = [], []
+    if au:
+        where.append("l.author=?"); params.append(au)
+    if rg:
+        where.append("l.raag=?"); params.append(rg)
+    if rgs:
+        where.append(f"l.raag IN ({','.join('?' * len(rgs))})"); params += rgs
+    if rahao:
+        where.append("l.is_rahao=1")
+    if min_themes > 1:
+        where.append("(SELECT COUNT(*) FROM concept_lines x WHERE x.line_id=l.id)>=?"); params.append(min_themes)
+    if ang_min > 1 or ang_max < 1430:
+        where.append("l.ang BETWEEN ? AND ?"); params += [ang_min, ang_max]
+    echo = {'author': au, 'raag': rg, 'raags': rgs, 'rahao': rahao, 'min_themes': min_themes,
+            'ang_min': ang_min, 'ang_max': ang_max}
+    return (' AND ' + ' AND '.join(where) if where else ''), params, echo
+
+
 def _route_analytics_constellation(p, qs):   # Concept Constellation
     # No ?concept= → the dropdown list (every concept + its verse count).
-    # ?concept=X → X's verses grouped into sub-constellations by each verse's co-themes.
-    # Purely read-only over the existing concepts / concept_lines tables; capped (top-k).
+    # ?concept=X → X's verses grouped into sub-constellations by each verse's co-themes (`clusters`,
+    # v1: a verse sits in every co-theme bucket it shares, so cluster counts overlap), plus the v2
+    # Focus model: an additive split (total = solo + shared), every companion with its verse count
+    # and the corpus bond (PPMI, Jaccard over shabads), and the 15-bin Ang strip. Read-only.
     c = qs.get('concept', [''])[0].strip()
-    au = qs.get('author', [''])[0].strip()       # optional filter: only verses by this author
-    rg = qs.get('raag', [''])[0].strip()          # optional filter: only verses in this raag
     try:
         if not c:
             concepts = rows_to_list(db().execute(
@@ -228,33 +262,148 @@ def _route_analytics_constellation(p, qs):   # Concept Constellation
             raags = rows_to_list(db().execute("SELECT name, roman FROM raags ORDER BY rowid"))
             return {'concepts': concepts, 'authors': authors, 'raags': raags,
                     'note': 'corpus-verified theme tags; counts are descriptive only'}
-        # filter the concept's verses by author/raag if requested (parameterized — no injection)
-        where, params = "cl.concept=?", [c]
-        if au:
-            where += " AND l.author=?"; params.append(au)
-        if rg:
-            where += " AND l.raag=?"; params.append(rg)
+        lw, lp, lens = _lens(qs)
+        au, rg = lens['author'], lens['raag']
+        where, params = "cl.concept=?" + lw, [c] + lp
         total = db().execute(
             f"SELECT COUNT(DISTINCT cl.line_id) FROM concept_lines cl JOIN lines l ON l.id=cl.line_id WHERE {where}",
             params).fetchone()[0]
         if not total:
-            return {'concept': c, 'author': au, 'raag': rg, 'total': 0, 'clusters': []}
+            return {'concept': c, 'author': au, 'raag': rg, 'lens': lens, 'total': 0, 'solo': 0, 'shared': 0,
+                    'clusters': [], 'companions': [], 'ang_bins': [0] * ANG_BINS}
         MAX_CLUSTERS, PER = 9, 40
         rows = db().execute(
             "SELECT co.concept co, l.id, l.ang, l.comp_id, l.gurmukhi "
             "FROM concept_lines cl JOIN concept_lines co ON co.line_id=cl.line_id AND co.concept<>cl.concept "
             f"JOIN lines l ON l.id=cl.line_id WHERE {where} ORDER BY co.concept, l.id", params).fetchall()
-        buckets = {}
+        buckets, shared_ids = {}, set()
         for r in rows:
+            shared_ids.add(r['id'])
             buckets.setdefault(r['co'], []).append(
                 {'id': r['id'], 'ang': r['ang'], 'comp_id': r['comp_id'], 'gurmukhi': r['gurmukhi']})
         clusters = sorted(({'co': k, 'n': len(v), 'verses': v[:PER]} for k, v in buckets.items()),
                           key=lambda x: x['n'], reverse=True)[:MAX_CLUSTERS]
-        return {'concept': c, 'author': au, 'raag': rg, 'total': total, 'clusters': clusters,
-                'note': 'verses carrying this theme (optionally filtered by author/raag), grouped by the '
-                        'other theme they most often share; descriptive structure, never a ranking of scripture'}
+        bonds = {r['target']: r for r in db().execute(
+            "SELECT target, ppmi, jaccard, shabad_count FROM theme_network WHERE source=?", (c,))}
+        companions = []
+        for co, vs in buckets.items():
+            b = bonds.get(co)
+            companions.append({'co': co, 'n': len(vs),
+                               'ppmi': b['ppmi'] if b else 0.0, 'jaccard': b['jaccard'] if b else 0.0,
+                               'shabad_count': b['shabad_count'] if b else 0})
+        companions.sort(key=lambda x: (-x['n'], x['co']))
+        bins = [0] * ANG_BINS
+        for (ang,) in db().execute(
+                f"SELECT l.ang FROM concept_lines cl JOIN lines l ON l.id=cl.line_id WHERE {where}", params):
+            bins[min(ANG_BINS - 1, (ang - 1) // ANG_BIN)] += 1
+        shared = len(shared_ids)
+        return {'concept': c, 'author': au, 'raag': rg, 'lens': lens, 'total': total,
+                'solo': total - shared, 'shared': shared, 'clusters': clusters,
+                'companions': companions, 'ang_bins': bins,
+                'note': 'total = solo + shared: a verse is "shared" when it also carries another theme. A '
+                        'companion\'s n counts the verses carrying both themes, so companion counts overlap '
+                        'by design (a verse with three themes counts under two companions). PPMI and Jaccard '
+                        'are the corpus bond between the two themes over shabads. Descriptive structure, '
+                        'never a ranking of scripture'}
     except sqlite3.OperationalError:
         return {'concepts': [], 'clusters': [], 'note': 'concept tables not present in this DB build'}
+    return _FALLTHROUGH
+
+
+def _route_analytics_sky(p, qs):   # /api/analytics/sky — the whole theme network at once
+    try:
+        min_ppmi = float(qs.get('min_ppmi', ['0.7'])[0])
+    except (TypeError, ValueError):
+        min_ppmi = 0.7
+    if not math.isfinite(min_ppmi):
+        min_ppmi = 0.7
+    min_ppmi = max(0.0, min(4.0, min_ppmi))
+    try:
+        nodes = rows_to_list(db().execute(
+            "SELECT concept, COUNT(DISTINCT line_id) n FROM concept_lines GROUP BY concept ORDER BY concept"))
+        edges = rows_to_list(db().execute(
+            "SELECT source, target, ppmi, jaccard, shabad_count FROM theme_network "
+            "WHERE source < target AND ppmi>=? ORDER BY source, target", (min_ppmi,)))
+        return {'nodes': nodes, 'edges': edges, 'min_ppmi': min_ppmi,
+                'note': 'every theme with its verse count; edges are theme pairs whose PPMI (co-occurrence '
+                        'within shabads, base-rate controlled) clears min_ppmi. Descriptive only'}
+    except sqlite3.OperationalError:
+        return {'nodes': [], 'edges': [], 'note': 'analytics tables not present in this DB build'}
+    return _FALLTHROUGH
+
+
+def _route_analytics_pair(p, qs):   # /api/analytics/pair?concept=a&with=b — verses carrying both themes
+    # alone=1 instead of with=b: the theme's solo verses (no other theme), the Focus view's halo.
+    a = qs.get('concept', [''])[0].strip()
+    b = qs.get('with', [''])[0].strip()
+    alone = qs.get('alone', [''])[0].strip() in ('1', 'true')
+    if not a or (alone and b) or (not alone and (not b or a == b)):
+        raise ValueError('pair requires a concept and either a different theme (with) or alone=1')
+    off = _int(qs, 'offset', 0, 0, 100000)
+    lim = _int(qs, 'limit', 50, 1, 200)
+    lw, lp, lens = _lens(qs)
+    try:
+        if alone:
+            base = ("FROM concept_lines ca JOIN lines l ON l.id=ca.line_id WHERE ca.concept=? AND NOT EXISTS "
+                    f"(SELECT 1 FROM concept_lines o WHERE o.line_id=ca.line_id AND o.concept<>ca.concept){lw}")
+            params, cols = [a] + lp, "ca.term term_a, NULL term_b"
+        else:
+            base = ("FROM concept_lines ca JOIN concept_lines cb ON cb.line_id=ca.line_id AND cb.concept=? "
+                    f"JOIN lines l ON l.id=ca.line_id WHERE ca.concept=?{lw}")
+            params, cols = [b, a] + lp, "ca.term term_a, cb.term term_b"
+        total = db().execute(f"SELECT COUNT(*) {base}", params).fetchone()[0]
+        rows = db().execute(
+            f"SELECT l.id, l.ang, l.comp_id, l.raag, l.author, l.is_rahao, l.gurmukhi, l.translit, {cols} "
+            f"{base} ORDER BY l.id LIMIT ? OFFSET ?", params + [lim, off]).fetchall()
+        shabads = []
+        for r in rows:   # consecutive verses of one shabad share a group (ids are in reading order)
+            if not shabads or shabads[-1]['comp_id'] != r['comp_id']:
+                shabads.append({'comp_id': r['comp_id'], 'ang': r['ang'], 'raag': r['raag'],
+                                'author': r['author'], 'verses': []})
+            shabads[-1]['verses'].append({'id': r['id'], 'ang': r['ang'], 'is_rahao': r['is_rahao'],
+                                          'gurmukhi': r['gurmukhi'], 'translit': r['translit'],
+                                          'terms': [r['term_a']] if alone else [r['term_a'], r['term_b']]})
+        bond = None if alone else db().execute(
+            "SELECT ppmi, jaccard, shabad_count FROM theme_network WHERE source=? AND target=?", (a, b)).fetchone()
+        return {'concept': a, 'with': None if alone else b, 'alone': alone, 'lens': lens, 'total': total,
+                'offset': off, 'limit': lim, 'bond': dict(bond) if bond else None, 'shabads': shabads,
+                'note': 'each verse carries one verified Gurmukhi word of each theme (terms, in the order '
+                        'concept, with; alone=1: the one word, and no other theme): a word match, not an '
+                        'interpretation. Text is verbatim'}
+    except sqlite3.OperationalError:
+        return {'concept': a, 'with': b, 'total': 0, 'shabads': [], 'note': 'concept tables not present in this DB build'}
+    return _FALLTHROUGH
+
+
+def _route_analytics_theme(p, qs):   # /api/analytics/theme?concept=x — the theme card
+    c = qs.get('concept', [''])[0].strip()
+    if not c:
+        raise ValueError('theme requires a concept')
+    try:
+        row = db().execute("SELECT concept, gurmukhi_terms, description FROM concepts WHERE concept=?", (c,)).fetchone()
+        if not row:
+            raise ApiError(404, 'unknown theme')
+        try:
+            terms = json.loads(row['gurmukhi_terms'] or '[]')
+        except ValueError:
+            terms = []
+        n_verses, n_shabads, n_rahao = db().execute(
+            "SELECT COUNT(DISTINCT cl.line_id), COUNT(DISTINCT l.comp_id), "
+            "COUNT(DISTINCT CASE WHEN l.is_rahao=1 THEN l.id END) "
+            "FROM concept_lines cl JOIN lines l ON l.id=cl.line_id WHERE cl.concept=?", (c,)).fetchone()
+
+        def fp(kind):
+            return rows_to_list(db().execute(
+                "SELECT entity_id, n_tagged, entity_rate, corpus_rate, lift FROM theme_fingerprint "
+                "WHERE entity_type=? AND concept=? AND is_reliable=1 AND lift>1 "
+                "ORDER BY lift DESC, entity_id LIMIT 5", (kind, c)))
+        return {'concept': c, 'description': row['description'], 'terms': terms,
+                'n_verses': n_verses, 'n_shabads': n_shabads, 'n_rahao': n_rahao,
+                'raags': fp('raag'), 'authors': fp('author'),
+                'note': 'raags and authors where this theme concentrates: lift = the entity\'s rate over the '
+                        'corpus rate, shown only where the sample is reliable. Descriptive, never a ranking'}
+    except sqlite3.OperationalError:
+        return {'concept': c, 'note': 'concept tables not present in this DB build'}
     return _FALLTHROUGH
 
 

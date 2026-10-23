@@ -173,6 +173,111 @@ class AbuseResistance(unittest.TestCase):
 
 
 @skip_no_db
+class ConstellationV2(unittest.TestCase):
+    """Constellation v2 invariants: the maths always closes, every pair verse carries both themes'
+    words, the distinctive order is theme_network's PPMI order, and every lens narrows, never adds."""
+
+    def _c(self, **q):
+        return serve.api("/api/analytics/constellation", {k: [str(v)] for k, v in q.items()})
+
+    def test_total_is_solo_plus_shared(self):
+        db = serve.db()
+        for con in ("naam", "seva", "kaam", "akal"):
+            r = self._c(concept=con)
+            ids = {x[0] for x in db.execute("SELECT line_id FROM concept_lines WHERE concept=?", (con,))}
+            multi = {x[0] for x in db.execute(
+                "SELECT a.line_id FROM concept_lines a JOIN concept_lines b ON b.line_id=a.line_id "
+                "AND b.concept<>a.concept WHERE a.concept=?", (con,))}
+            self.assertEqual(r["total"], len(ids), con)
+            self.assertEqual(r["shared"], len(multi), con)
+            self.assertEqual(r["total"], r["solo"] + r["shared"], con)
+            self.assertEqual(sum(r["ang_bins"]), r["total"], con)
+            self.assertEqual(len(r["ang_bins"]), 15, con)
+
+    def test_naam_matches_the_measured_plan(self):
+        r = self._c(concept="naam")
+        self.assertEqual((r["total"], r["shared"], r["solo"]), (5672, 3720, 1952))
+        self.assertEqual(r["ang_bins"], [451, 430, 407, 326, 397, 439, 440, 347, 310, 385, 372, 495, 381, 369, 123])
+
+    def test_companions_cover_every_co_theme_with_the_corpus_bond(self):
+        r = self._c(concept="naam")
+        bonds = {x["target"]: x for x in serve.api("/api/themes/network", {"concept": ["naam"], "limit": ["2000"]})["edges"]}
+        for c in r["companions"]:
+            self.assertGreater(c["n"], 0)
+            b = bonds.get(c["co"])
+            if b:
+                self.assertEqual((c["ppmi"], c["jaccard"]), (b["ppmi"], b["jaccard"]))
+        top_ppmi = [c["co"] for c in sorted(r["companions"], key=lambda c: -c["ppmi"])][:5]
+        self.assertEqual(top_ppmi, ["bani", "amrit", "bhavjal", "manmukh", "haumai"])
+        ns = [c["n"] for c in r["companions"]]
+        self.assertEqual(ns, sorted(ns, reverse=True))
+        self.assertEqual([c["co"] for c in r["clusters"]], [c["co"] for c in r["companions"]][:len(r["clusters"])])
+
+    def test_lenses_only_narrow(self):
+        full = self._c(concept="naam")["total"]
+        for lens in ({"rahao": 1}, {"min_themes": 3}, {"raags": "ਗਉੜੀ,ਆਸਾ"}, {"ang_min": 1, "ang_max": 100},
+                     {"author": "Bhagat Kabir Ji"}, {"raag": "ਆਸਾ"}):
+            r = self._c(concept="naam", **lens)
+            self.assertLessEqual(r["total"], full, lens)
+            self.assertEqual(r["total"], r["solo"] + r["shared"], lens)
+            self.assertEqual(sum(r["ang_bins"]), r["total"], lens)
+        self.assertEqual(self._c(concept="naam", rahao=1)["total"], 350)
+        self.assertEqual(self._c(concept="naam", min_themes=2)["solo"], 0)
+        self.assertEqual(self._c(concept="naam", ang_min=1, ang_max=100)["ang_bins"][1:], [0] * 14)
+        two = self._c(concept="naam", raags="ਗਉੜੀ,ਆਸਾ")["total"]
+        self.assertEqual(two, self._c(concept="naam", raag="ਗਉੜੀ")["total"] + self._c(concept="naam", raag="ਆਸਾ")["total"])
+
+    def test_pair_verses_carry_both_words_and_page(self):
+        db = serve.db()
+        terms = {}
+        for con in ("naam", "haumai"):
+            import json
+            terms[con] = set(json.loads(db.execute("SELECT gurmukhi_terms FROM concepts WHERE concept=?", (con,)).fetchone()[0]))
+        q = {"concept": ["naam"], "with": ["haumai"], "limit": ["20"]}
+        r = serve.api("/api/analytics/pair", q)
+        self.assertEqual(r["total"], next(c["n"] for c in self._c(concept="naam")["companions"] if c["co"] == "haumai"))
+        seen = []
+        for sh in r["shabads"]:
+            for v in sh["verses"]:
+                a, b = v["terms"]
+                self.assertIn(a, terms["naam"]); self.assertIn(b, terms["haumai"])
+                self.assertIn(a, v["gurmukhi"]); self.assertIn(b, v["gurmukhi"])
+                seen.append(v["id"])
+        self.assertEqual(len(seen), 20)
+        r2 = serve.api("/api/analytics/pair", dict(q, offset=["20"]))
+        nxt = [v["id"] for sh in r2["shabads"] for v in sh["verses"]]
+        self.assertGreater(nxt[0], seen[-1])
+        self.assertEqual(r["bond"]["shabad_count"], 358)
+        alone = serve.api("/api/analytics/pair", {"concept": ["naam"], "alone": ["1"], "limit": ["200"]})
+        self.assertEqual(alone["total"], self._c(concept="naam")["solo"])
+        for sh in alone["shabads"]:
+            for v in sh["verses"]:
+                self.assertEqual(len(v["terms"]), 1)
+                self.assertEqual(serve.db().execute("SELECT COUNT(*) FROM concept_lines WHERE line_id=?", (v["id"],)).fetchone()[0], 1)
+        for bad in ({"concept": ["naam"]}, {"concept": ["naam"], "with": ["naam"]},
+                    {"concept": ["naam"], "with": ["haumai"], "alone": ["1"]}):
+            with self.assertRaises(ValueError):
+                serve.api("/api/analytics/pair", bad)
+
+    def test_sky_and_theme_card(self):
+        sky = serve.api("/api/analytics/sky", {})
+        self.assertEqual(len(sky["nodes"]), 54)
+        self.assertTrue(all(e["ppmi"] >= 0.7 and e["source"] < e["target"] for e in sky["edges"]))
+        self.assertIn(("kaam", "krodh"), {(e["source"], e["target"]) for e in sky["edges"]})
+        for weird in ("nan", "inf", "banana"):
+            self.assertEqual(len(serve.api("/api/analytics/sky", {"min_ppmi": [weird]})["edges"]), len(sky["edges"]))
+        card = serve.api("/api/analytics/theme", {"concept": ["naam"]})
+        self.assertEqual((card["n_verses"], card["n_rahao"]), (5672, 350))
+        self.assertIn("ਨਾਮੁ", card["terms"])
+        for row in card["raags"] + card["authors"]:
+            self.assertGreater(row["lift"], 1)
+        with self.assertRaises(serve.ApiError):
+            serve.api("/api/analytics/theme", {"concept": ["no_such_theme"]})
+        with self.assertRaises(ValueError):
+            serve.api("/api/analytics/theme", {})
+
+
+@skip_no_db
 class HttpBehaviour(unittest.TestCase):
     """The wire-level guarantees: caching, the idle-socket timeout, the worker ceiling."""
 

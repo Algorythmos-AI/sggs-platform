@@ -102,7 +102,7 @@ test.describe('search, verify and the API console', () => {
     await expect(at.locator('[name="mode"]')).toBeVisible();
     await expect(at.locator('.at__url')).toHaveText('/api/search?q=sat+nam&mode=auto&limit=5');
     const options = await at.locator('.at__route option').count();
-    expect(options).toBe(26);
+    expect(options).toBe(29);
   });
 
   test('the generated routes page lists every route and keeps its header', async ({ page }) => {
