@@ -9,9 +9,10 @@ sidebar:
 
 The names below are exactly the `author` strings of the corpus, so `/api/analytics/author` and the
 [structure page](../scripture/structure.md) join to them; the [Ang explorer](../data/line-record.md) shows
-their lines. Dates are widely cited approximations (scholarly ranges vary, most for the Bhagats and
-Bhatts; *c.* marks the most uncertain). This is historical context, never a ranking, and it awaits the
-same scholar review as [Scripture 101](../scripture/README.md).
+their lines. Every date and region is taken from the sources cited under each voice; a fact the sources
+do not settle is left blank (*not established*), never guessed, and *c.* marks the uncertain. This is
+historical context, never a ranking, and it awaits the same scholar review as
+[Scripture 101](../scripture/README.md).
 
 ## The Gurus (6)
 
@@ -22,80 +23,128 @@ same scholar review as [Scripture 101](../scripture/README.md).
 | Guru Amar Das Ji (M3) | Guru Amar Das Ji | 1479–1574 | Third Guru · 1479–1574 | Punjab (Goindval) | Third Guru |
 | Guru Ram Das Ji (M4) | Guru Ram Das Ji | 1534–1581 | Fourth Guru · 1534–1581 | Punjab (Amritsar) | Fourth Guru |
 | Guru Arjan Dev Ji (M5) | Guru Arjan Dev Ji | 1563–1606 | Fifth Guru · 1563–1606 | Punjab (Amritsar) | Fifth Guru · Compiler |
-| Guru Tegh Bahadur Ji (M9) | Guru Tegh Bahadur Ji | 1621–1675 | Ninth Guru · 1621–1675 | Punjab (Amritsar / Delhi) | Ninth Guru |
+| Guru Tegh Bahadur Ji (M9) | Guru Tegh Bahadur Ji | 1621–1675 | Ninth Guru · 1621–1675 | Punjab (Amritsar) / Delhi | Ninth Guru |
 
-- **Guru Nanak Dev Ji (M1)** — The first Guru and founder; the Mool Mantar and Japji open the Granth with his revelation.
-- **Guru Angad Dev Ji (M2)** — Second Guru; shaped the Gurmukhi script and contributed saloks within the Vaars.
-- **Guru Amar Das Ji (M3)** — Third Guru; author of the Anand Sahib and a vast body of Bani across many raags.
+- **Guru Nanak Dev Ji (M1)** — First Guru and founder of the Sikh faith; the Mool Mantar that opens the Guru Granth Sahib is his.
+  Sources: [Guru Nanak (Britannica)](https://www.britannica.com/biography/Nanak); [Kartarpur (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/KARTARPUR.html).
+- **Guru Angad Dev Ji (M2)** — Second Guru (1539–52), based at Khadur; standardised the Gurmukhi script in which much of the Adi Granth is written.
+  Sources: [Guru Angad (Britannica)](https://www.britannica.com/biography/Angad); [Amar Das, Guru (1479-1574) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/AMAR%20DAS%20GURU%20%281479-1574%29.html).
+- **Guru Amar Das Ji (M3)** — Third Guru, who made Goindval his centre; his best-known composition is the Anand.
+  Sources: [Amar Das, Guru (1479-1574) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/AMAR%20DAS%20GURU%20%281479-1574%29.html); [Guru Amar Das (Britannica)](https://www.britannica.com/biography/Amar-Das).
 - **Guru Ram Das Ji (M4)** — Fourth Guru, founder of Amritsar; his Lavan are the wedding hymns of Sikh marriage.
-- **Guru Arjan Dev Ji (M5)** — Fifth Guru and compiler of the Adi Granth (1604); the most-represented voice, author of Sukhmani Sahib.
-- **Guru Tegh Bahadur Ji (M9)** — Ninth Guru; his saloks of detachment and courage were added by Guru Gobind Singh.
+  Sources: [Ram Das, Guru (1534-1581) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/RAM%20DAS%20GURU%281534-1581%29.html); [Guru Ram Das (Britannica)](https://www.britannica.com/biography/Ram-Das).
+- **Guru Arjan Dev Ji (M5)** — Fifth Guru and compiler of the Adi Granth, installed at the Harimandar in 1604; author of the Sukhmani.
+  Sources: [Arjan Dev, Guru (1563-1606) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/ARJAN%20DEV%20GURU%20%281563-1606%29.html); [Guru Arjan (Britannica)](https://www.britannica.com/biography/Arjan).
+- **Guru Tegh Bahadur Ji (M9)** — Ninth Guru, executed at Delhi in 1675; his 59 shabads and 57 saloks include the saloks near the close of the Guru Granth Sahib.
+  Sources: [Tegh Bahadur, Guru (1621-1675) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/TEGH%20BAHADUR%20GURU%20%281621-1675%29.html); [Guru Tegh Bahadur (Britannica)](https://www.britannica.com/biography/Tegh-Bahadur).
 
-## The Bhagats (9)
+## The Bhagats (15)
 
 | Name in the corpus | Roman | Lived | Era | Region | Tradition |
 |---|---|---|---|---|---|
-| Bhagat Jaidev Ji | Jaidev | c. 1170–1245 | 12th–13th century | Bengal (Kenduli) | Vaishnava poet |
-| Sheikh Farid Ji | Baba Sheikh Farid | 1173–1266 | 12th–13th century | Punjab / Multan | Sufi (Chishti) |
-| Bhagat Trilochan Ji | Trilochan | c. 1267–1335 | 13th–14th century | Maharashtra | Sant |
-| Bhagat Namdev Ji | Namdev | c. 1270–1350 | 13th–14th century | Maharashtra (Pandharpur) | Varkari / Sant |
-| Bhagat Beni Ji | Beni | c. 1330–1400 | uncertain (medieval) | North India | Sant |
-| Bhagat Ramanand Ji | Ramanand | c. 1400–1476 | 14th–15th century | Banaras (Varanasi) | Bhakti teacher |
-| Bhagat Kabir Ji | Kabir | c. 1440–1518 | 15th–16th century | Banaras (Varanasi) | Sant / weaver-mystic |
-| Bhagat Ravidas Ji | Ravidas | c. 1450–1520 | 15th–16th century | Banaras (Varanasi) | Sant / cobbler-saint |
-| Bhagat Bhikhan Ji | Bhikhan | c. 1480–1573 | 15th–16th century | North India | Sufi-influenced sant |
+| Sheikh Farid Ji | Baba Sheikh Farid | 1173–1265 | 12th–13th century | Punjab (Kothewal near Multan; Ajodhan / Pakpattan) | Sufi (Chishti) |
+| Bhagat Trilochan Ji | Trilochan | b. c. 1267 | 13th–14th century | Maharashtra (birthplace disputed) | Vaishnava sant |
+| Bhagat Namdev Ji | Namdev | c. 1270–1350 | 13th–14th century | Maharashtra (Narasi; Pandharpur) | Varkari / Sant |
+| Bhagat Ramanand Ji | Ramanand | c. 1400–1470 | 15th century (dates disputed) | Banaras (Varanasi) | Bhakti teacher (Ramanandi) |
+| Bhagat Dhanna Ji | Dhanna | b. c. 1415 | 15th century (dates disputed) | Rajasthan (Dhuan, Tonk district) | Bhakta (nirguna); counted among Ramanand's disciples |
+| Bhagat Pipa Ji | Pipa | b. c. 1425 | 15th century | Rajasthan (Gagaraun, Jhalawar district); later Dwarka | Bhakta (from saguna to nirguna); disciple of Ramanand |
+| Bhagat Kabir Ji | Kabir | c. 1440–1518 | 15th–16th century | Banaras (Varanasi); died at Maghar | Sant / weaver-poet |
+| Bhagat Bhikhan Ji | Bhikhan | c. 1480–1573 | 15th–16th century | Not recorded in the sources | Bhakta (in the tradition of Ravidas and Dhanna) |
+| Bhagat Parmanand Ji | Parmanand | b. c. 1483 | 15th–16th century | Maharashtra (Barsi, north of Pandharpur) | Vaishnava bhakta (Krishna); pen name Sarang |
+| Bhagat Surdas Ji | Surdas | b. c. 1529 | 16th century (identity disputed) | Awadh (Sandila) / Banaras (Varanasi) | Vaishnava bhakta poet |
+| Bhagat Beni Ji | Beni | not established | uncertain (medieval) | Not recorded in the sources | Sant |
+| Bhagat Jaidev Ji | Jaidev | not established | 12th century | Odisha or Bengal (Kenduli; birthplace disputed) | Vaishnava poet (Sanskrit) |
+| Bhagat Ravidas Ji | Ravidas | not established | uncertain (14th–15th century) | Banaras (Varanasi) | Sant (Chamar / leather-worker community) |
+| Bhagat Sadhna Ji | Sadhna | not established | uncertain (tradition: contemporary of Namdev) | Sindh (Sehwan); tomb at Sirhind, Punjab | Bhakta; butcher (qasai) by trade |
+| Bhagat Sain Ji | Sain | not established | uncertain (medieval; tradition makes him a disciple of Ramanand) | Central India (Rewa / Bandhavgarh); another tradition says Bidar | Bhakta; barber by trade |
 
-- **Bhagat Jaidev Ji** — Sanskrit-influenced devotional poet, author of the Gita Govinda tradition.
-- **Sheikh Farid Ji** — Revered Sufi saint of Punjab; his saloks and shabads are the earliest Bani in the Granth.
+- **Sheikh Farid Ji** — Sufi teacher of the Chishti order, settled at Ajodhan (Pakpattan); known as the first recorded poet in Punjabi.
+  Sources: [Farid, Shaikh (569-664 AH or AD 1173-1265) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/FARID%20SHAIKH%20%28569-664%20AH%20OR%20AD%201173-1265%29.html); [Bhagat (Bhakta) Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHAGAT%20%28BHAKTA%29%20BANI.html).
 - **Bhagat Trilochan Ji** — Maharashtrian sant, a contemporary and associate of Namdev.
-- **Bhagat Namdev Ji** — Beloved Marathi sant of pure devotion; the most-represented Bhagat after Kabir.
-- **Bhagat Beni Ji** — A sant of yogic and devotional verse; biographical detail is scarce.
+  Sources: [Trilochan (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/TRILOCHAN.html).
+- **Bhagat Namdev Ji** — Marathi poet-saint of the Varkari path, devoted to Vitthala of Pandharpur; sixty-one of his hymns are in the Guru Granth Sahib.
+  Sources: [Namdev (Britannica)](https://www.britannica.com/biography/Namdev); [Namdev (1270-1350) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/NAMDEV%20%281270-1350%29.html); [Bhagat (Bhakta) Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHAGAT%20%28BHAKTA%29%20BANI.html).
 - **Bhagat Ramanand Ji** — Influential Bhakti teacher of the Ganges plain, traditionally linked to Kabir and Ravidas.
-- **Bhagat Kabir Ji** — The towering weaver-mystic; his verses on the formless One are the most extensive Bhagat Bani.
-- **Bhagat Ravidas Ji** — Cobbler-saint of radical equality, a contemporary of Kabir.
+  Sources: [Ramananda (Britannica)](https://www.britannica.com/biography/Ramananda); [Dhanna Bhagat (b. 1415) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/DHANNA%20BHAGAT%20%28B.%201415%29.html); [Sain (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/SAIN.html).
+- **Bhagat Dhanna Ji** — A Jat farmer from Rajasthan; three of his hymns are in the Guru Granth Sahib.
+  Sources: [Dhanna Bhagat (b. 1415) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/DHANNA%20BHAGAT%20%28B.%201415%29.html).
+- **Bhagat Pipa Ji** — A prince of Gagaraun who renounced his throne; one of his hymns is in the Guru Granth Sahib.
+  Sources: [Pipa (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/PIPA.html).
+- **Bhagat Kabir Ji** — Weaver-poet of Banaras; his compositions are the largest Bhagat contribution to the Guru Granth Sahib.
+  Sources: [Kabir (Britannica)](https://www.britannica.com/biography/Kabir-Indian-mystic-and-poet); [Kabir (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/KABIR.html); [Bhagat (Bhakta) Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHAGAT%20%28BHAKTA%29%20BANI.html).
 - **Bhagat Bhikhan Ji** — A sant whose two shabads sit among the Bhagat Bani.
+  Sources: [Bhikhan (1480-1573) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHIKHAN%20%281480-1573%29.html).
+- **Bhagat Parmanand Ji** — A Maharashtrian Vaishnava saint-poet; one of his hymns is in the Guru Granth Sahib.
+  Sources: [Parmanand (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/PARMANAND.html).
+- **Bhagat Surdas Ji** — A bhakta poet whose single line in Raag Sarang is in the Guru Granth Sahib, followed by a hymn of Guru Arjan that expands it.
+  Sources: [Surdas (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/SURDAS.html); [Surdas (Britannica)](https://www.britannica.com/biography/Surdas); [Jeevan Deol, 'Surdas: poet and text in the Sikh tradition', BSOAS 63:2 (2000), 169-193](https://www.cambridge.org/core/journals/bulletin-of-the-school-of-oriental-and-african-studies/article/abs/surdas-poet-and-text-in-the-sikh-tradition1/1C527F5FD86DC396865B7F9FD54A92E4).
+- **Bhagat Beni Ji** — A bhagat of whom little is known; three of his hymns are in the Guru Granth Sahib.
+  Sources: [Beni Bhagat (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BENI%20BHAGAT.html).
+- **Bhagat Jaidev Ji** — Sanskrit poet, author of the Gita Govinda; two of his hymns are in the Guru Granth Sahib.
+  Sources: [Jayadeva (Britannica)](https://www.britannica.com/biography/Jayadeva); [Jaidev (Jayadeva) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/JAIDEV%20%28JAYADEVA%29.html).
+- **Bhagat Ravidas Ji** — Poet-saint born near Varanasi to a Chamar family; forty of his hymns are in the Guru Granth Sahib.
+  Sources: [Ravidas (Britannica)](https://www.britannica.com/biography/Ravidas); [Ravidas (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/RAVIDAS.html).
+- **Bhagat Sadhna Ji** — A butcher by trade from Sehwan in Sindh; his one hymn, in Raag Bilaval, is in the Guru Granth Sahib.
+  Sources: [Sadhna (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/SADHNA.html).
+- **Bhagat Sain Ji** — A barber counted among Ramanand's disciples; his one hymn in the Guru Granth Sahib is on true worship (aarti).
+  Sources: [Sain (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/SAIN.html).
 
 ## The Bhatts (12)
 
 | Name in the corpus | Roman | Lived | Era | Region | Tradition |
 |---|---|---|---|---|---|
-| Bhatt Bal (ਭਟ) | Bhatt Bal | c. 1535–1600 | Court bard · late 16th c. | Punjab | Bhatt (bard) |
-| Bhatt Bhal (ਭਟ) | Bhatt Bhal | c. 1535–1600 | Court bard · late 16th c. | Punjab | Bhatt (bard) |
-| Bhatt Bhikha (ਭਟ) | Bhatt Bhikha | c. 1535–1600 | Court bard · late 16th c. | Punjab | Bhatt (bard) |
-| Bhatt Gayand (ਭਟ) | Bhatt Gayand | c. 1535–1600 | Court bard · late 16th c. | Punjab | Bhatt (bard) |
-| Bhatt Haribans (ਭਟ) | Bhatt Haribans | c. 1535–1600 | Court bard · late 16th c. | Punjab | Bhatt (bard) |
-| Bhatt Jalap (ਭਟ) | Bhatt Jalap | c. 1535–1600 | Court bard · late 16th c. | Punjab | Bhatt (bard) |
-| Bhatt Kalsahar (ਭਟ) | Bhatt Kalsahar | c. 1535–1600 | Court bard · late 16th c. | Punjab | Bhatt (bard) |
-| Bhatt Kirat (ਭਟ) | Bhatt Kirat | c. 1535–1600 | Court bard · late 16th c. | Punjab | Bhatt (bard) |
-| Bhatt Mathura (ਭਟ) | Bhatt Mathura | c. 1535–1600 | Court bard · late 16th c. | Punjab | Bhatt (bard) |
-| Bhatt Nal (ਭਟ) | Bhatt Nal | c. 1535–1600 | Court bard · late 16th c. | Punjab | Bhatt (bard) |
-| Bhatt Sal (ਭਟ) | Bhatt Sal | c. 1535–1600 | Court bard · late 16th c. | Punjab | Bhatt (bard) |
-| The Bhatts (ਭਟ) | The Bhatts | c. 1535–1600 | Court bards · late 16th c. | Punjab | Bhatts (collective) |
+| Bhatt Bal (ਭਟ) | Bhatt Bal | not established | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
+| Bhatt Bhal (ਭਟ) | Bhatt Bhal | not established | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
+| Bhatt Bhikha (ਭਟ) | Bhatt Bhikha | not established | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
+| Bhatt Gayand (ਭਟ) | Bhatt Gayand | not established | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
+| Bhatt Haribans (ਭਟ) | Bhatt Haribans | not established | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
+| Bhatt Jalap (ਭਟ) | Bhatt Jalap | not established | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
+| Bhatt Kalsahar (ਭਟ) | Bhatt Kalsahar | not established | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
+| Bhatt Kirat (ਭਟ) | Bhatt Kirat | d. c. 1634 | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
+| Bhatt Mathura (ਭਟ) | Bhatt Mathura | not established | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
+| Bhatt Nal (ਭਟ) | Bhatt Nal | not established | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
+| Bhatt Sal (ਭਟ) | Bhatt Sal | not established | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
+| The Bhatts (ਭਟ) | The Bhatts | not established | Bhatt bard · late 16th–early 17th c. | Punjab (Sultanpur Lodhi / Goindval) | Bhatt (bard) |
 
-- **Bhatt Bal (ਭਟ)** — A Bhatt of the Guru's court.
-- **Bhatt Bhal (ਭਟ)** — A Bhatt of the Guru's court.
-- **Bhatt Bhikha (ਭਟ)** — One of the eleven Bhatts whose Savaiye honour the Gurus.
-- **Bhatt Gayand (ਭਟ)** — A Bhatt celebrated for the rhythmic force of his Savaiye.
-- **Bhatt Haribans (ਭਟ)** — One of the eleven Bhatts; his is among the closing Savaiye.
-- **Bhatt Jalap (ਭਟ)** — One of the eleven Bhatts whose praise is recorded in the Granth.
-- **Bhatt Kalsahar (ਭਟ)** — The most prolific of the Bhatts, the court bards who praised the Gurus in Savaiye.
-- **Bhatt Kirat (ਭਟ)** — One of the eleven Bhatts of the Guru's court.
-- **Bhatt Mathura (ਭਟ)** — A Bhatt whose verses especially praise Guru Ram Das and Guru Arjan.
-- **Bhatt Nal (ਭਟ)** — One of the eleven Bhatts whose Savaiye honour the Gurus.
-- **Bhatt Sal (ਭਟ)** — A Bhatt of the Guru's court.
-- **The Bhatts (ਭਟ)** — The collective body of the Bhatt bards whose Savaiye sit near the close of the Granth.
+- **Bhatt Bal (ਭਟ)** — A Bhatt whose five savaiyye stress the spiritual oneness of the Gurus.
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html).
+- **Bhatt Bhal (ਭਟ)** — A Bhatt whose single savaiya praises Guru Amar Das.
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html).
+- **Bhatt Bhikha (ਭਟ)** — A bard of Sultanpur Lodhi who became a Sikh under Guru Amar Das and introduced other Bhatts to Guru Arjan.
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html); [Bhikha (pronounced as Bhikkha) Bhatt (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHIKHA%20%28PRONOUNCED%20AS%20BHIKKHA%29%20BHATT.html).
+- **Bhatt Gayand (ਭਟ)** — A Bhatt whose five savaiyye glorify Guru Ram Das.
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html).
+- **Bhatt Haribans (ਭਟ)** — A Bhatt whose two savaiyye praise Guru Arjan.
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html).
+- **Bhatt Jalap (ਭਟ)** — A son of Bhikha who moved to Goindval; his four savaiyye praise Guru Amar Das.
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html).
+- **Bhatt Kalsahar (ਭਟ)** — Reckoned the most learned of the Bhatts; his 53 savaiyye praise the first five Gurus.
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html).
+- **Bhatt Kirat (ਭਟ)** — A Bhatt whose eight savaiyye praise Guru Amar Das and Guru Ram Das.
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html).
+- **Bhatt Mathura (ਭਟ)** — A Bhatt whose savaiyye praise the Gurus.
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html).
+- **Bhatt Nal (ਭਟ)** — A Bhatt whose five savaiyye praise Guru Ram Das.
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html).
+- **Bhatt Sal (ਭਟ)** — A Bhatt whose three savaiyye praise Guru Amar Das and Guru Ram Das.
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html).
+- **The Bhatts (ਭਟ)** — The bards whose 123 savaiyye in praise of the first five Gurus are recorded near the close of the Guru Granth Sahib (Ang 1389–1409).
+  Sources: [Bhatt Bani (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BHATT%20BANI.html).
 
 ## Gursikhs (3)
 
 | Name in the corpus | Roman | Lived | Era | Region | Tradition |
 |---|---|---|---|---|---|
-| Bhai Mardana | Bhai Mardana | 1459–1534 | 15th–16th century | Punjab (Talwandi) | Companion of Guru Nanak |
-| Baba Sundar Ji | Baba Sundar | c. 1560–1603 | 16th century | Punjab (Goindval) | Great-grandson of Guru Amar Das |
-| Satta & Balwand | Satta & Balwand | c. 1560–1620 | 16th–17th century | Punjab | Court rabābīs |
+| Bhai Mardana | Bhai Mardana | 1459–1534 | 15th–16th century | Punjab (Talwandi Rai Bhoe / Nankana Sahib) | Companion of Guru Nanak (rababi) |
+| Baba Sundar Ji | Baba Sundar | not established | late 16th century | Punjab | Great-grandson of Guru Amar Das |
+| Satta & Balwand | Satta & Balwand | not established | late 16th – early 17th century | Punjab (Lahore / Amritsar) | Rababis (rebeck players) to Guru Arjan |
 
-- **Bhai Mardana** — Guru Nanak's lifelong rabābī and companion on the udasis; a few saloks are his.
-- **Baba Sundar Ji** — Author of the Sadu, the composition on a peaceful, God-willed passing.
+- **Bhai Mardana** — Guru Nanak's Muslim companion and rabab player on his travels; one salok of his is in the Guru Granth Sahib.
+  Sources: [Mardana, Bhai (1459-1534) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/MARDANA%20BHAI%20%281459-1534%29.html).
+- **Baba Sundar Ji** — Great-grandson of Guru Amar Das; author of the Ramkali Sadu, on Guru Amar Das's passing.
+  Sources: [Sundar, Baba (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/SUNDAR%20BABA.html); [Amar Das, Guru (1479-1574) (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/AMAR%20DAS%20GURU%20%281479-1574%29.html).
 - **Satta & Balwand** — The two rabābīs whose Vaar praises the light passing from Guru to Guru.
+  Sources: [Balvand Rai (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/BALVAND%20RAI.html); [Satta (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/SATTA.html); [Ramkali ki Var (Encyclopaedia of Sikhism)](https://eos.learnpunjabi.org/RAMKALI%20KI%20VAR.html).
 
 Source: `frontend/public/contributors.json` (vendored by the app at each platform release). To change an
 entry, edit the JSON and run `python3 tools/gen_contributors.py`.

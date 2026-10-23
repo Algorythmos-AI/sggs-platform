@@ -57,6 +57,9 @@ body.cmp-mode .tl-node:hover .tl-card { border-color:color-mix(in srgb, var(--ac
   border:1px solid color-mix(in srgb, var(--k) 40%, transparent); box-shadow:inset 0 0 18px color-mix(in srgb, var(--k) 14%, transparent); }
 .ld-id { min-width:0; }
 .ld-name { font-size:21px; font-weight:800; letter-spacing:-.02em; line-height:1.15; }
+.ld-gm { font-size:15px; color:var(--soft); margin-top:2px; }   /* Gurmukhi: neutral ink, no letter-spacing */
+.ld-sources ul { margin:6px 0 0; padding-left:18px; font-size:12.5px; line-height:1.5; }
+.ld-sources a { color:var(--ink); text-decoration:underline; text-underline-offset:2px; }
 .ld .ld-chips { margin:8px 0 0; }
 .ld-blurb-c { font-size:12.5px; }
 .ld-sec { margin-top:16px; }

@@ -1,0 +1,1 @@
+function e(e){let t=String(e||``),n=t.match(/\s*\(M(\d)\)\s*$/);return{name:t.replace(/\s*\([^)]*\)\s*$/,``).trim()||t,mahala:n?`M`+n[1]:``}}var t=(e,t,n=t+`s`)=>`${Number(e||0).toLocaleString()} ${e===1?t:n}`,n=(e,t)=>(e.first_ang??1/0)-(t.first_ang??1/0)||e.name.localeCompare(t.name);export{t as n,e as r,n as t};
