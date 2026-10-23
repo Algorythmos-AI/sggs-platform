@@ -18,6 +18,7 @@ const GROUPS = [
   ['soul', 'Soul Gold', 'on paper'],
   ['brand', 'Brand', 'on paper'],
   ['status', 'Status', 'on paper'],
+  ['themeGroup', 'Theme groups', 'on paper'],
 ];
 
 export function swatchesHtml(tokens) {
