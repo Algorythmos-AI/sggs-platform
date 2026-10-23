@@ -13,7 +13,7 @@ type Source = { title: string; publisher?: string; url?: string };
 type RawSource = { ref?: string; entry?: string; url?: string };
 type C = {
   name: string; roman: string; kind: string; seq: number | null;
-  born: number | null; died: number | null; circa: boolean;
+  born: number | null; died: number | null; circa: boolean; fl_century?: number | null;
   era: string; region: string; tradition: string; blurb: string;
   gurmukhi_name?: string | null; sources?: Source[]; review?: string; context?: string | null;
   first_ang?: number; last_ang?: number; n_lines?: number;
@@ -40,7 +40,10 @@ const ord = (n: number) => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; re
 const centuryOf = (y: number) => Math.floor((y - 1) / 100) + 1;
 const titleCase = (s: string) => (s || '').replace(/\w\S*/g, (t) => t.charAt(0).toUpperCase() + t.slice(1));
 const bar = (n: number) => n > 0 ? Math.max(4, Math.round(100 * Math.sqrt(n / maxLines))) : 0;   // sqrt so small voices stay visible
-const byBorn = (a: C, b: C) => (a.born ?? Infinity) - (b.born ?? Infinity) || a.name.localeCompare(b.name);
+// When no source gives a birth year, order by the death year, else by the century the voice is known
+// from (roster v2 `fl_century`); only a voice with none of these goes to "Dates not established".
+const yearOf = (c: C) => c.born ?? c.died ?? (c.fl_century ? (c.fl_century - 1) * 100 + 50 : Infinity);
+const byBorn = (a: C, b: C) => (yearOf(a) - yearOf(b)) || a.name.localeCompare(b.name);
 const NOT_INDEXED = 'Bani not yet indexed under this name';
 // a source link is shown only for an http(s) URL; anything else is plain text
 const safeUrl = (u?: string) => (u && /^https?:\/\//i.test(u) ? u : '');
@@ -160,7 +163,7 @@ function render() {
   } else {
     rows.sort(byBorn);
     let cur: number | null = -1;
-    const cenOf = (c: C) => (c.born == null ? null : centuryOf(c.born));
+    const cenOf = (c: C) => (c.born != null ? centuryOf(c.born) : c.died != null ? centuryOf(c.died) : c.fl_century || null);
     html = rows.map((c) => {
       const cen = cenOf(c);
       let pre = '';
@@ -187,7 +190,8 @@ function band(label: string, n: number): string {
 }
 
 function nodeHTML(c: C): string {
-  const yr = c.born == null ? '—' : (c.circa ? 'c.' : '') + c.born;
+  const yr = c.born != null ? (c.circa ? 'c.' : '') + c.born
+    : c.died != null ? `d. ${c.circa ? 'c.' : ''}${c.died}` : c.fl_century ? `fl. ${ord(c.fl_century)} c.` : '—';
   const lines = c.n_lines ? `${plural(c.n_lines, 'line')} · ${c.first_ang === c.last_ang ? `Ang ${c.first_ang}` : `Angs ${c.first_ang}–${c.last_ang}`}` : NOT_INDEXED;
   return `<button class="tl-node kind-${esc(c.kind)}" data-name="${esc(c.name)}" type="button" aria-label="${esc(c.roman)} — open profile">
       <span class="tl-year">${esc(yr)}</span>
@@ -217,7 +221,7 @@ function profileHTML(c: C, d: any, compact: boolean): string {
   const st = (d && d.stylometry) || {};
   const reliable = st.is_reliable !== 0;
   const c_ = c.circa ? 'c.' : '';
-  const lifespan = c.born == null ? (c.died ? `d. ${c_}${c.died}` : 'Dates not established')
+  const lifespan = c.born == null ? (c.died ? `d. ${c_}${c.died}` : c.fl_century ? `fl. ${ord(c.fl_century)} century` : 'Dates not established')
     : c.died ? `${c_}${c.born}–${c.died}` : `${c_}${c.born}`;
 
   // stat tiles — prefer the corpus line count (matches the card) for consistency
