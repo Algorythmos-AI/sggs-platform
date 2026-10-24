@@ -10,7 +10,10 @@ from .core import _FALLTHROUGH, _ID_MAX, ApiError, _int, attach_translations, db
 TABLES = frozenset({
     'analytics_meta',
     'author_analytics',
+    'author_dialogues',
     'author_distinctive_terms',
+    'author_facts',
+    'author_mentions',
     'author_resonance',
     'authors',
     'concept_lines',
@@ -74,13 +77,56 @@ def _route_analytics_author(p, qs):
                           "WHERE entity_type='author' AND entity_id=? ORDER BY lift DESC LIMIT ?", (author, fp_lim)).fetchall()
         dt = db().execute("SELECT term, z_score, rank FROM author_distinctive_terms "
                           "WHERE author=? ORDER BY rank LIMIT 12", (author,)).fetchall()
-        return {'author': author, 'stylometry': out, 'theme_fingerprint': rows_to_list(fp),
-                'distinctive_terms': rows_to_list(dt),
-                'note': 'theme emphasis = lift vs corpus baseline; stylometry on the English '
-                        'translation; descriptive only, never a ranking of scripture'}
+        res = {'author': author, 'stylometry': out, 'theme_fingerprint': rows_to_list(fp),
+               'distinctive_terms': rows_to_list(dt),
+               'note': 'theme emphasis = lift vs corpus baseline; stylometry on the English '
+                       'translation; descriptive only, never a ranking of scripture'}
+        res.update(_author_voice(author))
+        return res
     except sqlite3.OperationalError:
         return {'author': author, 'note': 'analytics tables not present in this DB build'}
     return _FALLTHROUGH
+
+
+def _author_voice(author):
+    """The per-voice tables of DB 1.1+ (author_facts, author_mentions, author_dialogues),
+    each omitted when its table is absent so an older dataset still answers."""
+    out = {}
+    try:
+        f = db().execute("SELECT * FROM author_facts WHERE author=?", (author,)).fetchone()
+        if f:
+            facts = dict(f)
+            for k in ('raags_json', 'signature_raags_json'):
+                facts[k[:-5]] = json.loads(facts.pop(k) or '[]')
+            out['facts'] = facts
+    except sqlite3.OperationalError:
+        pass
+    try:
+        q = ("SELECT m.line_id, m.ang, m.src_author, m.mentioned, m.form, l.gurmukhi "
+             "FROM author_mentions m JOIN lines l ON l.id=m.line_id WHERE m.{} = ? "
+             "ORDER BY m.line_id LIMIT 60")
+        out['named_by'] = rows_to_list(db().execute(q.format('mentioned'), (author,)))
+        out['names'] = rows_to_list(db().execute(q.format('src_author'), (author,)))
+    except sqlite3.OperationalError:
+        pass
+    try:
+        rows = db().execute(
+            "SELECT seq, bhagat, guru, ang, bhagat_first_id, bhagat_last_id, guru_first_id, guru_last_id "
+            "FROM author_dialogues WHERE bhagat=? OR guru=? ORDER BY seq", (author, author)).fetchall()
+        dialogues = []
+        for d in rows:
+            d = dict(d)
+            d['bhagat_lines'] = [r['gurmukhi'] for r in db().execute(
+                "SELECT gurmukhi FROM lines WHERE id BETWEEN ? AND ? ORDER BY id",
+                (d['bhagat_first_id'], d['bhagat_last_id']))]
+            d['guru_lines'] = [r['gurmukhi'] for r in db().execute(
+                "SELECT gurmukhi FROM lines WHERE id BETWEEN ? AND ? ORDER BY id",
+                (d['guru_first_id'], d['guru_last_id']))]
+            dialogues.append(d)
+        out['dialogues'] = dialogues
+    except sqlite3.OperationalError:
+        pass
+    return out
 
 
 def _route_analytics_raag(p, qs):

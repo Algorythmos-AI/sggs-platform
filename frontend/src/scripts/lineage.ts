@@ -271,8 +271,8 @@ function profileHTML(c: C, d: any, compact: boolean): string {
   if (!compact) {
     const terms = ((d && d.distinctive_terms) || []).slice(0, 10);
     if (reliable && terms.length) {
-      termsHTML = `<div class="ld-sec"><div class="ld-h">Distinctive words <span class="ld-note">(keyness vs. corpus · English translation)</span></div>` +
-        `<div class="ld-termwrap">${terms.map((t: any) => `<span class="ld-term">${esc(t.term)}</span>`).join('')}</div></div>`;
+      termsHTML = `<div class="ld-sec"><div class="ld-h">Distinctive words <span class="ld-note">(Gurmukhi words this voice uses far more than the rest of the Granth · pen-names and function words left out)</span></div>` +
+        `<div class="ld-termwrap">${terms.map((t: any) => `<span class="ld-term" lang="pa">${esc(t.term)}</span>`).join('')}</div></div>`;
     } else if (!reliable) {
       termsHTML = `<div class="ld-note ld-sec">Stylometry is withheld here — this voice’s sample is too small to compare reliably.</div>`;
     }

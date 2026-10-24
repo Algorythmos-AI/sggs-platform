@@ -40,6 +40,7 @@ class Checker(unittest.TestCase):
             INSERT INTO lines VALUES (1, 92, 'Bhagat Kabir Ji', 10, 1, 'ਸ੍ਰੀਰਾਗੁ ਕਬੀਰ ਜੀਉ');
             INSERT INTO lines VALUES (2, 92, 'Bhagat Kabir Ji', 10, 0, 'ਕਹਤ ਕਬੀਰ ਛੋਡਿ ਬਿਖਿਆ ਰਸ ॥੧॥');
             INSERT INTO lines VALUES (3, 695, 'Bhagat Kabir Ji', 11, 0, 'ਜਨੁ ਧੰਨਾ ਲੇਵੈ ਮੰਗੀ ॥੨॥੪॥');
+            INSERT INTO lines VALUES (4, 1253, 'Guru Arjan Dev Ji (M5)', 12, 0, 'ਸੂਰਦਾਸ ਮਨੁ ਪ੍ਰਭਿ ਹਥਿ ਲੀਨੋ ਦੀਨੋ ਇਹੁ ਪਰਲੋਕ ॥੨॥੧॥੮॥');
         """)
         con.commit()
         con.close()
@@ -93,7 +94,8 @@ class Checker(unittest.TestCase):
 
     def test_an_unknown_name_fails_but_a_pending_one_warns(self):
         self.assertError(self.mutate(lambda c, d: c.update(name="Bhagat Nobody Ji")), "does not join")
-        rep = self.mutate(lambda c, d: c.update(name="Bhagat Dhanna Ji", chhap=["ਧੰਨਾ"], chhap_example={"line_id": 3, "ang": 695}))
+        # Surdas is the voice still pending (dataset 1.1.0 carries the other six)
+        rep = self.mutate(lambda c, d: c.update(name="Bhagat Surdas Ji", chhap=["ਸੂਰਦਾਸ"], chhap_example={"line_id": 4, "ang": 1253}))
         self.assertTrue(any("attribution repair" in w for w in rep.warnings), rep.warnings)
         self.assertFalse(any("does not join" in e for e in rep.errors), rep.errors)
 
