@@ -470,14 +470,7 @@
               ]
              },
              "author": {
-              "anyOf": [
-               {
-                "type": "null"
-               },
-               {
-                "type": "string"
-               }
-              ]
+              "type": "string"
              },
              "comp_type": {
               "anyOf": [
@@ -671,14 +664,7 @@
               ]
              },
              "author": {
-              "anyOf": [
-               {
-                "type": "null"
-               },
-               {
-                "type": "string"
-               }
-              ]
+              "type": "string"
              },
              "comp_type": {
               "anyOf": [
@@ -876,14 +862,7 @@
               ]
              },
              "author": {
-              "anyOf": [
-               {
-                "type": "null"
-               },
-               {
-                "type": "string"
-               }
-              ]
+              "type": "string"
              },
              "comp_type": {
               "anyOf": [
@@ -1312,7 +1291,14 @@
            "type": "null"
           },
           "author": {
-           "type": "null"
+           "anyOf": [
+            {
+             "type": "null"
+            },
+            {
+             "type": "string"
+            }
+           ]
           },
           "comp_id": {
            "anyOf": [
@@ -1439,14 +1425,7 @@
               ]
              },
              "author": {
-              "anyOf": [
-               {
-                "type": "null"
-               },
-               {
-                "type": "string"
-               }
-              ]
+              "type": "string"
              },
              "comp_type": {
               "anyOf": [
@@ -1861,6 +1840,217 @@
           },
           "note": {
            "type": "string"
+          },
+          "facts": {
+           "type": "object",
+           "properties": {
+            "author": {
+             "type": "string"
+            },
+            "n_verses": {
+             "type": "integer"
+            },
+            "n_compositions": {
+             "type": "integer"
+            },
+            "n_rahao": {
+             "type": "integer"
+            },
+            "n_angs": {
+             "type": "integer"
+            },
+            "first_ang": {
+             "type": "integer"
+            },
+            "last_ang": {
+             "type": "integer"
+            },
+            "first_line_id": {
+             "type": "integer"
+            },
+            "ang_mask": {
+             "type": "string"
+            },
+            "outside_raag_verses": {
+             "type": "integer"
+            },
+            "chhap_count": {
+             "type": "integer"
+            },
+            "n_tokens": {
+             "type": "integer"
+            },
+            "mattr_100": {
+             "type": "number"
+            },
+            "words_per_verse": {
+             "type": "number"
+            },
+            "raags": {
+             "type": "array",
+             "items": {
+              "type": "object",
+              "properties": {
+               "raag": {
+                "type": "string"
+               },
+               "verses": {
+                "type": "integer"
+               }
+              },
+              "required": [
+               "raag",
+               "verses"
+              ]
+             }
+            },
+            "signature_raags": {
+             "type": "array",
+             "items": {}
+            }
+           },
+           "required": [
+            "ang_mask",
+            "author",
+            "chhap_count",
+            "first_ang",
+            "first_line_id",
+            "last_ang",
+            "mattr_100",
+            "n_angs",
+            "n_compositions",
+            "n_rahao",
+            "n_tokens",
+            "n_verses",
+            "outside_raag_verses",
+            "raags",
+            "signature_raags",
+            "words_per_verse"
+           ]
+          },
+          "named_by": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "line_id": {
+              "type": "integer"
+             },
+             "ang": {
+              "type": "integer"
+             },
+             "src_author": {
+              "type": "string"
+             },
+             "mentioned": {
+              "type": "string"
+             },
+             "form": {
+              "type": "string"
+             },
+             "gurmukhi": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "ang",
+             "form",
+             "gurmukhi",
+             "line_id",
+             "mentioned",
+             "src_author"
+            ]
+           }
+          },
+          "names": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "line_id": {
+              "type": "integer"
+             },
+             "ang": {
+              "type": "integer"
+             },
+             "src_author": {
+              "type": "string"
+             },
+             "mentioned": {
+              "type": "string"
+             },
+             "form": {
+              "type": "string"
+             },
+             "gurmukhi": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "ang",
+             "form",
+             "gurmukhi",
+             "line_id",
+             "mentioned",
+             "src_author"
+            ]
+           }
+          },
+          "dialogues": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "seq": {
+              "type": "integer"
+             },
+             "bhagat": {
+              "type": "string"
+             },
+             "guru": {
+              "type": "string"
+             },
+             "ang": {
+              "type": "integer"
+             },
+             "bhagat_first_id": {
+              "type": "integer"
+             },
+             "bhagat_last_id": {
+              "type": "integer"
+             },
+             "guru_first_id": {
+              "type": "integer"
+             },
+             "guru_last_id": {
+              "type": "integer"
+             },
+             "bhagat_lines": {
+              "type": "array",
+              "items": {
+               "type": "string"
+              }
+             },
+             "guru_lines": {
+              "type": "array",
+              "items": {
+               "type": "string"
+              }
+             }
+            },
+            "required": [
+             "ang",
+             "bhagat",
+             "bhagat_first_id",
+             "bhagat_last_id",
+             "bhagat_lines",
+             "guru",
+             "guru_first_id",
+             "guru_last_id",
+             "guru_lines",
+             "seq"
+            ]
+           }
           }
          },
          "required": []
@@ -3255,14 +3445,7 @@
               ]
              },
              "author": {
-              "anyOf": [
-               {
-                "type": "null"
-               },
-               {
-                "type": "string"
-               }
-              ]
+              "type": "string"
              },
              "verses": {
               "type": "array",
@@ -3736,7 +3919,7 @@
              "type": "null"
             },
             "author": {
-             "type": "null"
+             "type": "string"
             },
             "comp_id": {
              "type": "integer"
@@ -3787,14 +3970,7 @@
               ]
              },
              "author": {
-              "anyOf": [
-               {
-                "type": "null"
-               },
-               {
-                "type": "string"
-               }
-              ]
+              "type": "string"
              },
              "comp_id": {
               "type": "integer"
@@ -4849,7 +5025,7 @@
               "type": "string"
              },
              "author": {
-              "type": "null"
+              "type": "string"
              },
              "comp_type": {
               "type": "null"

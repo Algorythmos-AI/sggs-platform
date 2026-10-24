@@ -20,6 +20,7 @@ export const LAYOUT = [
     pages('scripture'),
     page('data/answer-protocol', { from: DATA }),
     page('reference/contributors'),
+    pages('review'),
   ]),
   group('Architecture', [pages('architecture', { exclude: ['architecture/search-waterfall'] })]),
   group('Data', [

@@ -1,31 +1,20 @@
-"""The contributor roster (frontend/public/contributors.json) — one source for the web and the app.
+"""The contributor roster (frontend/public/contributors.json, schema v2) — one source for the web and the app.
 
-Every entry must have the same shape, carry where its dates and region come from (`sources`), and
-stay `review: "pending"` until a scholar signs it (gate G3). Facts the sources do not settle are
-null, never guessed. Each roster name must be an exact `authors.name` in the pinned DB, and each
-`authors` row must be in the roster, so the UI's joins by name never silently drop a voice.
+tools/check_contributors.py is the gate: every entry keeps the fields the shipped app decodes, every life fact
+names the tier-2 source it rests on, facts no source settles stay null, and every entry is a draft until the
+scholar signs it (gate G3). Against the pinned DB it also proves that each roster name is an exact
+`authors.name` (and each `authors` row is in the roster), that pen-names and notable Banis are verbatim in
+the corpus, and that the allow-list of voices awaiting the sggs-data attribution repair cannot go stale.
 """
-import json, re, sqlite3, unittest
+import sys
+import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-ROSTER = ROOT / "frontend" / "public" / "contributors.json"
-REAL_DB = ROOT / "db" / "sggs.sqlite"
+sys.path.insert(0, str(ROOT / "tools"))
+import check_contributors as cc  # noqa: E402
 
-KINDS = {"guru", "bhagat", "bhatt", "gursikh"}
-REVIEW = {"pending", "signed"}
-GURMUKHI = re.compile(r"^[਀-੿][਀-੿\s&().,·-]*$")
-FIELDS = {
-    "name", "roman", "kind", "seq", "born", "died", "circa", "era", "region", "tradition", "blurb",
-    "gurmukhi_name", "region_point", "sources", "review",
-}
-# The voices whose Bani is currently credited to another author in the dataset. Their names are
-# exactly the strings the sggs-data attribution change will write. This allow-list is removed in
-# P2, the dataset.lock.json bump to that dataset — from then on every roster name must be in the DB.
-NOT_YET_IN_DATASET = {
-    "Bhagat Dhanna Ji", "Bhagat Pipa Ji", "Bhagat Sain Ji", "Bhagat Sadhna Ji",
-    "Bhagat Parmanand Ji", "Bhagat Surdas Ji", "Baba Sundar Ji",
-}
+REAL_DB = ROOT / "db" / "sggs.sqlite"
 
 
 def _is_real_sqlite(p):
@@ -36,90 +25,29 @@ def _is_real_sqlite(p):
         return False
 
 
-def _roster():
-    return json.loads(ROSTER.read_text(encoding="utf-8"))["contributors"]
-
-
 class RosterShape(unittest.TestCase):
-    def setUp(self):
-        self.rows = _roster()
+    def test_the_roster_passes_its_gate_without_the_db(self):
+        rep = cc.run(cc.ROSTER, None, "testflight")
+        self.assertEqual(rep.errors, [])
 
-    def test_names_are_unique_and_the_new_bhagats_are_present(self):
-        names = [r["name"] for r in self.rows]
-        self.assertEqual(len(names), len(set(names)))
-        self.assertLessEqual(NOT_YET_IN_DATASET, set(names))
-
-    def test_every_entry_has_exactly_the_roster_fields(self):
-        for r in self.rows:
-            with self.subTest(r["name"]):
-                self.assertEqual(set(r), FIELDS)
-
-    def test_types_and_ranges(self):
-        for r in self.rows:
-            with self.subTest(r["name"]):
-                for k in ("name", "roman", "era", "region", "tradition", "blurb"):
-                    self.assertIsInstance(r[k], str)
-                    self.assertTrue(r[k].strip(), k)
-                self.assertIn(r["kind"], KINDS)
-                self.assertIsInstance(r["circa"], bool)
-                if r["kind"] == "guru":
-                    self.assertIn(r["seq"], range(1, 11))
-                else:
-                    self.assertIsNone(r["seq"])
-                for k in ("born", "died"):
-                    if r[k] is not None:
-                        self.assertIsInstance(r[k], int)
-                        self.assertTrue(1100 <= r[k] <= 1708, (k, r[k]))
-                if r["born"] is not None and r["died"] is not None:
-                    self.assertLess(r["born"], r["died"])
-
-    def test_gurmukhi_name_is_gurmukhi(self):
-        for r in self.rows:
-            with self.subTest(r["name"]):
-                g = r["gurmukhi_name"]
-                self.assertTrue(g is None or GURMUKHI.match(g), g)
-
-    def test_region_point_is_approximate_and_on_the_subcontinent(self):
-        for r in self.rows:
-            with self.subTest(r["name"]):
-                p = r["region_point"]
-                if p is None:
-                    continue
-                self.assertEqual(set(p), {"lat", "lon", "approx"})
-                self.assertIs(p["approx"], True)
-                self.assertTrue(5 <= p["lat"] <= 38 and 60 <= p["lon"] <= 97, p)
-
-    def test_every_entry_is_cited_and_awaits_review(self):
-        for r in self.rows:
-            with self.subTest(r["name"]):
-                self.assertIn(r["review"], REVIEW)
-                self.assertIsInstance(r["sources"], list)
-                self.assertTrue(r["sources"], "an entry without a source")
-                for s in r["sources"]:
-                    self.assertLessEqual({"title", "url"}, set(s))
-                    self.assertTrue(s["title"].strip())
-                    self.assertRegex(s["url"], r"^https://")
+    def test_the_appstore_channel_refuses_unreviewed_entries(self):
+        rep = cc.run(cc.ROSTER, None, "appstore")
+        self.assertTrue(any("gate G3" in e for e in rep.errors))
 
 
 @unittest.skipUnless(_is_real_sqlite(REAL_DB), "needs the real db/sggs.sqlite (make dataset)")
 class RosterJoinsTheDataset(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        con = sqlite3.connect(f"file:{REAL_DB}?mode=ro&immutable=1", uri=True)
-        cls.authors = {n for (n,) in con.execute("SELECT name FROM authors")}
-        con.close()
-        cls.roster = {r["name"] for r in _roster()}
-
-    def test_every_roster_name_is_an_author_in_the_db(self):
-        missing = self.roster - self.authors - NOT_YET_IN_DATASET
-        self.assertEqual(missing, set(), "roster names with no authors row (exact string match)")
-
-    def test_every_author_in_the_db_is_in_the_roster(self):
-        self.assertEqual(self.authors - self.roster, set(), "authors rows with no roster entry")
+    def test_the_roster_passes_its_gate_against_the_pinned_db(self):
+        rep = cc.run(cc.ROSTER, REAL_DB, "testflight")
+        self.assertEqual(rep.errors, [])
 
     def test_the_allow_list_is_not_stale(self):
-        landed = NOT_YET_IN_DATASET & self.authors
-        self.assertEqual(landed, set(), "now in the dataset: remove them from NOT_YET_IN_DATASET")
+        import sqlite3
+        con = sqlite3.connect(f"file:{REAL_DB}?mode=ro&immutable=1", uri=True)
+        authors = {n for (n,) in con.execute("SELECT name FROM authors")}
+        con.close()
+        landed = cc.PENDING_ATTRIBUTION & authors
+        self.assertEqual(landed, set(), "now in the dataset: remove them from PENDING_ATTRIBUTION")
 
 
 if __name__ == "__main__":

@@ -7,12 +7,15 @@
 import { $, esc, api, goSearchTheme } from './core';
 import { plural, granthOrder } from './voices';
 
+// Roster v2 (frontend/public/contributors.json): a source is {ref, entry, url} keyed into source_index;
+// review is {status, reviewer, date}. load() normalises them into the shape the views below draw.
 type Source = { title: string; publisher?: string; url?: string };
+type RawSource = { ref?: string; entry?: string; url?: string };
 type C = {
   name: string; roman: string; kind: string; seq: number | null;
-  born: number | null; died: number | null; circa: boolean;
+  born: number | null; died: number | null; circa: boolean; fl_century?: number | null;
   era: string; region: string; tradition: string; blurb: string;
-  gurmukhi_name?: string | null; sources?: Source[]; review?: string;
+  gurmukhi_name?: string | null; sources?: Source[]; review?: string; context?: string | null;
   first_ang?: number; last_ang?: number; n_lines?: number;
 };
 
@@ -37,7 +40,10 @@ const ord = (n: number) => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; re
 const centuryOf = (y: number) => Math.floor((y - 1) / 100) + 1;
 const titleCase = (s: string) => (s || '').replace(/\w\S*/g, (t) => t.charAt(0).toUpperCase() + t.slice(1));
 const bar = (n: number) => n > 0 ? Math.max(4, Math.round(100 * Math.sqrt(n / maxLines))) : 0;   // sqrt so small voices stay visible
-const byBorn = (a: C, b: C) => (a.born ?? Infinity) - (b.born ?? Infinity) || a.name.localeCompare(b.name);
+// When no source gives a birth year, order by the death year, else by the century the voice is known
+// from (roster v2 `fl_century`); only a voice with none of these goes to "Dates not established".
+const yearOf = (c: C) => c.born ?? c.died ?? (c.fl_century ? (c.fl_century - 1) * 100 + 50 : Infinity);
+const byBorn = (a: C, b: C) => (yearOf(a) - yearOf(b)) || a.name.localeCompare(b.name);
 const NOT_INDEXED = 'Bani not yet indexed under this name';
 // a source link is shown only for an http(s) URL; anything else is plain text
 const safeUrl = (u?: string) => (u && /^https?:\/\//i.test(u) ? u : '');
@@ -63,8 +69,14 @@ async function load() {
 
   const live: Record<string, any> = {};
   (meta.authors || []).forEach((a: any) => { live[a.name] = a; });
-  LIST = (data.contributors || []).map((c: C) => ({
+  const index: Record<string, { title?: string }> = data.source_index || {};
+  LIST = (data.contributors || []).map((c: any) => ({
     ...c,
+    gurmukhi_name: c.gurmukhi ?? c.gurmukhi_name ?? null,
+    // the corpus itself is not a biographical source: list only the references the life facts rest on
+    sources: ((c.sources || []) as RawSource[]).filter((s) => s && s.ref !== 'SGGS' && s.entry)
+      .map((s) => ({ title: String(s.entry), publisher: index[s.ref || '']?.title, url: s.url })),
+    review: c.review?.status === 'approved' ? 'approved' : 'pending',
     first_ang: live[c.name]?.first_ang, last_ang: live[c.name]?.last_ang, n_lines: live[c.name]?.n_lines,
   }));
   LIST.forEach((c) => byName.set(c.name, c));
@@ -151,7 +163,7 @@ function render() {
   } else {
     rows.sort(byBorn);
     let cur: number | null = -1;
-    const cenOf = (c: C) => (c.born == null ? null : centuryOf(c.born));
+    const cenOf = (c: C) => (c.born != null ? centuryOf(c.born) : c.died != null ? centuryOf(c.died) : c.fl_century || null);
     html = rows.map((c) => {
       const cen = cenOf(c);
       let pre = '';
@@ -178,7 +190,8 @@ function band(label: string, n: number): string {
 }
 
 function nodeHTML(c: C): string {
-  const yr = c.born == null ? '—' : (c.circa ? 'c.' : '') + c.born;
+  const yr = c.born != null ? (c.circa ? 'c.' : '') + c.born
+    : c.died != null ? `d. ${c.circa ? 'c.' : ''}${c.died}` : c.fl_century ? `fl. ${ord(c.fl_century)} c.` : '—';
   const lines = c.n_lines ? `${plural(c.n_lines, 'line')} · ${c.first_ang === c.last_ang ? `Ang ${c.first_ang}` : `Angs ${c.first_ang}–${c.last_ang}`}` : NOT_INDEXED;
   return `<button class="tl-node kind-${esc(c.kind)}" data-name="${esc(c.name)}" type="button" aria-label="${esc(c.roman)} — open profile">
       <span class="tl-year">${esc(yr)}</span>
@@ -208,7 +221,7 @@ function profileHTML(c: C, d: any, compact: boolean): string {
   const st = (d && d.stylometry) || {};
   const reliable = st.is_reliable !== 0;
   const c_ = c.circa ? 'c.' : '';
-  const lifespan = c.born == null ? (c.died ? `d. ${c_}${c.died}` : 'Dates not established')
+  const lifespan = c.born == null ? (c.died ? `d. ${c_}${c.died}` : c.fl_century ? `fl. ${ord(c.fl_century)} century` : 'Dates not established')
     : c.died ? `${c_}${c.born}–${c.died}` : `${c_}${c.born}`;
 
   // stat tiles — prefer the corpus line count (matches the card) for consistency
@@ -232,7 +245,7 @@ function profileHTML(c: C, d: any, compact: boolean): string {
   // where the dates and region come from; a roster entry stays "awaiting review" until a scholar signs it
   const srcs = (c.sources || []).filter((x) => x && x.title);
   const sourcesHTML = compact || !srcs.length ? '' :
-    `<div class="ld-sec ld-sources"><div class="ld-h">Sources <span class="ld-note">— for the dates and region${c.review === 'pending' ? ' · awaiting scholar review' : ''}</span></div><ul>` +
+    `<div class="ld-sec ld-sources"><div class="ld-h">Sources <span class="ld-note">— for the dates, places and context${c.review === 'pending' ? ' · awaiting scholar review' : ''}</span></div><ul>` +
     srcs.map((x) => {
       const t = esc(x.title) + (x.publisher ? ` <span class="ld-note">· ${esc(x.publisher)}</span>` : '');
       const u = safeUrl(x.url);
@@ -258,8 +271,8 @@ function profileHTML(c: C, d: any, compact: boolean): string {
   if (!compact) {
     const terms = ((d && d.distinctive_terms) || []).slice(0, 10);
     if (reliable && terms.length) {
-      termsHTML = `<div class="ld-sec"><div class="ld-h">Distinctive words <span class="ld-note">(keyness vs. corpus · English translation)</span></div>` +
-        `<div class="ld-termwrap">${terms.map((t: any) => `<span class="ld-term">${esc(t.term)}</span>`).join('')}</div></div>`;
+      termsHTML = `<div class="ld-sec"><div class="ld-h">Distinctive words <span class="ld-note">(Gurmukhi words this voice uses far more than the rest of the Granth · pen-names and function words left out)</span></div>` +
+        `<div class="ld-termwrap">${terms.map((t: any) => `<span class="ld-term" lang="pa">${esc(t.term)}</span>`).join('')}</div></div>`;
     } else if (!reliable) {
       termsHTML = `<div class="ld-note ld-sec">Stylometry is withheld here — this voice’s sample is too small to compare reliably.</div>`;
     }
@@ -287,7 +300,7 @@ function profileHTML(c: C, d: any, compact: boolean): string {
         </div>
       </div>
     </div>
-    <p class="ld-blurb${compact ? ' ld-blurb-c' : ''}">${esc(c.blurb)}</p>
+    <p class="ld-blurb${compact ? ' ld-blurb-c' : ''}">${esc((!compact && c.context) || c.blurb)}</p>
     ${statsHTML}${themesHTML}${termsHTML}${sourcesHTML}${actions}
   </div>`;
 }
