@@ -5,6 +5,7 @@ import * as d3 from 'd3';
 import Chart from 'chart.js/auto';
 import { $, esc, api, meta, prefersReducedMotion, guard, failHTML, goSearchTheme } from './core';
 import { cssVar, viz, onTheme, cached } from './viz';
+import { voice, plural, granthOrder } from './voices';
 
 const titleCase = (k: string) => k.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
@@ -190,11 +191,17 @@ async function authorRadar() {
   const canvas = $('#radar') as HTMLCanvasElement | null;
   if (!selA || !selB || !canvas) return;
 
-  const list = await api('analytics/author');
-  const authors = (list.authors || []).filter((a: any) => a.is_reliable !== 0);
+  const [list, m] = await Promise.all([api('analytics/author'), meta()]);
+  const firstAng: Record<string, number> = {};
+  (m.authors || []).forEach((a: any) => { firstAng[a.name] = a.first_ang; });
+  // Granth order (first Ang), never by volume; the label is the full name with its Mahala badge
+  const authors = (list.authors || []).filter((a: any) => a.is_reliable !== 0)
+    .map((a: any) => ({ ...a, name: a.author, first_ang: firstAng[a.author] }))
+    .sort(granthOrder);
+  const label = (author: string) => { const v = voice(author); return v.mahala ? `${v.name} · ${v.mahala}` : v.name; };
   const opts = (sel: HTMLSelectElement, withNone: boolean) => {
     sel.innerHTML = (withNone ? '<option value="">— compare (optional) —</option>' : '') +
-      authors.map((a: any) => `<option value="${esc(a.author)}">${esc(a.author)}</option>`).join('');
+      authors.map((a: any) => `<option value="${esc(a.author)}">${esc(label(a.author))}</option>`).join('');
   };
   opts(selA, false); opts(selB, true);
   selA.value = authors[0]?.author || '';
@@ -217,11 +224,11 @@ async function authorRadar() {
     const grid = cssVar('--line-strong') || 'rgba(255,255,255,.13)';
     const ink = cssVar('--ink'), soft = cssVar('--soft');
     const ds = [{
-      label: a, data: axes.map((c) => +(mapA[c] || 0).toFixed(2)),
+      label: voice(a).name, data: axes.map((c) => +(mapA[c] || 0).toFixed(2)),
       borderColor: accent, backgroundColor: accent + '33', pointBackgroundColor: accent, borderWidth: 2,
     }];
     if (mapB) ds.push({
-      label: b, data: axes.map((c) => +(mapB[c] || 0).toFixed(2)),
+      label: voice(b).name, data: axes.map((c) => +(mapB[c] || 0).toFixed(2)),
       borderColor: blue, backgroundColor: blue + '2e', pointBackgroundColor: blue, borderWidth: 2,
     });
     const cfg: any = {
@@ -242,7 +249,7 @@ async function authorRadar() {
     if (radar) { radar.data = cfg.data; radar.options = cfg.options; radar.update(); }
     else radar = new Chart(canvas, cfg);
     const note = $('#radarNote');
-    if (note) note.textContent = `Theme emphasis as lift vs. the corpus baseline (1.0× = average). Axes are ${a}'s most distinctive themes.`;
+    if (note) note.textContent = `Theme emphasis as lift vs. the corpus baseline (1.0× = average). Axes are ${voice(a).name}'s most distinctive themes.`;
   }
   selA.onchange = draw; selB.onchange = draw;
   onTheme(draw);
@@ -313,10 +320,11 @@ async function resonanceChord() {
       .on('mouseover', (ev: any, c: any) => {
         const a = names[c.source.index], b = names[c.target.index];
         const ab = meta[a + '>' + b] || {}, ba = meta[b + '>' + a] || {};
-        tip.html(`<b>${esc(short(a))} ↔ ${esc(short(b))}</b>`
-          + `<br><span>${esc(short(a))} → ${esc(short(b))}: lift ${(matrix[c.source.index][c.target.index] || 0).toFixed(2)}×</span>`
-          + `<br><span>${esc(short(b))} → ${esc(short(a))}: lift ${(matrix[c.target.index][c.source.index] || 0).toFixed(2)}×</span>`
-          + `<br><span>${(ab.edges || 0) + (ba.edges || 0)} shared neighbour links</span>`).style('opacity', 1);
+        const na = voice(a).name, nb = voice(b).name;
+        tip.html(`<b>${esc(na)} ↔ ${esc(nb)}</b>`
+          + `<br><span>${esc(na)} → ${esc(nb)}: lift ${esc((matrix[c.source.index][c.target.index] || 0).toFixed(2))}×</span>`
+          + `<br><span>${esc(nb)} → ${esc(na)}: lift ${esc((matrix[c.target.index][c.source.index] || 0).toFixed(2))}×</span>`
+          + `<br><span>${esc(plural((ab.edges || 0) + (ba.edges || 0), 'shared neighbour link'))}</span>`).style('opacity', 1);
         ribs.transition().duration(prefersReducedMotion() ? 0 : 100).attr('fill-opacity', (x: any) => x === c ? 0.92 : 0.06);
       })
       .on('mousemove', (ev: any) => { const r = host.getBoundingClientRect(); tip.style('left', (ev.clientX - r.left + 12) + 'px').style('top', (ev.clientY - r.top + 12) + 'px'); })
@@ -327,9 +335,9 @@ async function resonanceChord() {
       top.push([matrix[i][j], names[i], names[j], (meta[names[i] + '>' + names[j]] || {}).edges || 0]);
     top.sort((a, b) => b[0] - a[0]);
     dataTable(host, 'chordTable', 'Resonances — data table (text alternative)',
-      `${top.length} directed resonances between ${N} voices at this threshold, strongest first.`,
+      `${plural(top.length, 'directed resonance')} between ${plural(N, 'voice')} at this threshold, strongest first.`,
       ['Voice', 'Echoes', 'Lift', 'Neighbour links'],
-      top.map(([l, a, b, n]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td><td>${(+l).toFixed(2)}×</td><td>${(+n).toLocaleString()}</td></tr>`).join(''));
+      top.map(([l, a, b, n]) => `<tr><td>${esc(voice(a).name)}</td><td>${esc(voice(b).name)}</td><td>${esc((+l).toFixed(2))}×</td><td>${esc((+n).toLocaleString())}</td></tr>`).join(''));
 
     function fadeNode(i: number | null) {
       ribs.transition().duration(prefersReducedMotion() ? 0 : 120).attr('fill-opacity', (c: any) =>
@@ -411,7 +419,7 @@ async function ribbonStream() {
 const AUTHOR_COL: Record<string, string> = { M1: 'var(--viz-2)', M2: 'var(--viz-4)', M3: 'var(--viz-3)', M4: 'var(--viz-6)', M5: 'var(--viz-1)', M9: 'var(--viz-8)' };
 const mahala = (a: string) => { const m = (a || '').match(/\(M(\d)\)/); return m ? 'M' + m[1] : ''; };
 const authColor = (a: string) => AUTHOR_COL[mahala(a)] || 'var(--viz-10)';
-const authShort = (a: string) => (a || '?').split(' (')[0].replace('Guru ', '').replace('Bhagat ', '').replace(' Ji', '');
+const authShort = (a: string) => (a ? voice(a).name : '?');
 
 async function vaarAnatomy() {
   const host = $('#vaar'); if (!host) return;
@@ -420,14 +428,14 @@ async function vaarAnatomy() {
   const vaars = list.vaars || [];
   if (sel && !sel.dataset.filled) {
     if (!vaars.length) { host.innerHTML = '<div class="hint">Vaar anatomy not built in this DB. Run pipeline/build_vaars.py.</div>'; return; }
-    sel.innerHTML = vaars.map((v: any) => `<option value="${v.vaar_id}">${esc(v.roman)} · Angs ${v.first_ang}–${v.last_ang} · ${v.n_pauris} pauris${v.cross_author ? ' · cross-voice' : ''}</option>`).join('');
+    sel.innerHTML = vaars.map((v: any) => `<option value="${esc(v.vaar_id)}">${esc(v.roman)} · Angs ${esc(v.first_ang)}–${esc(v.last_ang)} · ${esc(plural(v.n_pauris, 'pauri'))}${v.cross_author ? ' · cross-voice' : ''}</option>`).join('');
     sel.dataset.filled = '1';
   }
   async function draw() {
     const vid = sel ? sel.value : (vaars[0]?.vaar_id);
     if (vid == null) return;
     host.innerHTML = '<div class="rel-loading">Tracing the Vaar…</div>';
-    const d = await api('analytics/vaar?id=' + vid);
+    const d = await api('analytics/vaar?id=' + encodeURIComponent(vid));
     const v = d.vaar, units = d.units || [];
     if (!v) { host.innerHTML = '<div class="hint">No anatomy for this Vaar.</div>'; return; }
     const pCol = authColor(v.pauri_author);
@@ -442,15 +450,15 @@ async function vaarAnatomy() {
 
     const salokHTML = (s: any) => {
       const cross = mahala(s.author) !== mahala(v.pauri_author);
-      return `<button class="vu vu-salok${cross ? ' cross' : ''}" style="--c:${authColor(s.author)}" onclick="goReader(${s.ang})" title="Salok by ${esc(s.author || '')} — open Ang ${s.ang}">
-        <span class="vu-dot"></span><span class="vu-t">Salok · ${esc(authShort(s.author))} · ${s.n_lines} ln${cross ? ' <span class="vx">✦ cross-voice</span>' : ''}</span></button>`;
+      return `<button class="vu vu-salok${cross ? ' cross' : ''}" style="--c:${authColor(s.author)}" onclick="goReader(${Number(s.ang)})" title="Salok by ${esc(authShort(s.author))} — open Ang ${esc(s.ang)}">
+        <span class="vu-dot"></span><span class="vu-t">Salok · ${esc(authShort(s.author))} · ${esc(plural(s.n_lines, 'line'))}${cross ? ' <span class="vx">✦ cross-voice</span>' : ''}</span></button>`;
     };
-    const pauriHTML = (pp: any) => `<button class="vu vu-pauri" style="--c:${authColor(pp.author)}" onclick="goReader(${pp.ang})" title="Pauri ${pp.pauri_no} by ${esc(pp.author || '')} — open Ang ${pp.ang}">
-        <span class="vp-no">${pp.pauri_no ?? ''}</span>
-        <span class="vu-t"><b>Pauri ${pp.pauri_no ?? ''}</b> · ${esc(authShort(pp.author))} · ${pp.n_lines} ln${pp.theme ? ' · ' + esc(titleCase(pp.theme)) : ''}</span></button>`;
+    const pauriHTML = (pp: any) => `<button class="vu vu-pauri" style="--c:${authColor(pp.author)}" onclick="goReader(${Number(pp.ang)})" title="Pauri ${esc(pp.pauri_no)} by ${esc(authShort(pp.author))} — open Ang ${esc(pp.ang)}">
+        <span class="vp-no">${esc(pp.pauri_no)}</span>
+        <span class="vu-t"><b>Pauri ${esc(pp.pauri_no)}</b> · ${esc(authShort(pp.author))} · ${esc(plural(pp.n_lines, 'line'))}${pp.theme ? ' · ' + esc(titleCase(pp.theme)) : ''}</span></button>`;
 
     host.innerHTML = `<div class="vaar-meta" style="--pc:${pCol}">
-        <div class="vaar-stats"><span class="vstat">${v.n_pauris} pauris</span><span class="vstat">${v.n_saloks} saloks</span><span class="vstat">Angs ${v.first_ang}–${v.last_ang}</span></div>
+        <div class="vaar-stats"><span class="vstat">${esc(plural(v.n_pauris, 'pauri'))}</span><span class="vstat">${esc(plural(v.n_saloks, 'salok'))}</span><span class="vstat">Angs ${esc(v.first_ang)}–${esc(v.last_ang)}</span></div>
         <div class="vaar-cross">${crossNote}</div></div>
       <div class="vaar-ladder">${groups.map((g) => `<div class="vg">
         ${g.saloks.length ? `<div class="vg-saloks">${g.saloks.map(salokHTML).join('')}</div>` : ''}
