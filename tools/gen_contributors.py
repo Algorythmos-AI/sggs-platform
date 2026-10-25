@@ -93,8 +93,12 @@ def build() -> str:
             lines.append(f"| {r['name']} | {r.get('display') or r.get('roman')} | {lived(r)} | {r.get('era') or '—'} | {r.get('region') or '—'} | {r.get('tradition') or '—'} |")
         lines.append("")
         for r in group:
-            if r.get("context") or r.get("blurb"):
-                lines.append(f"- **{r.get('display') or r['name']}** — {gm(r.get('context') or r.get('blurb'))}")
+            # The longer `context` is published only once the scholar has approved the entry (gate G3), as
+            # the website and the app do; until then the reference shows the short blurb.
+            approved = (r.get("review") or {}).get("status") == "approved"
+            text = (r.get("context") if approved else None) or r.get("blurb")
+            if text:
+                lines.append(f"- **{r.get('display') or r['name']}** — {gm(text)}")
         lines.append("")
     lines += ["Source: `frontend/public/contributors.json` (vendored by the app at each platform release). To change an",
               "entry, edit the JSON, run `python3 tools/check_contributors.py`, then `python3 tools/gen_contributors.py`.", ""]
