@@ -10,7 +10,7 @@
 import Marketing from "../layouts/Marketing.astro";
 import LegalPage from "../components/LegalPage.astro";
 import { CONTRIBUTE_MODE } from "../contribute.ts";
-const updated = "17 October 2026";
+const updated = "25 October 2026";
 // The launch-notice sign-up (Newsletter.astro) renders only when this build-time env var is set;
 // the disclosure below follows it, so the policy never describes a form the site does not show.
 const newsletterOn = !!import.meta.env.PUBLIC_NEWSLETTER_FORM_URL;
@@ -53,7 +53,10 @@ const toc = [
       <p>The app bundles the complete text of Sri Guru Granth Sahib Ji, plus the Nitnem banis as a separate, labelled layer, and searches it locally. It never sends a request to any server, so we cannot see what you read, search for or save. Specifically:</p>
       <ul>
         <li><strong>Saved verses</strong> are stored in the app's own database on your device. If you save a verse, it is also added to your device's Spotlight index so you can find it from the Home Screen search; unsaving removes it. Spotlight data stays on your device.</li>
+        <li><strong>Themes in Spotlight</strong>: the app also adds the 54 theme names, with their Gurmukhi words and verse counts, to Spotlight so a theme can be opened from the Home Screen search. These entries hold nothing about you.</li>
+        <li><strong>Your themes</strong> on the Themes page is worked out on your device from your saved verses. It is never sent anywhere, and you can turn it off in Settings.</li>
         <li><strong>Settings</strong> (accent colour, transliteration, traditional rendering, last Ang read) are stored in the app's local preferences.</li>
+        <li><strong>Vaars</strong>: where you are in a Vaar you are reading is stored in a small file in the app's own App Group container on your device. It is never transmitted.</li>
         <li><strong>Nitnem</strong> progress (where you are in each bani, which days you completed it, your own sets and journey) is stored in small files in the app's own App Group container on your device, so the Nitnem widget can show it. It is never transmitted.</li>
         <li><strong>Reminders</strong> are optional local notifications. The app asks for notification permission only when you turn a reminder on, schedules them on your device at the times you choose, and uses no push service: no notification ever comes from a server, and no device token is created or sent anywhere.</li>
         <li><strong>Live Activity</strong> is optional and off by default. When you turn it on, a reading session shows its progress on your Lock Screen and in the Dynamic Island. It is driven entirely on your device (no push updates) and never shows a verse.</li>
