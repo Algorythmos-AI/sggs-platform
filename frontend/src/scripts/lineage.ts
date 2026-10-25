@@ -60,6 +60,13 @@ function initials(c: C): string {
 }
 
 // ---------- load ----------
+// The roster `context` (a longer biographical paragraph) reaches readers only once the scholar has
+// approved the entry (gate G3), exactly as the iOS app does (Contributor.lifeText). Until then the
+// short `blurb` is shown. A draft or pending entry never shows its context.
+export function lifeText(c: { review?: string; context?: string | null; blurb: string }, compact = false): string {
+  return (!compact && c.review === 'approved' && c.context) ? c.context : c.blurb;
+}
+
 async function load() {
   const host = $('#timeline'); if (!host) return;
   let data: any, meta: any;
@@ -300,7 +307,7 @@ function profileHTML(c: C, d: any, compact: boolean): string {
         </div>
       </div>
     </div>
-    <p class="ld-blurb${compact ? ' ld-blurb-c' : ''}">${esc((!compact && c.context) || c.blurb)}</p>
+    <p class="ld-blurb${compact ? ' ld-blurb-c' : ''}">${esc(lifeText(c, compact))}</p>
     ${statsHTML}${themesHTML}${termsHTML}${sourcesHTML}${actions}
   </div>`;
 }

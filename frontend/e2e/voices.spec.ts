@@ -42,3 +42,17 @@ test('the Insights voices are listed by full name in Granth order', async ({ pag
   expect(labels[0]).toBe('Guru Nanak Dev Ji · M1');
   for (const l of labels) expect(l).not.toMatch(/\(M\d\)/);
 });
+
+test('a roster entry awaiting scholar review shows its short blurb, never its draft context (G3)', async ({ page, request }) => {
+  const roster = await (await request.get('/contributors.json')).json();
+  const list: any[] = roster.contributors ?? roster;
+  const draft = list.find((c) => c.review?.status !== 'approved' && c.context && c.blurb && c.context !== c.blurb);
+  test.skip(!draft, 'no draft entry with distinct context in this roster');
+  await page.goto('/lineage');
+  await page.locator(node(draft.name)).click();
+  const panel = page.locator('#panel.on .ld');
+  await expect(panel).toBeVisible({ timeout: 15_000 });
+  await expect(panel.locator('.ld-blurb')).toHaveText(draft.blurb);
+  await expect(panel).not.toContainText(draft.context.slice(0, 60));
+  await expect(panel.locator('.ld-sources')).toContainText('awaiting scholar review');
+});
