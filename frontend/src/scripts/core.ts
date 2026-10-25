@@ -5,8 +5,11 @@ import { initTheme, applyTheme } from './theme';
 import { initAppearance } from './appearance';
 export { applyTheme } from './theme';
 export const $ = (s: string) => document.querySelector(s) as HTMLElement | null;
-export const esc = (s: any) =>
-  (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// The one HTML-escape helper: every value that reaches innerHTML or an attribute passes through it.
+// Numbers and booleans are stringified (0 stays "0"); null/undefined become "".
+export const esc = (s: unknown) =>
+  String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 export const store = {
   get: (k: string, d?: any) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } },

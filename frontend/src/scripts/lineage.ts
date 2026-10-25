@@ -5,11 +5,17 @@
 // fingerprint, and distinctive terms via /api/analytics/author.
 // READ-ONLY: this view never touches the corpus or scripture text — it only describes it.
 import { $, esc, api, goSearchTheme } from './core';
+import { plural, granthOrder } from './voices';
 
+// Roster v2 (frontend/public/contributors.json): a source is {ref, entry, url} keyed into source_index;
+// review is {status, reviewer, date}. load() normalises them into the shape the views below draw.
+type Source = { title: string; publisher?: string; url?: string };
+type RawSource = { ref?: string; entry?: string; url?: string };
 type C = {
   name: string; roman: string; kind: string; seq: number | null;
-  born: number; died: number | null; circa: boolean;
+  born: number | null; died: number | null; circa: boolean; fl_century?: number | null;
   era: string; region: string; tradition: string; blurb: string;
+  gurmukhi_name?: string | null; sources?: Source[]; review?: string; context?: string | null;
   first_ang?: number; last_ang?: number; n_lines?: number;
 };
 
@@ -22,7 +28,7 @@ const KIND_ORDER = ['guru', 'bhagat', 'bhatt', 'gursikh'];
 
 let LIST: C[] = [];
 const byName = new Map<string, C>();
-let groupMode: 'time' | 'kind' | 'volume' = 'time';
+let groupMode: 'granth' | 'time' | 'kind' | 'volume' = 'granth';   // Granth order first: never volume-first
 let kindFilter = 'all';
 let maxLines = 1;
 
@@ -33,7 +39,14 @@ const compareSel: C[] = [];
 const ord = (n: number) => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
 const centuryOf = (y: number) => Math.floor((y - 1) / 100) + 1;
 const titleCase = (s: string) => (s || '').replace(/\w\S*/g, (t) => t.charAt(0).toUpperCase() + t.slice(1));
-const bar = (n: number) => Math.max(4, Math.round(100 * Math.sqrt((n || 0) / maxLines)));   // sqrt so small voices stay visible
+const bar = (n: number) => n > 0 ? Math.max(4, Math.round(100 * Math.sqrt(n / maxLines))) : 0;   // sqrt so small voices stay visible
+// When no source gives a birth year, order by the death year, else by the century the voice is known
+// from (roster v2 `fl_century`); only a voice with none of these goes to "Dates not established".
+const yearOf = (c: C) => c.born ?? c.died ?? (c.fl_century ? (c.fl_century - 1) * 100 + 50 : Infinity);
+const byBorn = (a: C, b: C) => (yearOf(a) - yearOf(b)) || a.name.localeCompare(b.name);
+const NOT_INDEXED = 'Bani not yet indexed under this name';
+// a source link is shown only for an http(s) URL; anything else is plain text
+const safeUrl = (u?: string) => (u && /^https?:\/\//i.test(u) ? u : '');
 
 // kind-coloured medallion text: M# for Gurus, otherwise the leading initials of the name
 const HONORIFIC = new Set(['baba', 'bhai', 'bhagat', 'bhatt', 'guru', 'sant', 'the', 'ji']);
@@ -47,6 +60,13 @@ function initials(c: C): string {
 }
 
 // ---------- load ----------
+// The roster `context` (a longer biographical paragraph) reaches readers only once the scholar has
+// approved the entry (gate G3), exactly as the iOS app does (Contributor.lifeText). Until then the
+// short `blurb` is shown. A draft or pending entry never shows its context.
+export function lifeText(c: { review?: string; context?: string | null; blurb: string }, compact = false): string {
+  return (!compact && c.review === 'approved' && c.context) ? c.context : c.blurb;
+}
+
 async function load() {
   const host = $('#timeline'); if (!host) return;
   let data: any, meta: any;
@@ -56,8 +76,14 @@ async function load() {
 
   const live: Record<string, any> = {};
   (meta.authors || []).forEach((a: any) => { live[a.name] = a; });
-  LIST = (data.contributors || []).map((c: C) => ({
+  const index: Record<string, { title?: string }> = data.source_index || {};
+  LIST = (data.contributors || []).map((c: any) => ({
     ...c,
+    gurmukhi_name: c.gurmukhi ?? c.gurmukhi_name ?? null,
+    // the corpus itself is not a biographical source: list only the references the life facts rest on
+    sources: ((c.sources || []) as RawSource[]).filter((s) => s && s.ref !== 'SGGS' && s.entry)
+      .map((s) => ({ title: String(s.entry), publisher: index[s.ref || '']?.title, url: s.url })),
+    review: c.review?.status === 'approved' ? 'approved' : 'pending',
     first_ang: live[c.name]?.first_ang, last_ang: live[c.name]?.last_ang, n_lines: live[c.name]?.n_lines,
   }));
   LIST.forEach((c) => byName.set(c.name, c));
@@ -74,6 +100,7 @@ function renderHero() {
   let verses = 0, bMin = Infinity, bMax = -Infinity;
   LIST.forEach((c) => {
     verses += c.n_lines || 0;
+    if (c.born == null) return;
     bMin = Math.min(bMin, c.born);
     bMax = Math.max(bMax, c.died || c.born);
   });
@@ -109,7 +136,7 @@ function wireControls() {
   const g = $('#linGroup');
   g?.querySelectorAll('[data-g]').forEach((b: any) => {
     b.addEventListener('click', () => {
-      groupMode = (b.dataset.g || 'time') as typeof groupMode;
+      groupMode = (b.dataset.g || 'granth') as typeof groupMode;
       g.querySelectorAll('[data-g]').forEach((x: any) => {
         const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on));
       });
@@ -125,23 +152,32 @@ function render() {
   const rows = kindFilter === 'all' ? LIST.slice() : LIST.filter((c) => c.kind === kindFilter);
 
   let html = '';
-  if (groupMode === 'volume') {
-    rows.sort((a, b) => (b.n_lines || 0) - (a.n_lines || 0));
-    html = band('Ordered by how much Bani is preserved here', rows.length) + rows.map(nodeHTML).join('');
+  if (groupMode === 'granth') {
+    const inGranth = rows.filter((c) => c.first_ang).sort(granthOrder);
+    const later = rows.filter((c) => !c.first_ang).sort(byBorn);
+    html = (inGranth.length ? band('In the order of the Granth, by first Ang', inGranth.length) + inGranth.map(nodeHTML).join('') : '')
+      + (later.length ? band(NOT_INDEXED, later.length) + later.map(nodeHTML).join('') : '');
+  } else if (groupMode === 'volume') {
+    rows.sort((a, b) => (b.n_lines || 0) - (a.n_lines || 0) || granthOrder(a, b));
+    html = band('Ordered by how much Bani is preserved here — never importance', rows.length) + rows.map(nodeHTML).join('');
   } else if (groupMode === 'kind') {
     const order = kindFilter === 'all' ? KIND_ORDER : [kindFilter];
     html = order.map((k) => {
-      const g = rows.filter((c) => c.kind === k).sort((a, b) => a.born - b.born);
+      const g = rows.filter((c) => c.kind === k).sort(byBorn);
       if (!g.length) return '';
       return band(KIND_DESC[k], g.length) + g.map(nodeHTML).join('');
     }).join('');
   } else {
-    rows.sort((a, b) => a.born - b.born);
-    let cur = -1;
+    rows.sort(byBorn);
+    let cur: number | null = -1;
+    const cenOf = (c: C) => (c.born != null ? centuryOf(c.born) : c.died != null ? centuryOf(c.died) : c.fl_century || null);
     html = rows.map((c) => {
-      const cen = centuryOf(c.born);
+      const cen = cenOf(c);
       let pre = '';
-      if (cen !== cur) { cur = cen; const n = rows.filter((x) => centuryOf(x.born) === cen).length; pre = band(`${ord(cen)} century`, n); }
+      if (cen !== cur) {
+        cur = cen; const n = rows.filter((x) => cenOf(x) === cen).length;
+        pre = band(cen == null ? 'Dates not established' : `${ord(cen)} century`, n);
+      }
       return pre + nodeHTML(c);
     }).join('');
   }
@@ -157,19 +193,21 @@ function render() {
 }
 
 function band(label: string, n: number): string {
-  return `<div class="tl-band"><span class="tl-band-l">${esc(label)}</span><span class="tl-band-n">${n} ${n === 1 ? 'voice' : 'voices'}</span></div>`;
+  return `<div class="tl-band"><span class="tl-band-l">${esc(label)}</span><span class="tl-band-n">${esc(plural(n, 'voice'))}</span></div>`;
 }
 
 function nodeHTML(c: C): string {
-  const yr = (c.circa ? 'c.' : '') + c.born;
-  const lines = c.n_lines ? `${c.n_lines.toLocaleString()} lines · Angs ${c.first_ang}–${c.last_ang}` : 'in the corpus';
+  const yr = c.born != null ? (c.circa ? 'c.' : '') + c.born
+    : c.died != null ? `d. ${c.circa ? 'c.' : ''}${c.died}` : c.fl_century ? `fl. ${ord(c.fl_century)} c.` : '—';
+  const lines = c.n_lines ? `${plural(c.n_lines, 'line')} · ${c.first_ang === c.last_ang ? `Ang ${c.first_ang}` : `Angs ${c.first_ang}–${c.last_ang}`}` : NOT_INDEXED;
   return `<button class="tl-node kind-${esc(c.kind)}" data-name="${esc(c.name)}" type="button" aria-label="${esc(c.roman)} — open profile">
       <span class="tl-year">${esc(yr)}</span>
       <span class="tl-dot" aria-hidden="true"></span>
       <span class="tl-card">
         <span class="tl-med" aria-hidden="true">${esc(initials(c))}</span>
         <span class="tl-main">
-          <span class="tl-row"><span class="tl-name">${esc(c.roman)}</span><span class="tl-kind">${esc(KIND_LABEL[c.kind] || c.kind)}${c.seq ? ' · M' + c.seq : ''}</span></span>
+          <span class="tl-row"><span class="tl-name">${esc(c.roman)}</span><span class="tl-kind">${esc(KIND_LABEL[c.kind] || c.kind)}${c.seq ? ' · M' + esc(c.seq) : ''}</span></span>
+          ${c.gurmukhi_name ? `<span class="tl-gm" lang="pa">${esc(c.gurmukhi_name)}</span>` : ''}
           <span class="tl-era">${esc(c.era)} · ${esc(c.region)}</span>
           <span class="tl-bar" aria-hidden="true"><i style="width:${bar(c.n_lines || 0)}%"></i></span>
           <span class="tl-lines">${esc(lines)}</span>
@@ -189,23 +227,37 @@ const closePanel = () => (window as any).closePanel?.();
 function profileHTML(c: C, d: any, compact: boolean): string {
   const st = (d && d.stylometry) || {};
   const reliable = st.is_reliable !== 0;
-  const lifespan = c.died ? `${c.circa ? 'c.' : ''}${c.born}–${c.died}` : `${c.circa ? 'c.' : ''}${c.born}`;
+  const c_ = c.circa ? 'c.' : '';
+  const lifespan = c.born == null ? (c.died ? `d. ${c_}${c.died}` : c.fl_century ? `fl. ${ord(c.fl_century)} century` : 'Dates not established')
+    : c.died ? `${c_}${c.born}–${c.died}` : `${c_}${c.born}`;
 
   // stat tiles — prefer the corpus line count (matches the card) for consistency
   const lineN = c.n_lines ?? st.n_lines;
   const tile = (v: any, l: string, note?: string) =>
     (v == null || v === '' || (typeof v === 'number' && isNaN(v))) ? '' :
       `<div class="ld-stat"><span class="ld-stat-v">${esc(String(v))}</span><span class="ld-stat-l">${esc(l)}${note ? ` <span class="ld-q" tabindex="0" role="img" aria-label="${esc(note)}" title="${esc(note)}">?</span>` : ''}</span></div>`;
+  // Only counts of the Bani itself. The stylometry measures (vocabulary variety, words per line) are
+  // computed on the English translation's tokens, so they describe the translator, not the voice.
   const tiles = [
-    tile(typeof lineN === 'number' ? lineN.toLocaleString() : lineN, 'Lines'),
-    tile(st.n_shabads, 'Compositions'),
-    tile(st.n_raags, 'Raags'),
-    tile(st.avg_words_line != null ? (+st.avg_words_line).toFixed(1) : null, 'Avg words / line'),
-    tile(st.mattr_100 != null ? (+st.mattr_100).toFixed(2) : null, 'Lexical variety', 'Share of unique words across the text (0–1). Higher means a more varied vocabulary. Measured on the English translation.'),
-    tile(c.first_ang ? `${c.first_ang}–${c.last_ang}` : null, 'Ang range'),
+    tile(typeof lineN === 'number' ? lineN.toLocaleString() : lineN, lineN === 1 ? 'Line' : 'Lines'),
+    tile(st.n_shabads, st.n_shabads === 1 ? 'Composition' : 'Compositions'),
+    st.n_raags === 0 ? tile('Swaiyye', 'Outside the raag framework') : tile(st.n_raags, st.n_raags === 1 ? 'Raag' : 'Raags'),
+    tile(c.first_ang ? (c.first_ang === c.last_ang ? String(c.first_ang) : `${c.first_ang}–${c.last_ang}`) : null, c.first_ang === c.last_ang ? 'Ang' : 'Ang range'),
   ].filter(Boolean).join('');
-  const statsHTML = tiles ? `<div class="ld-statgrid">${tiles}</div>`
+  const statsHTML = !c.n_lines
+    ? (compact ? `<div class="ld-note">${esc(NOT_INDEXED)}.</div>` : `<div class="ld-note ld-sec">${esc(NOT_INDEXED)} in this build: the attribution of these lines is being reviewed, so no counts are shown yet.</div>`)
+    : tiles ? `<div class="ld-statgrid">${tiles}</div>`
     : (compact ? '' : '<div class="ld-note ld-sec">Composition statistics aren’t available for this voice in this build.</div>');
+
+  // where the dates and region come from; a roster entry stays "awaiting review" until a scholar signs it
+  const srcs = (c.sources || []).filter((x) => x && x.title);
+  const sourcesHTML = compact || !srcs.length ? '' :
+    `<div class="ld-sec ld-sources"><div class="ld-h">Sources <span class="ld-note">— for the dates, places and context${c.review === 'pending' ? ' · awaiting scholar review' : ''}</span></div><ul>` +
+    srcs.map((x) => {
+      const t = esc(x.title) + (x.publisher ? ` <span class="ld-note">· ${esc(x.publisher)}</span>` : '');
+      const u = safeUrl(x.url);
+      return `<li>${u ? `<a href="${esc(u)}" rel="noopener noreferrer" target="_blank">${t}</a>` : t}</li>`;
+    }).join('') + '</ul></div>';
 
   // signature themes (lift vs. corpus baseline)
   let themesHTML = '';
@@ -226,8 +278,8 @@ function profileHTML(c: C, d: any, compact: boolean): string {
   if (!compact) {
     const terms = ((d && d.distinctive_terms) || []).slice(0, 10);
     if (reliable && terms.length) {
-      termsHTML = `<div class="ld-sec"><div class="ld-h">Distinctive words <span class="ld-note">(keyness vs. corpus · English translation)</span></div>` +
-        `<div class="ld-termwrap">${terms.map((t: any) => `<span class="ld-term">${esc(t.term)}</span>`).join('')}</div></div>`;
+      termsHTML = `<div class="ld-sec"><div class="ld-h">Distinctive words <span class="ld-note">(Gurmukhi words this voice uses far more than the rest of the Granth · pen-names and function words left out)</span></div>` +
+        `<div class="ld-termwrap">${terms.map((t: any) => `<span class="ld-term" lang="pa">${esc(t.term)}</span>`).join('')}</div></div>`;
     } else if (!reliable) {
       termsHTML = `<div class="ld-note ld-sec">Stylometry is withheld here — this voice’s sample is too small to compare reliably.</div>`;
     }
@@ -235,10 +287,10 @@ function profileHTML(c: C, d: any, compact: boolean): string {
 
   // actions
   const actions = compact
-    ? (c.first_ang ? `<div class="ld-cactions"><button onclick="goReader(${c.first_ang})" type="button">Read · Ang ${c.first_ang} →</button></div>` : '')
+    ? (c.first_ang ? `<div class="ld-cactions"><button onclick="goReader(${Number(c.first_ang)})" type="button">Read · Ang ${esc(c.first_ang)} →</button></div>` : '')
     : `<div class="endnav ld-actions">
         <button class="ld-cmp" data-name="${esc(c.name)}" type="button">⇄ Compare with another voice</button>
-        ${c.first_ang ? `<button onclick="goReader(${c.first_ang})" type="button">Read their first composition · Ang ${c.first_ang} →</button>` : '<span></span>'}
+        ${c.first_ang ? `<button onclick="goReader(${Number(c.first_ang)})" type="button">Read their first composition · Ang ${esc(c.first_ang)} →</button>` : '<span></span>'}
       </div>`;
 
   return `<div class="ld kind-${esc(c.kind)}">
@@ -246,16 +298,17 @@ function profileHTML(c: C, d: any, compact: boolean): string {
       <span class="ld-med" aria-hidden="true">${esc(initials(c))}</span>
       <div class="ld-id">
         <div class="ld-name">${esc(c.roman)}</div>
+        ${c.gurmukhi_name ? `<div class="ld-gm" lang="pa">${esc(c.gurmukhi_name)}</div>` : ''}
         <div class="ld-chips">
-          <span class="ld-chip kind-${esc(c.kind)}">${esc(KIND_LABEL[c.kind] || c.kind)}${c.seq ? ' · M' + c.seq : ''}</span>
+          <span class="ld-chip kind-${esc(c.kind)}">${esc(KIND_LABEL[c.kind] || c.kind)}${c.seq ? ' · M' + esc(c.seq) : ''}</span>
           <span class="ld-chip">${esc(lifespan)}</span>
           <span class="ld-chip">${esc(c.region)}</span>
           <span class="ld-chip">${esc(c.tradition)}</span>
         </div>
       </div>
     </div>
-    <p class="ld-blurb${compact ? ' ld-blurb-c' : ''}">${esc(c.blurb)}</p>
-    ${statsHTML}${themesHTML}${termsHTML}${actions}
+    <p class="ld-blurb${compact ? ' ld-blurb-c' : ''}">${esc(lifeText(c, compact))}</p>
+    ${statsHTML}${themesHTML}${termsHTML}${sourcesHTML}${actions}
   </div>`;
 }
 
@@ -266,7 +319,10 @@ function wireProfile() {
   root.querySelectorAll('.ld-cmp').forEach((b: any) => b.addEventListener('click', () => { const nm = b.dataset.name || ''; closePanel(); startCompareWith(nm); }));
 }
 
-const fetchAnalytics = (c: C) => api('analytics/author?author=' + encodeURIComponent(c.name)).catch(() => ({}));
+// a voice with no indexed lines has no analytics row: asking would only raise an error toast
+const fetchAnalytics = (c: C) => c.n_lines
+  ? api('analytics/author?author=' + encodeURIComponent(c.name)).catch(() => ({}))
+  : Promise.resolve({});
 
 async function openDetail(c: C) {
   openPanel();

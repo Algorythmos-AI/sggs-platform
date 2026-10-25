@@ -38,10 +38,12 @@ Source: `ios/tests/test_ios_gates.py` in gurbani-soul-ios, read at the pinned co
 | Saved verses | a SwiftData store | per verse: the line id, its Gurmukhi and transliteration, Ang, composition id, and when you saved it |
 | Nitnem progress | `nitnem-progress.json` in the App Group | per bani: where you stopped, when you last read, and the days you completed (at most 400) |
 | My Nitnem | `nitnem-plan.json` in the App Group | your own sets: order, hidden and added banis |
+| Vaar progress (from 1.4.9) | `vaar-progress.json` in the App Group | per Vaar: the line you reached, its pauri, when you last read, and when you finished |
 | Widget snapshot | `widget-snapshot.json` in the App Group | a Hukam verse and its Ang, the pahar-to-raag tables, the clock mode and coordinates, the set names |
 | Settings | the app's preferences | display and reader settings, the last Ang read, reminder times, and the launch-integrity cache |
 | Clock settings | the App Group's preferences | the clock mode and, in Solar mode, your coordinates rounded to two decimal places (about a kilometre); the exact position is never stored, and "Forget location" (from 1.4.0) removes it |
-| Spotlight | the system index | your saved verses only (Gurmukhi, transliteration, Ang), so system search can find them |
+| Spotlight | the system index | your saved verses (Gurmukhi, transliteration, Ang), so system search can find them; from 1.4.9 also the 54 theme names with their Gurmukhi words and verse counts, which hold nothing about you |
+| Your themes (from 1.4.9) | computed on demand, not stored | the themes your saved verses carry, worked out on the device each time the Themes page opens; a Settings switch turns it off |
 | Diagnostics | Application Support | MetricKit reports, as above |
 
 The JSON files fall back to the app's own Application Support folder when the App Group is not

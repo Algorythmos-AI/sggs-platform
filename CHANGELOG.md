@@ -3,6 +3,40 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.4.9] — 2026-10-25
+
+The voices of the Granth, attributed from the evidence printed in it, and five new ways into the Granth on the iPhone. It ships on the website, the API and the iPhone app together.
+
+### Data
+- **Dataset 1.1.0** (sggs-data #13, pinned at `f818b3a`): 1,045 author tags corrected from the evidence printed in the Granth: a composition's own heading, or the pen-name in its closing verse. The voices whose Bani had been credited to others are now present: Bhagats Dhanna, Pipa, Sain, Sadhna and Parmanand, and Baba Sundar Ji. Only `author` changed; the scripture is byte-identical (`verify_attribution.py`, reconcile char-exact). Bhagat Surdas Ji's one line stays unattributed until the scholar decides it. Contested readings (Raagmala, Bhai Mardana) are recorded unchanged and flagged for review (#308).
+
+### Added
+- **Contributors roster v2** (`contributors.json`, one source for web and iOS), with all 36 voices (#305, #308):
+  - honorific and Gurmukhi names, and pen-names proven verbatim in the corpus
+  - notable Banis by composition
+  - approximate places
+  - life facts cited only from The Encyclopaedia of Sikhism and Sahib Singh's Darpan; where no source supports a date, it is shown as "Dates not established"
+  - every biographical entry stays a draft until the scholar review (G3); `tools/check_contributors.py` refuses drafts on the App Store channel
+- **API:** `/api/analytics/author` returns per-voice `facts`, `named_by` / `names`, and `dialogues` (#308).
+
+### Changed
+- **Insights and Lineage on the website** report only what the data supports: one canonical count per voice, Gurmukhi distinctive words labelled as Gurmukhi, and no claims beyond the cited sources (#305, #308).
+- **Constellation copy** follows the G3 pre-review: theme descriptions are labelled "About this theme … an editorial note, not scripture", and "matched by a shared word, not by meaning" (#304).
+- **Privacy policy:** it now names the two new things the app keeps on the device. Theme names (no personal data) are added to Spotlight, and "Your themes" is worked out on the phone from saved verses, can be turned off, and is never sent anywhere. The Vaar reader's position is kept in the app's own container.
+
+### Changed (iOS, gurbani-soul-ios #57–#81)
+- **Vaars v2:** a home of voices for the 22 Vaars, a weave of each Vaar's pauris and saloks as printed, a continuous reader with a pauris-only view and resume, `sggs://vaar/<n>` deep links and "Read a Vaar" in Siri.
+- **Index 2.0:** the Index follows the saroop. It adds the Granth Ribbon, a page for every raag (with "In this hour"), compositions with their printed rhythm, Continue, Find in Index, and a Forms tab of the poetic forms the printed headings name.
+- **Themes v2:** a living index with a theme of the day, a page for every theme, a verse list you can narrow with true totals, on-device "Your themes", themes in Spotlight and Siri.
+- **Lineage v2 and Voices of the Granth:**
+  - one count for each voice
+  - a Voice page for every voice
+  - the River timeline and the Voice of the day
+  - Compare v2
+  - `sggs://voice/<slug>` and "Open a voice"
+  - the Insights dot field, Granth ribbon and Echoes
+- **Explanations wait for the scholar:** every sentence that explains rather than shows the text is behind a scholar-review switch that is off in this release.
+
 ## [1.4.8] — 2026-10-23
 
 Constellation v2: the Granth, seen by idea. It ships on the website, the API and the iPhone app together.

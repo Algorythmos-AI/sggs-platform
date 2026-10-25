@@ -22,6 +22,7 @@
 .tl-name { overflow-wrap:anywhere; font-size:16px; font-weight:700; letter-spacing:-.01em; }
 .tl-kind { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--kt); white-space:nowrap; }
 .tl-era { font-size:11.5px; color:var(--soft); margin-top:1px; }
+.tl-gm { display:block; font-size:13px; color:var(--soft); margin-top:1px; }   /* Gurmukhi: neutral ink only */
 .tl-bar { display:block; height:5px; border-radius:99px; background:var(--chip); margin:8px 0 5px; overflow:hidden; }
 .tl-bar i { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg, var(--k), color-mix(in srgb, var(--k) 55%, var(--gold))); }
 .tl-lines { font-size:11px; color:var(--faint); }

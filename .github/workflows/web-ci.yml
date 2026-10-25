@@ -26,6 +26,8 @@ jobs:
       - name: Unit tests — platform (webapp/tests)
         run: |
           python3 -m unittest discover -s webapp/tests -v
+      - name: Contributors roster v2 (sources, pen-names and Banis proven against the pinned corpus)
+        run: python3 tools/check_contributors.py
       - name: Health + shabad heading regression
         run: |
           (cd webapp && SGGS_OPEN_BROWSER=0 SGGS_PORT=7777 python3 serve.py &) ; sleep 3
