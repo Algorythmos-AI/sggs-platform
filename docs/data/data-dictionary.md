@@ -11,11 +11,11 @@ Every table in the pinned database: 40 tables, of which 4 are full-text indexes 
 
 | The pinned dataset | |
 |---|---|
-| Built by | [`Algorythmos-AI/sggs-data`](https://github.com/Algorythmos-AI/sggs-data) at `f818b3aa` |
-| `DATASET_VERSION` (the lock) | `1.1.0` |
-| Database build version (`meta.version`) | `1.1.0`, built 2026-10-23 |
-| SHA-256 | `e90eab8918cf80d0…` |
-| Size | 103.6 MiB |
+| Built by | [`Algorythmos-AI/sggs-data`](https://github.com/Algorythmos-AI/sggs-data) at `c36e3172` |
+| `DATASET_VERSION` (the lock) | `1.2.0` |
+| Database build version (`meta.version`) | `1.2.0`, built 2026-10-24 |
+| SHA-256 | `ff5e5de70027dbeb…` |
+| Size | 103.5 MiB |
 | Lines · Angs | 60,658 · 1,430 |
 
 Which version is which, and how a new dataset arrives, is on [the dataset pin](dataset-pin.md). The
@@ -162,7 +162,7 @@ Descriptive statistics over structure, the theme tags and the English. See [the 
 | [`shabad_neighbors`](#shabad_neighbors) | 43,800 | insights | For each composition, the ten with the most similar theme profile. |
 | [`theme_fingerprint`](#theme_fingerprint) | 2,315 | insights | How strongly each author or raag carries each theme, as lift over the whole Granth. |
 | [`theme_network`](#theme_network) | 2,528 | insights | Theme pairs that occur in the same shabads, with PPMI and Jaccard. |
-| [`vaar_units`](#vaar_units) | 1,426 | insights | Each Vaar's saloks and pauris in reading order. |
+| [`vaar_units`](#vaar_units) | 1,443 | insights | Each Vaar's saloks and pauris in reading order. |
 | [`vaars`](#vaars) | 22 | insights | The Vaars: span, pauri and salok counts, and who wrote each part. |
 
 ### author_analytics
