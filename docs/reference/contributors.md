@@ -26,12 +26,12 @@ This is historical context, never a ranking.
 | Guru Arjan Dev Ji (M5) | Guru Arjan Dev Ji | 1563–1606 | Fifth Guru · 1563–1606 | Punjab (Goindval / Amritsar / Lahore) | Fifth Guru · Compiler |
 | Guru Tegh Bahadur Ji (M9) | Guru Tegh Bahadur Ji | 1621–1675 | Ninth Guru · 1621–1675 | Punjab (Amritsar / Anandpur) · Delhi | Ninth Guru |
 
-- **Guru Nanak Dev Ji** — Guru Nanak was born on 15 April 1469 at Rai Bhoi ki Talwandi, now Nankana Sahib. After years of travel he settled around 1521 at Kartarpur, where he joined devotion to God with the life of a householder. Before his death on 7 September 1539 he installed Bhai Lahina, whom he renamed Angad, as his successor.
-- **Guru Angad Dev Ji** — Guru Angad was born Lahina on 31 March 1504 at Matte di Sarai, now Sarai Naga. Guru Nanak named him his successor. He passed away at Khadur on 29 March 1552, handing the succession to Guru Amar Das.
-- **Guru Amar Das Ji** — Guru Amar Das was born on 5 May 1479 at Basarke and became Guru in 1552, after Guru Angad. Goindval, a settlement he founded at Guru Angad's bidding, was his seat. Before his death on 1 September 1574 he chose Bhai Jetha, his son-in-law, as his successor, Guru Ram Das.
-- **Guru Ram Das Ji** — Guru Ram Das was born Jetha on 24 September 1534 in Chuna Mandi, Lahore, and lived at Goindval near Guru Amar Das, who chose him as successor. He founded the settlement that became Amritsar, and he died at Goindval on 1 September 1581.
-- **Guru Arjan Dev Ji** — Guru Arjan was born on 15 April 1563 at Goindval, the son of Guru Ram Das and Bibi Bhani. He compiled the Adi Granth, installed in the Harimandar on 16 August 1604; over a third of it is his own Bani. He was the first martyr of the Sikh faith, at Lahore on 30 May 1606.
-- **Guru Tegh Bahadur Ji** — Guru Tegh Bahadur, youngest son of Guru Hargobind, was born at Amritsar on 1 April 1621. He founded Chakk Nanaki, later Anandpur, naming it after his mother. He was beheaded in public in Chandni Chowk, Delhi, on 11 November 1675, having named his son Gobind Das as his successor.
+- **Guru Nanak Dev Ji** — The first Guru and founder of the Sikh faith; the Granth opens with his Mool Mantar and Japji.
+- **Guru Angad Dev Ji** — The second Guru; his Bani is saloks, set within the Vaars of the Granth.
+- **Guru Amar Das Ji** — The third Guru; author of the Anand Sahib.
+- **Guru Ram Das Ji** — The fourth Guru, who founded Amritsar; his Laavan are sung at the Sikh wedding.
+- **Guru Arjan Dev Ji** — The fifth Guru, who compiled the Adi Granth (installed 1604); the author of Sukhmani Sahib.
+- **Guru Tegh Bahadur Ji** — The ninth Guru, martyred at Delhi in 1675; his saloks close the Bani of the Gurus in the Granth.
 
 ## The Bhagats (15)
 
@@ -53,21 +53,21 @@ This is historical context, never a ranking.
 | Bhagat Surdas Ji | Bhagat Surdas Ji | b. c. 1529 | 16th century | Awadh (Sandila) · Banaras | Bhakta poet |
 | Bhagat Beni Ji | Bhagat Beni Ji | not recorded | uncertain (medieval) | Not recorded | Sant |
 
-- **Bhagat Jaidev Ji** — Jaidev is chiefly known as the author of the Gita Govinda. He was born at Kindu Bilva, identified with Kenduli in Bengal or Kenduli-Sasan near Puri, and died in his birth village. Two of his hymns are in the Granth.
-- **Baba Sheikh Farid Ji** — Shaikh Farid was born in AD 1173 (569 AH) at Kothewal, near Multan, and died in 1265. A Sufi of the Chishti order, he set up a centre at Hansi and later at Ajodhan, now Pakpattan. He is known as the first recorded poet of the Punjabi language.
-- **Bhagat Trilochan Ji** — Trilochan was a Maharashtrian saint-poet, said to have been born in 1267 to a Vaishya family. Four of his hymns are in the Granth, in Siri, Gujri and Dhanasri. Two saloks among Kabir's present a dialogue between him and Namdev.
-- **Bhagat Namdev Ji** — Namdev was born in 1270 at Narasi-Vamani in Maharashtra, to a tailor's family, and turned to bhakti under Jnanadeva. He is said to have lived for over twenty years at Ghuman in the Punjab, and later settled at Pandharpur. Sixty-one of his hymns are in the Granth.
-- **Bhagat Ramanand Ji** — Ramanand was born at Prayag and taught at Kashi, where he founded the Ramanandi sampradaya. Tradition names Kabir, Ravidas, Sain and Dhanna among his disciples, though the dates make this impossible for all of them. His one hymn in the Granth (Basant, Ang 1195) rejects idol-worship.
-- **Bhagat Sadhna Ji** — Sadhna lived by selling meat and won spiritual eminence through devotion. He is believed to have been born at Sehwan in Sindh and was cremated at Sirhind, where a tomb honours him. His only hymn, in Bilaval (Ang 858), asks the Lord to save the honour of His servant.
-- **Bhagat Kabir Ji** — Kabir's life centred on Kashi (Banaras), where he worked as a weaver. Of all the Bhagats his contribution to the Granth is the largest: 227 padas in 17 raags and 237 saloks. He spent his last days at Magahar rather than Banaras.
-- **Bhagat Dhanna Ji** — Dhanna was born in the village of Dhuan in Tonk district, Rajasthan, the son of a farmer. In a hymn in Asa he tells how the examples of Namdev, Kabir, Ravidas and Sain drew him to God. He turned from worshipping idols to the Formless One, and three of his hymns are in the Granth.
-- **Bhagat Pipa Ji** — Pipa was a prince, born at Gagraun about 1425, who renounced his throne after initiation by Ramanand at Kashi. He later lived at Dwarka and gave up idol-worship. His one hymn in the Granth (Dhanasri, Ang 695) finds the Divine within the body.
-- **Bhagat Ravidas Ji** — Ravidas was born near Varanasi to a family of leather-workers and followed the family trade. He came to reject idol-worship and distinctions of caste, and Mirabai was among his followers. Forty of his hymns are in the Granth.
-- **Bhagat Sain Ji** — All accounts agree that Sain was a barber. Bhai Gurdas makes him a disciple of Ramanand. Guru Arjan names him as a bhakta of rare devotion (Ang 487), and Ravidas ranks him with Namdev, Kabir, Trilochan and Sadhna (Ang 1106). His one hymn (Dhanasri, Ang 695) teaches that singing the Lord's praise and meditating on His Name are the highest worship.
-- **Bhagat Bhikhan Ji** — Bhakta Bhikhan was a devotee in the tradition of Ravidas and Dhanna; he is distinct from a Sufi of the same name and time. His two hymns in the Granth call the Name of Hari the cure for all the ills of the world.
-- **Bhagat Parmanand Ji** — Parmanand was a Maharashtrian saint-poet, born probably in 1483, who is believed to have lived at Barsi, north of Pandharpur. He wrote under the pen-name Sarang. His one hymn in the Granth (Sarang, Ang 1253) faults reading the scriptures as ritual when it does not lead to serving others.
-- **Bhagat Surdas Ji** — Surdas, born Madan Mohan, is said to have been born in 1529 into a Brahmin family. He served Akbar as governor of Sandila, renounced the world, and died at Banaras. The Granth keeps one line of his, `ਛਾਡਿ ਮਨ ਹਰਿ ਬਿਮੁਖਨ ਕੋ ਸੰਗੁ` (Sarang, Ang 1253). The shabad after it, headed `ਸਾਰੰਗ ਮਹਲਾ ੫ ਸੂਰਦਾਸ`, is Guru Arjan's, written in response.
-- **Bhagat Beni Ji** — Very little is known of Beni's life except his devotion to prayer and meditation; Bhai Gurdas refers to it. Three of his hymns are in the Granth, in Siri, Ramkali and Prabhati. Guru Arjan directed that the Siri hymn be sung in the tune of Guru Nanak's Pahire.
+- **Bhagat Jaidev Ji** — Poet of the Gita Govinda; two of his hymns are in the Granth.
+- **Baba Sheikh Farid Ji** — Sufi mystic, known as the first recorded poet of the Punjabi language.
+- **Bhagat Trilochan Ji** — A Maharashtrian sant, learned in Puranic lore; four of his hymns are in the Granth.
+- **Bhagat Namdev Ji** — Marathi sant of fervent devotion; sixty-one of his hymns are in the Granth.
+- **Bhagat Ramanand Ji** — Teacher of Vaishnava bhakti at Kashi; his single hymn in the Granth rejects idol-worship.
+- **Bhagat Sadhna Ji** — A butcher by trade whose single hymn asks the Lord to save his honour.
+- **Bhagat Kabir Ji** — The weaver-mystic of Kashi; his Bani is the largest of any Bhagat in the Granth.
+- **Bhagat Dhanna Ji** — A Jatt farmer of Rajasthan, drawn to devotion by Namdev, Kabir, Ravidas and Sain; three hymns are his.
+- **Bhagat Pipa Ji** — A prince of Gagraun who gave up his throne; his one hymn finds the Divine within the body.
+- **Bhagat Ravidas Ji** — Poet and mystic of Varanasi who rejected caste; forty of his hymns are in the Granth.
+- **Bhagat Sain Ji** — A barber-saint whose one hymn in the Granth calls praise of the Lord the true aarti.
+- **Bhagat Bhikhan Ji** — A sant in the tradition of Ravidas and Dhanna; two of his hymns are in the Granth.
+- **Bhagat Parmanand Ji** — A Maharashtrian saint-poet whose one hymn puts devotion and service above ritual reading.
+- **Bhagat Surdas Ji** — A bhakta poet of whom the Granth keeps one line, answered by a shabad of Guru Arjan.
+- **Bhagat Beni Ji** — A sant of single-minded meditation; three of his hymns are in the Granth.
 
 ## The Bhatts (12)
 
@@ -88,16 +88,16 @@ This is historical context, never a ranking.
 
 - **Bhatt Bal Ji** — Balh, son of Tokha (a brother of Rayya), wrote Swaiyye on the spiritual oneness of the Gurus, in the set praising Guru Ram Das.
 - **Bhatt Bhal Ji** — Bhalh, a son of Sekha, wrote one Swaiyya, in praise of Guru Amar Das.
-- **Bhatt Bhikha Ji** — Bhikha, son of Rayya, was a Brahmin bard of Sultanpur Lodhi who received initiation from Guru Amar Das. He lived until Guru Arjan's time and introduced to him sixteen other bards; his Swaiyye praise Guru Amar Das.
+- **Bhatt Bhikha Ji** — Bhikha, son of Rayya, was a Brahmin bard of Sultanpur Lodhi who received initiation from Guru Amar Das.
 - **Bhatt Gayand Ji** — Gayand's Swaiyye glorify Guru Ram Das.
 - **Bhatt Haribans Ji** — Haribans, eldest son of Gokha (a brother of Rayya), wrote two Swaiyye, both in praise of Guru Arjan.
-- **Bhatt Jalap Ji** — Jalap, a son of Bhatt Bhikha, moved to Goindval with his father. His Swaiyye are in praise of Guru Amar Das.
-- **Bhatt Kalsahar Ji** — Kalh, also called Kalsahar or Kal Thakur, was a son of Bhatt Bhikha and is reckoned the most learned of the Bhatts. His Swaiyye, the most of any Bhatt, praise all five Gurus, Guru Nanak to Guru Arjan.
+- **Bhatt Jalap Ji** — Jalap, a son of Bhatt Bhikha, moved to Goindval with his father.
+- **Bhatt Kalsahar Ji** — Kalh, also called Kalsahar or Kal Thakur, was a son of Bhatt Bhikha and is reckoned the most learned of the Bhatts.
 - **Bhatt Nal Ji** — Nalh's Swaiyye are all in praise of Guru Ram Das.
 - **Bhatt Sal Ji** — Salh, a son of Sekha (brother of Rayya, Bhikha's father), wrote Swaiyye on the pre-eminence of Guru Amar Das and Guru Ram Das.
-- **The Bhatts** — The Bhatts were bards of Brahmin families from the banks of the Sarasvati; some had settled at Sultanpur Lodhi. Their Swaiyye (Angs 1389–1409) praise the Gurus not as individuals but as one light passing from body to body. This entry holds the Swaiyye headers and the lines the corpus does not credit to a named Bhatt.
+- **The Bhatts** — The Bhatts were bards of Brahmin families from the banks of the Sarasvati; some had settled at Sultanpur Lodhi.
 - **Bhatt Kirat Ji** — Kirat, a son of Bhatt Bhikha, wrote Swaiyye in praise of Guru Amar Das and Guru Ram Das.
-- **Bhatt Mathura Ji** — Mathura, a son of Bhatt Bhikha, sang the praise of Guru Ram Das and Guru Arjan. Trained in arms in Guru Hargobind's time, he fell in the battle of Amritsar in 1634.
+- **Bhatt Mathura Ji** — Mathura, a son of Bhatt Bhikha, sang the praise of Guru Ram Das and Guru Arjan.
 
 ## Gursikhs (3)
 
@@ -107,9 +107,9 @@ This is historical context, never a ranking.
 | Baba Sundar Ji | Baba Sundar Ji | fl. 16th c. | 16th century | Punjab (Goindval) | Great-grandson of Guru Amar Das |
 | Satta & Balwand | Bhai Satta Ji & Bhai Balwand Ji | fl. 16th c. | 16th–17th century | Punjab (Lahore) | Rababis of the Gurus' court |
 
-- **Bhai Mardana Ji** — Mardana was born in 1459 at Talwandi Rai Bhoe to a Mirasi family of hereditary minstrels. He grew up with Guru Nanak, was ten years his senior, and played the rabab as the Guru sang on all his travels. He died at Kartarpur in 1534.
-- **Baba Sundar Ji** — Sundar was the great-grandson of Guru Amar Das: his father was Anand Das, son of Baba Mohri. His six-stanza Ramkali Sadu tells of Guru Amar Das's last counsel, not to mourn him, and of his appointing Ram Das as successor. The Sadu is commonly read when a reading of the Granth concludes as part of the obsequies.
-- **Bhai Satta Ji & Bhai Balwand Ji** — Rai Balwand and Satta, said to be brothers, were Muslim Mirasi minstrels who played the rabab for Guru Arjan. Their Ramkali ki Vaar, known as Tikke di Vaar, sees all the Gurus as sharing one light. Both died at Lahore in the time of Guru Hargobind and were buried on the bank of the Ravi.
+- **Bhai Mardana Ji** — Guru Nanak's companion and rabab player on his travels. Saloks at Ang 553 carry his name (ਮਰਦਾਨਾ ੧); many read them as Guru Nanak's words addressed to him — under scholarly review.
+- **Baba Sundar Ji** — Author of the Sadu, which tells of Guru Amar Das's peaceful, God-willed passing.
+- **Bhai Satta Ji & Bhai Balwand Ji** — The two rababis whose Vaar praises the one light passing from Guru to Guru.
 
 Source: `frontend/public/contributors.json` (vendored by the app at each platform release). To change an
 entry, edit the JSON, run `python3 tools/check_contributors.py`, then `python3 tools/gen_contributors.py`.
