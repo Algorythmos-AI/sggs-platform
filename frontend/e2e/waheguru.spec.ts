@@ -46,12 +46,12 @@ test('every spelling finds the same lines in the search', async ({ page }) => {
   }
 });
 
-test('the palette finds the theme as "Waheguru" and as its slug', async ({ page }) => {
+test('the palette finds the theme under every spelling', async ({ page }) => {
   await open(page, '/library');
   await page.locator('#paletteBtn').click();
   const q = page.locator('#paletteQ');
   const theme = page.locator('#paletteList .pal-item').filter({ hasText: 'Theme' }).filter({ hasText: 'Waheguru' });
-  for (const typed of ['waheguru', 'vahiguru']) {
+  for (const typed of ['waheguru', 'Waheguru', 'vaheguru', 'vahiguru', 'wahiguru', 'wahe']) {
     await q.fill(typed);
     await expect(theme.first(), typed).toHaveAttribute('href', '/search?q=vahiguru&mode=theme');
   }

@@ -5,7 +5,7 @@
 // search. It only navigates — every result is a link.
 import { esc, meta, api, store, validAng } from './core';
 import { overlayOpened, overlayClosed } from './overlay';
-import { themeName } from './themegroups';
+import { themeName, themeAliases } from './themegroups';
 
 type Item = { kind: string; label: string; gm?: string; sub?: string; href: string; hay: string };
 const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T | null;
@@ -25,7 +25,7 @@ async function load(): Promise<Item[]> {
     for (const a of m.authors || []) out.push({ kind: 'Contributor', label: a.name, sub: `${Number(a.n_lines).toLocaleString()} lines · first on Ang ${a.first_ang}`,
       href: `/reader?ang=${a.first_ang}`, hay: String(a.name).toLowerCase() });
     for (const c of m.concepts || []) out.push({ kind: 'Theme', label: themeName(String(c.concept)), sub: `${c.n_lines} lines`,
-      href: `/search?q=${encodeURIComponent(c.concept)}&mode=theme`, hay: `${themeName(String(c.concept))} ${String(c.concept).replace(/_/g, ' ')}`.toLowerCase() });
+      href: `/search?q=${encodeURIComponent(c.concept)}&mode=theme`, hay: [themeName(String(c.concept)), String(c.concept).replace(/_/g, ' '), ...themeAliases(String(c.concept))].join(' ').toLowerCase() });
   } catch { /* the pages and the search still work */ }
   try {
     const d = await api('banis');

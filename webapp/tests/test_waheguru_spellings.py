@@ -11,6 +11,7 @@ import serve  # noqa: E402
 from sggs.search import concept_by_fold  # noqa: E402
 
 SPELLINGS = ("waheguru", "Waheguru", "vaheguru", "Vaheguru", "vahiguru", "wahiguru")
+JI_FORMS = ("waheguruji", "Waheguruji", "vaheguruji", "vahiguruji", "wahiguruji")
 skip_no_db = unittest.skipUnless(os.path.exists(serve.DB), "db/sggs.sqlite not present (run `make dataset`)")
 
 
@@ -24,7 +25,7 @@ class WaheguruSpellings(unittest.TestCase):
         want = search("waheguru", "auto")
         self.assertTrue(want["results"])
         ids = [r["id"] for r in want["results"]]
-        for q in SPELLINGS:
+        for q in SPELLINGS + JI_FORMS + ("WAHEGURU",):
             with self.subTest(q=q):
                 got = search(q, "auto")
                 self.assertEqual([r["id"] for r in got["results"]], ids)

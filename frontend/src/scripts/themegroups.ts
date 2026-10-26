@@ -36,3 +36,7 @@ const titleCase = (k: string) => k.split('_').map((w) => w.charAt(0).toUpperCase
 // webapp/sggs/search.py SEEKER_LEXICON and theme_search).
 const THEME_NAMES: Record<string, string> = { vahiguru: 'Waheguru' };
 export const themeName = (k: string) => THEME_NAMES[k] || titleCase(k);
+// Other Roman spellings a reader may type for a theme (native parity: gurbani-soul-ios
+// ConceptName.aliases), so the palette finds the theme under each of them.
+const THEME_ALIASES: Record<string, string[]> = { vahiguru: ['waheguru', 'vaheguru', 'wahiguru'] };
+export const themeAliases = (k: string) => THEME_ALIASES[k] || [];
