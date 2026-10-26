@@ -434,6 +434,12 @@ html.js-motion .reveal.in[data-delay="2"] { transition-delay: 160ms; }
 .mosaic .tile { display: flex; flex-direction: column; }
 .mosaic .tile .tile-img { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: var(--paper-2); }
 .mosaic .tile--tall .tile-img { aspect-ratio: auto; flex: 1 1 auto; min-height: 240px; }
+/* Below the 3-column grid a two-row tile is narrower than a phone screenshot, so cover-fit would cut
+   both edges: it spans the two columns instead and shows the top of the screen. */
+@media (max-width: 979px) {
+  .mosaic--3 .tile--tall { grid-column: span 2; grid-row: auto; }
+  .mosaic--3 .tile--tall .tile-img { aspect-ratio: 1 / 1; flex: none; min-height: 0; }
+}
 .mosaic .tile .tile-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
 .mosaic .tile figcaption { padding: 12px 16px 14px; font-size: 14px; line-height: 1.45; color: var(--ink-soft); border-top: 1px solid var(--line); }
 .mosaic .tile figcaption strong { display: block; color: var(--ink); font-weight: 650; font-size: 15px; }

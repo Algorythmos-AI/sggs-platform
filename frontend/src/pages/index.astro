@@ -32,10 +32,31 @@ import wHukam from '../assets/app/widget-hukam-medium-light.png';
 import wNitnem from '../assets/app/widget-nitnem-medium-light.png';
 import laCard from '../assets/app/iphone-live-activity-card.png';
 import aboutShot from '../assets/app/iphone-about-light.png';
+import vaarsShot from '../assets/app/iphone-vaars-light.png';
+import indexShot from '../assets/app/iphone-index-light.png';
+import formsShot from '../assets/app/iphone-index-forms-light.png';
+import voiceShot from '../assets/app/iphone-voice-m9-light.png';
+import compareShot from '../assets/app/iphone-compare-light.png';
 
-// Explore tiles: the app's own 1.4.9 screenshots (src/assets/app, provenance in SHOTS.md). Empty
-// until the verified set lands; the chapter then shows the counts alone.
-const exploreTiles: { src: ImageMetadata; alt: string; name: string; caption: string }[] = [];
+// Explore tiles: the app's own 1.4.9 screenshots (src/assets/app, provenance in SHOTS.md). The first
+// is drawn tall. Themes and Constellation have no verified 1.4.9 shot yet, so they stay copy only.
+const exploreTiles: { src: ImageMetadata; alt: string; name: string; caption: string }[] = [
+  { src: vaarsShot, name: "The Vaars",
+    caption: `All ${FACTS.vaars} Vaars, with the voices who wrote each one's pauris and saloks.`,
+    alt: "The Vaars screen on iPhone: 22 Vaars, 471 pauris and 972 saloks, then each Vaar by raag with its voices" },
+  { src: indexShot, name: "The Index",
+    caption: `The Granth in saroop order, Ang 1 to Ang ${fmt(FACTS.angs)}.`,
+    alt: "The Index on iPhone: the saroop ribbon across 1,430 Angs, and the major compositions with their reading times" },
+  { src: formsShot, name: "Forms",
+    caption: "The poetic forms the printed headings name, and where each is found.",
+    alt: "The Index on iPhone, Forms tab: each poetic form named in the printed headings, with the raag and Ang of each place" },
+  { src: voiceShot, name: "A voice's page",
+    caption: "Guru Tegh Bahadur Ji's page: where their Bani sits in the Granth, and in which raags.",
+    alt: "The page for Guru Tegh Bahadur Ji on iPhone: dates, the Angs where their Bani appears, and counts of verses, compositions and raags" },
+  { src: compareShot, name: "Compare",
+    caption: "Two voices side by side: where each appears, and the themes each dwells on.",
+    alt: "Compare on iPhone: Guru Tegh Bahadur Ji beside Guru Nanak Dev Ji, the Angs where each appears and how strongly each carries a theme" },
+];
 
 const desc = "Gurbani Soul is a quiet, exact companion to Sri Guru Granth Sahib Ji for iPhone and iPad — the complete Granth, verbatim and cited by Ang, fully offline, never AI-generated.";
 
@@ -207,7 +228,7 @@ const softwareApplication = {
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="pair">
-          <DeviceFrame src={searchRoman} alt="Search on iPhone: the Roman word naam finds matching lines in Auto mode" />
+          <DeviceFrame src={searchRoman} alt="Search on iPhone: the Roman word naam, in Auto mode, finds matching lines with their Ang and voice" />
           <DeviceFrame src={searchFirst} alt="Search on iPhone by first letters, finding a line from Ang 1" />
         </div>
       </div>
@@ -234,7 +255,7 @@ const softwareApplication = {
         <div class="stage stage--ipad">
           <DeviceFrame kind="ipad" src={ipadNitnem} alt="Nitnem on iPad in landscape: the morning banis with progress rings, and the full list by time of day" />
           <div class="overlap media-secondary">
-            <DeviceFrame src={baniJapji} sizes="200px" alt="Japji Sahib open in the Nitnem reader on iPhone" />
+            <DeviceFrame src={baniJapji} sizes="200px" alt="Japji Sahib open in the Nitnem reader on iPhone, cited Ang 1 to 8, at line 1 of 385" />
           </div>
         </div>
       </div>
@@ -271,10 +292,10 @@ const softwareApplication = {
         <div class="widgets">
           <div class="wrow">
             <figure class="widget widget--s"><Image src={wRaagLight} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt="Raag Now widget, small: the 24-hour dial at 4:40 pm, the 4th pahar of day" /></figure>
-            <figure class="widget widget--m"><Image src={wHukam} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Hukam widget, medium: a verse from Ang 13 with its citation" /></figure>
+            <figure class="widget widget--m"><Image src={wHukam} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Hukam of the day widget, medium: an opening verse with its transliteration, cited Sri Guru Granth Sahib Ji, Ang 13" /></figure>
           </div>
           <div class="wrow wrow--rev">
-            <figure class="widget widget--m"><Image src={wNitnem} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Nitnem widget, medium: the next bani of the day" /></figure>
+            <figure class="widget widget--m"><Image src={wNitnem} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Nitnem widget, medium: the morning banis, with Jaap Sahib next and a progress ring" /></figure>
             <figure class="widget widget--s"><Image src={wRaagDark} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt="Raag Now widget, small, in the dark scheme: the 24-hour dial at 4:40 pm, the 4th pahar of day" /></figure>
           </div>
           <figure class="la">
@@ -299,7 +320,7 @@ const softwareApplication = {
         ? <div class="mosaic mosaic--3 reveal" data-delay="1">
             {exploreTiles.map((t, i) => (
               <figure class:list={["tile", { "tile--tall": i === 0 }]}>
-                <div class="tile-img"><Image src={t.src} widths={[400, 800]} sizes="(min-width: 980px) 380px, 46vw" loading="lazy" decoding="async" alt={t.alt} /></div>
+                <div class="tile-img"><Image src={t.src} widths={[400, 800]} sizes={i === 0 ? "(min-width: 980px) 380px, 92vw" : "(min-width: 980px) 380px, 46vw"} loading="lazy" decoding="async" alt={t.alt} /></div>
                 <figcaption><strong>{t.name}</strong>{t.caption}</figcaption>
               </figure>
             ))}
@@ -346,7 +367,7 @@ const softwareApplication = {
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="stage">
-          <DeviceFrame src={aboutShot} alt="About screen on iPhone: the scripture integrity checks, all passed" />
+          <DeviceFrame src={aboutShot} alt="About screen on iPhone, version 1.4.9: the four scripture integrity checks, all passed" />
         </div>
       </div>
     </div>
