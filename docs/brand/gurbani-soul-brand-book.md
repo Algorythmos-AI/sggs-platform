@@ -162,7 +162,7 @@ The icon has its own grid; the layout clear-space rule above would keep it too s
   The stroke must stay at or above 2 px at the 58 px size, and the kaar at least 8% inside the icon mask.
 - **Pothi:** two lines, 40 px on the 1024 canvas. A plain open book, not a depiction of a Bir.
 - **Light and depth live in the field only.** The mark and the pothi are one flat colour in every appearance.
-  The icon field is a permitted gradient, alongside the Explore hero and the share-card rule (§6).
+  The icon field is a permitted gradient, alongside the share-card rule (§6).
 - **Layered icon (iOS 26 and later):** the same geometry as an Icon Composer document, with the system's
   specular highlight turned off so the mark is never embossed.
 - Red is not used in the icon. The field is warmer and deeper than the literal brand gold, and the mark on
@@ -202,9 +202,9 @@ the black tile disappeared on dark backgrounds.
 | Secondary button | Card surface · hairline · `accentText` label |
 | Selected pill | As primary button, radius 8 |
 | Card | Unchanged: shadow in light, hairline in dark, radius 12 |
-| Explore hero | **Flat `accentFill`**, `onAccent` text. Gradient `accentFill -> accentDeep` allowed only here and on the share-card rule |
+| Explore hub | No hero slab: a dated masthead (Source Serif 4 hero line), then cards on the Card surface. The only gold fill is the **Featured today** capsule: `accentFill` + 1-pt `accent` border, `onAccent` label (the selected-pill recipe). Card previews (ribbon, dot field, dial, sky) use `accent` tints and the family/voice tokens; Gurmukhi raag names and the one quoted verse are ink. Gradient `accentFill -> accentDeep` allowed only on the share-card rule |
 | Focus highlight | `accent` at 18% |
-| Glow | A radial/linear `accentFill` (or `accent`) wash at **≤14%** over an AA-checked surface — a light, never a text background. Used on the Nitnem hero, the Raag Clock now-card, Lineage, and every widget's `PaperGround`. Distinct from the Explore-hero *gradient* (opaque `accentFill→accentDeep`), which stays limited to that hero and the share-card rule. |
+| Glow | A radial/linear `accentFill` (or `accent`) wash at **≤14%** over an AA-checked surface — a light, never a text background. Used on the Nitnem hero, the Raag Clock now-card, Lineage, and every widget's `PaperGround`. Distinct from the opaque `accentFill→accentDeep` *gradient*, which stays limited to the share-card rule. |
 | Reader paper | `Ink.paper` (default), `Ink.paperWarm` (#FDF6E3 light — hue-shifted, still clears every accent pair), or Night (the warm-ink dark scheme forced on the reader subtree; no new colours). |
 | Share card (VerseCard) | Paper surface, ink Gurmukhi, gold rule, full citation "Sri Guru Granth Sahib Ji · Ang N" |
 | Widgets | Card surface, gold rule, `accentText` labels; same tokens as the app. The Raag Now dial (`PaharDialRenderer`) is the same face as the app: `accentFill` current watch with an `accent` stroke, `accent` hand; lock-screen accessories render it mono. The 12-hour analog face (`ClockHandsLayer`) uses ink tapered hands and an `accent` seconds hand (app only; widgets show hour/minute at the entry minute); the day/date number is `accentText`. |
