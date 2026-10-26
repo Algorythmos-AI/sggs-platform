@@ -10,10 +10,10 @@ test('/features renders the chapters, the at-a-glance list and device shots @smo
   expect(res?.status()).toBe(200);
   await expect(page.locator('h1')).toBeVisible();
 
-  // the six-capability "at a glance" list is present, each row anchoring a chapter on the page
-  expect(await page.locator('dl.feat-list .feat-row dt').count()).toBe(6);
+  // the nine-capability "at a glance" list is present, each row anchoring a chapter on the page
+  expect(await page.locator('dl.feat-list .feat-row dt').count()).toBe(9);
   const anchors = await page.locator('dl.feat-list dt a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
-  expect(anchors).toHaveLength(6);
+  expect(anchors).toHaveLength(9);
   for (const href of anchors) {
     await expect(page.locator(`[data-chapter]${href}`)).toHaveCount(1);
   }

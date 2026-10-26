@@ -261,6 +261,44 @@ class LandingPage(unittest.TestCase):
             self.assertEqual(store_links, [], "coming-soon build links to the App Store")
             self.assertNotIn("installUrl", self.html, "coming-soon build carries a JSON-LD installUrl")
 
+    def test_landing_facts_match_the_data(self):
+        # Every count the marketing pages quote comes from src/generated/landing-facts.json
+        # (scripts/gen_landing_verse.py). It must agree with the pinned dataset and the roster, so a
+        # dataset or roster change cannot leave a stale number on the site.
+        facts = json.loads((ROOT / "frontend" / "src" / "generated" / "landing-facts.json").read_text(encoding="utf-8"))
+        lock = json.loads((ROOT / "dataset.lock.json").read_text(encoding="utf-8"))
+        self.assertEqual(facts["db_sha256"], lock["database"]["sha256"],
+                         "landing-facts.json was generated from another dataset: run scripts/gen_landing_verse.py")
+        roster = json.loads((ROOT / "frontend" / "public" / "contributors.json").read_text(encoding="utf-8"))["contributors"]
+        self.assertEqual(facts["voices"], len(roster), "landing-facts.json voices != contributors.json")
+        self.assertEqual(facts["voice_traditions"], len({v["kind"] for v in roster}))
+        db = ROOT / "db" / "sggs.sqlite"
+        if not (db.exists() and db.read_bytes()[:15] == b"SQLite format 3"):
+            self.skipTest("db/sggs.sqlite not present (make dataset)")
+        conn = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+        one = lambda sql: conn.execute(sql).fetchone()[0]
+        want = {
+            "angs": one("SELECT max(ang) FROM lines"),
+            "lines": one("SELECT count(*) FROM lines"),
+            "raags": one("SELECT count(*) FROM raags"),
+            "vaars": one("SELECT count(*) FROM vaars"),
+            "vaar_pauris": one("SELECT count(*) FROM vaar_units WHERE kind='pauri'"),
+            "vaar_saloks": one("SELECT count(*) FROM vaar_units WHERE kind='salok'"),
+            "themes": one("SELECT count(*) FROM concepts"),
+            "themed_lines": one("SELECT count(DISTINCT line_id) FROM concept_lines"),
+        }
+        self.assertEqual({k: facts[k] for k in want}, want, "landing-facts.json != db/sggs.sqlite")
+
+    def test_marketing_pages_quote_no_stale_counts(self):
+        # Counts that were true of an older app or dataset must not come back on the built pages.
+        self._skip_if_unbuilt()
+        stale = [r"\b30 (voices|contributors)\b", r"\b53 (themes|concepts)\b"]
+        for route, f in MARKETING_BUILT.items():
+            if f.exists():
+                html = f.read_text(encoding="utf-8")
+                for pat in stale:
+                    self.assertNotRegex(html, pat, f"{route}: stale count matching {pat!r}")
+
     def test_landing_raags_match_db(self):
         # The raags listed under each pahar must be exactly the DB's primary claims for that pahar,
         # and pahar 7 (the silent night) must list none. Since the multi-page redesign the raag

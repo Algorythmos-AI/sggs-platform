@@ -206,6 +206,11 @@ Vercel Production + Preview envs — see [runbook: newsletter](../process/runboo
   `LandingPage` gate compares the rendered `lang="pa"` line byte-for-byte to
   `SELECT gurmukhi FROM lines WHERE ang=1 ORDER BY id LIMIT 1`. Citation is always
   "Sri Guru Granth Sahib Ji · Ang N".
+- **Counts are never typed by hand either.** Every number the marketing pages quote (Angs, lines,
+  characters, raags, Vaars, pauris, saloks, themes, voices) comes from
+  `frontend/src/generated/landing-facts.json`, written by the same script from the DB and
+  `frontend/public/contributors.json`, and read through `frontend/src/facts.ts`. The
+  `LandingPage` gate checks the file against the pinned dataset and the roster.
 - **Honest copy.** The listing lint's forbidden list applies here too: no "AI" except
   "never AI-generated", no "beta", nothing the app does not do.
 
