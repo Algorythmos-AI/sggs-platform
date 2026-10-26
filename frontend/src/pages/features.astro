@@ -32,6 +32,12 @@ import accentSaffron from "../assets/app/accent-saffron.png";
 import accentGold from "../assets/app/accent-gold.png";
 import accentIndigo from "../assets/app/accent-indigo.png";
 import accentTeal from "../assets/app/accent-teal.png";
+import vaarWeave from "../assets/app/iphone-vaar-weave-light.png";
+import vaarReader from "../assets/app/iphone-vaar-reader-light.png";
+import indexShot from "../assets/app/iphone-index-light.png";
+import raagGauri from "../assets/app/iphone-raag-gauri-light.png";
+import voiceM9 from "../assets/app/iphone-voice-m9-light.png";
+import compareShot from "../assets/app/iphone-compare-light.png";
 
 const desc =
   "Everything Gurbani Soul does on your iPhone and iPad — read the whole Granth, search the way you remember, keep your Nitnem, receive the Hukam of the day, read the Vaars, and explore the Index, themes and voices. Verbatim, cited by Ang, fully offline.";
@@ -39,11 +45,27 @@ const desc =
 const ANGS = fmt(FACTS.angs);
 
 // The 1.4.9 surfaces. Each list fills with the app's own screenshots (src/assets/app, provenance in
-// SHOTS.md); while one is empty its chapter shows its copy and figures alone.
-const vaarShots: { src: ImageMetadata; alt: string; label?: string }[] = [];
-const indexShots: { src: ImageMetadata; alt: string; label?: string }[] = [];
+// SHOTS.md); while one is empty its chapter shows its copy and figures alone. Themes and Explore
+// (Constellation) have no verified 1.4.9 shot yet.
+const vaarShots: { src: ImageMetadata; alt: string; label?: string }[] = [
+  { src: vaarWeave, label: "The weave",
+    alt: "Maajh Ki Vaar on iPhone, Angs 137 to 150: its voices with their pauris and saloks, and the weave in reading order, each salok and pauri cited by Ang" },
+  { src: vaarReader, label: "The reader",
+    alt: "Maajh Ki Vaar open in the Vaar reader on iPhone: its printed heading, then the first salok with transliteration under each line" },
+];
+const indexShots: { src: ImageMetadata; alt: string; label?: string }[] = [
+  { src: indexShot, label: "The saroop",
+    alt: "The Index on iPhone: the saroop ribbon across 1,430 Angs, and the major compositions with their reading times" },
+  { src: raagGauri, label: "A raag's page",
+    alt: "Raag Gauri's page on iPhone: raag 3 of 31, Angs 151 to 346, its counts of shabads, verses, Angs and voices, and the voices in this raag" },
+];
 const themeShots: { src: ImageMetadata; alt: string; label?: string }[] = [];
-const voiceShots: { src: ImageMetadata; alt: string; label?: string }[] = [];
+const voiceShots: { src: ImageMetadata; alt: string; label?: string }[] = [
+  { src: voiceM9, label: "A voice's page",
+    alt: "The page for Guru Tegh Bahadur Ji on iPhone: dates, the Angs where their Bani appears, and counts of verses, compositions and raags" },
+  { src: compareShot, label: "Compare",
+    alt: "Compare on iPhone: Guru Tegh Bahadur Ji beside Guru Nanak Dev Ji, the Angs where each appears and how strongly each carries a theme" },
+];
 const exploreShots: { src: ImageMetadata; alt: string; label?: string }[] = [];
 
 // At a glance — nine rows, each linking to its chapter below (a hairline 3×3 grid).
@@ -157,8 +179,8 @@ const jsonLd = {
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="pair">
-          <DeviceFrame src={searchRoman} alt="Search on iPhone: the Roman word naam finds matching lines in Auto mode" />
-          <DeviceFrame src={verifyShot} alt="Verify on iPhone: a pasted line confirmed verbatim against the text, Ang 1" />
+          <DeviceFrame src={searchRoman} alt="Search on iPhone: the Roman word naam, in Auto mode, finds matching lines with their Ang and voice" />
+          <DeviceFrame src={verifyShot} alt="Verify on iPhone: a line typed in Roman letters, confirmed as scripture and shown as its canonical line, Ang 8" />
         </div>
       </div>
     </div>
@@ -176,7 +198,7 @@ const jsonLd = {
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="stage">
-          <DeviceFrame src={hukamShot} alt="A complete shabad in Raag Dhanasari, Ang 13, open in the shabad sheet on iPhone" />
+          <DeviceFrame src={hukamShot} alt="A Hukam open on iPhone: a complete shabad in Raag Kalyan, Ang 1319, with its Rahao line marked and a button to open the Ang in the Reader" />
         </div>
       </div>
     </div>
@@ -283,12 +305,12 @@ const jsonLd = {
       <div class="story-media reveal" data-delay="1">
         <div class="widgets">
           <div class="wrow wrow--rev">
-            <figure class="widget widget--m"><Image src={wHukamDark} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Hukam widget, medium, in the dark scheme: a verse from Ang 13 with its citation" /></figure>
+            <figure class="widget widget--m"><Image src={wHukamDark} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Hukam of the day widget, medium, in the dark scheme: an opening verse with its transliteration, cited Sri Guru Granth Sahib Ji, Ang 13" /></figure>
             <figure class="widget widget--s"><Image src={wRaag} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt="Raag Now widget, small: the 24-hour dial at 4:40 pm, the 4th pahar of day" /></figure>
           </div>
           <div class="wrow">
-            <figure class="widget widget--s"><Image src={wNitnemSmall} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt="Nitnem widget, small: the next bani of the day" /></figure>
-            <figure class="widget widget--m"><Image src={wNitnemDark} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Nitnem widget, medium, in the dark scheme" /></figure>
+            <figure class="widget widget--s"><Image src={wNitnemSmall} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt="Nitnem widget, small: the morning banis, with Jaap Sahib next" /></figure>
+            <figure class="widget widget--m"><Image src={wNitnemDark} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Nitnem widget, medium, in the dark scheme: the morning banis, with Jaap Sahib next and a progress ring" /></figure>
           </div>
           <figure class="la">
             <div class="la-card"><Image src={laCard} widths={[450, 900]} sizes="(min-width: 980px) 740px, 92vw" loading="lazy" decoding="async" alt="Live Activity on the Lock Screen: reading Japji Sahib, a progress ring at 1%" /></div>
