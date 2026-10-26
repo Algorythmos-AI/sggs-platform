@@ -26,7 +26,7 @@
   {
     "id": "step-05",
     "title": "Proven on every deploy",
-    "caption": "CI fails if vercel.json is not what the code generates, if a function bundles anything but its own code and slice, if any context answers with the wrong X-Service (or an unknown prefix does not fall through to all), or if the golden contract — the 305 records the seven HTTP suites replay — does not pass through the gateway on the staging site.",
+    "caption": "CI fails if vercel.json is not what the code generates, if a function bundles anything but its own code and slice, if any context answers with the wrong X-Service (or an unknown prefix does not fall through to all), or if the golden contract — the 311 records the seven HTTP suites replay — does not pass through the gateway on the staging site.",
     "link": "/process/ci-gates/"
   },
   {

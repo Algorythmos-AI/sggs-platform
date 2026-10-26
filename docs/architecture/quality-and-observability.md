@@ -29,7 +29,7 @@ flowchart TB
 | Quality | The promise | Measured by | Enforced where |
 |---|---|---|---|
 | **Fidelity** | Served scripture is byte-identical to the pinned, proven database | `integrity` (row count, Ang range, `quick_check`, the pin agrees with the contract); the data canary | required check on every PR; every six hours in production |
-| **Correctness** | Every route answers exactly as recorded | the golden contract: 305 records replayed over HTTP, plus the Roman-fold and scoring vectors | `python` check, the API image, staging and production deploys |
+| **Correctness** | Every route answers exactly as recorded | the golden contract: 311 records replayed over HTTP, plus the Roman-fold and scoring vectors | `python` check, the API image, staging and production deploys |
 | **Search quality** | Casual and misspelt quotations still find the line | the casual-quote and round-trip harnesses (reported; neither has a pass threshold) | `python` check ([harnesses](../search/harnesses-and-golden-vectors.md)) |
 | **Availability** | The site and API answer, with every health check true | `uptime.yml`, `/api/health`, `/readyz` | every 15 minutes |
 | **Recoverability** | A bad deploy never stays live | the public smoke test after promotion | automatic `vercel rollback` ([rollback](../process/runbooks/rollback.md)) |

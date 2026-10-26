@@ -231,6 +231,9 @@ def search_vectors():
         ('haumai', 'auto'), ('hukam', 'auto'),                            # concept-exact -> theme
         ('ego', 'auto'), ('mercy', 'auto'), ('peace', 'auto'),           # seeker lexicon (theme/translit)
         ('waheguru', 'auto'), ('satnam waheguru', 'auto'),               # lexicon translit / bigram
+        ('vaheguru', 'auto'), ('vahiguru', 'auto'), ('wahiguru', 'auto'),  # every spelling of the Name:
+        ('satnam vaheguru', 'auto'),                                      # the same lines as 'waheguru'
+        ('waheguru', 'theme'), ('vaheguru', 'theme'),                     # theme by fold -> vahiguru, not Naam
         ('darshan', 'auto'), ('seva', 'auto'),                           # lexicon anchors
         ('s n k', 'auto'), ('dh dh r g', 'auto'),                        # roman first-letters
         ('satgur kirpa', 'auto'),                                         # translit / fold

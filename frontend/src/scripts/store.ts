@@ -1,6 +1,7 @@
 // store.ts — the Study Trail "active store": pinned verses in localStorage + lightweight
 // client-side ML aggregation over their corpus theme tags. Pure state/compute, no DOM.
 // (Distinct from core.ts's tiny `store` localStorage primitive — this manages the pin set.)
+import { themeName } from './themegroups';
 
 export type Pin = { line_id: number; gm: string; ang: number; comp_id: number; themes?: string[]; ts: number };
 
@@ -117,8 +118,7 @@ const FRIENDLY: Record<string, string> = {
   dukh_sukh: 'Dukh-Sukh · Sorrow & Joy', sangat: 'Sangat · Holy Congregation', shabad: 'Shabad · the Word',
   sifat_salah: 'Sifat-Salah · Praise', karam_nadar: 'Karam · Grace', bairag: 'Bairag · Detachment',
 };
-const titleCase = (k: string) => k.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-export const label = (c: string) => FRIENDLY[c] || titleCase(c);
+export const label = (c: string) => FRIENDLY[c] || themeName(c);
 
 export type Gravity = { total: number; nThemed: number; top: { concept: string; label: string; pct: number; n: number }[]; headline: string };
 export function centerOfGravity(pins: Pin[]): Gravity {

@@ -1,7 +1,7 @@
 // themes.ts — the Themes page (/themes) : the 54 corpus concepts grouped theologically.
 // Ported 1:1; a tile deep-links into Search as a theme query via goSearchTheme.
 import { $, esc, guard, meta, goSearchTheme } from './core';
-import { THEME_GROUPS, titleCase } from './themegroups';
+import { THEME_GROUPS, themeName } from './themegroups';
 
 let META: any = null;
 
@@ -13,8 +13,8 @@ const themes = guard(async () => {
     const c = m.concepts[i]; placed.add(c.concept);
     const n = (c.n_lines || 0).toLocaleString();
     return `<div class="tile theme-tile" data-concept="${i}" role="button" tabindex="0"
-      aria-label="${esc(titleCase(c.concept))} — explore ${n} lines">
-      <div class="n">${esc(titleCase(c.concept))}</div>
+      aria-label="${esc(themeName(c.concept))} — explore ${n} lines">
+      <div class="n">${esc(themeName(c.concept))}</div>
       <div class="s">${esc(c.description)}</div>
       <div class="explore">Explore ${n} lines →</div></div>`;
   };
