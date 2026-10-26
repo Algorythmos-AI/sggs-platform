@@ -1,5 +1,6 @@
 ---
 import { Picture, Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { getCollection } from 'astro:content';
 import Marketing from '../layouts/Marketing.astro';
 import MarketingNav from '../components/MarketingNav.astro';
@@ -12,6 +13,8 @@ import JsonLd from '../components/JsonLd.astro';
 import { SITE_URL, APP_STORE_URL, APP_STORE_LIVE, SUPPORT_EMAIL } from '../site.ts';
 import { LEARN_SLUGS } from '../routes';
 import { LEARN_COVERS } from '../covers';
+import { FACTS, fmt, spell, VOICE_CENTURIES } from '../facts';
+import Figures from '../components/Figures.astro';
 import verse from '../generated/landing-verse.json';
 import heroImg from '../assets/landing/harmandir-sahib-sunset.jpg';
 import nightPhoto from '../assets/landing/unsplash-salilkoli-harmandir-sahib-night.jpg';
@@ -28,12 +31,11 @@ import wRaagDark from '../assets/app/widget-raagnow-small-dark.png';
 import wHukam from '../assets/app/widget-hukam-medium-light.png';
 import wNitnem from '../assets/app/widget-nitnem-medium-light.png';
 import laCard from '../assets/app/iphone-live-activity-card.png';
-import themesShot from '../assets/app/iphone-themes-light.png';
-import lineageShot from '../assets/app/iphone-lineage-light.png';
-import insightsShot from '../assets/app/iphone-insights-light.png';
-import constellationShot from '../assets/app/iphone-constellation-light.png';
 import aboutShot from '../assets/app/iphone-about-light.png';
-import indexShot from '../assets/app/iphone-index-light.png';
+
+// Explore tiles: the app's own 1.4.9 screenshots (src/assets/app, provenance in SHOTS.md). Empty
+// until the verified set lands; the chapter then shows the counts alone.
+const exploreTiles: { src: ImageMetadata; alt: string; name: string; caption: string }[] = [];
 
 const desc = "Gurbani Soul is a quiet, exact companion to Sri Guru Granth Sahib Ji for iPhone and iPad — the complete Granth, verbatim and cited by Ang, fully offline, never AI-generated.";
 
@@ -44,12 +46,12 @@ const HERO_WIDTHS = [640, 960, 1280, 1600, 1920];
 const HERO_QUALITY = 62;
 const heroAvif = await getImage({ src: heroImg, format: 'avif', widths: HERO_WIDTHS, quality: HERO_QUALITY });
 
-// Proof strip — the corpus facts (the "0 network calls" claim is scoped to the APP: the website
-// itself runs privacy-scoped analytics on gurbanisoul.com).
+// Proof strip — the corpus facts, generated from the DB (src/facts.ts). The "0 network calls"
+// claim is scoped to the APP: the website itself runs privacy-scoped analytics on gurbanisoul.com.
 const proof = [
-  { n: "1,430", l: "Angs — the complete Granth" },
-  { n: "60,658", l: "lines, each cited by Ang" },
-  { n: "1,643,385", l: "characters, zero loss" },
+  { n: fmt(FACTS.angs), l: "Angs — the complete Granth" },
+  { n: fmt(FACTS.lines), l: "lines, each cited by Ang" },
+  { n: fmt(FACTS.characters), l: "characters, zero loss" },
   { n: "0", l: "network calls in the app" },
   { n: "None", l: "data collected — the App Store label is “Data Not Collected”" },
 ];
@@ -142,7 +144,7 @@ const softwareApplication = {
               : <span class="pill soon" data-app-store="coming-soon">Coming soon to the App Store</span>}
             <a class="hero-ghost" href="/search">Open the Knowledge Base</a>
           </div>
-          <p class="hero-fine">Fully offline · no account · no tracking</p>
+          <p class="hero-fine">The app: fully offline · no account · no tracking</p>
         </div>
         <div class="hero-device">
           <DeviceFrame src={readerLight} eager alt="Gurbani Soul Reader on iPhone, open at Ang 1 in Sant Lipi" />
@@ -176,9 +178,9 @@ const softwareApplication = {
       <div class="story-text reveal">
         <p class="chapter-no"><span>01</span> Read</p>
         <h2 class="h-story">The whole Granth, set to be read</h2>
-        <p class="body-lg">All 1,430 Angs in Sant Lipi, on warm paper or in a night scheme that is never pure black. Turn pages, jump to any Ang, pick up where you left off. Every composition opens with its printed heading.</p>
+        <p class="body-lg">All {fmt(FACTS.angs)} Angs in Sant Lipi, on warm paper or in a night scheme that is never pure black. Turn pages, jump to any Ang, pick up where you left off. Every composition opens with its printed heading.</p>
         <ul class="factrail detail-row">
-          <li>Sant Lipi</li><li>Traditional saroop</li><li>Five accents</li><li>Night scheme</li><li>iPad landscape</li>
+          <li>Sant Lipi</li><li>Traditional saroop</li><li>Sehaj focus</li><li>Five accents</li><li>Night scheme</li><li>iPad landscape</li>
         </ul>
       </div>
       <div class="story-media reveal" data-delay="1">
@@ -244,7 +246,7 @@ const softwareApplication = {
     <div class="wrap story-grid story-grid--7-5 story--flip">
       <div class="story-text reveal">
         <p class="chapter-no"><span>04</span> The watch</p>
-        <h2 class="h-story">Eight watches. Thirty-one raags. One face.</h2>
+        <h2 class="h-story">Eight watches. {spell(FACTS.raags)} raags. One face.</h2>
         <p class="body-lg">The day is divided into eight pahars, and different raags belong to different watches. The Raag Clock shows which belong to this one — by fixed hours, or by your local sunrise and sunset. The deep night is left in silence.</p>
         <p class="cta-row"><a class="btn ghost" href="/watch" data-astro-prefetch>See the Raag Clock</a></p>
       </div>
@@ -262,18 +264,18 @@ const softwareApplication = {
       <div class="story-text reveal">
         <p class="chapter-no"><span>05</span> At a glance</p>
         <h2 class="h-story">On your Home Screen and Lock Screen</h2>
-        <p class="body-lg">Three widgets — the raag of the moment, a Hukam verse with its Ang, today's Nitnem — in sizes from small to large, plus Lock Screen accessories. An optional Live Activity shows your reading progress as a ring. It never shows a verse.</p>
-        <p class="detail">Siri: “Today’s Hukam”, “What raag is it now”. Shortcuts: “Open Ang”. Saved verses appear in Spotlight.</p>
+        <p class="body-lg">Three widgets: the raag of the moment, the Hukam of the day with its Ang, and today's Nitnem — in sizes from small to large, with Lock Screen accessories for the raag and the Nitnem. The Hukam of the day is one complete Hukam for the whole day, chosen by the date: the same in the app and in Siri, with its opening verse on the widget. An optional Live Activity shows how far you have read a bani. It never shows a verse.</p>
+        <p class="detail">Ask Siri for “Today’s Hukam”, “What raag is it now”, “Read a Vaar”, “Open a theme” or “Open a voice”. Spotlight finds your saved verses and every theme.</p>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="widgets">
           <div class="wrow">
-            <figure class="widget widget--s"><Image src={wRaagLight} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt="Raag Now widget, small: the raag of the current watch" /></figure>
+            <figure class="widget widget--s"><Image src={wRaagLight} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt="Raag Now widget, small: the 24-hour dial at 4:40 pm, the 4th pahar of day" /></figure>
             <figure class="widget widget--m"><Image src={wHukam} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Hukam widget, medium: a verse from Ang 13 with its citation" /></figure>
           </div>
           <div class="wrow wrow--rev">
             <figure class="widget widget--m"><Image src={wNitnem} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Nitnem widget, medium: the next bani of the day" /></figure>
-            <figure class="widget widget--s"><Image src={wRaagDark} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt="Raag Now widget, small, in the dark scheme" /></figure>
+            <figure class="widget widget--s"><Image src={wRaagDark} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt="Raag Now widget, small, in the dark scheme: the 24-hour dial at 4:40 pm, the 4th pahar of day" /></figure>
           </div>
           <figure class="la">
             <div class="la-card"><Image src={laCard} widths={[450, 900]} sizes="(min-width: 980px) 740px, 92vw" loading="lazy" decoding="async" alt="Live Activity on the Lock Screen: reading Japji Sahib, a progress ring at 1%" /></div>
@@ -284,36 +286,30 @@ const softwareApplication = {
     </div>
   </section>
 
-  <!-- 10 · EXPLORE -->
+  <!-- 10 · EXPLORE — the 1.4.9 ways in, counted from the data (exploreTiles fill with app shots) -->
   <section class="sec surface-warm" id="story-explore" data-chapter="explore">
     <div class="wrap">
       <div class="story-head reveal">
         <p class="chapter-no"><span>06</span> Explore</p>
         <h2 class="h-story">Explore the Granth from every side</h2>
-        <p class="body-lg">Themes across the whole text. Lineage — 30 voices, 12th to 17th century. Insights that count and compare. A constellation of verses that share their words.</p>
+        <p class="body-lg">An Index in the order of the saroop, with a page for every raag. All {FACTS.vaars} Vaars, woven pauri by pauri as printed. {FACTS.themes} themes, each with its own page. The {FACTS.voices} voices of the Granth, {VOICE_CENTURIES}, each with a page of their own. Constellation, Insights and the Raag Clock beside them.</p>
+        <p class="cta-row"><a class="link-more" href="/features#vaars" data-astro-prefetch>See what each one does</a></p>
       </div>
-      <div class="mosaic mosaic--3 reveal" data-delay="1">
-        <figure class="tile tile--tall">
-          <div class="tile-img"><Image src={constellationShot} widths={[400, 800]} sizes="(min-width: 980px) 380px, 46vw" loading="lazy" decoding="async" alt="Constellation on iPhone: verses on the theme of Naam clustered by the words they share" /></div>
-          <figcaption><strong>Constellation</strong>Verses that share their words, drawn as one sky.</figcaption>
-        </figure>
-        <figure class="tile">
-          <div class="tile-img"><Image src={themesShot} widths={[400, 800]} sizes="(min-width: 980px) 380px, 46vw" loading="lazy" decoding="async" alt="Themes on iPhone: concepts such as Ik Onkar, Hukam and Naam with their verse counts" /></div>
-          <figcaption><strong>Themes</strong>Ideas traced across all 1,430 Angs.</figcaption>
-        </figure>
-        <figure class="tile">
-          <div class="tile-img"><Image src={lineageShot} widths={[400, 800]} sizes="(min-width: 980px) 380px, 46vw" loading="lazy" decoding="async" alt="Lineage on iPhone: the 30 contributors, 12th to 17th century, on a timeline" /></div>
-          <figcaption><strong>Lineage</strong>The Gurus, Bhagats and Bhatts, in time.</figcaption>
-        </figure>
-        <figure class="tile">
-          <div class="tile-img"><Image src={insightsShot} widths={[400, 800]} sizes="(min-width: 980px) 380px, 46vw" loading="lazy" decoding="async" alt="Insights on iPhone: lines contributed to the Granth, by author" /></div>
-          <figcaption><strong>Insights</strong>Counts and comparisons, described plainly.</figcaption>
-        </figure>
-        <figure class="tile">
-          <div class="tile-img"><Image src={indexShot} widths={[400, 800]} sizes="(min-width: 980px) 380px, 46vw" loading="lazy" decoding="async" alt="Index on iPhone: major compositions, the 31 raags, and banis and sections by author" /></div>
-          <figcaption><strong>Index</strong>Compositions, raags and authors — one tap away.</figcaption>
-        </figure>
-      </div>
+      {exploreTiles.length > 0
+        ? <div class="mosaic mosaic--3 reveal" data-delay="1">
+            {exploreTiles.map((t, i) => (
+              <figure class:list={["tile", { "tile--tall": i === 0 }]}>
+                <div class="tile-img"><Image src={t.src} widths={[400, 800]} sizes="(min-width: 980px) 380px, 46vw" loading="lazy" decoding="async" alt={t.alt} /></div>
+                <figcaption><strong>{t.name}</strong>{t.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
+        : <div class="reveal" data-delay="1"><Figures label="The Granth, counted" items={[
+            { n: fmt(FACTS.raags), l: "raags, a page for each" },
+            { n: fmt(FACTS.vaars), l: "Vaars, woven as printed" },
+            { n: fmt(FACTS.themes), l: "themes, a page for each" },
+            { n: fmt(FACTS.voices), l: "voices, a page for each" },
+          ]} /></div>}
     </div>
   </section>
 
@@ -328,7 +324,7 @@ const softwareApplication = {
       </div>
       <div class="story-media reveal" data-delay="1">
         <ol class="steps">
-          <li><span class="n" aria-hidden="true">1</span><h3>Reconciled</h3><p>All 1,643,385 characters are proven against the source edition, character for character — zero loss.</p></li>
+          <li><span class="n" aria-hidden="true">1</span><h3>Reconciled</h3><p>All {fmt(FACTS.characters)} characters are proven against the source edition, character for character — zero loss.</p></li>
           <li><span class="n" aria-hidden="true">2</span><h3>Sealed</h3><p>The bundled text carries a SHA-256 checksum, fixed when the app is built.</p></li>
           <li><span class="n" aria-hidden="true">3</span><h3>Checked</h3><p>The app checks it when it is installed or updated. If a check fails, the app refuses to show the text rather than risk showing it altered.</p></li>
         </ol>
@@ -350,7 +346,7 @@ const softwareApplication = {
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="stage">
-          <DeviceFrame src={aboutShot} alt="About screen on iPhone: the scripture integrity checks, all passed on the device" />
+          <DeviceFrame src={aboutShot} alt="About screen on iPhone: the scripture integrity checks, all passed" />
         </div>
       </div>
     </div>

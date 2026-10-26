@@ -57,3 +57,22 @@ test's sample "next bani" state), `widget-raagnow-small-*`. **Not shipped:** Huk
 truncates to "Sri Guru Granth Sahib Ji · An…" — an app bug, being fixed separately) and Raag Now
 **medium/large** ("next watch in 4 days, 18 hrs" — countdown bug under investigation), and the light
 lock-screen accessory renders (near-blank on a black background). Re-render once the fixes land.
+
+## 1.4.9 site refresh (2026-10-26)
+
+App 1.4.9 (gurbani-soul-ios `v1.4.9`, `f700fb3`) changed screens these 1.3.4 shots show. Shots whose
+content is now **untrue** were taken off the pages (the files stay here until the 1.4.9 set replaces them):
+
+| file | why it is off the pages |
+|---|---|
+| iphone-lineage-light | says "30 voices · 60,273 verses"; the roster is 36 voices (dataset 1.1.0 attribution) |
+| ipad-explore-landscape-light | its Lineage tile says "30 voices across five centuries" |
+| iphone-insights-light | per-author counts before the 1.1.0 re-attribution, and a "lexical diversity" figure computed on the English layer that 1.4.9 no longer shows |
+| iphone-themes-light | shows English theme descriptions, which 1.4.9 holds back for scholar review (G3) |
+| iphone-constellation-dark, iphone-constellation-light | Constellation v1 drawing; the copy now describes v2 (Focus, lenses, the Sky) |
+| iphone-index-light, iphone-more-display-light | their chapters were rewritten for Index 2.0 and Display; no longer referenced |
+
+Still shown, still true but from 1.3.4 (replace with the 1.4.9 set): the Reader, Search, Verify, Hukam,
+Nitnem, Raag Clock, divergence, About, saroop, accent and iPad Reader/Nitnem shots; the widget renders (the Hukam widget's eyebrow now reads "HUKAM OF THE
+DAY") and the Live Activity card. New 1.4.9 surfaces (Vaars, Index 2.0, Themes v2, Voices) show
+DB-derived figures, not borrowed screens, until their shots land; Explore shows its copy alone.

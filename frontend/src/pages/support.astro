@@ -9,6 +9,7 @@ import LegalPage from '../components/LegalPage.astro';
 import JsonLd from '../components/JsonLd.astro';
 import { SITE_URL } from '../site.ts';
 import { CONTRIBUTE_MODE } from '../contribute.ts';
+import { FACTS, fmt } from '../facts.ts';
 
 // Single source for the "Frequently asked" block: it renders BOTH the visible <h3>+<p> HTML and the
 // FAQPage JSON-LD below, so the two can never diverge (the FAQPage `name`s are exactly these
@@ -20,23 +21,27 @@ const faqs: { q: string; a: string }[] = [
   { q: "Why is there no English translation in the app?",
     a: "The English translation we would like to include is licensed for personal study only, and distributing it through the App Store requires a written licence we do not yet hold. Rather than ship it without permission, the app is Gurmukhi-only, with transliteration. If a licence is granted, the translation will arrive in an update as a separate, clearly labelled layer, never mixed into the scripture." },
   { q: "What does the \"traditional saroop\" toggle do?",
-    a: "It changes only how the text is <em>drawn</em>: the doubled subjoined ya (<span class=\"gm\" lang=\"pa\">੍ਯ੍ਯ</span>) is shown as the single tucked form used in the printed Bir. The stored text, search, and Copy are always the verbatim characters. Turn it off in the Reader's reading options to see the exact source characters." },
+    a: "It changes only how the text is <em>drawn</em>: the doubled subjoined ya (<span class=\"gm\" lang=\"pa\">੍ਯ੍ਯ</span>) is shown as the single tucked form used in the printed Bir. The stored text, search, and Copy are always the verbatim characters. Turn it off in <em>More → Display</em> to see the exact source characters." },
   { q: "Why does the app ask for my location?",
     a: "Only if you tap “Use my location” on the Raag Clock’s solar mode, which times the watches of the day by local sunrise and sunset. The location is rounded to about 1 km, kept only on your device, and never transmitted. You can deny the permission and enter a location manually, or stay in fixed mode. See the <a href=\"/privacy\">Privacy Policy</a>." },
   { q: "How do Nitnem reminders work?",
-    a: "In <em>More → Reminders</em> you can switch on a reminder for each part of the day and choose its time. iOS asks for notification permission the first time you switch one on. Reminders are scheduled on your device; nothing comes from a server. Once you complete that part of the day's Nitnem, that day's reminder is dropped. If reminders do not appear, check <em>Settings → Notifications → Gurbani Soul</em>." },
+    a: "In <em>More</em>, under Nitnem, <em>Reminders</em> you can switch on a reminder for each part of the day and choose its time. iOS asks for notification permission the first time you switch one on. Reminders are scheduled on your device; nothing comes from a server. Once you complete that part of the day's Nitnem, that day's reminder is dropped. If reminders do not appear, check <em>Settings → Notifications → Gurbani Soul</em>." },
   { q: "What is the Live Activity while reading?",
     a: "An optional progress indicator on the Lock Screen and in the Dynamic Island while you read a bani, so you can return to your place with one tap. It is off by default (turn it on in <em>More</em>, under Nitnem), shows progress only, never a verse, and ends when you finish or leave the bani." },
   { q: "Where do the Nitnem banis come from?",
     a: "Banis from Sri Guru Granth Sahib Ji are this project's own verified, verbatim corpus, cited by Ang. Bani ordering and the Sri Dasam Granth / Ardaas text come via the ShabadOS open database and are shown as a separate, labelled layer, never presented as part of Sri Guru Granth Sahib Ji." },
+  { q: "What is the Hukam of the day?",
+    a: "One complete Hukam for the whole day, chosen on your device by the date: the same unit in the app and when you ask Siri for \"Today's Hukam\", and the Hukam of the day widget shows its opening verse with its Ang. It is not the Hukamnama issued from Sri Harmandir Sahib. To read another, draw a fresh Hukam; the Hukam of the day stays as it is until the date changes." },
   { q: "The widgets are empty.",
-    a: "Open the app once and open a Hukam; the widgets read a small snapshot the app writes. If they stay empty, check <em>More → About → Integrity</em> and confirm it says \"Widget App Group available\", then email us with that screen." },
+    a: "Open the app once; the widgets read a small snapshot the app writes, including the Hukam of the day for the next two weeks. If they stay empty, check <em>More → About &amp; credits → Integrity</em> and confirm it says \"Widget App Group available\", then email us with that screen." },
   { q: "What is the Integrity section in About?",
     a: "When you install or update the app, it verifies that the bundled scripture database is bit-for-bit the certified one (a SHA-256 checksum). Every launch after that re-checks that the file has not changed and re-runs the structural checks. If verification ever fails, the app refuses to show scripture rather than risk showing altered text. Reinstalling from the App Store fixes a corrupted download." },
   { q: "How do I save, share, or find a verse later?",
-    a: "Long-press a verse (or use the actions on a verse card) to Save, Copy, Share or Explore related verses. Saved verses appear under <em>More → Saved</em> and in your device's Spotlight search. Share cards always carry the Ang citation." },
+    a: "Long-press a verse (or use the actions on a verse card) to Save, Copy, Share or Explore related verses. Saved verses appear under <em>More → Saved verses</em> and in your device's Spotlight search. Share cards always carry the Ang citation." },
   { q: "Siri and Shortcuts",
-    a: "The app offers \"Today's Hukam\", \"What raag is it now\", \"Read a bani\" and \"Search Gurbani\" as Siri phrases, and \"Open Ang\" as a Shortcuts action. Links of the form <code>sggs://ang/500</code> or <code>sggs://hukam</code> open the app directly." },
+    a: "The app offers nine Siri shortcuts: \"Today's Hukam\", \"Draw a Hukam\", \"What raag is it now\", \"Read a bani\", \"Read a Vaar\", \"Search Gurbani\", \"Show the constellation\", \"Open a theme\" and \"Open a voice\", and \"Open Ang\" as a Shortcuts action. Your saved verses and the " + FACTS.themes + " themes appear in Spotlight. Links such as <code>sggs://ang/500</code>, <code>sggs://hukam/today</code>, <code>sggs://vaar/1</code> or <code>sggs://voice/guru-tegh-bahadur-ji</code> open the app directly." },
+  { q: "Why does a voice's page say \"Context pending scholarly review\"?",
+    a: "Notes that explain the text rather than show it — about a Vaar, a theme, or the fuller story of a voice's life — wait until a scholar has reviewed them, and until then the app does not show them. A voice's page says so where its note is waiting. The verbatim lines, their Ang citations and the counts are shown as usual, and the Gurmukhi itself is never touched by this review." },
   { q: "Accessibility",
     a: "The app supports VoiceOver (each verse is read as one item, in Punjabi, with its Ang), Dynamic Type up to the largest accessibility sizes, Reduce Motion and Increase Contrast. If something is unreadable or unreachable with assistive technology, that is a bug: please tell us." },
   { q: "iPad",
@@ -71,7 +76,7 @@ const faqLd = {
   <LegalPage
     eyebrow="Support"
     title="Help with the Gurbani Soul app and this site"
-    lede="Gurbani Soul is a fully offline reader, search tool and Nitnem companion for Sri Guru Granth Sahib Ji, all 1,430 Angs. This page answers the common questions; anything else, write to us."
+    lede={`Gurbani Soul is a fully offline reader, search tool and Nitnem companion for Sri Guru Granth Sahib Ji, all ${fmt(FACTS.angs)} Angs. This page answers the common questions; anything else, write to us.`}
     id="v-support"
     toc={toc}
   >
@@ -107,7 +112,7 @@ const faqLd = {
 
     <section id="this-website">
       <h2>This website</h2>
-      <p>The site offers the same text and search in a browser, plus study tools (themes, lineage, insights, constellation, Raag Clock). It stores your theme and pinned verses in your browser only. See the <a href="/privacy">Privacy Policy</a>.</p>
+      <p>The site offers the same text and search in a browser, plus study tools (themes, lineage, insights, constellation, Raag Clock). It stores your settings, pinned verses and reading place in your browser only. See the <a href="/privacy">Privacy Policy</a>.</p>
       {CONTRIBUTE_MODE !== "off" ? (
         <div class="contact-card give-card">
           <h3>Help keep it free</h3>

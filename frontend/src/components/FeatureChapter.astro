@@ -1,0 +1,50 @@
+---
+// FeatureChapter.astro — one numbered product chapter (Vaars, Index, Themes, Voices …): the
+// chapter number, a heading, the copy (default slot), optional figures from src/facts.ts, and the
+// app's own screenshots. With shots, the phones take the media column and the figures sit under the
+// copy; with none, the figures take the media column as a large stack — so a chapter never borrows
+// another screen's picture, and never shows an empty half (copy alone is one readable column).
+import type { ImageMetadata } from "astro";
+import DeviceFrame from "./DeviceFrame.astro";
+import Figures from "./Figures.astro";
+
+interface Props {
+  id: string;
+  no: string;
+  label: string;
+  title: string;
+  surface?: "paper" | "warm";
+  flip?: boolean;
+  shots?: { src: ImageMetadata; alt: string; label?: string }[];
+  figures?: { n: string; l: string }[];
+  figuresLabel?: string;
+}
+const { id, no, label, title, surface = "paper", flip = false, shots = [], figures, figuresLabel = title } = Astro.props;
+const hasShots = shots.length > 0;
+const media = hasShots || !!figures;
+---
+<section class:list={["sec", `surface-${surface}`]} id={id} data-chapter={id}>
+  <div class:list={["wrap", media && ["story-grid", hasShots ? "story-grid--6-6" : "story-grid--7-5", { "story--flip": flip }], { "chapter-solo": !media }]}>
+    <div class="story-text reveal">
+      <p class="chapter-no"><span>{no}</span> {label}</p>
+      <h2 class="h-story">{title}</h2>
+      <slot />
+      {hasShots && figures && <Figures items={figures} label={figuresLabel} />}
+    </div>
+    {hasShots ? (
+      <div class="story-media reveal" data-delay="1">
+        {shots.length === 1
+          ? <div class="stage"><DeviceFrame src={shots[0].src} alt={shots[0].alt} label={shots[0].label} /></div>
+          : <div class="pair">{shots.slice(0, 2).map((s) => <DeviceFrame src={s.src} alt={s.alt} label={s.label} />)}</div>}
+      </div>
+    ) : figures && (
+      <div class="story-media reveal" data-delay="1">
+        <Figures items={figures} label={figuresLabel} stack />
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .chapter-solo .story-text { max-width: 62ch; }
+</style>

@@ -1,11 +1,11 @@
 {
-  "_db_sha256": "30739ee5bc45bee29cc7ec4b79814bd370804e9916c87999998f7a96e2c1317f",
+  "_db_sha256": "ff5e5de70027dbebb5162ef48df2d5358fca0fd32ebe38b101c5f788d830e66d",
   "quotes": {
     "1": {
       "ang": 1,
       "line_no": 1,
       "raag": null,
-      "author": null,
+      "author": "Guru Nanak Dev Ji (M1)",
       "is_header": true,
       "gurmukhi": "ੴ ਸਤਿ ਨਾਮੁ ਕਰਤਾ ਪੁਰਖੁ ਨਿਰਭਉ ਨਿਰਵੈਰੁ ਅਕਾਲ ਮੂਰਤਿ ਅਜੂਨੀ ਸੈਭੰ ਗੁਰ ਪ੍ਰਸਾਦਿ ॥"
     },
@@ -13,7 +13,7 @@
       "ang": 1,
       "line_no": 3,
       "raag": null,
-      "author": null,
+      "author": "Guru Nanak Dev Ji (M1)",
       "is_header": false,
       "gurmukhi": "ਆਦਿ ਸਚੁ ਜੁਗਾਦਿ ਸਚੁ ॥"
     },
@@ -21,7 +21,7 @@
       "ang": 8,
       "line_no": 2,
       "raag": null,
-      "author": null,
+      "author": "Guru Nanak Dev Ji (M1)",
       "is_header": false,
       "gurmukhi": "ਪਵਣੁ ਗੁਰੂ ਪਾਣੀ ਪਿਤਾ ਮਾਤਾ ਧਰਤਿ ਮਹਤੁ ॥"
     },
