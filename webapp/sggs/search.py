@@ -169,6 +169,15 @@ SEEKER_LEXICON = {
     'keertan': ('translit', ['keeratan']),          # ਕੀਰਤਨ ('keertan' spelling resolved empty)
     'raidas': ('translit', ['ravidaas']),           # Bhagat ਰਵਿਦਾਸ — common alt spelling, was 0 results
     'waheguruji': ('translit', ['vaahiguroo']),     # space-collapsed जपੁ form
+    # Every common roman spelling of ਵਾਹਿਗੁਰੂ finds the same lines as 'waheguru'. The fold alone
+    # (all of them -> 'vhgr') let raag headers (bihaagarhaa) into the variant tier, and
+    # 'vahiguru' is the theme slug (see LEXICON_OVER_SLUG).
+    'vaheguru': ('translit', ['vaahiguroo']), 'vahiguru': ('translit', ['vaahiguroo']),
+    'wahiguru': ('translit', ['vaahiguroo']), 'vaheguruji': ('translit', ['vaahiguroo']),
+    'vahiguruji': ('translit', ['vaahiguroo']), 'wahiguruji': ('translit', ['vaahiguroo']),
+    'satnam vaheguru': ('translit', ['vaahiguroo', 'sat naam']),
+    'satnam vahiguru': ('translit', ['vaahiguroo', 'sat naam']),
+    'satnam wahiguru': ('translit', ['vaahiguroo', 'sat naam']),
     'sachkhand': ('translit', ['sach khand']),      # ਸਚ ਖੰਡ — space-collapsed compound
     'kirtan sohila': ('translit', ['sohilaa']),     # bani name -> ਸੋਹਿਲਾ
     'onkar': ('translit', ['oankaar']), 'ikonkar': ('translit', ['oankaar']),
@@ -177,6 +186,12 @@ SEEKER_LEXICON = {
     'khushi': ('translit', ['sukh']), 'satsang': ('translit', ['saadhasang', 'sang']),
     'ocean': ('translit', ['saagar']), 'name': ('translit', ['naam']),
 }
+
+
+# Theme slugs that are also a word seekers type for something more exact: in auto mode the
+# lexicon entry wins over the slug's theme shortcut, so 'vahiguru' finds the lines of ਵਾਹਿਗੁਰੂ
+# exactly as 'waheguru' does. The theme is still one tap away (mode=theme, /themes).
+LEXICON_OVER_SLUG = {'vahiguru'}
 
 
 def lexicon_search(q, limit, offset):
@@ -276,7 +291,7 @@ def do_search(q, mode, limit, offset):
         else:
             ql = q.lower()
             cpt = db().execute('SELECT concept FROM concepts WHERE concept = ?', (ql,)).fetchone()
-            if cpt:
+            if cpt and ql not in LEXICON_OVER_SLUG:
                 return theme_search(ql, limit, offset)
             if all(len(t) <= 3 for t in toks) and len(toks) >= 2:
                 res = run('fl_r', phrase=True); used = 'first-letters'
@@ -617,9 +632,21 @@ def search_en(q, limit, offset):
         return []
 
 
+def concept_by_fold(ql):
+    """The one theme whose slug folds like the query (waheguru, vaheguru, wahiguru -> vahiguru),
+    or None when no slug or more than one does (bani/bhana both fold to 'vn')."""
+    f = roman_norm(ql)
+    if not f: return None
+    hits = [c for (c,) in db().execute('SELECT concept FROM concepts') if roman_norm(c.replace('_', ' ')) == f]
+    return hits[0] if len(hits) == 1 else None
+
+
 def theme_search(q, limit, offset):
     ql = q.strip().lower()
     row = db().execute('SELECT concept, gurmukhi_terms, description FROM concepts WHERE concept = ?', (ql,)).fetchone()
+    if not row:                                   # a theme named in another spelling, before a
+        c = concept_by_fold(ql)                   # description match ('waheguru' was finding Naam)
+        if c: row = db().execute('SELECT concept, gurmukhi_terms, description FROM concepts WHERE concept = ?', (c,)).fetchone()
     if not row:
         like = f'%{ql}%'
         row = db().execute('SELECT concept, gurmukhi_terms, description FROM concepts WHERE concept LIKE ? OR description LIKE ?',

@@ -6,8 +6,7 @@ import Chart from 'chart.js/auto';
 import { $, esc, api, meta, prefersReducedMotion, guard, failHTML, goSearchTheme } from './core';
 import { cssVar, viz, onTheme, cached } from './viz';
 import { voice, plural, granthOrder } from './voices';
-
-const titleCase = (k: string) => k.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+import { themeName } from './themegroups';
 
 /* ============================ D3 theme network ============================ */
 async function themeNetwork() {
@@ -75,7 +74,7 @@ async function themeNetwork() {
       .attr('stroke-width', 1).attr('stroke-opacity', 0.5)
       .style('cursor', 'pointer')
       .on('mouseover', (ev: any, d: any) => {
-        tip.html(`<b>${esc(titleCase(d.id))}</b><br><span>${(size[d.id] || 0).toLocaleString()} lines</span><br>${esc(desc[d.id] || '')}`)
+        tip.html(`<b>${esc(themeName(d.id))}</b><br><span>${(size[d.id] || 0).toLocaleString()} lines</span><br>${esc(desc[d.id] || '')}`)
           .style('opacity', 1);
         d3.select(ev.currentTarget).attr('stroke-opacity', 1).attr('stroke-width', 2.5);
       })
@@ -88,13 +87,13 @@ async function themeNetwork() {
       // keyboard operability: each node is a focusable button; Enter/Space searches its theme,
       // focus mirrors the hover highlight + tooltip (positioned at the node).
       .attr('tabindex', 0).attr('role', 'button')
-      .attr('aria-label', (d: any) => `${titleCase(d.id)}, ${(size[d.id] || 0).toLocaleString()} lines. Press Enter to search this theme.`)
+      .attr('aria-label', (d: any) => `${themeName(d.id)}, ${(size[d.id] || 0).toLocaleString()} lines. Press Enter to search this theme.`)
       .on('keydown', (ev: any, d: any) => {
         if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); goSearchTheme(d.id); }
       })
       .on('focus', (ev: any, d: any) => {
         const r = host.getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect();
-        tip.html(`<b>${esc(titleCase(d.id))}</b><br><span>${(size[d.id] || 0).toLocaleString()} lines</span><br>${esc(desc[d.id] || '')}`)
+        tip.html(`<b>${esc(themeName(d.id))}</b><br><span>${(size[d.id] || 0).toLocaleString()} lines</span><br>${esc(desc[d.id] || '')}`)
           .style('opacity', 1).style('left', (b.left - r.left + 14) + 'px').style('top', (b.top - r.top + 12) + 'px');
         d3.select(ev.currentTarget).attr('stroke-opacity', 1).attr('stroke-width', 2.5);
       })
@@ -103,11 +102,11 @@ async function themeNetwork() {
         .on('start', (ev, d: any) => { if (!ev.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
         .on('drag', (ev, d: any) => { d.fx = ev.x; d.fy = ev.y; })
         .on('end', (ev, d: any) => { if (!ev.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }) as any);
-    nEnter.append('title').text((d: any) => titleCase(d.id));
+    nEnter.append('title').text((d: any) => themeName(d.id));
 
     const label = labelSel.selectAll('text').data(nodes.filter((d: any) => rNode(d.id) > 15), (d: any) => d.id);
     label.exit().remove();
-    label.enter().append('text').text((d: any) => titleCase(d.id))
+    label.enter().append('text').text((d: any) => themeName(d.id))
       .attr('font-size', 11).attr('font-weight', 600)
       .attr('text-anchor', 'middle').attr('pointer-events', 'none')
       .attr('paint-order', 'stroke').attr('stroke-width', 3);
@@ -161,7 +160,7 @@ function buildNetworkTable(edgesAll: any[], _size: Record<string, number>, _desc
   document.getElementById('networkTable')?.remove();
   const top = edgesAll.slice().sort((a, b) => b.ppmi - a.ppmi).slice(0, 50);
   const rows = top.map((e) =>
-    `<tr><td>${esc(titleCase(id(e.source)))}</td><td>${esc(titleCase(id(e.target)))}</td>` +
+    `<tr><td>${esc(themeName(id(e.source)))}</td><td>${esc(themeName(id(e.target)))}</td>` +
     `<td>${(+e.ppmi).toFixed(2)}</td><td>${(+e.sc).toLocaleString()}</td></tr>`).join('');
   dataTable(host, 'networkTable', 'Theme co-occurrences — data table (text alternative)',
     `The ${top.length} strongest of ${edgesAll.length.toLocaleString()} co-occurrence links, ranked by PPMI. Each theme is searchable from the Search page.`,
@@ -233,7 +232,7 @@ async function authorRadar() {
     });
     const cfg: any = {
       type: 'radar',
-      data: { labels: axes.map(titleCase), datasets: ds },
+      data: { labels: axes.map(themeName), datasets: ds },
       options: {
         responsive: true, maintainAspectRatio: false,
         scales: { r: {
@@ -390,7 +389,7 @@ async function ribbonStream() {
     const paths = svg.append('g').selectAll('path').data(layers).join('path')
       .attr('d', area as any).attr('fill', (_l: any, i: number) => color(i)).attr('opacity', 0.85)
       .attr('stroke', cssVar('--bg')).attr('stroke-width', 0.5).style('cursor', 'pointer')
-      .on('mouseover', (_ev: any, l: any) => { tip.html(`<b>${esc(titleCase(l.key))}</b>`).style('opacity', 1); paths.attr('opacity', (z: any) => z === l ? 1 : 0.22); })
+      .on('mouseover', (_ev: any, l: any) => { tip.html(`<b>${esc(themeName(l.key))}</b>`).style('opacity', 1); paths.attr('opacity', (z: any) => z === l ? 1 : 0.22); })
       .on('mousemove', (ev: any) => { const r = host.getBoundingClientRect(); tip.style('left', (ev.clientX - r.left + 12) + 'px').style('top', (ev.clientY - r.top + 12) + 'px'); })
       .on('mouseout', () => { tip.style('opacity', 0); paths.attr('opacity', 0.85); });
 
@@ -405,9 +404,9 @@ async function ribbonStream() {
     dataTable(host, 'streamTable', 'Raag progression — data table (text alternative)',
       `The ${concepts.length} leading themes of this raag across ${B} spans from Ang ${d.ang_axis[0]} to Ang ${d.ang_axis[B - 1]}.`,
       ['Theme', 'Weight across the raag', 'Strongest near'],
-      concepts.map((c) => `<tr><td>${esc(titleCase(c))}</td><td>${total(c).toFixed(1)}</td><td>Ang ${esc(String(peak(c)))}</td></tr>`).join(''));
+      concepts.map((c) => `<tr><td>${esc(themeName(c))}</td><td>${total(c).toFixed(1)}</td><td>Ang ${esc(String(peak(c)))}</td></tr>`).join(''));
     const lg = $('#streamLegend');
-    if (lg) lg.innerHTML = concepts.map((c, i) => `<span><i class="lg" style="background:${color(i)}"></i>${esc(titleCase(c))}</span>`).join('');
+    if (lg) lg.innerHTML = concepts.map((c, i) => `<span><i class="lg" style="background:${color(i)}"></i>${esc(themeName(c))}</span>`).join('');
   }
   if (sel) sel.onchange = draw;
   onTheme(draw);
@@ -455,7 +454,7 @@ async function vaarAnatomy() {
     };
     const pauriHTML = (pp: any) => `<button class="vu vu-pauri" style="--c:${authColor(pp.author)}" onclick="goReader(${Number(pp.ang)})" title="Pauri ${esc(pp.pauri_no)} by ${esc(authShort(pp.author))} — open Ang ${esc(pp.ang)}">
         <span class="vp-no">${esc(pp.pauri_no)}</span>
-        <span class="vu-t"><b>Pauri ${esc(pp.pauri_no)}</b> · ${esc(authShort(pp.author))} · ${esc(plural(pp.n_lines, 'line'))}${pp.theme ? ' · ' + esc(titleCase(pp.theme)) : ''}</span></button>`;
+        <span class="vu-t"><b>Pauri ${esc(pp.pauri_no)}</b> · ${esc(authShort(pp.author))} · ${esc(plural(pp.n_lines, 'line'))}${pp.theme ? ' · ' + esc(themeName(pp.theme)) : ''}</span></button>`;
 
     host.innerHTML = `<div class="vaar-meta" style="--pc:${pCol}">
         <div class="vaar-stats"><span class="vstat">${esc(plural(v.n_pauris, 'pauri'))}</span><span class="vstat">${esc(plural(v.n_saloks, 'salok'))}</span><span class="vstat">Angs ${esc(v.first_ang)}–${esc(v.last_ang)}</span></div>

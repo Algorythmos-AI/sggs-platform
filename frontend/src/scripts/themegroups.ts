@@ -28,4 +28,11 @@ export const groupOf = (concept: string): ThemeGroup | undefined => BY_THEME[con
 /** the CSS variable carrying a theme's group colour (the ink when the theme has no group) */
 export const groupVar = (concept: string) => (BY_THEME[concept] ? `--tg-${BY_THEME[concept].key}` : '--soft');
 
-export const titleCase = (k: string) => k.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+const titleCase = (k: string) => k.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+// The English name a theme is shown under, everywhere on the site. It is the slug's title case
+// except where the widely used spelling differs: the slug `vahiguru` stays as it is in URLs, the
+// API and saved data, but the Name is written "Waheguru" (search finds every spelling, see
+// webapp/sggs/search.py SEEKER_LEXICON and theme_search).
+const THEME_NAMES: Record<string, string> = { vahiguru: 'Waheguru' };
+export const themeName = (k: string) => THEME_NAMES[k] || titleCase(k);
