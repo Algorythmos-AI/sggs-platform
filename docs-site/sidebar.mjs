@@ -96,6 +96,8 @@ export const LABELS = {
   'ios/ios/app-store-listing': 'App Store listing',
   'ios/ios/testflight-launch-plan': 'TestFlight launch plan',
   'ios/ios/testflight-test-plan': 'TestFlight test plan',
+  'ios/ios/device-checklist-1.4.9': 'Device checklist · 1.4.9',
+  'ios/ios/device-checklist-2026-10-17': 'Device checklist · 2026-10-17',
   'ios/contributing': 'Contributing to the app',
   'ios/process/runbooks/app-store-submission': 'App Store submission',
   'ios/process/runbooks/ios-hotfix': 'iOS hotfix',
