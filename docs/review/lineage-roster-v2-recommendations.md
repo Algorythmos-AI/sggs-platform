@@ -33,14 +33,14 @@ been confirmed.
 | Recommendations | Every section of this page. They are editorial and not binding. |
 | Decisions confirmed by the reviewer | None. No comment, formal GitHub review or signed message from Kanwaljit Singh is in the record. |
 | Decisions awaiting confirmation | All seven questions and R-01 to R-36. On 2026-10-27 the account `skalaliya` entered a sign-off on his behalf, approving the recommendations subject to the documented corrections, source qualifications and verification requirements. His direct confirmation, exact role and review date are not verified. The history is kept in [PR #321](https://github.com/Algorythmos-AI/sggs-platform/pull/321). |
-| Source verification outstanding | Guru Nanak Dev Ji's date variants (R-01), and the facts marked "Granthi to verify" below, notably R-06, R-07 and R-19. |
+| Source verification outstanding | For R-01, a source for the 22 September 1539 variant and a check of the EoS page images (its dates were read from the scan's OCR text; see condition 1). The facts marked "Granthi to verify" below, notably R-06, R-07 and R-19. |
 | Automated checks | Run by CI on every commit. The results for each commit are on PR #321. |
 
 **The five acceptance conditions** (from the review comment on PR #321):
 
 | # | Condition | Status | Remaining action |
 |---|---|---|---|
-| 1 | Guru Nanak Dev Ji's birth and death date variants, with identifiable references | Partly met | The variants are recorded in R-01. Source verification is pending. The entry to check is the Encyclopaedia of Sikhism (ed. Harbans Singh, Punjabi University, Patiala), *Nānak, Gurū (Srī Gurū Nānak Dev)*, as cited in the roster. It could not be opened while this page was prepared, so no page, quotation or date from it is claimed here. The other references are web-search snippets, which were not read as sources. |
+| 1 | Guru Nanak Dev Ji's birth and death date variants, with identifiable references | Partly met | The EoS dates now have a page reference, from the Internet Archive scan of vol. III (see *Condition 1 sources* below): birth Baisakh sudi 3, 1526 Bk / 15 April 1469, with the Kartik full-moon observance (p. 166); death Assu vadi 10, 1596 Bk / 7 September 1539 (p. 182). Still open: (a) these were read in the scan's OCR text, not the page images or print, so a look at pp. 166 and 182 should confirm them; (b) the entry does not give 22 September 1539, so that variant still rests on search snippets only. |
 | 2 | Raagmala with neutral authorship wording | Met in the recommendation text | Q-Raagmala assigns no author and records the differing sources. Nothing to apply until the reviewer decides. |
 | 3 | 11 Bhatts, Gurmukhi forms and romanisation, consistent and traceable | Partly met | This page is consistent: 11 named Bhatts plus the collective entry; ਟਲ treated as a variant signature of Kalsahar; Balh / Bhalh / Nalh / Salh proposed. The roster data (`contributors.json`) is not yet updated; that waits on the reviewer's decision. |
 | 4 | Traditions, memorials and disputed claims qualified | Partly met | The recommended wording qualifies them. The underlying facts for R-06 (Gobind Das / Gobind Rai), R-07 (the Sheikh Ibrahim view) and R-19 (Sirhind) are still unverified. |
@@ -49,11 +49,21 @@ been confirmed.
 The roster data, `review.status` and the generated pack change only in a separate pull request. That follows the
 reviewer's direct confirmation and the closing of condition 1.
 
+### Condition 1 sources (checked 2026-10-27)
+
+| Source | How it was read | What it supports |
+|---|---|---|
+| Encyclopaedia of Sikhism, ed. Harbans Singh (Punjabi University, Patiala), *Nānak, Gurū (Srī Gurū Nānak Dev)*, vol. III (M–R), pp. 166–182. Internet Archive full text: https://archive.org/stream/TheEncyclopediaOfSikhism-VolumeIiiM-r/TheEncyclopediaOfSikhism-VolumeIiiM-r_djvu.txt | **Directly inspected**, in the scan's OCR text. Page numbers come from the running heads in that text. The page images were not viewed. | Birth Baisakh sudi 3, 1526 Bk / 15 April 1469, the date modern research favours, with the birthday kept by custom on the Kartik full moon (p. 166). Death Assu vadi 10, 1596 Bk / 7 September 1539 (p. 182). The only other "September" in pp. 166–182 is the 1487 marriage date, so the entry does not give 22 September 1539. |
+| Sikhitihas, *Guru Nanak Dev Ji*: https://sikhitihas.org/people/guru-nanak-dev/ | **Directly inspected.** A secondary summary. | Gives the same EoS reference (vol. III, pp. 166–182) and links the archive scan above. It states 15 April 1469 and 7 September 1539, citing the EoS. Not used as a source in its own right. |
+| eos.learnpunjabi.org, online entry for Guru Nanak | **Not opened.** The URL tried returned "resource removed or unavailable". | Nothing. |
+| IGNCA, *The Life and Teachings of Guru Nanak*: https://ignca.gov.in/Asi_data/44707.pdf | **Not opened.** The PDF did not load. Seen only as indexed search text, which mentions the Vaisakh account and the Katak tradition. | Corroborating context only. Not relied on. |
+
 ## How the evidence was gathered
 
 - **The Encyclopaedia of Sikhism (EoS).** Its online edition could not be opened while this page was
   prepared. Where the roster rests on an EoS entry, that entry is cited "as cited in the roster". It is
-  not quoted.
+  not quoted. The one exception is *Nānak, Gurū* (R-01), read later in the Internet Archive scan's
+  OCR text (see *Condition 1 sources*).
 - **Prof. Sahib Singh ("SS").** His notes in the *Darpan* often carry short lives of the Bhagats and the
   Bhatts. They were read line by line from the ShabadOS 4.8.7 database (sha256 `d8e07134…`, verified),
   together with the *Faridkot Teeka* ("FDK").
@@ -312,7 +322,11 @@ Reason: no heading assigns them elsewhere, Sahib Singh argues explicitly that th
 which the EoS follows, vs the tradition of Katak Puranmashi, the date of the Gurpurab), and death (7 September
 1539 in the roster vs 22 September 1539 in many accounts, from Asu vadi 10, Sammat 1596; the difference is mainly
 Julian vs Gregorian reckoning).
-**Evidence.** EoS (Nānak, Gurū) as cited in the roster. Search snippet only — Granthi to verify:
+**Evidence.** EoS, *Nānak, Gurū (Srī Gurū Nānak Dev)*, vol. III (M–R), pp. 166–182, read in the Internet
+Archive scan's OCR text (see *Condition 1 sources*): birth Baisakh sudi 3, 1526 Bk / 15 April 1469, with the
+birthday kept by custom on the Kartik full moon (p. 166); death Assu vadi 10, 1596 Bk / 7 September 1539
+(p. 182). The entry does not mention 22 September 1539. For that variant and the 1538 year, search snippet
+only — Granthi to verify:
 https://en.wikipedia.org/wiki/Guru_Nanak ; https://www.britannica.com/biography/Guru-Nanak ; https://barusahib.org/?p=15417
 **Where sources differ.** As above. Britannica notes a 1538/1539 split for the year of death (snippet only).
 **Recommended ruling.** Change (name the variant, keep the EoS dates).
