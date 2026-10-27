@@ -2,6 +2,7 @@
 title: "Lineage roster v2: editorial recommendations for the reviewer"
 description: "The evidence and an editorial recommendation for each of the 36 life paragraphs and the roster pack's six questions, for the G3 reviewer to rule on."
 sidebar:
+  label: "Roster: recommendations"
   order: 2
 ---
 # Lineage roster v2: editorial recommendations for the reviewer
