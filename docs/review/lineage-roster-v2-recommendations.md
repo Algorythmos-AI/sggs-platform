@@ -17,8 +17,8 @@ reviewer decides every item.
 
 The rest of the G3 1.4.9 review is on two companion pages:
 
-- the app's pack, [`gurbani-soul-ios` `docs/review/g3-1.4.9/RECOMMENDATIONS.md`](https://github.com/Algorythmos-AI/gurbani-soul-ios/blob/claude/loving-bohr-n5am3s/docs/review/g3-1.4.9/RECOMMENDATIONS.md);
-- the dataset decisions, [`sggs-data` `validation/attribution-g3-review/RECOMMENDATIONS.md`](https://github.com/Algorythmos-AI/sggs-data/blob/claude/loving-bohr-n5am3s/validation/attribution-g3-review/RECOMMENDATIONS.md).
+- the app's pack, [`gurbani-soul-ios` `docs/review/g3-1.4.9/RECOMMENDATIONS.md`](https://github.com/Algorythmos-AI/gurbani-soul-ios/pull/111);
+- the dataset decisions, [`sggs-data` `validation/attribution-g3-review/RECOMMENDATIONS.md`](https://github.com/Algorythmos-AI/sggs-data/pull/18).
 
 ## How the evidence was gathered
 
