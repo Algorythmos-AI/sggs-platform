@@ -43,7 +43,7 @@ been confirmed.
 | Recommendations | Every section of this page. They are editorial and not binding. |
 | Decisions confirmed by the reviewer | None. No comment, formal GitHub review or signed message from Kanwaljit Singh is in the record. |
 | Decisions awaiting confirmation | All seven questions and R-01 to R-36. On 2026-10-27 the account `skalaliya` entered a sign-off on his behalf, approving the recommendations subject to the documented corrections, source qualifications and verification requirements. His direct confirmation, exact role and review date are not verified. The history is kept in [PR #321](https://github.com/Algorythmos-AI/sggs-platform/pull/321). |
-| Source verification outstanding | Small and named. Karam Singh's *Gurapurb Nirṇay* (the 22 September conversion) was not found and is cited through McLeod. R-09's possible Bikrami origin for "1267" is unresolved. Facts marked *Search snippet only* below are leads, not evidence. EoS entries for R-02 to R-04, R-10 and R-23 were checked in OCR text only; those for R-08, R-11 and R-36 were not re-read. See *Evidence index*. |
+| Source verification outstanding | One item. The Western date 22 September 1539 originates, per McLeod, in Karam Singh's *Gurapurb Nirṇay*, which was not found. The lunar date it converts (Asu sudi 10, S. 1596) was read in a printed *Gyan-ratanavali*, but the conversion was not inspected or recomputed. Facts marked *Search snippet only* below are leads, not evidence. Every EoS row was read on a page image (see *Evidence index*). |
 | Ruling-form ticks | The pull-request description shows R-04 ticked "Approve as recommended". Who ticked it is not recorded, so it is not counted as a decision. No other ruling box is ticked. |
 | Automated checks | Run by CI on every commit. The results for each commit are on PR #321. |
 
@@ -51,10 +51,10 @@ been confirmed.
 
 | # | Condition | Status | Remaining action |
 |---|---|---|---|
-| 1 | Guru Nanak Dev Ji's birth and death date variants, with identifiable references | Met | Every variant now has an identifiable reference read on the page image (see *Condition 1 sources*). EoS vol. III (3rd ed., 2011), *Nānak, Gurū*, pp. 165–183: birth Baisakh sudi 3, 1526 Bk / 15 April 1469 with the Kartik full-moon observance (p. 166); death Assu vadi 10, 1596 Bk / 7 September 1539 (p. 182). McLeod (1968), pp. 99–101, traces the other two death dates: 22 September 1539 is Karam Singh's conversion of Asu **sudi** 10, S. 1596 (the *Gyan-ratanavali* date), and S. 1595 / 1538 is the *Puratan* date. Two limits remain. Karam Singh's own book was not found and is cited through McLeod. Which day R-01 shows is the reviewer's choice. |
+| 1 | Guru Nanak Dev Ji's birth and death date variants, with identifiable references | Partly met | Met for the EoS dates: vol. III (3rd ed., 2011), *Nānak, Gurū*, pp. 165–183, on page images. Birth Baisakh sudi 3, 1526 Bk / 15 April 1469, with the Kartik full-moon observance (p. 166); death Assu vadi 10, 1596 Bk / 7 September 1539 (p. 182). Met for the lunar dates behind the variants: McLeod (1968, pp. 99–101) names three traditions, and the *Gyan-ratanavali* date, Asu sudi 10, S. 1596, was read in a printed edition (p. 481). **Not met for the origin of the Western date 22 September 1539.** McLeod reports it as Karam Singh's conversion; Gupta (p. 54) and Mandair (p. 27) give it without a calendar basis. Karam Singh's book was not found, and this page did not recompute the conversion. Remaining action: inspect *Gurapurb Nirṇay*, or the reviewer accepts McLeod's report. Neither choice changes the recommended wording, which gives the month only. |
 | 2 | Raagmala with neutral authorship wording | Met in the recommendation text | Q-Raagmala assigns no author and records the differing sources. Nothing to apply until the reviewer decides. |
-| 3 | 11 Bhatts, Gurmukhi forms and romanisation, consistent and traceable | Met in the recommendation text | Each part is traced. The 11-count is Sahib Singh's, Teja Singh's and Taran Singh's (EoS I p. 351), and the per-Bhatt counts are Sahib Singh's (Salh corrected to 1 + 2 = 3, so the counts reach his 123 + 20 = 143). ਟਲ signs exactly one verse (line 59315) and is recommended as a variant signature of Kalsahar. Balh / Bhalh / Nalh / Salh is the EoS's spelling (I p. 352), against today's display names Nal / Sal / Bal / Bhal. The roster data changes only after the reviewer decides. |
-| 4 | Traditions, memorials and disputed claims qualified | Met in the recommendation text | The facts behind the qualified wording are now read on page images. R-06: "Gobind Das" is the EoS's own form (IV p. 332). R-07: the Ibrahim view is Macauliffe's (vol. VI p. 357), and the EoS rejects it (II p. 13). R-19: cremation at Sirhind with a tomb is the EoS's wording (IV p. 7). "By tradition" in R-13, R-18 and R-32 is this page's hedge: the EoS states those claims plainly. Which name or wording to print is the reviewer's choice. |
+| 3 | 11 Bhatts, Gurmukhi forms and romanisation, consistent and traceable | Met in the recommendation text | Each part is traced. The 11-count is Sahib Singh's, Teja Singh's and Taran Singh's (EoS I p. 351), and the per-Bhatt counts are Sahib Singh's (Salh corrected to 1 + 2 = 3, so the counts reach his 123 + 20 = 143). The Granth's own running total, `੧੪੩` at line 59867, confirms 143, and the EoS's 17-name count also sums to 123: the two readings count persons differently, not verses (see *Counting terms* under Q-Bhatts). ਟਲ signs exactly one verse (line 59315) and is recommended as a variant signature of Kalsahar. Balh / Bhalh / Nalh / Salh is the EoS's spelling (I p. 352), against today's display names Nal / Sal / Bal / Bhal. The Gurmukhi forms with ੍ਹ are editorial and labelled so (the Granth writes ਨਲ੍ਯ੍ਯ etc.); the choice of spelling is the reviewer's. The roster data changes only after the reviewer decides. |
+| 4 | Traditions, memorials and disputed claims qualified | Met in the recommendation text | The facts behind the qualified wording are now read on page images. R-06: "Gobind Das" is the EoS's own form (IV p. 332). R-07: the Ibrahim view is Macauliffe's (vol. VI p. 357), and the EoS rejects it (II p. 13). R-19: cremation at Sirhind with a tomb is the EoS's wording (IV p. 7). R-09: the EoS gives AD 1267 explicitly, while the writer Sahib Singh quotes gives Sammat 1267; the page records this as a disagreement and the suggested wording says "said to have been born about 1267". "By tradition" in R-13, R-18 and R-32 is this page's hedge: the EoS states those claims plainly. Which name or wording to print is the reviewer's choice. |
 | 5 | Script and docs checks pass; no unrelated changes | Met for this revision | Run on this revision before it was pushed: `python3 tools/docs_check.py --db db/sggs.sqlite`, and the Gurmukhi verbatim check against the pinned corpus and ShabadOS 4.8.7. The only misses are the four modern roster name forms named in *Q-Gurmukhi*. The diff against `integration` is this one page. CI results for each commit are on PR #321. |
 
 The roster data, `review.status` and the generated pack change only in a separate pull request. That follows the
@@ -74,7 +74,8 @@ fetch that page's image at `https://archive.org/download/<identifier>/page/n<lea
 | Arvind-pal S. Mandair, *Sikhism: A Guide for the Perplexed*, Bloomsbury, 2013. Archive `sikhism-guide-for-the-perplexed`, leaf 37. | Page image of p. 27. | Gives 22 September 1539, with no calendar basis. |
 | Wikipedia, "Guru Nanak" (read 2026-10-27). | Article source text. | A lead only. It gives 22 September 1539 (citing Mandair and Gupta), and 7 September 1539 in its succession box. Not relied on. |
 | Sikhitihas, *Guru Nanak Dev Ji*: https://sikhitihas.org/people/guru-nanak-dev/ | Web page. A secondary summary. | It led to the archive scan above. Not relied on. |
-| Karam Singh, *Gurapurb Nirṇay* | **Not found.** Archive.org was searched by English and Gurmukhi title. | Known only through McLeod's note. |
+| *Purātan Janam Sākhī Srī Gurū Nānak Dev Jī*, attributed to Bhai Mani Singh, incl. the *Gyān-ratanāvalī*, ed. Bhai Gurpartap Singh, Bhai Chatar Singh Jiwan Singh, Amritsar, 4th printing July 2013 (ISBN 81-7601-195-9). Archive `bhai-mani-singh-vali-janam-sakhi`, leaf 480. | Page image of p. 481; imprint on leaf 1. | Gives the death as Sammat 1596, Asu sudi 10 (`ਸੰਮਤ ੧੫੯੬ ਅਸੂ ਸੁਦੀ ਦਸਮੀ`, janam-sakhi prose transcribed from the page image, not Gurbani; the scan's OCR text agrees). It gives no Western date. This is a modern popular edition, not the one McLeod used (he cites GR p. 587), so it confirms the lunar date only. |
+| Karam Singh, *Gurapurb Nirṇay* | **Not found.** Archive.org was searched by English and Gurmukhi title. Hira Singh Dard's *Karam Singh Historian di Itihasak Khoj* lists it among his works and nothing more. | Known only through McLeod's note (pp. 47–49 and 57, giving 22 September 1539 as the equivalent of Asu sudi 10, S. 1596). |
 | eos.learnpunjabi.org, online entry for Guru Nanak | **Not opened:** "resource removed or unavailable". | Nothing. |
 | IGNCA, *The Life and Teachings of Guru Nanak*: https://ignca.gov.in/Asi_data/44707.pdf | **Not opened:** the PDF did not load. | Nothing. |
 
@@ -84,8 +85,9 @@ fetch that page's image at `https://archive.org/download/<identifier>/page/n<lea
   the Internet Archive scans of its four volumes: vol. I, 4th ed., 2002 (`TheEncyclopediaOfSikhism-VolumeIA-d`);
   vol. II, 3rd ed., 2011 (`…-VolumeIiE-l`); vol. III, 3rd ed., 2011 (`…-VolumeIiiM-r`); vol. IV, 2nd ed., 2004
   (`…-VolumeIvS-z`). The editions were read from each imprint page; the scans were uploaded by DiscoverSikhism.com.
-  - Each entry was found in the OCR text. Every consequential wording was then checked on the page image, citing
-    the printed page and the scan leaf. A first attempt to read the online edition (eos.learnpunjabi.org) failed,
+  - Each entry was found in the OCR text, then its consequential wording was checked on the page image, citing the
+    printed page and the scan leaf. The editor viewed most pages; the rest were viewed by the audit agent, and four
+    of those were re-viewed by the editor as a spot check (all agreed). The *Evidence index* marks which. A first attempt to read the online edition (eos.learnpunjabi.org) failed,
     and earlier drafts cited entries "as cited in the roster". Those labels have been replaced wherever the
     entry was read.
   - EoS page numbers are for these editions; other printings may paginate differently.
@@ -146,6 +148,20 @@ reads ਟਲ as another name of Kalsahar, not as a separate Bhatt Tal.
   `ਕੁੱਲ ਜੋੜ = ੧੪੩` (with the 20 Swaiyye of Guru Arjan himself counted in). The note is cut off in the database
   after `(੩) ਕੀਰਤ . . ੪`. These eleven counts add up to 123; with Guru Arjan's 20, that gives the 143 of his note.
   (Earlier drafts listed Salh as 1, which leaves the sum two short.)
+- **The Granth's own running numbers.** The last Bhatt Swaiyya closes with `॥੨॥੨੧॥੯॥੧੧॥੧੦॥੧੦॥੨੨॥੬੦॥੧੪੩॥` (line
+  59867, Ang 1409), and Guru Arjan's own Swaiyye close with `॥੨॥੧੧॥੨੦॥` (line 59212, Ang 1389). Read with the EoS's
+  split (I p. 352), this gives 10 + 10 + 22 + 60 + 21 = 123 Swaiyye addressed to the five Gurus, plus Guru Arjan's 9 + 11
+  = 20, for 143 in all. Which number belongs to which section is this page's reading, matched to the EoS.
+- **Counting terms, defined.** These figures do not contradict one another; they count different things.
+  - *Swaiyye*: the verses. Sahib Singh and the EoS agree on 123 by the Bhatts.
+  - *Signatures*: the names inside the verses, e.g. ਕਲ੍ਯ੍ਯ, ਕਲ੍ਯ੍ਯਸਹਾਰ, ਟਲ.
+  - *Named persons* (contributors): a reading of which signatures are separate poets. Sahib Singh reads 11; the EoS
+    list reads 17.
+  - *Corpus authors*: the dataset's 11 named Bhatts plus a collective "The Bhatts" for headings.
+- **How the two 123s map.** Sahib Singh's Kalsahar 54 = EoS Kalh 53 + Tal 1; Jalap 5 = Jalap 4 + Jalh 1; Mathura 14 =
+  Mathura 12 + Jalan 2. Nalh 16 + Gayand 13 = 29 = EoS Nalh 5 + Gayand 5 + Das 10 + Parmanand 5 + Sevak 4; the split
+  inside that 29 was not mapped. The remaining Bhatts agree. This is arithmetic on the two sources, not a statement by
+  either.
 - EoS, *Bhaṭṭ Bāṇī*, vol. I (4th ed., 2002), pp. 351–352 (page images, leaves 368–369). The entry gives the
   differing counts: 11 (Sahib Singh, Teja Singh, Taran Singh and other modern scholars), 17 (Santokh Singh, *Sri Gur
   Pratap Suraj Granth*; Bhai Vir Singh and some other traditional scholars) and 19 (Pandit Kartar Singh Dakha). Its own
@@ -230,7 +246,7 @@ dataset 1.3.0 credits line 53935 to Bhagat Surdas Ji, as ShabadOS does.
   `ਸੂਰਦਾਸ ਮਨੁ ਪ੍ਰਭਿ ਹਥਿ ਲੀਨੋ ਦੀਨੋ ਇਹੁ ਪਰਲੋਕ ॥੨॥੧॥੮॥` (line 53943, Ang 1253).
 - Sahib Singh note on line 53943, Ang 1253: `ਲਫ਼ਜ਼ 'ਮਹਲਾ ੫' ਤੋਂ ਜ਼ਾਹਰ ਹੁੰਦਾ ਹੈ ਕਿ ਇਹ ਸ਼ਬਦ ਗੁਰੂ ਅਰਜਨ ਸਾਹਿਬ ਜੀ ਦਾ ਹੈ। ... ਭਾਵੇਂ ਭਗਤ ਸੂਰਦਾਸ ਜੀ ਦੀ ਇਕੋ ਹੀ ਤੁਕ ਦਰਜ ਕੀਤੀ ਹੈ, ਪਰ ਗਿਣਤੀ ਵਿਚ ਉਸ ਨੂੰ ਸਾਰੇ ਸ਼ਬਦ ਵਾਂਗ ਗਿਣਿਆ ਹੈ; ... ਕਈ ਵਿਦਵਾਨਾਂ ਦਾ ਖ਼ਿਆਲ ਹੈ ਕਿ ਦੋ ਸੂਰਦਾਸ ਹੋਏ ਹਨ, ਪਰ ਜਿਹੜਾ ਭੀ ਹੈ ਉਸ ਦੀ ਸਿਰਫ਼ ਇਕੋ ਤੁਕ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਵਿਚ ਦਰਜ ਹੈ। ਇਹ ਸ਼ਬਦ ਸਤਿਗੁਰੂ ਅਰਜਨ ਸਾਹਿਬ ਜੀ ਦਾ ਆਪਣਾ ਹੈ। ਸੂਰਦਾਸ ਦਾ ਨਹੀਂ।`
   The same note then quotes the other writer: `'ਭਗਤ ਸੂਰਦਾਸ ਜੀ ਜ਼ਾਤ ਦੇ ਬ੍ਰਾਹਮਣ ਸਨ। ਆਪ ਦਾ ਜਨਮ ਸੰਮਤ ੧੫੮੬ ਬਿ: ਦਾ ਪਤਾ ਲੱਗਦਾ ਹੈ। ਇਹਨਾਂ ਦਾ ਅਸਲ ਨਾਮ ਮਦਨ ਮੋਹਨ ਸੀ, ਪਹਿਲਾਂ ਆਪ ਸੰਧੀਲਾ ਦੇ ਹਾਕਮ ਰਹੇ। ...`
-- EoS, *Sūrdās*, vol. IV (2nd ed., 2004), p. 288 (checked on the page image by the audit agent): born 1529, died at Banaras, distinct from the blind poet of the Sur Sagar.
+- Reference, page image: EoS, *Sūrdās*, vol. IV (2nd ed., 2004), p. 288 (leaf 305). He is said to have been born in 1529, and died at Banaras. The entry also says Guru Arjan composed a hymn to explain and supplement the single line, agreeing with the `ਮਹਲਾ ੫` heading. The entry places him as distinct from the blind poet of the Sur Sagar.
 - Search result with the same facts (a lead, not relied on): https://www.allaboutsikhs.com/sikh-bhagats-bhagat-surdas-ji
 
 **Where sources differ.**
@@ -383,11 +399,15 @@ Reason: no heading assigns them elsewhere, Sahib Singh argues explicitly that th
   - Asu vadi 10, S. 1596, in some *Bala* janam-sakhis and the Kartarpur manuscript's list, which the EoS gives as 7 September 1539 (p. 182). McLeod judges it the most likely of the three.
 
   The 7 and 22 September dates are fifteen days apart because they fall in different halves of the lunar month: vadi is the dark half and sudi the light half.
-**Evidence.** Published reference inspected, on page images: EoS vol. III (3rd ed., 2011), pp. 165–183; McLeod (1968), pp. 94–95 and 99–101; Gupta (2008 edition), p. 54; Macauliffe (1909), vol. I, pp. lxxxiv and 191; Mandair (2013), p. 27. Not inspected: Karam Singh, *Gurapurb Nirṇay*, pp. 47–49 and 57, cited through McLeod. The Western-calendar equivalents are the cited authors' own; this page did not recompute them.
+**Evidence.** Published reference inspected, on page images: EoS vol. III (3rd ed., 2011), pp. 165–183; McLeod (1968), pp. 94–95 and 99–101; Gupta (2008 edition), p. 54; Macauliffe (1909), vol. I, pp. lxxxiv and 191; Mandair (2013), p. 27. Primary text inspected: the *Gyan-ratanavali* in a modern printed edition (p. 481), which gives Asu sudi 10, S. 1596 and no Western date. Not inspected: Karam Singh, *Gurapurb Nirṇay*, pp. 47–49 and 57.
+- **What McLeod states himself:** the three lunar dates, the fifteen-day gap, and his judgement that Asu vadi 10, S. 1596 (7 September 1539) is the most likely.
+- **What he reports:** that Karam Singh gives 22 September 1539 as the equivalent of the *Gyan-ratanavali* date.
+
+The Western-calendar equivalents are the cited authors' own; this page did not recompute them.
 **Where sources differ.** As above. Earlier drafts of this page said the 7/22 September gap was "mainly Julian vs Gregorian reckoning", and the next draft said the "source and reckoning have not been identified". Both are superseded: McLeod shows the gap is vadi against sudi. A Julian-to-Gregorian shift in 1539 would be ten days, not fifteen.
 **Recommended ruling.** Change (name the variant, keep the EoS dates). The suggested wording gives the month of death and no day, so it holds whichever date the reviewer prefers.
 **Suggested wording (if Change).** "Guru Nanak was born in 1469 at Rai Bhoi ki Talwandi, now Nankana Sahib: on 15 April by the EoS, while his Gurpurab is kept on Katak Puranmashi. After years of travel he settled around 1521 at Kartarpur, where he joined devotion to God with the life of a householder. Before his death in September 1539 he installed Bhai Lahina, whom he renamed Angad, as his successor."
-**Confidence.** High that these variants exist and come from these sources. Which day to show, if any, is the reviewer's decision.
+**Confidence.** High that the lunar variants exist and come from these traditions. The 22 September conversion is not independently verified. Which day to show, if any, is the reviewer's decision.
 
 ### R-05 · Guru Arjan Dev Ji
 **Finding.** Correct. "16 August 1604" is the EoS day; 1 September is the common observance (see L-05a).
@@ -441,18 +461,19 @@ the Bani: Farid Shakarganj (the EoS) vs Sheikh Ibrahim (Macauliffe).
 ### R-09 · Bhagat Trilochan Ji
 **Finding.** Two variants are not named. (1) **Caste**: the roster (EoS) says a Vaishya family; Sahib Singh says
 Brahmin. (2) **Birth year**: the EoS gives 1267. Sahib Singh quotes another writer (not his own view) giving
-`ਸੰਮਤ ੧੨੬੭ ਬਿਕਰਮੀ`, which would be about 1210 CE, not 1267 CE. It is possible that 1267 began as a Bikrami year
-and was later read as CE; this cannot be settled from the sources read.
+`ਸੰਮਤ ੧੨੬੭ ਬਿਕਰਮੀ`, which would be about 1210 CE, not 1267 CE. The EoS states its year explicitly as AD ("said to
+have been born in AD 1267"). Neither source gives its evidence, so the two years stand as a disagreement. (Earlier drafts
+suggested 1267 might have begun as a Bikrami year; that was conjecture and is withdrawn.)
 **Evidence.**
 - Sahib Singh note on line 30080, Ang 695: `* ਨੋਟ: ਭਗਤ ਤ੍ਰਿਲੋਚਨ ਜੀ ਜਾਤਿ ਦੇ ਬ੍ਰਾਹਮਣ ਸਨ।`
 - Sahib Singh note on line 3707, Ang 92, quoting a writer he disagrees with: `ਭਗਤ ਤ੍ਰਿਲੋਚਨ ਜੀ ਬਾਰਸੀ ਨਾਮੀ ਨਗਰ (ਜ਼ਿਲਾ ਸ਼ੋਲਾਪੁਰ) ਮਹਾਰਾਸ਼ਟਰ ਦੇ ਰਹਿਣ ਵਾਲੇ ਸਨ। ਆਪ ਦਾ ਜਨਮ ਸੰਮਤ ੧੨੬੭ ਬਿਕਰਮੀ ਦੇ ਗਿਰਦੇ ਹੋਇਆ ਹੈ।` (The note is cut off in the database
   after this sentence.) This also supports the Barsi pin (M-P09).
-- EoS, *Trilochan*, vol. IV (2nd ed., 2004), p. 365 (checked on the page image by the audit agent, not re-viewed here): said to have been born in AD 1267; Vaishya; birthplace disputed (Barsi or Uttar Pradesh).
+- Reference, page image: EoS, *Trilochan*, vol. IV (2nd ed., 2004), p. 365 (leaf 380): "said to have been born in AD 1267 of a Vaisya family"; no unanimity on the birthplace (Barsi, or Uttar Pradesh).
 - Corpus: four hymns, Siri (Ang 92), Gujri (Angs 525–526), Dhanasri (Ang 695): agrees with the context.
 **Where sources differ.** Vaishya (EoS) vs Brahmin (Sahib Singh); 1267 (EoS) vs Sammat 1267 Bikrami (writer quoted by Sahib Singh).
 **Recommended ruling.** Change.
 **Suggested wording (if Change).** "Trilochan was a Maharashtrian saint-poet, said to have been born about 1267. The EoS gives his family as Vaishya; Sahib Singh calls him a Brahmin. Four of his hymns are in the Granth, in Siri, Gujri and Dhanasri. Two saloks among Kabir's present a dialogue between him and Namdev."
-**Confidence.** high (that the variants exist); Granthi to verify (the year).
+**Confidence.** high (that the variants exist, and in what year system each is stated); unresolved (which year is right).
 
 ### R-12 · Bhagat Kabir Ji
 **Finding.** Facts follow the EoS. The context gives no dates, so the 1518/1448 death-year split (recorded in
@@ -647,21 +668,21 @@ follows the 11-count. Not wrong as a report of tradition, but it may read as a c
 
 ## Life paragraphs recommended for Approve as written
 
-"EoS (checked)" means the audit agent found the entry in the four-volume scan and found that it supports the facts listed, in OCR text for R-02 to R-04, R-10 and R-23. R-08, R-11 and R-36 were not re-read in this audit; they rest on the roster's EoS citations and the corpus.
+"EoS (checked)" means the entry was read on a page image and supports the facts listed. The *Evidence index* gives each page and who viewed it.
 
 | Item | Voice | Key facts checked | Source | Confidence |
 |---|---|---|---|---|
-| R-02 | Guru Angad Dev Ji | b. 31 Mar 1504 Matte di Sarai; d. 29 Mar 1552 Khadur | EoS (checked) | high |
-| R-03 | Guru Amar Das Ji | b. 5 May 1479 Basarke; Guru 1552; Goindval; d. 1 Sep 1574 | EoS (checked) | high |
-| R-04 | Guru Ram Das Ji | b. 24 Sep 1534 Chuna Mandi; founded Amritsar settlement; d. 1 Sep 1581 Goindval | EoS (checked) | high |
+| R-02 | Guru Angad Dev Ji | b. 31 Mar 1504 Matte di Sarai; d. 29 Mar 1552 Khadur | EoS I 146, 148 (page images) | high |
+| R-03 | Guru Amar Das Ji | b. 5 May 1479 Basarke; Guru 1552; Goindval; d. 1 Sep 1574 | EoS I 87–89 (page images) | high |
+| R-04 | Guru Ram Das Ji | b. 24 Sep 1534 Chuna Mandi; founded Amritsar settlement; d. 1 Sep 1581 Goindval | EoS III 451–452 (page images) | high |
 | R-06 | Guru Tegh Bahadur Ji | 1 Apr 1621; Chakk Nanaki; 11 Nov 1675 (24 Nov is the Nanakshahi observance) | EoS IV p. 332 (page image) | high (date) · reviewer to choose "Gobind Das" (EoS) or "Gobind Rai" (see above) |
-| R-08 | Bhagat Jaidev Ji | Gita Govinda; Kenduli / Kenduli-Sasan named as variants; two hymns (Gujri Ang 526, Maru Ang 1106) | EoS (not re-read in this audit); corpus | high |
-| R-10 | Bhagat Namdev Ji | 1270; Narasi-Vamani (Satara: Sahib Singh note on line 58727, Ang 1376, `ਨਾਮਦੇਵ ਜੀ ਬੰਬਈ ਪ੍ਰਾਂਤ ਦੇ ਜ਼ਿਲਾ ਸਤਾਰਾ ਦੇ ਰਹਿਣ ਵਾਲੇ ਸਨ`); tailor; 61 hymns | EoS (checked); Sahib Singh | high |
-| R-11 | Bhagat Ramanand Ji | Prayag; Kashi; disciples tradition hedged; one hymn Basant Ang 1195 | EoS (not re-read in this audit); corpus | high |
+| R-08 | Bhagat Jaidev Ji | Gita Govinda; Kenduli / Kenduli-Sasan named as variants; two hymns (Gujri Ang 526, Maru Ang 1106) | EoS II 321 (page image); corpus | high |
+| R-10 | Bhagat Namdev Ji | 1270; Narasi-Vamani (Satara: Sahib Singh note on line 58727, Ang 1376, `ਨਾਮਦੇਵ ਜੀ ਬੰਬਈ ਪ੍ਰਾਂਤ ਦੇ ਜ਼ਿਲਾ ਸਤਾਰਾ ਦੇ ਰਹਿਣ ਵਾਲੇ ਸਨ`); tailor; 61 hymns | EoS III 161 (page image); Sahib Singh | high |
+| R-11 | Bhagat Ramanand Ji | Prayag; Kashi; disciples tradition hedged; one hymn Basant Ang 1195 | EoS III 447 (page image); corpus | high |
 | R-12 | Bhagat Kabir Ji | weaver of Kashi; Magahar (line 14933, Ang 326); counts per EoS (optional rewording above) | EoS (checked); corpus | high |
 | R-21 | Bhagat Surdas Ji | one line (53935); Guru Arjan's shabad (53936); Sammat 1586 = 1529 | EoS; Sahib Singh; corpus | high |
 | R-22 | Bhai Mardana Ji | 1459 Talwandi; Mirasi; rabab; d. Kartarpur 1534 (the EoS account) | EoS III pp. 52–54 | high (source) · see Q-Mardana |
-| R-23 | Baba Sundar Ji | great-grandson of Guru Amar Das; six-stanza Ramkali Sadu (signature line Ang 924) | EoS (checked); corpus | high |
+| R-23 | Baba Sundar Ji | great-grandson of Guru Amar Das; six-stanza Ramkali Sadu (signature line Ang 924) | EoS IV 274 (page image); corpus | high |
 | R-24 | Bhai Satta & Balwand Ji | Mirasi rababis of Guru Arjan; Tikke di Vaar; Lahore | EoS (checked); Sahib Singh | high |
 | R-26 | Bhatt Nal Ji | 16 Swaiyye, all to Guru Ram Das (name form only, see above) | Sahib Singh (EoS *Bhaṭṭ Bāṇī* counts 5) | high |
 | R-27 | Bhatt Mathura Ji | 7 + 7 Swaiyye; fell at Amritsar 1634 | Sahib Singh; corpus (EoS *Bhaṭṭ Bāṇī* counts 12) | high |
@@ -672,7 +693,7 @@ follows the 11-count. Not wrong as a report of tradition, but it may read as a c
 | R-33 | Bhatt Bal Ji | 5 Swaiyye in the set to Guru Ram Das (name form only) | Sahib Singh; EoS I p. 352 (5) | high |
 | R-34 | Bhatt Haribans Ji | 2 Swaiyye to Guru Arjan (`ਇਹ ਦੋਵੇਂ ਸਵਈਏ 'ਹਰਿਬੰਸ' ਭੱਟ ਦੇ ਹਨ।`) | Sahib Singh; EoS I p. 352 (2) | high |
 | R-35 | Bhatt Bhal Ji | 1 Swaiyya to Guru Amar Das (name form only) | Sahib Singh; EoS I p. 352 (1) | high |
-| R-36 | The Bhatts | Angs 1389–1409; one light; collective entry | EoS (not re-read in this audit); corpus | high |
+| R-36 | The Bhatts | Angs 1389–1409; one light; collective entry | EoS I 351–352 (page image); corpus | high |
 
 ---
 
@@ -680,25 +701,25 @@ follows the 11-count. Not wrong as a report of tradition, but it may read as a c
 
 The sources behind each item, by class (see *How the evidence was gathered*). "Text" = corpus line ids (pinned
 dataset 1.2.0). "Commentary" = ShabadOS 4.8.7. "Reference" = printed page read on the scan's page image (★ = viewed
-by the editor; otherwise by the audit agent; † = OCR text only). "Open" = what the evidence leaves to the reviewer
+by the editor; otherwise by the audit agent). "Open" = what the evidence leaves to the reviewer
 or could not settle.
 
 | Item | Text | Commentary | Reference | Snippet only | Open |
 |---|---|---|---|---|---|
 | Q-Bhatts | 59315; 59436, 59756, 59762 | SS 59316, 59798, 59867 | EoS I 351–352 ★ | leads only | reviewer decision |
 | Q-Mardana / R-22 | 24461–24475 | SS 24467; FDK 24460, 24471; ShabadOS 2114–2115 | EoS III 54 ★, I 368 ★ | other death places | two reviewer decisions |
-| Q-Surdas / R-21 | 53935–53943 | SS 53943; FDK 53934, 53943; ShabadOS 4532 | EoS IV 288 | — | reviewer decision (ShabadOS credits Surdas) |
+| Q-Surdas / R-21 | 53935–53943 | SS 53943; FDK 53934, 53943; ShabadOS 4532 | EoS IV 288 ★ | — | reviewer decision (ShabadOS credits Surdas) |
 | Q-Raagmala | 60586–60658 | FDK 60592; ShabadOS 5540 | EoS III 422 ★ | Rehat Maryada | reviewer decision |
 | Q-Japji | 1–385; 6062–6068 | SS 1, 4, 378; FDK 4; ShabadOS 1–39, 421 | EoS II 347 | — | none |
 | Q-Gurmukhi | Bhatt signatures; 30081, 30091; 47545 | — | EoS I 352 ★ (spellings) | — | reviewer decision |
 | Kabir saloks | 58719–58789 | SS; FDK; ShabadOS 5179–5182 | — | — | reviewer decision |
-| R-01 | — | — | EoS III 165–183 ★; McLeod 94–95, 99–101 ★; Gupta 54 ★; Macauliffe I lxxxiv, 191 ★; Mandair 27 ★ | — | Karam Singh not seen; which day to show |
-| R-05 | count over 55,511 lines | — | EoS I 191 | — | reviewer decision (day) |
+| R-01 | — | — | EoS III 165–183 ★; McLeod 94–95, 99–101 ★; Gupta 54 ★; Macauliffe I lxxxiv, 191 ★; Mandair 27 ★; *Gyan-ratanavali* (2013 ed.) p. 481 ★ | — | Karam Singh not seen (22 Sep conversion); which day to show |
+| R-05 | count over 55,511 lines | — | EoS I 191 ★ | — | reviewer decision (day) |
 | R-06 | — | — | EoS IV 332 ★ | 24 Nov observance | reviewer decision (name) |
 | R-07 | 1377 heading | — | EoS II 11, 13, 297 ★; Macauliffe VI 357 ★ | — | reviewer decision (name the view?) |
-| R-09 | 92, 525–526, 695 | SS 30080, 3707 | EoS IV 365 | — | Bikrami "1267" unresolved |
+| R-09 | 92, 525–526, 695 | SS 30080, 3707 | EoS IV 365 ★ | — | sources differ on the year (AD 1267 vs Sammat 1267); unresolved |
 | R-12 | 14933 | — | EoS II 403 | date variants | none |
-| R-13 | 28670 | — | EoS III 493 | — | none |
+| R-13 | 28670 | — | EoS III 493 ★ | — | none |
 | R-14 | 3720 | SS 3743, 57823 | EoS I 309 ★ | — | none |
 | R-15 | — | SS 28694 | EoS I 355–356 | — | none |
 | R-16 | 22053–22063; 35591 | SS 22052, 22063; ShabadOS | EoS I 567 ★ | — | none (textual marker) |
@@ -710,8 +731,9 @@ or could not settle.
 | R-25 | 59272, 59315 | SS 59316, 59798, 59867 | EoS I 352 ★ | — | none |
 | R-26, R-31, R-33, R-35 | Bhatt signatures | SS 59436, 59598, 59734 | EoS I 352 ★ | — | reviewer decision (spelling) |
 | R-27 | — | SS 59708, 59855 | EoS I 352 ★, III 68 | — | none |
-| R-32 | — | SS 59430 | EoS I 355, 352 ★ | — | none |
-| Other approve rows | as in the table above | as above | EoS R-02 to R-04, R-10, R-23 †; R-08, R-11, R-36 not re-read | — | R-08, R-11, R-36 EoS check outstanding |
+| R-32 | — | SS 59430 | EoS I 355 ★, 352 ★ | — | none |
+| R-02, R-03, R-04 | — | — | EoS I 146, 148 ★; I 87–89 ★; III 451–452 ★ | — | none |
+| R-08, R-10, R-11, R-23, R-36 | corpus | SS 58727 (R-10) | EoS II 321 ★; III 161 ★; III 447 ★; IV 274 ★; I 351–352 ★ | — | none |
 
 ---
 
