@@ -68,10 +68,11 @@ misspelling. The full columns are in the [data dictionary](../data/data-dictiona
 ## The seeker lexicon
 
 `SEEKER_LEXICON` in `webapp/sggs/search.py` maps a whole query (lower-cased) to what the seeker
-most likely means. It has 106 entries:
+most likely means. It has 115 entries:
 
-- **100 map to transliteration terms**, tried in order. For example `mercy` maps to `daiaa`, then
-  `kirapaa`; `satnam` to `sat naam`, then `satinaam`; `waheguru` to `vaahiguroo`. The answer's
+- **109 map to transliteration terms**, tried in order. For example `mercy` maps to `daiaa`, then
+  `kirapaa`; `satnam` to `sat naam`, then `satinaam`; `waheguru`, `vaheguru`, `vahiguru` and
+  `wahiguru` all to `vaahiguroo`, so every spelling of the Name finds the same lines. The answer's
   `mode` reads `seeker-lexicon (<term>)`.
 - **6 map to a theme** (`ego`, `liberation`, `love`, `moksha`, `salvation`, `truth`), answered like
   the theme mode.
@@ -82,8 +83,10 @@ The lexicon is code, not data: it ships with a platform release, not with a data
 letters, the transliteration index, the **lexicon**, the **variant index**, then the English
 translation and the later tiers ([modes and tiers](modes-and-tiers.md)). So a lexicon key that is
 itself a word of the transliteration is answered by the transliteration tier and never reaches
-the lexicon. Of the 106 keys, 20 are shadowed this way (short words such as `ka`, `ki`, `ko`,
+the lexicon. Of the 115 keys, 20 are shadowed this way (short words such as `ka`, `ki`, `ko`,
 `me`), and 3 (`darshan`, `seva`, `satguru`) are also theme names and resolve as themes first.
+A fourth theme name, `vahiguru`, is in `LEXICON_OVER_SLUG`: there the lexicon wins, so it finds
+the same lines as `waheguru`, and the theme stays one tap away in theme mode.
 
 ## How the variant index is used
 

@@ -3,6 +3,31 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.5.0] — 2026-10-27
+
+Explore becomes "The Granth Today" on the iPhone, the Vaars are read as printed, and the website catches up with the app. It ships on the website, the API and the iPhone app together. App Store 1.4.9 was not submitted: 1.5.0 carries everything in it.
+
+### Data
+- **Dataset 1.2.0** (sggs-data #16, pinned at `c36e317`): each Vaar is read from the print, which gives the printed titles, the 17 `ਡਖਣੇ` saloks of Maru Ki Vaar M5, no phantom salok at the Ramkali M3 `ਧੁਨੀ`, and no unit running on into the next bani (`vaar_units` 1,426 → 1,443). Only the Vaar and analytics tables changed; the lines and every search index are identical, so the scripture is byte-identical (#312).
+
+### Changed
+- **gurbanisoul.com matches the app.** Every page was audited against the app: the counts are generated from the database and the roster (36 voices, 54 themes, 22 Vaars), the Features page gains chapters for the Vaars, the Index, Themes and Voices, and the screenshots are the verified iOS 1.4.9 set (#314, #315).
+- **"Waheguru"** is how the website names the theme everywhere. Every spelling of the Name (waheguru, vaheguru, vahiguru, wahiguru) finds the same lines, and no raag heading slips in. The theme's slug is unchanged in URLs, the API and saved data (#316).
+- **Brand book §6:** the Explore hub replaces the flat-gold hero (#313).
+- **The Raag Clock reads on one 12-hour scale (web):** the pahar ring sits on the clock face's own geometry (12 at the top, 30° per hour) and shows the half of the day the hour hand is in, AM or PM, with the watches clipped at noon and midnight. Each watch is labelled P1–P8, smaller than the face's numerals, so nothing on the ring reads as a clock hour; the separate ring pointer is gone (#318).
+- **Privacy (iOS):** the Raag Clock's "Keep" answer to the travel notice is one yes/no flag next to the rounded coordinates; it clears when the place changes and with Forget location.
+
+### Changed (iOS, gurbani-soul-ios #84–#97 and the 1.5.0 fixes)
+- **Explore is "The Granth Today":** a dated masthead, a featured card and live previews (the Raag Clock, today's theme, the sky), on iPad all at once, with deep links and Audio Graphs.
+- **One voice count:** 36 voices on every screen. Bhagat Surdas Ji is shown as under scholarly review, never dropped.
+- **Raag Clock on one 12-hour scale:** the ring and the clock face share one geometry, so 6 AM sits beside the face's 6 and every watch boundary, sunrise and sunset sits where the hour hand points at that time; the ring shows the current AM or PM half and the hour hand is the one "now". The same scale is used in Explore's preview and the Raag now widgets, and a widget keeps its own entry's time zone if the phone moves (gurbani-soul-ios #101).
+- **Raag Clock travel notice:** when the saved place is far from where the phone is, the clock says whose sky it shows; "Keep" silences it.
+- **"Waheguru"** names the theme in the app as well; every spelling finds it.
+- **Smaller fixes:** the Ang count is written once, from the data; section headings, widget headings and the voice tags in Lineage ("Guru · M5", "Bhagat") are in sentence case; Ang numbers are never written with a thousands separator.
+- **Testing:** launch time is measured inside the app on the device; the flaky Nitnem UI tests are fixed at their causes; a manual workflow captures the website's screenshot set and checks it before it is published.
+
+### Data
+
 ## [1.4.9] — 2026-10-25
 
 The voices of the Granth, attributed from the evidence printed in it, and five new ways into the Granth on the iPhone. It ships on the website, the API and the iPhone app together.

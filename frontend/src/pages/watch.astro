@@ -7,6 +7,7 @@ import RaagArc from "../components/RaagArc.astro";
 import DeviceFrame from "../components/DeviceFrame.astro";
 import JsonLd from "../components/JsonLd.astro";
 import { SITE_URL } from "../site.ts";
+import { FACTS, spell } from "../facts.ts";
 import raagData from "../generated/landing-raags.json";
 import { paharLabel, paharRange } from "../scripts/pahar.js";
 import clockDark from "../assets/app/iphone-clock-dark.png";
@@ -53,7 +54,7 @@ const jsonLd = {
         <p class="eyebrow">The Raag Clock</p>
         <h1>The watch of the day</h1>
         <span class="gold-hair" aria-hidden="true"></span>
-        <p class="lead">Eight pahars. Thirty-one raags. The clock that knows which belong to now.</p>
+        <p class="lead">Eight pahars. {spell(FACTS.raags)} raags. The clock that knows which belong to now.</p>
       </div>
       <div class="story-media">
         <div class="stage wash">
@@ -147,6 +148,7 @@ const jsonLd = {
         <p class="eyebrow">Sources</p>
         <h2 class="h-story">Where traditions disagree</h2>
         <p class="body-lg">Not every source places a raag in the same watch. Where they differ, every claim is kept with its citation — primary, variant or disputed — so you can see the disagreement rather than a single silent answer.</p>
+        <p class="detail">In the app, every raag has its own page in the Index, with its traditional time and the source of each claim, and “In this hour” gathers the raags of the current watch.</p>
         <p class="cta-row"><a class="link-more" href="/divergence">See every disagreement</a></p>
       </div>
       <div class="story-media reveal" data-delay="1">
@@ -163,13 +165,13 @@ const jsonLd = {
       <div class="story-text reveal">
         <p class="eyebrow">On your Home Screen</p>
         <h2 class="h-story">The watch, at a glance</h2>
-        <p class="body-lg">The Raag Now widget shows the raag of the current watch on your Home Screen, in light or dark — never a feed, never a notification you did not ask for.</p>
+        <p class="body-lg">The Raag Now widget shows the current watch on its clock face on your Home Screen, in light or dark; the medium and large sizes name its raags — never a feed, never a notification you did not ask for.</p>
         <p class="detail">Siri: “What raag is it now”.</p>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="wpair">
-          <figure class="widget widget--s"><Image src={wRaagLight} widths={[260, 520]} sizes="(min-width: 980px) 260px, 42vw" loading="lazy" decoding="async" alt="Raag Now widget, small: the raag of the current watch" /></figure>
-          <figure class="widget widget--s"><Image src={wRaagDark} widths={[260, 520]} sizes="(min-width: 980px) 260px, 42vw" loading="lazy" decoding="async" alt="Raag Now widget, small, in the dark scheme" /></figure>
+          <figure class="widget widget--s"><Image src={wRaagLight} widths={[260, 520]} sizes="(min-width: 980px) 260px, 42vw" loading="lazy" decoding="async" alt="Raag Now widget, small: the 24-hour dial at 4:40 pm, the 4th pahar of day" /></figure>
+          <figure class="widget widget--s"><Image src={wRaagDark} widths={[260, 520]} sizes="(min-width: 980px) 260px, 42vw" loading="lazy" decoding="async" alt="Raag Now widget, small, in the dark scheme: the 24-hour dial at 4:40 pm, the 4th pahar of day" /></figure>
         </div>
       </div>
     </div>

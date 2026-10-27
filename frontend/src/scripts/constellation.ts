@@ -9,12 +9,12 @@ import * as d3 from 'd3';
 import { $, esc, api, guard, failHTML, goReader } from './core';
 import { cssVar, onTheme } from './viz';
 import { loadClock, currentPahar } from './timing';
-import { THEME_GROUPS, groupOf, groupVar, titleCase } from './themegroups';
+import { THEME_GROUPS, groupOf, groupVar, themeName } from './themegroups';
 
 type Companion = { co: string; n: number; ppmi: number; jaccard: number; shabad_count: number };
 const SHOWN = 9, PAGE = 50, BINS = 15;
 const nf = (n: number) => (n || 0).toLocaleString();
-const T = (k: string) => titleCase(k);
+const T = (k: string) => themeName(k);
 
 const st = {
   theme: 'naam', view: 'focus' as 'focus' | 'sky', rank: 'shared' as 'shared' | 'distinctive',

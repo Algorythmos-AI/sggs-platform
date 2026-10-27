@@ -23,7 +23,7 @@ corpus by accident.
 | `gurmukhi` | the verbatim `text` column (FTS) | the `skeleton` column with vowel signs stripped (`gurmukhi-skeleton`) |
 | `roman` | the `translit` column (FTS) | the phonetic fold over `translit_norm` (`roman-spelling-tolerant`) |
 | `first` | first letters of each word, as a phrase: `fl_g` for Gurmukhi, `fl_r` for Roman | — |
-| `theme` | the concept index: the concept's lines, with its description and total | a `LIKE` over concept names and descriptions |
+| `theme` | the concept index: the concept's lines, with its description and total | the one concept whose name folds like the query (`waheguru` → `vahiguru`), then a `LIKE` over concept names and descriptions |
 | `english` | the English translation layer, `fts_en` | — |
 
 ## The tiers of auto mode
@@ -39,7 +39,7 @@ on the waterfall poster. On GitHub, the table below lists the same tiers.
 | Gurmukhi first letters | every token is one letter, ≥ 2 tokens | `fl_g` phrase | `first-letters` |
 | Gurmukhi text | Gurmukhi query | `text` (FTS, bm25) | `gurmukhi` |
 | Gurmukhi skeleton | text found nothing | vowel signs stripped, `skeleton LIKE` | `gurmukhi-skeleton` |
-| Concept name | the query is exactly a concept key (`naam`, `haumai`, …) | the concept index | `theme` |
+| Concept name | the query is exactly a concept key (`naam`, `haumai`, …), except `vahiguru`, which goes on to the lexicon | the concept index | `theme` |
 | Roman first letters | ≥ 2 tokens, all ≤ 3 letters | `fl_r` phrase, then `translit` | `first-letters`, `roman` |
 | Transliteration | Roman query | `translit` (FTS, bm25) | `roman` |
 | Seeker lexicon | nothing yet | a curated table: a word → a transliteration term or a theme | `seeker-lexicon (term)` |

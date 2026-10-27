@@ -6,6 +6,7 @@
 // READ-ONLY: this view never touches the corpus or scripture text — it only describes it.
 import { $, esc, api, goSearchTheme } from './core';
 import { plural, granthOrder } from './voices';
+import { themeName } from './themegroups';
 
 // Roster v2 (frontend/public/contributors.json): a source is {ref, entry, url} keyed into source_index;
 // review is {status, reviewer, date}. load() normalises them into the shape the views below draw.
@@ -38,7 +39,6 @@ const compareSel: C[] = [];
 // ---------- small helpers ----------
 const ord = (n: number) => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
 const centuryOf = (y: number) => Math.floor((y - 1) / 100) + 1;
-const titleCase = (s: string) => (s || '').replace(/\w\S*/g, (t) => t.charAt(0).toUpperCase() + t.slice(1));
 const bar = (n: number) => n > 0 ? Math.max(4, Math.round(100 * Math.sqrt(n / maxLines))) : 0;   // sqrt so small voices stay visible
 // When no source gives a birth year, order by the death year, else by the century the voice is known
 // from (roster v2 `fl_century`); only a voice with none of these goes to "Dates not established".
@@ -268,7 +268,7 @@ function profileHTML(c: C, d: any, compact: boolean): string {
     themesHTML = `<div class="ld-sec"><div class="ld-h">Signature themes <span class="ld-note">— ideas this voice returns to more than the Granth overall</span></div>` +
       top.map((t: any) => {
         const w = Math.max(8, Math.round((+t.lift) / maxL * 100));
-        return `<div class="ld-trow"><button class="ld-tlabel" data-theme="${esc(t.concept)}" type="button" title="Search this theme across the Granth">${esc(titleCase(String(t.concept).replace(/_/g, ' ')))}</button>` +
+        return `<div class="ld-trow"><button class="ld-tlabel" data-theme="${esc(t.concept)}" type="button" title="Search this theme across the Granth">${esc(themeName(String(t.concept)))}</button>` +
           `<span class="ld-ttrack" aria-hidden="true"><i style="width:${w}%"></i></span><span class="ld-tpct">×${(+t.lift).toFixed(1)}</span></div>`;
       }).join('') + `</div>`;
   }

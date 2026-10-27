@@ -57,3 +57,86 @@ test's sample "next bani" state), `widget-raagnow-small-*`. **Not shipped:** Huk
 truncates to "Sri Guru Granth Sahib Ji · An…" — an app bug, being fixed separately) and Raag Now
 **medium/large** ("next watch in 4 days, 18 hrs" — countdown bug under investigation), and the light
 lock-screen accessory renders (near-blank on a black background). Re-render once the fixes land.
+
+## 1.4.9 site refresh (2026-10-26)
+
+App 1.4.9 (gurbani-soul-ios `v1.4.9`, `f700fb3`) changed screens these 1.3.4 shots show. Shots whose
+content is now **untrue** were taken off the pages (the files stay here until the 1.4.9 set replaces them):
+
+| file | why it is off the pages |
+|---|---|
+| iphone-lineage-light | says "30 voices · 60,273 verses"; the roster is 36 voices (dataset 1.1.0 attribution) |
+| ipad-explore-landscape-light | its Lineage tile says "30 voices across five centuries" |
+| iphone-insights-light | per-author counts before the 1.1.0 re-attribution, and a "lexical diversity" figure computed on the English layer that 1.4.9 no longer shows |
+| iphone-themes-light | shows English theme descriptions, which 1.4.9 holds back for scholar review (G3) |
+| iphone-constellation-dark, iphone-constellation-light | Constellation v1 drawing; the copy now describes v2 (Focus, lenses, the Sky) |
+| iphone-more-display-light | its chapter was rewritten for Display; no longer referenced (`iphone-index-light` is now the 1.4.9 Index, below) |
+
+### The 1.4.9 set (2026-10-26)
+
+Source: gurbani-soul-ios workflow `ios-site-shots`, run **40283477272**, at tag `v1.4.9` (`f700fb3`), Xcode 26.3,
+iPhone 17 Pro and iPad Pro 13" (M5) simulators on **iOS 26.2**. The public Gurmukhi-only DB
+(`bf9141739ca0210926da71b24c9bbfda98387698aa851dd9100243bf07854fef`, the one in App Store build 1.4.9 (1)) was
+swapped into the built app and proved by sha256 and by the absence of the `translations` and `fts_en` tables.
+Status bar 9:41 (wifi 3, cell 4, 100%), clock pinned with `SGGS_CLOCK_NOW=581` (09:41), fixed mode, no
+coordinates; 0 tests failed. Every source file matched the run's `SHA256SUMS` before it was placed.
+
+Encoding: iPhone shots resized to 900 px wide, widgets kept at native size, all palette-PNG re-encoded with sharp
+(quality 92); the pages serve Astro's responsive WebP (AVIF+WebP for iPad). The sha256 below is of the **raw source
+PNG**, as in the 1.3.4 table. Same-named files replace their 1.3.4 versions; the others are new.
+
+| file | source (`shots149/`) | device | iOS | appearance | source sha256 | run |
+|---|---|---|---|---|---|---|
+| iphone-reader-light.png | `iphone-light/reader.png` | iPhone 17 Pro | 26.2 | light | `def5d7176b7eea4b1aa29847902a926abb2da6f388cdd7a3b1fe82a1a23d1b3f` | 40283477272 |
+| iphone-reader-dark.png | `iphone-dark/reader.png` | iPhone 17 Pro | 26.2 | dark | `ff5eee4f04ec5a266733c327f9dca600d98a08a473f86c1cd512f27b23ca3128` | 40283477272 |
+| iphone-search-roman-light.png | `iphone-light/after_search.png` | iPhone 17 Pro | 26.2 | light | `ee6b1024b166205051a5dae4bfd27820632566da0a4a3153c4d1c65b026b75a9` | 40283477272 |
+| iphone-verify-verdict-light.png | `iphone-light/verify.png` | iPhone 17 Pro | 26.2 | light | `7227c464b3bd6604a5b3592578742937c36c16b135736b2287f6168c590511ce` | 40283477272 |
+| iphone-hukam-light.png | `iphone-light/hukam.png` | iPhone 17 Pro | 26.2 | light | `223c298f7a5df5b1a12753bf885dad58d37b25c803d7cf2a442c19e5b4356bde` | 40283477272 |
+| iphone-bani-japji-light.png | `iphone-light/bani_reader.png` | iPhone 17 Pro | 26.2 | light | `25e66bea550f87871f9feadb61261c228c11afa9430d0c5ba1c7b433d0981b78` | 40283477272 |
+| iphone-clock-dark.png | `iphone-dark/clock.png` | iPhone 17 Pro | 26.2 | dark | `cecb099cdef184c0496dfd16a2440c992b838ba470991d8e4d94384c5f04c555` | 40283477272 |
+| iphone-about-light.png | `iphone-light/about.png` | iPhone 17 Pro | 26.2 | light | `829607befabbfb1c775e88448c091a9ea3870b285c0551e604b0f21cf29c55a2` | 40283477272 |
+| iphone-vaars-light.png | `iphone-light/vaars_home.png` | iPhone 17 Pro | 26.2 | light | `e0d709e824e5d705cc34bcb414f4b261148ecd20ab07da1be7124b59b759350a` | 40283477272 |
+| iphone-vaar-weave-light.png | `iphone-light/vaar_weave_top.png` | iPhone 17 Pro | 26.2 | light | `306ba98751c0844c35f6db3d1d8958b12b46573c9fcfbb1bf72f7a4e92da8633` | 40283477272 |
+| iphone-vaar-reader-light.png | `iphone-light/vaar_reader_top.png` | iPhone 17 Pro | 26.2 | light | `c7f0f4c3b8cfe2d9f80252072b0f8e051c9ed5807709b58400669057a8f34f7d` | 40283477272 |
+| iphone-index-light.png | `iphone-light/index.png` | iPhone 17 Pro | 26.2 | light | `4b517ce0ad5766bf0e78198f03a3e72bdbc04f854686cd9629cb5c88bc9c3313` | 40283477272 |
+| iphone-raag-gauri-light.png | `iphone-light/raag_gauri.png` | iPhone 17 Pro | 26.2 | light | `e9e89608cc07422f343fbb23842b974e9b6f8ff5dcbf2709bfdc16c12331ee76` | 40283477272 |
+| iphone-index-forms-light.png | `iphone-light/index_forms.png` | iPhone 17 Pro | 26.2 | light | `192462c52bce7a4611917cf120454e120477f821b9271b37f41e171fdcc5c6c1` | 40283477272 |
+| iphone-voice-m9-light.png | `iphone-light/voice-m9.png` | iPhone 17 Pro | 26.2 | light | `02d8b322c2c1e543395665bc02504af6a85903a5c1f18aadddad842e2901136a` | 40283477272 |
+| iphone-compare-light.png | `iphone-light/compare-v2.png` | iPhone 17 Pro | 26.2 | light | `b684b915ac04d5c942294de065802b5a12312382e0a447d5ff3c099625d50145` | 40283477272 |
+| widget-hukam-medium-light.png | `widgets/hukam-medium-light.png` | widget render (unit test, `ImageRenderer` scale 3) | 26.2 | light | `3aefd1d621b72ceccb89cc9d609a122cc840312e67195568477f5fff7a0d7a1c` | 40283477272 |
+| widget-hukam-medium-dark.png | `widgets/hukam-medium-dark.png` | widget render (unit test, `ImageRenderer` scale 3) | 26.2 | dark | `5011996f16d852e6d6ca1143ddd35e5327c3aaf18d5eff8b51882de8656e2c54` | 40283477272 |
+| widget-nitnem-medium-light.png | `widgets/nitnem_medium_next_light.png` | widget render (unit test, `ImageRenderer` scale 3) | 26.2 | light | `2779c67ce2c04edcc80623dac4d0d75326a8a87d319595c09917989adc5f86bf` | 40283477272 |
+| widget-nitnem-medium-dark.png | `widgets/nitnem_medium_next_dark.png` | widget render (unit test, `ImageRenderer` scale 3) | 26.2 | dark | `e499636a80a77ddd2c82868170526e83ed28a9682aa89734397860ec5f2b4c72` | 40283477272 |
+| widget-nitnem-small-light.png | `widgets/nitnem_small_next_light.png` | widget render (unit test, `ImageRenderer` scale 3) | 26.2 | light | `84b8e801892055b44c124c48dbb7bafd563cb3f6840ab45ac2f72bad75b7dc3c` | 40283477272 |
+| widget-raagnow-small-light.png | `widgets/raagnow-small-fixed-light.png` | widget render (unit test, `ImageRenderer` scale 3) | 26.2 | light | `5ee97f4f885ca89ee81c80a2409bb6e8b70699686b0f3d6520aae2602536d10e` | 40283477272 |
+| widget-raagnow-small-dark.png | `widgets/raagnow-small-fixed-dark.png` | widget render (unit test, `ImageRenderer` scale 3) | 26.2 | dark | `c6838f767be56e42f1c26eab10639a41d32dced73a7ef514ca91d0ae92af4230` | 40283477272 |
+
+Widget renders come from `WidgetRenderTests` / `NitnemWidgetRenderTests` / `HukamWidgetRenderTests` fixtures:
+the Raag Now dial is the fixture's 16:40, the Nitnem widget shows the fixture's "next bani" state, and the Hukam
+widget draws the seed-29 unit (Ang 13), so it is not the same Hukam as `iphone-hukam-light` (Ang 1319). The Hukam
+widget's eyebrow now reads "HUKAM OF THE DAY" and its citation is no longer truncated.
+
+`iphone-about-light`: the four scripture integrity checks are green and the version reads 1.4.9+1. Behind the
+tab bar, a few pixels of the next row's red icon show: the CI build is not signed, so its "Widget App Group"
+row fails. That row is not one of the integrity checks, and its text is hidden.
+
+### Not placed from the 1.4.9 set
+
+| source | why |
+|---|---|
+| `themes-index`, `themes` (all four sets) | capture fault: they show the Index **Forms** tab, not Themes (the iphone-light files are byte-identical to each other). Themes stays figures only |
+| `constellation`, `constellation-focus` (all four sets) | same capture fault (Index Forms tab). Explore stays copy only |
+| `themes-search-gurmukhi` | shows "No Results for ਹਉਮੈ" with the keyboard up: not a picture of the feature |
+| `ipad-landscape/*` | the landscape UI is rotated 90° onto the 2752×2064 canvas and clipped, with a black band. The 1.3.4 iPad landscape Reader and Nitnem stay. `ipad-landscape-frames/frame-004` proves a clean landscape capture is possible: recapture Reader and Nitnem that way |
+| `voices_ribbon`, `insights_contributors`, `lineage*` | **held**: they read "35 voices / 35 contributors"; the site says 36. The owner is deciding the wording |
+| `explore_hub` | **held**: the old flat-gold hub, replaced by the Explore redesign in the next app release |
+| `index_find`, `search_results` | the keyboard covers half the screen; `after_search` (same results, no keyboard) is used for Search |
+| `nitnem_home`, `vaar_reader_pauris_only`, the other surfaces | not needed by a page today |
+| `hukam-large-*`, `raagnow-medium/large-*` | now clean (citation whole, countdown right), but the widget rows have no large or second medium slot |
+
+### Still from 1.3.4 (no 1.4.9 equivalent was captured)
+
+`iphone-search-first-letters-light`, `iphone-saroop-on/off-light`, `accent-*`, `iphone-nitnem-journey-light`,
+`iphone-clock-solar-dark`, `iphone-pahar-divergence-light`, `iphone-live-activity-card`, and
+`ipad-reader/nitnem-landscape-light` (see above). Each is still true of 1.4.9. The unreferenced 1.3.4 files
+listed at the top of this section stay in the repo but are on no page.

@@ -41,7 +41,7 @@ Source: `ios/tests/test_ios_gates.py` in gurbani-soul-ios, read at the pinned co
 | Vaar progress (from 1.4.9) | `vaar-progress.json` in the App Group | per Vaar: the line you reached, its pauri, when you last read, and when you finished |
 | Widget snapshot | `widget-snapshot.json` in the App Group | a Hukam verse and its Ang, the pahar-to-raag tables, the clock mode and coordinates, the set names |
 | Settings | the app's preferences | display and reader settings, the last Ang read, reminder times, and the launch-integrity cache |
-| Clock settings | the App Group's preferences | the clock mode and, in Solar mode, your coordinates rounded to two decimal places (about a kilometre); the exact position is never stored, and "Forget location" (from 1.4.0) removes it |
+| Clock settings | the App Group's preferences | the clock mode and, in Solar mode, your coordinates rounded to two decimal places (about a kilometre); the exact position is never stored, and "Forget location" (from 1.4.0) removes it. From 1.5.0, a yes/no flag records that you chose "Keep" on the travel notice (the clock is showing a saved place far from you); it clears when the place changes and with "Forget location" |
 | Spotlight | the system index | your saved verses (Gurmukhi, transliteration, Ang), so system search can find them; from 1.4.9 also the 54 theme names with their Gurmukhi words and verse counts, which hold nothing about you |
 | Your themes (from 1.4.9) | computed on demand, not stored | the themes your saved verses carry, worked out on the device each time the Themes page opens; a Settings switch turns it off |
 | Diagnostics | Application Support | MetricKit reports, as above |
@@ -95,8 +95,8 @@ Source: `ios/App/Resources/PrivacyInfo.xcprivacy` in gurbani-soul-ios, read at t
 ## Deleting data
 
 - **A saved verse:** swipe to delete; its Spotlight entry goes with it.
-- **Your location** (from 1.4.0): Raag Clock → Forget location. It goes from the app's settings and from the
-  widgets' snapshot; Solar mode shows the fixed clock until you add one again.
+- **Your location** (from 1.4.0): Raag Clock → Forget location. It goes from the app's settings (with the
+  "Keep" flag) and from the widgets' snapshot; Solar mode shows the fixed clock until you add one again.
 - **Your reading history** (from 1.4.0): Reading journey → Clear reading history, after a confirmation. It
   removes the days you completed and where you stopped in each bani.
 - **A bani's reading position:** Start again (the days completed are kept).

@@ -6,6 +6,7 @@
 // goes out with its citation — Sri Guru Granth Sahib Ji · Ang N.
 import { $, esc } from './core';
 import { togglePin, isPinned, MAX_PINS } from './store';
+import { themeName } from './themegroups';
 import { overlayOpened, overlayClosed } from './overlay';
 
 type Verse = { id: number; ang: number; cid: number; gm: string };
@@ -65,7 +66,7 @@ function showThemes(id: number) {
   }
   p.then((list) => {
     if (!cur || cur.id !== id || !list.length) return;
-    box.innerHTML = 'Themes: ' + list.map((c) => `<a href="/search?q=${encodeURIComponent(c)}&mode=theme">${esc(c.replace(/_/g, ' '))}</a>`).join('');
+    box.innerHTML = 'Themes: ' + list.map((c) => `<a href="/search?q=${encodeURIComponent(c)}&mode=theme">${esc(themeName(c))}</a>`).join('');
     box.hidden = false;
   });
 }
