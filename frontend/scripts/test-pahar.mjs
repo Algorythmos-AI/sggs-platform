@@ -5,6 +5,7 @@ import {
   paharFromMinutes, paharFixed, paharWindow, paharLabel, paharRange, fmt12,
   sunTimes, paharSolar, paharSolarWindow, nextPaharBoundary, raagsForPahar,
 } from '../src/scripts/pahar.js';
+import { halfOf, faceDegrees, clipToHalf, halfLabels, halfSpoken } from '../src/scripts/paharface.js';
 
 let pass = 0, fail = 0;
 function eq(name, got, want) {
@@ -92,6 +93,50 @@ const clock = { claims: { primary: [{ raag_name: 'ਆਸਾ', pahar: 8 }, { raag
 eq('pahar 8 raags', raagsForPahar(clock, 8).map(c => c.raag_name), ['ਆਸਾ']);
 eq('pahar 7 is empty (deliberate)', raagsForPahar(clock, 7), []);
 eq('handles missing payload', raagsForPahar(null, 1), []);
+
+console.log('— the 12-hour face (ring and hands on one scale; presentation, not the contract) —');
+eq('12 AM at the 12', faceDegrees(0), 0);
+eq('6 AM at the 6, never beside the 9', faceDegrees(360), 180);
+eq('9 AM at the 9', faceDegrees(540), 270);
+eq('12 PM at the 12', faceDegrees(720), 0);
+eq('6 PM at the 6', faceDegrees(1080), 180);
+eq('wraps below zero', faceDegrees(-60), 330);
+{
+  let bad = 0;
+  for (let m = 0; m < 1440; m++) {
+    const hand = ((Math.floor(m / 60) % 12) + (m % 60) / 60) * 30;      // the hour hand at that minute
+    if (Math.abs(faceDegrees(m) - hand) > 1e-9) bad++;
+  }
+  eq('every minute sits under the hour hand', bad, 0);
+}
+near('08:18 boundary = hour hand at 08:18', faceDegrees(498), (8 + 18 / 60) * 30, 1e-9);
+eq('half: 11:59 is AM', halfOf(719).key, 'am');
+eq('half: noon is PM', halfOf(720).key, 'pm');
+eq('half: 23:59 is PM', halfOf(1439).key, 'pm');
+eq('half: midnight is AM', halfOf(1440).key, 'am');
+const AM = halfOf(0), PM = halfOf(720);
+eq('fixed: AM half holds P7 P8 P1 P2', [1, 2, 3, 4, 5, 6, 7, 8].filter(p => clipToHalf(paharWindow(p), AM).length), [1, 2, 7, 8]);
+eq('fixed: PM half holds P3–P6', [1, 2, 3, 4, 5, 6, 7, 8].filter(p => clipToHalf(paharWindow(p), PM).length), [3, 4, 5, 6]);
+eq('fixed P6 ends on the 12 (1440), not 0', clipToHalf(paharWindow(6), PM), [{ start: 1260, end: 1440 }]);
+{
+  const ws = [1, 2, 3, 4, 5, 6, 7, 8].map(p => paharSolarWindow(p, 351, 1067));
+  const p3 = ws[2];
+  eq('solar P3 cut at noon (AM part)', clipToHalf(p3, AM), [{ start: p3.start, end: 720 }]);
+  eq('solar P3 cut at noon (PM part)', clipToHalf(p3, PM), [{ start: 720, end: p3.end }]);
+  const x = ws.find(w => w.end < w.start);
+  eq('solar watch over midnight: PM part', clipToHalf(x, PM), [{ start: x.start, end: 1440 }]);
+  eq('solar watch over midnight: AM tail', clipToHalf(x, AM), [{ start: 0, end: x.end }]);
+  for (const h of [AM, PM]) {
+    const sp = ws.flatMap(w => clipToHalf(w, h)).sort((a, b) => a.start - b.start);
+    eq(`solar ${h.key} half tiles 720 min`, sp.reduce((t, s) => t + s.end - s.start, 0), 720);
+    eq(`solar ${h.key} half has no gaps`, sp.every((s, i) => i === 0 ? s.start === h.start : s.start === sp[i - 1].end), true);
+  }
+}
+eq('zero-length window is empty', clipToHalf({ start: 300, end: 300 }, AM), []);
+eq('labels, 12-h AM', halfLabels(AM, false).map(l => l.label), ['AM', '3 AM', '6 AM', '9 AM']);
+eq('labels, 24-h PM', halfLabels(PM, true).map(l => l.label), ['12–24', '15', '18', '21']);
+eq('labels sit at the 12 · 3 · 6 · 9', halfLabels(PM, false).map(l => faceDegrees(l.minute)), [0, 90, 180, 270]);
+eq('spoken PM half', halfSpoken(PM, false), '12 PM to 12 AM');
 
 console.log(`\n${pass} passed, ${fail} failed.`);
 process.exit(fail ? 1 : 0);

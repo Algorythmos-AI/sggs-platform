@@ -72,13 +72,14 @@ body.hide-timing .timechip { display:none; }
 .clock-dial { display:flex; justify-content:center; }
 .clock-dial .raagdial { width:100%; max-width:560px; height:auto; display:block; }
 
-/* the face. From the centre: the reader's own 12-hour clock, the band of the eight watches, the
-   24 hour ticks and their numerals. A watch is a tint; the one it is now is the accent fill, edged.
+/* the face, on ONE 12-hour scale. From the centre: the reader's own 12-hour clock, the band of the
+   watches in this half of the day, the 12 hour ticks, and the labels (AM/PM on the 12, then 3 · 6 · 9). A watch is a tint; the one it is now is the accent fill, edged.
    Text on a watch is ink (on the fill: the fill's own text colour), so it reads in every theme. */
 .clock-col { min-width:0; }
 .raagdial .tick { stroke:var(--line-strong); stroke-width:2; stroke-linecap:round; }
 .raagdial .tick-major { stroke:var(--accent-ui); stroke-width:3.5; }
 .raagdial .hourmark { font-size:21px; font-weight:600; fill:var(--soft); font-variant-numeric:tabular-nums; }
+.raagdial .hourmark-half { font-size:23px; font-weight:750; fill:var(--ink); letter-spacing:.03em; }   /* the half shown reads first */
 .raagdial .arc { stroke:var(--card); stroke-width:2.5; cursor:pointer; outline:none; transition:stroke .15s; }
 .raagdial .arc-day   { fill:color-mix(in srgb, var(--accent) 15%, var(--card)); }
 .raagdial .arc-p2, .raagdial .arc-p3 { fill:color-mix(in srgb, var(--accent) 21%, var(--card)); }
@@ -99,9 +100,6 @@ body.hide-timing .timechip { display:none; }
 .raagdial .sun-badge { fill:var(--card); stroke:var(--accent-ui); stroke-width:2; }
 .raagdial .sun-disc { fill:var(--accent-ui); }
 .raagdial .sun-line { stroke:var(--accent-ui); stroke-width:2.2; stroke-linecap:round; }
-.raagdial .handhalo { stroke:var(--card); stroke-width:9; stroke-linecap:round; opacity:.92; }
-.raagdial .handline { stroke:var(--accent-ui); stroke-width:4; stroke-linecap:round; }
-.raagdial .handdot { fill:var(--accent-ui); stroke:var(--card); stroke-width:1.5; }
 /* the 12-hour face in the hollow */
 .raagdial .face-disc { fill:var(--surface-raised); stroke:var(--line-strong); stroke-width:1.5; }
 .raagdial .ftick { stroke:var(--faint); stroke-width:1.4; stroke-linecap:round; opacity:.6; }

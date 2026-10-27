@@ -30,7 +30,7 @@ import Base from '../layouts/Base.astro';
       <div class="clock-stage">
         <div class="clock-col">
           <div id="clockWrap" class="clock-dial"
-               role="group" aria-label="24-hour raag clock: noon at the top, midnight at the bottom. Each watch is a button; the same watches are listed below."></div>
+               role="group" aria-label="Raag clock on your own 12-hour clock face: the ring shows the half of the day the hour hand is in. Each watch is a button; all eight are listed below."></div>
           <p id="clockReadout" class="clock-readout"></p>
         </div>
         <aside id="clockDetail" class="clock-detail" aria-live="polite" aria-label="The chosen watch"></aside>
@@ -68,8 +68,8 @@ import Base from '../layouts/Base.astro';
     <p class="clock-foot">Pahars were traditionally <b>solar</b>: four equal watches of daylight and four of
       night, so they stretch and shrink with the season. The fixed view places the first watch at 6 AM as a
       modern rendering; solar mode works out sunrise and sunset on this device (NOAA equations), and your
-      location never leaves it. The dial is a 24-hour face on your own clock: noon at the top, midnight at
-      the bottom. Every placement here is an attributed claim with its citation.</p>
+      location never leaves it. The dial is your own 12-hour clock: the ring shows the half of the day the
+      hour hand is in (AM or PM), and each watch sits where the hand points at that time. Every placement here is an attributed claim with its citation.</p>
   </section>
   <script>import '../scripts/raagclock';</script>
 </Base>
