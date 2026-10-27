@@ -320,8 +320,8 @@ Reason: no heading assigns them elsewhere, Sahib Singh argues explicitly that th
 ### R-01 · Guru Nanak Dev Ji
 **Finding.** Facts follow the EoS as cited. Two dates have well-known variants: birth (15 April 1469, Vaisakh,
 which the EoS follows, vs the tradition of Katak Puranmashi, the date of the Gurpurab), and death (7 September
-1539 in the roster vs 22 September 1539 in many accounts, from Asu vadi 10, Sammat 1596; the difference is mainly
-Julian vs Gregorian reckoning).
+1539, Assu vadi 10, 1596 Bk, in the EoS and the roster; 22 September 1539 appears in other accounts, whose
+source and reckoning have not been identified).
 **Evidence.** EoS, *Nānak, Gurū (Srī Gurū Nānak Dev)*, vol. III (M–R), pp. 166–182, read in the Internet
 Archive scan's OCR text (see *Condition 1 sources*): birth Baisakh sudi 3, 1526 Bk / 15 April 1469, with the
 birthday kept by custom on the Kartik full moon (p. 166); death Assu vadi 10, 1596 Bk / 7 September 1539
