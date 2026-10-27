@@ -50,6 +50,8 @@ test('the face shows the time and the watch it is: fixed hours', async ({ page }
   expect(await arcStartDeg(page, 5)).toBeCloseTo(180, 0);
   await expect(page.locator('#clockWrap')).toHaveAttribute('aria-label', /showing 12 PM to 12 AM/);
   await expect(page.locator('.raagdial .wedge')).toHaveCount(4);                 // P3–P6
+  // a watch is named "P5", never a bare "5" that would read as an hour beside the face
+  expect(await page.locator('.raagdial .pnum').allTextContents()).toEqual(['P3', 'P4', 'P5', 'P6']);
   // a bead for each raag of a watch, and none in the silent one
   const beads = (p: number) => page.locator(`.raagdial .wedge[data-wedge="${p}"] .bead`).count();
   expect(await beads(7)).toBe(0);
@@ -67,6 +69,7 @@ test('in the morning the ring shows 12 AM–12 PM, and it turns to PM as the hou
   expect(await arcStartDeg(page, 1)).toBeCloseTo(180, 0);                // 6 AM is at the 6, never beside the 9
   expect(await arcStartDeg(page, 2)).toBeCloseTo(270, 0);                // 9 AM at the 9
   await expect(page.locator('.raagdial .wedge')).toHaveCount(4);         // P7, P8, P1, P2
+  expect(await page.locator('.raagdial .pnum').allTextContents()).toEqual(['P1', 'P2', 'P7', 'P8']);
   await page.clock.setFixedTime(new Date('2026-01-15T12:01:00Z'));
   await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
   await expect(page.locator('.raagdial')).toHaveAttribute('data-half', 'pm');

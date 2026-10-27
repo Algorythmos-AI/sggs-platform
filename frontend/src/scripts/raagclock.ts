@@ -138,8 +138,10 @@ function buildDial() {
       ? `Pahar 7, ${span(w)}: deliberately no raags — the deep night is left in silence.`
       : `Pahar ${p}, ${paharLabel(p)}, ${span(w)}, ${countOf(primary.length)}: ${primary.map((c: any) => c.roman).join(', ') || 'none'}${variants.length ? `, plus ${variants.length} disputed variant` : ''}. Press Enter for detail.`);
     g.appendChild(path);
-    const [nx, ny] = pt(mid, R_IN + 34);
-    if (roomy) g.appendChild(el('text', { x: nx, y: ny + 11, class: 'pnum', 'text-anchor': 'middle', 'pointer-events': 'none', 'aria-hidden': 'true' }, String(p)));
+    // the watch's name is "P1"…"P8" (as the card's badge), never a bare number that would read as
+    // a clock hour beside the face's own numerals
+    const [nx, ny] = pt(mid, R_IN + 30);
+    if (roomy) g.appendChild(el('text', { x: nx, y: ny + 8, class: 'pnum', 'text-anchor': 'middle', 'pointer-events': 'none', 'aria-hidden': 'true' }, `P${p}`));
     if (p === 7 && roomy) {
       const [sx, sy] = pt(mid, R_OUT - 34);
       g.appendChild(el('text', { x: sx, y: sy + 8, class: 'quiet-star', 'text-anchor': 'middle', 'pointer-events': 'none', 'aria-hidden': 'true' }, '✦'));

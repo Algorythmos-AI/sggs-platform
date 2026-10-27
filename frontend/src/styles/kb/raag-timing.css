@@ -90,7 +90,7 @@ body.hide-timing .timechip { display:none; }
 .raagdial .arc:hover { stroke:var(--line-strong); }
 .raagdial .wedge.is-now .arc:hover { stroke:var(--accent-ui); }
 .raagdial .arc-sel, .raagdial .arc:focus-visible, .raagdial .wedge.is-now .arc-sel, .raagdial .wedge.is-now .arc:focus-visible { stroke:var(--ink); stroke-width:4.5; }
-.raagdial .pnum { font-size:34px; font-weight:750; fill:var(--ink); font-variant-numeric:tabular-nums; }
+.raagdial .pnum { font-size:24px; font-weight:650; fill:var(--soft); letter-spacing:.02em; font-variant-numeric:tabular-nums; }   /* "P1"…: smaller and lighter than the face's numerals, which stay the scale */
 .raagdial .wedge.is-now .pnum { fill:var(--on-accent); }
 .raagdial .bead { fill:var(--ink); opacity:.72; }
 .raagdial .bead-var { fill:none; stroke:var(--ink); stroke-width:1.8; }
