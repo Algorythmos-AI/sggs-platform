@@ -1,7 +1,8 @@
 // raagclock.ts — the Raag Clock page (/raag-clock), in step with the app's clock.
-// One face answers "what time is it here, and which raags belong to it": a 24-hour ring of the
-// eight watches (fixed hours, or the sun's own when solar mode has a location), with the reader's
-// own clock — hour, minute and second hands — in its hollow. Beside it, the claims for the watch
+// One face answers "what time is it here, and which raags belong to it": a ring of the eight
+// watches (fixed hours, or the sun's own when solar mode has a location) around the reader's own
+// clock — hour, minute and second hands — on ONE 12-hour scale: every boundary sits where the hour
+// hand points at that time, and the ring shows the half of the day the hand is in (AM or PM). Beside it, the claims for the watch
 // that was tapped; under it, the time in words, the eight watches as a list (the full-content
 // path for a keyboard or a screen reader), the seasonal raags, and every claim in a table.
 // Everything here is METADATA about raags — scripture rendering is untouched; all API text passes
@@ -12,10 +13,11 @@ import {
   paharFromMinutes, paharWindow, paharSolarWindow, paharLabel, fmt12,
   nextPaharBoundary, raagsForPahar, minutesOf,
 } from './pahar.js';
+import { halfOf, faceDegrees, clipToHalf, halfLabels, halfSpoken } from './paharface.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 // The face, from the centre outwards (units of an 800 box): the 12-hour clock in the hollow, the
-// band of the eight watches, the 24 hour ticks, the hour numerals.
+// band of the watches in this half of the day, the 12 hour ticks, the labels (the half, 3 · 6 · 9).
 const C = 400, R_IN = 196, R_OUT = 316, R_FACE = R_IN - 8, R_TICK = R_OUT + 5, R_NUM = R_OUT + 26;
 let CLOCK: any = null;
 let BYRAAG: Record<string, any[]> = {};
@@ -30,13 +32,15 @@ function el(tag: string, attrs: Record<string, string | number> = {}, text?: str
   if (text != null) e.textContent = text;
   return e;
 }
-/** minutes-since-midnight → radians. Noon top, midnight bottom, 6 AM left (as in the app). */
-const angle = (m: number) => ((m / 1440) * 360 + 90) * Math.PI / 180;
+/** minutes-since-midnight → radians on the 12-hour face: 12 at the top, clockwise — the hour
+ *  hand's own angle at that minute, so 6 AM and 6 PM both point at the 6 (as in the app). */
+const angle = (m: number) => (faceDegrees(m) - 90) * Math.PI / 180;
 const pt = (m: number, r: number) => [C + r * Math.cos(angle(m)), C + r * Math.sin(angle(m))];
+/** the band between two minutes of one half (720 min = a full turn) */
 function arcPath(m0: number, m1: number, r0: number, r1: number) {
   const [x0, y0] = pt(m0, r1), [x1, y1] = pt(m1, r1);
   const [x2, y2] = pt(m1, r0), [x3, y3] = pt(m0, r0);
-  const large = (m1 - m0) > 720 ? 1 : 0;
+  const large = (m1 - m0) > 360 ? 1 : 0;
   return `M${x0},${y0} A${r1},${r1} 0 ${large} 1 ${x1},${y1} L${x2},${y2} A${r0},${r0} 0 ${large} 0 ${x3},${y3} Z`;
 }
 
@@ -82,37 +86,51 @@ const variantsOf = (p: number) => (CLOCK.claims.variant || []).filter((c: any) =
 // =============================================================================
 // The dial
 // =============================================================================
-// Drawn again only when what it shows changes shape: the mode, the sun's times, the day.
+/** the shape key: the dial is drawn again when the mode, the sun's times, the day or the half changes */
+const shapeKey = (st: any, now: Date) =>
+  [st.mode, st.sun?.sunrise, st.sun?.sunset, now.toDateString(), halfOf(minutesOf(now)).key].join('|');
+
+// Drawn again only when what it shows changes shape: the mode, the sun's times, the day, and at
+// noon and midnight, when the hour hand passes 12 and the ring turns to the other half.
 function buildDial() {
   const wrap = $('#clockWrap'); if (!wrap || !CLOCK) return;
-  const st = currentPahar(), now = new Date();
-  dialKey = [st.mode, st.sun?.sunrise, st.sun?.sunset, now.toDateString()].join('|');
+  const st = currentPahar(), now = new Date(), half = halfOf(minutesOf(now));
+  dialKey = shapeKey(st, now);
   wrap.textContent = '';
-  const svg = el('svg', { viewBox: `0 0 ${C * 2} ${C * 2}`, class: 'raagdial' });
+  const svg = el('svg', { viewBox: `0 0 ${C * 2} ${C * 2}`, class: 'raagdial', 'data-half': half.key });
+  // the group names the half it shows; the watches of the other half are in the list below
+  wrap.setAttribute('aria-label', `Raag clock on your own 12-hour clock face, showing ${halfSpoken(half, H24)}: `
+    + 'each watch sits where the hour hand points at that time. Each watch shown is a button; all eight are listed below.');
 
-  // 24 hour ticks, a longer one and a numeral every three hours
+  // 12 hour ticks on the dial's own hours, a longer one every three; the labels name the half on
+  // the 12 and its 3 · 6 · 9 beside the face's own numbers
   const ring = el('g', { class: 'hours', 'aria-hidden': 'true' });
-  for (let h = 0; h < 24; h++) {
+  const labels = halfLabels(half, H24);
+  for (let h = 0; h < 12; h++) {
     const major = h % 3 === 0;
     const [x1, y1] = pt(h * 60, R_TICK), [x2, y2] = pt(h * 60, R_TICK + (major ? 11 : 6));
     ring.appendChild(el('line', { x1, y1, x2, y2, class: major ? 'tick tick-major' : 'tick' }));
     if (major) {
-      // a numeral sits clear of its tick: beside it at the sides, above or below it at the ends
-      const [x, y] = pt(h * 60, R_NUM);
-      const label = H24 ? pad(h) : (h % 6 === 0 ? fmt12(`${h}:00`) : String(h % 12));
+      // a label sits clear of its tick: beside it at the sides, above or below it at the ends
+      const [x, y] = pt(h * 60, R_NUM), top = h === 0;
       const side = x < C - 60 ? 'end' : x > C + 60 ? 'start' : 'middle';
-      ring.appendChild(el('text', { x, y: y + (side === 'middle' ? (y < C ? 2 : 17) : 7), class: 'hourmark', 'text-anchor': side }, label));
+      ring.appendChild(el('text', { x, y: y + (side === 'middle' ? (y < C ? 2 : 17) : 7),
+        class: top ? 'hourmark hourmark-half' : 'hourmark', 'text-anchor': side }, labels[h / 3].label));
     }
   }
   svg.appendChild(ring);
 
-  // the eight watches
+  // the watches of this half; one that crosses noon or midnight shows the part on this side
   for (let p = 1; p <= 8; p++) {
-    const w = win(p, st), len = ((w.end - w.start) % 1440 + 1440) % 1440, mid = w.start + len / 2;
+    const w = win(p, st), len = ((w.end - w.start) % 1440 + 1440) % 1440;
+    const spans = clipToHalf(w, half);
+    if (!spans.length) continue;
+    const big = spans.reduce((a, b) => (b.end - b.start > a.end - a.start ? b : a));
+    const mid = (big.start + big.end) / 2, roomy = big.end - big.start >= 40;
     const primary = raagsForPahar(CLOCK, p), variants = variantsOf(p);
     const g = el('g', { class: 'wedge', 'data-wedge': p });
     const path = el('path', {
-      d: arcPath(w.start, w.start + len, R_IN, R_OUT),
+      d: spans.map((sp) => arcPath(sp.start, sp.end, R_IN, R_OUT)).join(' '),
       class: p === 7 ? 'arc arc-quiet' : `arc ${p <= 4 ? 'arc-day' : 'arc-night'} arc-p${p}`,
       tabindex: 0, role: 'button', 'data-pahar': p,
     });
@@ -120,24 +138,31 @@ function buildDial() {
       ? `Pahar 7, ${span(w)}: deliberately no raags — the deep night is left in silence.`
       : `Pahar ${p}, ${paharLabel(p)}, ${span(w)}, ${countOf(primary.length)}: ${primary.map((c: any) => c.roman).join(', ') || 'none'}${variants.length ? `, plus ${variants.length} disputed variant` : ''}. Press Enter for detail.`);
     g.appendChild(path);
-    const [nx, ny] = pt(mid, R_IN + 34);
-    g.appendChild(el('text', { x: nx, y: ny + 11, class: 'pnum', 'text-anchor': 'middle', 'pointer-events': 'none', 'aria-hidden': 'true' }, String(p)));
-    if (p === 7) {
+    // the watch's name is "P1"…"P8" (as the card's badge), never a bare number that would read as
+    // a clock hour beside the face's own numerals
+    const [nx, ny] = pt(mid, R_IN + 30);
+    if (roomy) g.appendChild(el('text', { x: nx, y: ny + 8, class: 'pnum', 'text-anchor': 'middle', 'pointer-events': 'none', 'aria-hidden': 'true' }, `P${p}`));
+    if (p === 7 && roomy) {
       const [sx, sy] = pt(mid, R_OUT - 34);
       g.appendChild(el('text', { x: sx, y: sy + 8, class: 'quiet-star', 'text-anchor': 'middle', 'pointer-events': 'none', 'aria-hidden': 'true' }, '✦'));
     }
-    // one bead for each raag, along the arc: filled for a primary claim, ringed for a variant
+    // one bead for each raag, spaced along the WHOLE watch: filled for a primary claim, ringed for
+    // a variant; a watch cut at noon or midnight shows the beads that fall on this side
     const beads = [...primary.map(() => 0), ...variants.map(() => 1)].slice(0, 10);
     beads.forEach((v, i) => {
-      const [bx, by] = pt(w.start + len * (i + 1) / (beads.length + 1), R_OUT - 30);
+      const bm = w.start + len * (i + 1) / (beads.length + 1);
+      if (halfOf(Math.floor(bm)).key !== half.key) return;
+      const [bx, by] = pt(bm, R_OUT - 30);
       g.appendChild(el('circle', { cx: bx, cy: by, r: v ? 5 : 5.6, class: v ? 'bead bead-var' : 'bead', 'pointer-events': 'none' }));
     });
     svg.appendChild(g);
   }
 
-  // sunrise and sunset, on the seam between day and night, when the sun's hours are in force
+  // sunrise and sunset, on the seam between day and night, when the sun's hours are in force (the
+  // one in this half)
   if (st.mode === 'solar' && st.sun) {
     ([[st.sun.sunrise, 'Sunrise', 1], [st.sun.sunset, 'Sunset', -1]] as [number, string, number][]).forEach(([m, name, up]) => {
+      if (halfOf(m).key !== half.key) return;
       const [x, y] = pt(m, (R_IN + R_OUT) / 2);
       const g = el('g', { class: 'sunmark', 'pointer-events': 'none' });
       g.appendChild(el('title', {}, `${name} ${tm(m)}`));
@@ -148,13 +173,7 @@ function buildDial() {
     });
   }
 
-  // "now" on the band: it never crosses the hollow, which belongs to the clock
-  const nowHand = el('g', { class: 'nowhand', id: 'nowHand', 'pointer-events': 'none', 'aria-hidden': 'true' });
-  // it keeps to the outer half of the band, clear of the watch's numeral
-  nowHand.appendChild(el('line', { x1: C, y1: C - R_OUT + 52, x2: C, y2: C - R_OUT - 9, class: 'handhalo' }));
-  nowHand.appendChild(el('line', { x1: C, y1: C - R_OUT + 52, x2: C, y2: C - R_OUT - 9, class: 'handline' }));
-  nowHand.appendChild(el('circle', { cx: C, cy: C - R_OUT - 9, r: 6.5, class: 'handdot' }));
-  svg.appendChild(nowHand);
+  // "now" is the hour hand itself: it points into the lit watch, so the ring has no pointer of its own
 
   svg.appendChild(buildFace(now));
 
@@ -220,8 +239,6 @@ function positionHands() {
   const m = d.getMinutes() + s / 60, h = (d.getHours() % 12) + m / 60;
   const turn = (id: string, deg: number) => document.getElementById(id)?.setAttribute('transform', `rotate(${deg.toFixed(2)} ${C} ${C})`);
   turn('handHour', h * 30); turn('handMinute', m * 6); turn('handSecond', s * 6);
-  // noon is at the top of the 24-hour ring
-  turn('nowHand', ((d.getHours() * 60 + m - 720) / 1440) * 360);
 }
 let sweeping = false, dialSeen = true, lastFrame = 0;
 function sweep(t: number) {
@@ -416,8 +433,8 @@ function renderNow() {
     ro.innerHTML = `<b class="cr-time">${esc(t)}</b><span class="cr-dot" aria-hidden="true">·</span><span class="cr-p">${paharLabel(st.pahar)}</span>`;
   }
 
-  // the dial is drawn again only when its shape changed (mode, the sun's hours, a new day)
-  const key = [st.mode, st.sun?.sunrise, st.sun?.sunset, now.toDateString()].join('|');
+  // the dial is drawn again only when its shape changed (mode, the sun's hours, a new day, the half)
+  const key = shapeKey(st, now);
   if (key !== dialKey) {
     buildDial(); renderWatches(st);
     if (selPahar) { const d = $('#clockDetail'); if (d) d.innerHTML = detailPahar(selPahar); }
