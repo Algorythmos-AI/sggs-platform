@@ -21,6 +21,34 @@ The rest of the G3 1.4.9 review is on two companion pages:
 - the app's pack, [`gurbani-soul-ios` `docs/review/g3-1.4.9/RECOMMENDATIONS.md`](https://github.com/Algorythmos-AI/gurbani-soul-ios/pull/111);
 - the dataset decisions, [`sggs-data` `validation/attribution-g3-review/RECOMMENDATIONS.md`](https://github.com/Algorythmos-AI/sggs-data/pull/18).
 
+## Review status
+
+Status last updated 2026-10-27. That is the date this section was written, not a review date: no review date has
+been confirmed.
+
+**Reviewer decision: pending Kanwaljit Singh's direct confirmation.**
+
+| Kind of record | What exists |
+|---|---|
+| Recommendations | Every section of this page. They are editorial and not binding. |
+| Decisions confirmed by the reviewer | None. No comment, formal GitHub review or signed message from Kanwaljit Singh is in the record. |
+| Decisions awaiting confirmation | All seven questions and R-01 to R-36. On 2026-10-27 the account `skalaliya` entered a sign-off on his behalf, approving the recommendations subject to the documented corrections, source qualifications and verification requirements. His direct confirmation, exact role and review date are not verified. The history is kept in [PR #321](https://github.com/Algorythmos-AI/sggs-platform/pull/321). |
+| Source verification outstanding | Guru Nanak Dev Ji's date variants (R-01), and the facts marked "Granthi to verify" below, notably R-06, R-07 and R-19. |
+| Automated checks | Run by CI on every commit. The results for each commit are on PR #321. |
+
+**The five acceptance conditions** (from the review comment on PR #321):
+
+| # | Condition | Status | Remaining action |
+|---|---|---|---|
+| 1 | Guru Nanak Dev Ji's birth and death date variants, with identifiable references | Partly met | The variants are recorded in R-01. Source verification is pending. The entry to check is the Encyclopaedia of Sikhism (ed. Harbans Singh, Punjabi University, Patiala), *Nānak, Gurū (Srī Gurū Nānak Dev)*, as cited in the roster. It could not be opened while this page was prepared, so no page, quotation or date from it is claimed here. The other references are web-search snippets, which were not read as sources. |
+| 2 | Raagmala with neutral authorship wording | Met in the recommendation text | Q-Raagmala assigns no author and records the differing sources. Nothing to apply until the reviewer decides. |
+| 3 | 11 Bhatts, Gurmukhi forms and romanisation, consistent and traceable | Partly met | This page is consistent: 11 named Bhatts plus the collective entry; ਟਲ treated as a variant signature of Kalsahar; Balh / Bhalh / Nalh / Salh proposed. The roster data (`contributors.json`) is not yet updated; that waits on the reviewer's decision. |
+| 4 | Traditions, memorials and disputed claims qualified | Partly met | The recommended wording qualifies them. The underlying facts for R-06 (Gobind Das / Gobind Rai), R-07 (the Sheikh Ibrahim view) and R-19 (Sirhind) are still unverified. |
+| 5 | Script and docs checks pass; no unrelated changes | Met for the checked commits | `python3 tools/docs_check.py` and the Gurmukhi verbatim check passed on `9cf172e`, and CI was green there. Each later commit is checked again by CI on PR #321. |
+
+The roster data, `review.status` and the generated pack change only in a separate pull request. That follows the
+reviewer's direct confirmation and the closing of condition 1.
+
 ## How the evidence was gathered
 
 - **The Encyclopaedia of Sikhism (EoS).** Its online edition could not be opened while this page was
