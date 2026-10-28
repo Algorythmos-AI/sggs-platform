@@ -94,8 +94,14 @@ class Checker(unittest.TestCase):
 
     def test_an_unknown_name_fails_but_a_pending_one_warns(self):
         self.assertError(self.mutate(lambda c, d: c.update(name="Bhagat Nobody Ji")), "does not join")
-        # Surdas is the voice still pending (dataset 1.1.0 carries the other six)
-        rep = self.mutate(lambda c, d: c.update(name="Bhagat Surdas Ji", chhap=["ਸੂਰਦਾਸ"], chhap_example={"line_id": 4, "ang": 1253}))
+        # a voice a pending sggs-data repair will add only warns (dataset 1.3.0 left none pending, so the
+        # mechanism is exercised with a name of the test's own)
+        orig = cc.PENDING_ATTRIBUTION
+        cc.PENDING_ATTRIBUTION = {"Bhagat Pending Ji"}
+        try:
+            rep = self.mutate(lambda c, d: c.update(name="Bhagat Pending Ji"))
+        finally:
+            cc.PENDING_ATTRIBUTION = orig
         self.assertTrue(any("attribution repair" in w for w in rep.warnings), rep.warnings)
         self.assertFalse(any("does not join" in e for e in rep.errors), rep.errors)
 

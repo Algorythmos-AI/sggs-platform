@@ -16,23 +16,6 @@ const QUICK_ACCESS = [
   { gm: 'ਸਿਧ ਗੋਸਟਿ', roman: 'Sidh Gosht', ang: 938, where: 'Raag Ramkali' },
   { gm: 'ਓਅੰਕਾਰੁ', roman: 'Dakhni Oankaar', ang: 929, where: 'Raag Ramkali' },
 ];
-// The corpus `sections` table carries "ਚਉਬੋਲੇ" forward across the two standalone
-// Bhagat-Salok sections — split it back at the display layer (counts ground-truthed).
-const CLOSING_FIX: Record<string, any[]> = {
-  'ਚਉਬੋਲੇ': [
-    { name: 'ਚਉਬੋਲੇ', first_ang: 1363, last_ang: 1364, n_lines: 24 },
-    { name: 'ਸਲੋਕ ਭਗਤ ਕਬੀਰ ਜੀ', first_ang: 1364, last_ang: 1377, n_lines: 494 },
-    { name: 'ਸਲੋਕ ਭਗਤ ਫਰੀਦ ਜੀ', first_ang: 1377, last_ang: 1384, n_lines: 298 },
-  ],
-};
-function fixSections(sections: any[]): any[] {
-  const out: any[] = [];
-  for (const s of sections) {
-    if (CLOSING_FIX[s.name]) out.push(...CLOSING_FIX[s.name]);
-    else out.push(s);
-  }
-  return out;
-}
 const raags = guard(async () => {
   const m = await meta(); META = m;
   ($('#quickOut') as HTMLElement).innerHTML = QUICK_ACCESS.map((c) => `
@@ -48,7 +31,7 @@ const raags = guard(async () => {
       <div class="r">${esc(r.roman || '')}</div>
       <div class="s">Angs ${r.first_ang}–${r.last_ang} · ${r.n_shabads ?? '—'} compositions · ${r.n_lines} lines</div>
     </div>`).join('');
-  SECTIONS = fixSections(m.sections);          // corrected closing-section list (also used by the click handler)
+  SECTIONS = m.sections;                       // dataset 1.3.0 names the closing collections as printed
   ($('#sectionsOut') as HTMLElement).innerHTML = SECTIONS.map((s: any, i: number) => `
     <div class="tile" data-section="${i}" role="button" tabindex="0">
       <div class="n gm">${esc(s.name)}</div>

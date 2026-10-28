@@ -77,12 +77,7 @@ const ang = guard(async (n: number, turn = false) => {
   // context chips
   const chips: string[] = [];
   if (d.raag) chips.push(`<span class="raagchip gm">${esc(d.raag)}</span>`);
-  // closing-section correction (same data fix as the Index grid): the corpus tags Angs
-  // 1364–1384 as ਚਉਬੋਲੇ, but they are the standalone Salok Bhagat Kabir Ji / Farid Ji
-  // sections (header at 1364 / 1377). Show the right name so the chip matches the grid.
-  const sec = (curAng >= 1364 && curAng <= 1376) ? 'ਸਲੋਕ ਭਗਤ ਕਬੀਰ ਜੀ'
-    : (curAng >= 1377 && curAng <= 1384) ? 'ਸਲੋਕ ਭਗਤ ਫਰੀਦ ਜੀ' : d.section;
-  if (sec) chips.push(`<span class="gm">${esc(sec)}</span>`);
+  if (d.section) chips.push(`<span class="gm">${esc(d.section)}</span>`);
   (d.authors || []).forEach((a: string) => chips.push(`<span>${esc(a)}</span>`));
   ($('#angCtx') as HTMLElement).innerHTML = chips.join('');
   if (d.raag) addTimingChip(d.raag, myReq);   // async metadata chip; never blocks the scripture
