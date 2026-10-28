@@ -3,6 +3,22 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.5.1] — 2026-10-28
+
+The G3 scholarly review of dataset 1.3.0 is complete. Kanwaljit Singh ruled on every item; his reply was relayed from WhatsApp by the owner and recorded as relayed, with the owner's signature (sggs-data `validation/attribution-g3-review/SIGN-OFF.md`). It ships on the website, the API and the iPhone app together.
+
+### Data
+- **Dataset 1.3.0** (sggs-data #17, #19, pinned at `efbf74e`). The scripture is byte-identical to 1.2.0 (reconcile char-exact; no Gurmukhi line changed); only who a line is credited to and how lines are grouped moved, as ruled:
+  - **Ang 1253:** the single line `ਛਾਡਿ ਮਨ ਹਰਿ ਬਿਮੁਖਨ ਕੋ ਸੰਗੁ ॥` is Bhagat Surdas Ji's, and a composition of its own (5384). The Voices page counts 36 voices with Bani in the Granth.
+  - **Angs 1363–1384:** three sections, named as printed: `ਚਉਬੋਲੇ ਮਹਲਾ ੫`, `ਸਲੋਕ ਭਗਤ ਕਬੀਰ ਜੀਉ ਕੇ`, `ਸਲੋਕ ਸੇਖ ਫਰੀਦ ਕੇ`. The text, its order and the Angs are unchanged.
+  - **Ang 695:** `ਸ੍ਰੀ ਸੈਣੁ ॥`, `ਪੀਪਾ ॥` and `ਧੰਨਾ ॥` each open their own shabad (5381–5383), apart from Bhagat Trilochan Ji's.
+  - **Angs 524 and 323:** the Bhagats' shared headings carry no author.
+  - Not yet: the scholar's direction on `ਸੁਧੁ` (Angs 323, 517, 524, 654) needs its own data change (#322).
+
+### Changed
+- **Index and Reader (web):** the closing sections come straight from the data; the display-layer split of `ਚਉਬੋਲੇ` is removed (#322).
+- Lineage roster review notes for the G3 reviewer (#321).
+
 ## [1.5.0] — 2026-10-27
 
 Explore becomes "The Granth Today" on the iPhone, the Vaars are read as printed, and the website catches up with the app. It ships on the website, the API and the iPhone app together. App Store 1.4.9 was not submitted: 1.5.0 carries everything in it.
