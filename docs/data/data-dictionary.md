@@ -11,11 +11,11 @@ Every table in the pinned database: 40 tables, of which 4 are full-text indexes 
 
 | The pinned dataset | |
 |---|---|
-| Built by | [`Algorythmos-AI/sggs-data`](https://github.com/Algorythmos-AI/sggs-data) at `c36e3172` |
-| `DATASET_VERSION` (the lock) | `1.2.0` |
-| Database build version (`meta.version`) | `1.2.0`, built 2026-10-24 |
-| SHA-256 | `ff5e5de70027dbeb…` |
-| Size | 103.5 MiB |
+| Built by | [`Algorythmos-AI/sggs-data`](https://github.com/Algorythmos-AI/sggs-data) at `efbf74e4` |
+| `DATASET_VERSION` (the lock) | `1.3.0` |
+| Database build version (`meta.version`) | `1.3.0`, built 2026-10-26 |
+| SHA-256 | `4e6777c54140d7c4…` |
+| Size | 103.6 MiB |
 | Lines · Angs | 60,658 · 1,430 |
 
 Which version is which, and how a new dataset arrives, is on [the dataset pin](dataset-pin.md). The
@@ -28,11 +28,11 @@ The verbatim text and the structure derived from it. Everything else refers to t
 
 | Table | Rows | Read by | What it holds |
 |---|--:|---|---|
-| [`authors`](#authors) | 35 | insights, reader | Each contributor with the Ang span and number of lines attributed. |
+| [`authors`](#authors) | 36 | insights, reader | Each contributor with the Ang span and number of lines attributed. |
 | [`lines`](#lines) | 60,658 | insights, reader, search, verify | One row per printed line: the verbatim Gurmukhi with its Ang, raag, section, author and composition; the source of truth ([anatomy of a line record](line-record.md)). |
 | [`meta`](#meta) | 9 | reader | Facts about the build as key/value pairs: version, build date, edition, totals. |
 | [`raags`](#raags) | 31 | insights, knowledge, reader | Each raag with its Ang span, line and shabad counts, Roman name and order in the Granth. |
-| [`sections`](#sections) | 13 | reader | Each section of the Granth with its Ang span and line count. |
+| [`sections`](#sections) | 15 | reader | Each section of the Granth with its Ang span and line count. |
 | [`word_freq`](#word_freq) | 29,312 | search | Every distinct Gurmukhi word and how often it occurs. |
 
 ### authors
@@ -67,8 +67,8 @@ Built from the scripture tables at rebuild time; the search and verify contexts 
 |---|--:|---|---|
 | [`canon_tokens`](#canon_tokens) | 24,676 | search | Every distinct token of the transliteration, used to tell a known Roman word from a misspelling. |
 | [`fts`](#fts) | 60,658 | reader, search, verify | Full-text index over `lines`: the text, transliteration, Roman fold, first letters and consonant skeleton. |
-| [`fts_shabad`](#fts_shabad) | 4,524 | search | Full-text index over each composition's Roman consonant skeleton, for queries that span lines. |
-| [`fts_tri`](#fts_tri) | 55,511 | — | Trigram index over the transliteration, for partial and misspelt Roman queries. |
+| [`fts_shabad`](#fts_shabad) | 4,528 | search | Full-text index over each composition's Roman consonant skeleton, for queries that span lines. |
+| [`fts_tri`](#fts_tri) | 55,508 | — | Trigram index over the transliteration, for partial and misspelt Roman queries. |
 | [`variants`](#variants) | 79,840 | search | Spelling and phonetic variants, each mapped to the Gurmukhi word it stands for, with frequency, score and type. |
 
 ### canon_tokens
@@ -149,18 +149,18 @@ Descriptive statistics over structure, the theme tags and the English. See [the 
 
 | Table | Rows | Read by | What it holds |
 |---|--:|---|---|
-| [`author_analytics`](#author_analytics) | 35 | insights | Per-author counts and stylometry of the English translation, with a reliability flag. |
+| [`author_analytics`](#author_analytics) | 36 | insights | Per-author counts and stylometry of the English translation, with a reliability flag. |
 | [`author_dialogues`](#author_dialogues) | 17 | insights | A Guru's salok set directly after a Bhagat's salok in the Kabir and Farid collections, by line range. |
 | [`author_distinctive_terms`](#author_distinctive_terms) | 195 | insights | The Gurmukhi words most characteristic of each voice (log-odds; pen-names and function words excluded). |
-| [`author_facts`](#author_facts) | 35 | insights | Per-voice facts from the Gurmukhi: one verse count, Angs present (bit mask), raags, raags no other voice uses, stylometry. |
+| [`author_facts`](#author_facts) | 36 | insights | Per-voice facts from the Gurmukhi: one verse count, Angs present (bit mask), raags, raags no other voice uses, stylometry. |
 | [`author_mentions`](#author_mentions) | 249 | insights | Verses in which one voice names another: Bhagats named together, the Gurus praised by the Bhatts. |
-| [`author_resonance`](#author_resonance) | 670 | insights | How often one voice's lines land nearest another's, as lift. |
+| [`author_resonance`](#author_resonance) | 679 | insights | How often one voice's lines land nearest another's, as lift. |
 | [`concept_lines`](#concept_lines) | 62,221 | insights, reader, search | Which lines carry which theme. |
 | [`concepts`](#concepts) | 54 | insights, reader, search | The curated themes. |
-| [`line_neighbors`](#line_neighbors) | 532,227 | insights | For each line, the lines whose English is closest by TF-IDF cosine (0.30 and above). |
+| [`line_neighbors`](#line_neighbors) | 532,212 | insights | For each line, the lines whose English is closest by TF-IDF cosine (0.30 and above). |
 | [`raag_analytics`](#raag_analytics) | 31 | insights | Per-raag counts and theme emphasis. |
-| [`shabad_neighbors`](#shabad_neighbors) | 43,800 | insights | For each composition, the ten with the most similar theme profile. |
-| [`theme_fingerprint`](#theme_fingerprint) | 2,315 | insights | How strongly each author or raag carries each theme, as lift over the whole Granth. |
+| [`shabad_neighbors`](#shabad_neighbors) | 43,840 | insights | For each composition, the ten with the most similar theme profile. |
+| [`theme_fingerprint`](#theme_fingerprint) | 2,316 | insights | How strongly each author or raag carries each theme, as lift over the whole Granth. |
 | [`theme_network`](#theme_network) | 2,528 | insights | Theme pairs that occur in the same shabads, with PPMI and Jaccard. |
 | [`vaar_units`](#vaar_units) | 1,443 | insights | Each Vaar's saloks and pauris in reading order. |
 | [`vaars`](#vaars) | 22 | insights | The Vaars: span, pauri and salok counts, and who wrote each part. |
@@ -232,10 +232,10 @@ Attributed scholarship about the text. See [the knowledge context](../architectu
 | Table | Rows | Read by | What it holds |
 |---|--:|---|---|
 | [`raag_timing_claims`](#raag_timing_claims) | 46 | knowledge | When each raag is sung according to a cited source: pahar, season or occasion, with confidence. |
-| [`shabd_musical_markers`](#shabd_musical_markers) | 4,527 | knowledge | Ghar, partaal, rahao and other musical markers stated in a composition's heading. |
+| [`shabd_musical_markers`](#shabd_musical_markers) | 4,531 | knowledge | Ghar, partaal, rahao and other musical markers stated in a composition's heading. |
 | [`shabd_poetic_genre`](#shabd_poetic_genre) | 57 | knowledge | A composition's named genre when its heading states it. |
-| [`shabd_raag_map`](#shabd_raag_map) | 4,527 | knowledge | Each composition's raag, first Ang and first line. |
-| [`shabd_structural_form`](#shabd_structural_form) | 4,527 | knowledge | A composition's form when its heading states it; otherwise NULL, never guessed. |
+| [`shabd_raag_map`](#shabd_raag_map) | 4,531 | knowledge | Each composition's raag, first Ang and first line. |
+| [`shabd_structural_form`](#shabd_structural_form) | 4,531 | knowledge | A composition's form when its heading states it; otherwise NULL, never guessed. |
 | [`timing_sources`](#timing_sources) | 5 | knowledge, reader | The sources behind the timing claims and their tradition. |
 
 ### raag_timing_claims
