@@ -14,10 +14,9 @@ test('the contributors open in Granth order, with full names and honest counts',
   expect(await page.locator('#timeline .tl-name').allTextContents()).not.toContainEqual(expect.stringMatching(/\(M\d\)/));
   const bands = await page.locator('#timeline .tl-band-n').allTextContents();
   for (const b of bands) expect(b).toMatch(/^1 voice$|^\d+ voices$/);
-  // a roster voice whose Bani is not yet credited to them in this dataset says so, never "0 lines"
-  // (dataset 1.1.0: only Bhagat Surdas Ji's single line awaits a scholar's attribution)
+  // dataset 1.3.0 credits Bhagat Surdas Ji with his single line (G3 ruling, 2026-10-28): one line, one Ang
   const surdas = page.locator(node('Bhagat Surdas Ji'));
-  await expect(surdas.locator('.tl-lines')).toHaveText('Bani not yet indexed under this name');
+  await expect(surdas.locator('.tl-lines')).toHaveText('1 line · Ang 1253');
   // the attribution repair credits Bhagat Dhanna Ji with his own Bani, on the Angs that print it
   const dhanna = page.locator(node('Bhagat Dhanna Ji'));
   await expect(dhanna.locator('.tl-lines')).toHaveText(/^\d+ lines · Angs 487–695$/);
