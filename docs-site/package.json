@@ -16,6 +16,7 @@
     "lhci": "npx --yes @lhci/cli@0.15.1 autorun",
     "check:links": "node scripts/check-links.mjs dist",
     "check:all": "npm run check:render && npm run check:nav && npm run check:mermaid && npm run check:links && npm run check:budget && npm run check:csp && npm run check:pdf",
+    "pretypecheck": "node scripts/copy-assets.mjs",
     "typecheck": "astro check",
     "posters": "node scripts/build-posters.mjs",
     "check:posters": "node scripts/build-posters.mjs --check",

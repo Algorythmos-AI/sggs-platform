@@ -155,7 +155,7 @@ async function chrome(c: Card, host: string, w = W) {
   await c.text("serif", host, 22, 500, w - PADX, 106, C.muted, "end");
 }
 
-function finish(c: Card, w: number, h: number, glow: boolean): Uint8Array {
+function finish(c: Card, w: number, h: number, glow: boolean): Uint8Array<ArrayBuffer> {
   if (c.missing) throw new Error(`share card: ${c.missing} glyph(s) missing from the font`);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${DEFS}`
     + `<rect width="${w}" height="${h}" fill="${C.paper}"/>${glow ? `<rect width="${w}" height="${h}" fill="url(#glow)"/>` : ""}`
@@ -167,7 +167,7 @@ function finish(c: Card, w: number, h: number, glow: boolean): Uint8Array {
 export interface PageCard { eyebrow?: string; title: string; sub?: string; host?: string }
 
 // Page card: eyebrow (small caps, muted), a Source Serif 4 title, the gold rule, one supporting line.
-export async function pageCard({ eyebrow, title, sub, host = "gurbanisoul.com" }: PageCard): Promise<Uint8Array> {
+export async function pageCard({ eyebrow, title, sub, host = "gurbanisoul.com" }: PageCard): Promise<Uint8Array<ArrayBuffer>> {
   const c = new Card();
   await chrome(c, host);
   const size = title.length > 60 ? 54 : 64;
@@ -187,7 +187,7 @@ export interface AngCard { ang: number; raag?: string | null; gurmukhi: string; 
 
 // Ang card (/ang/N): "ANG", the numeral, the raag (Gurmukhi, as stored) and the citation on the
 // left; the Ang's opening line, verbatim, on the right. No glow: 1430 of these ship per deploy.
-export async function angCard({ ang, raag, gurmukhi, host = "gurbanisoul.com" }: AngCard): Promise<Uint8Array> {
+export async function angCard({ ang, raag, gurmukhi, host = "gurbanisoul.com" }: AngCard): Promise<Uint8Array<ArrayBuffer>> {
   const c = new Card();
   await chrome(c, host);
   await c.text("serif", "ANG", 22, 600, PADX, 236, C.muted);
