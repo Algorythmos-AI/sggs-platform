@@ -77,7 +77,7 @@ SEO/social/PWA block is a shared component, **`frontend/src/components/Seo.astro
 - `apple-mobile-web-app-title`, `<link rel="manifest">`, an `apple-touch-icon`, an SVG favicon, and —
   once the app is live (`APP_STORE_LIVE`) — the `apple-itunes-app` Smart App Banner.
 
-`og:image` defaults to the page's OG card (`/og/<slug>.png`, see **OG images** below).
+`og:image` defaults to the page's OG card (`/og/v2/<slug>.png`, see **OG images** below).
 `frontend/public/robots.txt` points crawlers at the canonical host and names `/sitemap.xml`, which
 is now **generated** (see **Routes, sitemap & RSS**). `Base.astro` derives its canonical/OG from
 `Astro.url.pathname` so every Knowledge Base page is self-consistent without per-page props.
@@ -98,16 +98,57 @@ The `SeoInvariants` gate checks every built page's canonical/description/`og:ima
 - The old `frontend/public/sitemap.xml` was deleted (Astro forbids a public file colliding with a
   page route).
 
-### OG images
+### OG images (share cards)
 
-`frontend/src/pages/og/[slug].png.ts` renders each 1200×630 card at build with **satori**
-(HTML/CSS → SVG) + **@resvg/resvg-js** (SVG → PNG): warm-ink background, a gold ੴ, the title in
-Source Serif 4, the "Gurbani Soul" wordmark, a thin gold rule. `getStaticPaths` returns one card per
-distinct `og` slug in `routes.ts` (at least `home` and `knowledge-base`). satori needs **static**
-(non-variable) TTFs, so `frontend/src/og/fonts/` holds pinned instances (`*-og.ttf`) of Source
-Serif 4 and Sant Lipi with their OFL licences; only the single ੴ glyph is Gurmukhi (satori has no
-Indic shaping). Cards are byte-deterministic and each ≤ 150 KB. `public/og.jpg` remains a hero crop
-for any fixed-image use.
+Every page has a 1200×630 share card at `/og/v2/<slug>.png`, drawn at build time by
+`frontend/src/og/render.ts` and served by `frontend/src/pages/og/v2/[slug].png.ts`, one per
+distinct `og` slug in `routes.ts` (plus `knowledge-base`, the fallback for unlisted paths such as
+the 404). Text is shaped by **HarfBuzz** (`harfbuzzjs`) into outlines and rasterised by
+**@resvg/resvg-js**, so Sant Lipi Gurmukhi gets real Indic shaping (satori, used before, had none).
+The fonts are the variable masters in `frontend/src/og/fonts/` (`SantLipi-VF.ttf`,
+`SourceSerif4-VF.ttf`, the files the iOS app ships, with their OFL licences). A glyph missing from
+the font fails the build.
+
+Design (brand book): paper surface, ink text, the app icon (`public/favicon.svg`) and "Gurbani
+Soul" top left, the host top right, an eyebrow, a Source Serif 4 title (balanced lines, never a
+lone word), a gold rule (fill with an accent edge), one supporting line, a faint gold glow. Gold is
+never text; no red. The bottom-left corner stays free because X lays the title over it.
+
+The copy for each card, and the social description (≤ 125 characters, so WhatsApp and iMessage
+show it whole) and any shorter `og:title`, live in `frontend/src/share.ts`; Learn articles use
+their frontmatter. `<Seo>` emits the full set: `og:locale`, `og:image:secure_url`, `:type`,
+`:width`, `:height`, `:alt` and `twitter:image:alt` beside the usual tags.
+
+The `v2` path segment is the cache key link-preview services fetch by: bump it whenever the card
+design changes, or WhatsApp, Facebook and Slack keep showing the old card. After a deploy that
+changes cards, re-scrape `https://gurbanisoul.com/` in Facebook's Sharing Debugger and LinkedIn's
+Post Inspector (both need a login).
+
+Cards are byte-deterministic and each ≤ 100 KB. Gates: `ShareCardMeta` (webapp/tests) checks every
+built page's tag set and copy limits and every card's PNG size and weight; `e2e/share-meta.spec.ts`
+checks the same through the server. `public/og.jpg` remains a hero crop for any fixed-image use.
+
+### Sharing a verse or an Ang (`/ang/N`)
+
+Every share from the Knowledge Base (and, from the next app release, from the iOS app) links to
+`/ang/N` (`?line=ID` for a verse). `frontend/src/pages/ang/[n].astro` builds one small page per
+Ang: its own title, description and card (`/og/v2/ang/N.png`: the numeral, the raag and the Ang's
+opening line, verbatim from `frontend/src/generated/ang-cards.json`, which
+`scripts/gen_landing_verse.py` writes from the database). A crawler reads the tags; a person is
+sent on to `/reader?ang=N&line=ID` by a script (never a meta refresh, which some crawlers follow).
+The pages are `noindex, follow` and stay out of `routes.ts` and the sitemap.
+
+The 1430 Ang cards (~60 MB) are built on every deploy and never committed:
+`scripts/sync-to-webapp.mjs` leaves `og/v2/ang/` out of `webapp/static`, and
+`scripts/check-share-cards.mjs` (part of `npm run build`) fails the build if any card or page is
+missing, the wrong size or over budget (100 KB for page cards, 60 KB for Ang cards). Gates:
+`AngSharePages` (card data equals the database's opening lines; every page's tags) and
+`e2e/verse-actions.spec.ts`.
+
+In the verse sheet, **Share** sends the verbatim line, its citation and the `/ang/N?line=ID` link;
+**Share as image** draws a 1080×1080 card in the browser (`src/scripts/shareimage.ts`, the page's
+own Sant Lipi, so the browser shapes the Gurmukhi) and shares it where the browser can share
+files, otherwise saves it. The Reader's options sheet has **Share this Ang**.
 
 ### Analytics
 

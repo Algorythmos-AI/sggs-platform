@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev --port 4321",
-    "build": "astro build",
+    "build": "astro build && node scripts/check-share-cards.mjs",
     "sync": "node scripts/sync-to-webapp.mjs",
     "rollback": "node scripts/sync-to-webapp.mjs --rollback",
-    "build:deploy": "astro build && node scripts/sync-to-webapp.mjs",
+    "build:deploy": "npm run build && node scripts/sync-to-webapp.mjs",
     "test:pahar": "node scripts/test-pahar.mjs",
     "test:e2e": "playwright test",
     "shots": "node scripts/shots.mjs"
@@ -21,6 +21,7 @@
     "astro": "^7.3.3",
     "chart.js": "^4.5.1",
     "d3": "^7.9.0",
+    "harfbuzzjs": "0.4.12",
     "satori": "0.33.4",
     "sharp": "0.35.5",
     "tailwindcss": "^4.3.1"

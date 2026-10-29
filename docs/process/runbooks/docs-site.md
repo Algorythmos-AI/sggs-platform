@@ -78,7 +78,7 @@ every section under `docs-site/qa-shots/`):
 | A learning path's ticks survive a reload | `/learning-paths/platform-engineer/` |
 | Search (⌘K) finds a technical term and a scripture term | any page |
 | Dark mode on every section; phone width with no horizontal scroll | every section |
-| The 404 page; a page's Open Graph card (`/og/<id>.png`) | `/nope/`, `/og/index.png` |
+| The 404 page; a page's Open Graph card (`/og/v2/<id>.png`) | `/nope/`, `/og/v2/index.png` |
 
 Anything wrong is a normal pull request into `integration`; the site redeploys to staging on merge.
 

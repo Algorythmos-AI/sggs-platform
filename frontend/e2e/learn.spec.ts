@@ -34,7 +34,7 @@ test('rss feed is served as xml with learn items @smoke', async ({ request }) =>
 });
 
 test('per-article OG card is a png @smoke', async ({ request }) => {
-  const res = await request.get('/og/learn-what-is-an-ang.png');
+  const res = await request.get('/og/v2/learn-what-is-an-ang.png');
   expect(res.status()).toBe(200);
   expect(res.headers()['content-type']).toContain('image/png');
 });

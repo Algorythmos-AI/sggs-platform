@@ -1,10 +1,11 @@
 ---
 // Seo.astro — the shared <head> SEO/social/PWA block for both the marketing shell and the
-// Knowledge Base (Base.astro). Emits an absolute canonical + Open Graph/Twitter/theme-color/
+// Knowledge Base (Base.astro). Emits an absolute canonical + Open Graph/Twitter (with the card's size, type and alt)/theme-color/
 // manifest set. Does NOT emit <title> (the layout owns it). No hreflang here — locale alternates
 // live only in sitemap.xml until the `pa` pages exist.
 import { SITE_URL, APP_STORE_ID, APP_STORE_LIVE } from "../site";
-import { ogForPath } from "../routes";
+import { ogForPath, ogImagePath } from "../routes";
+import { SHARE } from "../share";
 import kbThemes from "../generated/kb-themes.json";
 
 export interface Props {
@@ -12,6 +13,7 @@ export interface Props {
   description: string;
   path: string;          // root-relative, e.g. "/" or "/search"
   ogImage?: string;      // root-relative or absolute; defaults to the path's OG card
+  imageAlt?: string;     // the card's alt text when ogImage is a page's own card
   type?: string;         // og:type, default "website"
   // Browser-chrome colour: always ONE meta that follows the PAGE theme, never the OS, so a
   // dark-OS visitor never gets dark browser chrome over a light page (or the reverse).
@@ -21,11 +23,20 @@ export interface Props {
   // paper and rewritten by scripts/theme.ts on toggle.
   themeColor?: "page" | "light";
 }
-const { title, description, path, ogImage, type = "website", themeColor = "page" } = Astro.props;
+const { title, description, path, ogImage, imageAlt: ownAlt, type = "website", themeColor = "page" } = Astro.props;
 
 const canonical = new URL(path, SITE_URL).href;
-const ogPath = ogImage ?? `/og/${ogForPath(path)}.png`;
+const slug = ogForPath(path);
+const ogPath = ogImage ?? ogImagePath(slug);
 const ogAbsolute = new URL(ogPath, SITE_URL).href;
+// What a shared link says (share.ts): a description short enough to unfurl whole (≤ 125), and a
+// shorter og:title where the page title is too long. Pages without an entry (learn articles) use
+// their own title and description.
+const share = SHARE[slug] && !ogImage ? SHARE[slug] : undefined;
+const socialTitle = share?.ogTitle ?? title;
+const social = share?.social ?? description;
+// Alt text for the card: what the image says, for screen readers in every client that reads it.
+const imageAlt = ownAlt ?? (share ? [share.eyebrow, share.title].filter(Boolean).join(": ") + " (Gurbani Soul)" : `${socialTitle} (Gurbani Soul)`);
 const kbChrome = kbThemes.themes.find((t) => t.id === kbThemes.default)!.chrome.light;
 ---
 <link rel="canonical" href={canonical} />
@@ -33,15 +44,22 @@ const kbChrome = kbThemes.themes.find((t) => t.id === kbThemes.default)!.chrome.
 
 <meta property="og:type" content={type} />
 <meta property="og:site_name" content="Gurbani Soul" />
-<meta property="og:title" content={title} />
-<meta property="og:description" content={description} />
+<meta property="og:locale" content="en_GB" />
+<meta property="og:title" content={socialTitle} />
+<meta property="og:description" content={social} />
 <meta property="og:url" content={canonical} />
 <meta property="og:image" content={ogAbsolute} />
+<meta property="og:image:secure_url" content={ogAbsolute} />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={imageAlt} />
 
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content={title} />
-<meta name="twitter:description" content={description} />
+<meta name="twitter:title" content={socialTitle} />
+<meta name="twitter:description" content={social} />
 <meta name="twitter:image" content={ogAbsolute} />
+<meta name="twitter:image:alt" content={imageAlt} />
 
 {themeColor === "light"
   ? <meta name="theme-color" content="#FBF7F0" id="themeColorMeta" />

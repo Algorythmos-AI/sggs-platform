@@ -31,12 +31,15 @@ if (existsSync(STATIC)) {
   console.log('Backed up  webapp/static/  ->  webapp/static.bak/');
 }
 
-// 2) mirror dist/ -> webapp/static/ (rsync --delete removes stale hashed chunks; cpSync fallback)
+// 2) mirror dist/ -> webapp/static/ (rsync --delete removes stale hashed chunks; cpSync fallback).
+//    The 1430 per-Ang share cards (og/v2/ang/) are built on every deploy and never committed: they
+//    are ~60 MB of PNGs that only link-preview crawlers fetch from production.
+const SKIP = 'og/v2/ang';
 try {
-  execSync(`rsync -a --delete "${DIST}/" "${STATIC}/"`, { stdio: 'inherit' });
+  execSync(`rsync -a --delete --exclude "/${SKIP}/" "${DIST}/" "${STATIC}/"`, { stdio: 'inherit' });
 } catch {
   mkdirSync(STATIC, { recursive: true });
-  cpSync(DIST, STATIC, { recursive: true });
+  cpSync(DIST, STATIC, { recursive: true, filter: (src) => !src.startsWith(join(DIST, SKIP)) });
   console.log('Synced (Node cpSync fallback).');
 }
 console.log('Sync complete. webapp/static/ now reflects the latest build.');

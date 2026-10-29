@@ -72,7 +72,7 @@ repository gate fails if the sitemap and the built pages disagree.
   `unicode-range` to the Gurmukhi block, so it never downloads for an English-only page; the
   marketing pages add Source Serif 4. Both are preloaded.
 - **Node 22** (`.nvmrc`), used for the build only.
-- **Open Graph cards** are drawn at build time with satori and resvg (`src/pages/og/`).
+- **Open Graph cards** are drawn at build time with HarfBuzz and resvg (`src/og/render.ts`, `src/pages/og/v2/`).
 
 ## How a page talks to the API
 
