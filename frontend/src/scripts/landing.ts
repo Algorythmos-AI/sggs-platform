@@ -21,53 +21,105 @@ let tick: number | undefined;
 const motionOK = () =>
   typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: no-preference)").matches;
 
-/** Mobile <dialog> menu: open/close, aria-expanded sync, Esc, focus restore, body scroll lock. */
+/** Lock page scroll under the open menu. `overflow: hidden` alone does not hold on iOS Safari, so
+    the body is pinned at its current offset and the scroll position restored on release. */
+function lockScroll(): () => void {
+  const y = window.scrollY;
+  const b = document.body.style;
+  const prev = { position: b.position, top: b.top, left: b.left, right: b.right, width: b.width, overflow: b.overflow };
+  Object.assign(b, { position: "fixed", top: `-${y}px`, left: "0", right: "0", width: "100%", overflow: "hidden" });
+  return () => {
+    Object.assign(b, prev);
+    window.scrollTo(0, y);
+  };
+}
+
+/** Mobile <dialog> sheet: open/close, aria-expanded sync, Esc (native), Tab wrap, backdrop tap,
+    scroll lock, focus restore; closes on a link tap and when the window widens past the menu. */
 function wireMobileMenu() {
   const burger = document.querySelector<HTMLButtonElement>(".burger");
   const dialog = document.getElementById("mobileMenu") as HTMLDialogElement | null;
   if (!burger || !dialog || typeof dialog.showModal !== "function") return;
-  const close = document.querySelector<HTMLButtonElement>(".mm-close");
+  const close = dialog.querySelector<HTMLButtonElement>(".mm-close");
+  let unlock: (() => void) | null = null;
 
   const open = () => {
+    if (dialog.open) return;
+    unlock = lockScroll();
     dialog.showModal();
+    close?.focus();
     burger.setAttribute("aria-expanded", "true");
-    document.body.style.overflow = "hidden";
   };
   const shut = () => {
     if (dialog.open) dialog.close();
   };
-  const onOpen = () => open();
-  const onClose = () => shut();
   const onDialogClose = () => {
     burger.setAttribute("aria-expanded", "false");
-    document.body.style.overflow = "";
-    burger.focus();
+    unlock?.();
+    unlock = null;
+    burger.focus({ preventScroll: true });
   };
-  // A link tap inside the menu should dismiss it (in-page anchors don't navigate away).
-  const onLinkClick = (e: Event) => {
-    if ((e.target as HTMLElement).closest("a")) shut();
+  const onClick = (e: MouseEvent) => {
+    // A tap on the transparent dialog layer (outside the sheet) or on any link dismisses it.
+    if (e.target === dialog || (e.target as HTMLElement).closest("a")) shut();
   };
+  // Tab wrap, done by hand in both directions: WebKit skips links on Tab by default, so relying on
+  // the native order at the sheet's edges lets focus escape. Listens on the document while open so
+  // a Tab from anywhere (focus can start on <body>) lands inside the sheet.
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key !== "Tab" || !dialog.open) return;
+    const f = Array.from(dialog.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"))
+      .filter((el) => el.offsetParent !== null);
+    if (!f.length) return;
+    e.preventDefault();
+    const i = f.indexOf(document.activeElement as HTMLElement);
+    const next = e.shiftKey ? f[i <= 0 ? f.length - 1 : i - 1] : f[i === -1 || i === f.length - 1 ? 0 : i + 1];
+    next.focus();
+  };
+  const wide = matchMedia("(min-width: 1024px)");
+  const onWide = () => { if (wide.matches) shut(); };
 
-  burger.addEventListener("click", onOpen);
-  close?.addEventListener("click", onClose);
+  burger.addEventListener("click", open);
+  close?.addEventListener("click", shut);
   dialog.addEventListener("close", onDialogClose);
-  dialog.addEventListener("click", onLinkClick);
+  dialog.addEventListener("click", onClick);
+  document.addEventListener("keydown", onKey, true);
+  wide.addEventListener("change", onWide);
   cleanups.push(() => {
-    burger.removeEventListener("click", onOpen);
-    close?.removeEventListener("click", onClose);
-    dialog.removeEventListener("close", onDialogClose);
-    dialog.removeEventListener("click", onLinkClick);
+    burger.removeEventListener("click", open);
+    close?.removeEventListener("click", shut);
+    dialog.removeEventListener("click", onClick);
+    document.removeEventListener("keydown", onKey, true);
+    wide.removeEventListener("change", onWide);
     shut();
-    document.body.style.overflow = "";
+    dialog.removeEventListener("close", onDialogClose);
+    unlock?.();
+    unlock = null;
   });
 }
 
-/** Frost the nav once the page has scrolled past a 1px sentinel at the very top. */
+/** Secondary theme buttons (menu sheet, footer) drive the one #themeBtn that theme.ts owns, and
+    mirror its state (glyph + aria-label) so their icon matches. */
+function wireThemeProxies() {
+  const main = document.getElementById("themeBtn");
+  const proxies = document.querySelectorAll<HTMLButtonElement>("[data-theme-proxy]");
+  if (!main || !proxies.length) return;
+  const sync = () => proxies.forEach((p) => {
+    p.textContent = main.textContent;
+    p.setAttribute("aria-label", main.getAttribute("aria-label") || "Theme");
+  });
+  const onClick = () => { main.click(); sync(); };
+  proxies.forEach((p) => p.addEventListener("click", onClick));
+  sync();
+  cleanups.push(() => proxies.forEach((p) => p.removeEventListener("click", onClick)));
+}
+
+/** Turn the bar into its frosted capsule once the page has scrolled past an 8px sentinel. */
 function wireNavScrolled() {
   const nav = document.getElementById("mnav");
   if (!nav) return;
   const sentinel = document.createElement("div");
-  sentinel.style.cssText = "position:absolute;top:0;left:0;height:1px;width:1px;pointer-events:none";
+  sentinel.style.cssText = "position:absolute;top:0;left:0;height:8px;width:1px;pointer-events:none";
   document.body.prepend(sentinel);
   const io = new IntersectionObserver(
     ([e]) => nav.classList.toggle("scrolled", !e.isIntersecting),
@@ -188,8 +240,11 @@ function wireTocActive() {
 }
 
 /** Hero phone drift: the floating hero device lags the scroll by at most 12px (passive listener,
-    one rAF per frame). Motion-safe only; uses the individual `translate` property so it composes
-    with the device's own rotate() transform. Torn down on astro:before-swap. */
+    one rAF per frame, idle once the hero is out of view). Motion-safe only; uses the individual
+    `translate` property so it composes with the device's own rotate() transform. The photo's slower
+    drift is CSS (a scroll-driven animation in index.astro): setting a transform on the 1920px
+    artwork from script after first paint forced a ~2s re-raster on throttled phones (Lighthouse).
+    Torn down on astro:before-swap. */
 function wireHeroDrift() {
   const device = document.querySelector<HTMLElement>(".hero-device .device");
   const hero = device?.closest<HTMLElement>(".hero") ?? null;
@@ -199,6 +254,7 @@ function wireHeroDrift() {
   const update = () => {
     frame = 0;
     const h = hero.offsetHeight || 1;
+    if (window.scrollY > h) return;
     const p = Math.min(Math.max(window.scrollY / h, 0), 1);
     device.style.translate = `0 ${(p * MAX).toFixed(2)}px`;
   };
@@ -215,6 +271,36 @@ function wireHeroDrift() {
   });
 }
 
+/** Proof numerals count up once, the first time they are seen (900ms, ease-out). The real figure is
+    in the HTML, so no-JS and reduced motion simply show it; tabular figures keep digits steady. */
+function wireCountUp() {
+  const els = Array.from(document.querySelectorAll<HTMLElement>("[data-count]"));
+  if (!els.length || !motionOK()) return;
+  const fmt = new Intl.NumberFormat("en-US");
+  const raf: number[] = [];
+  const run = (el: HTMLElement) => {
+    const to = Number(el.dataset.count);
+    if (!Number.isFinite(to) || to <= 0) return;
+    const t0 = performance.now();
+    const step = (t: number) => {
+      const k = Math.min((t - t0) / 900, 1);
+      el.textContent = fmt.format(Math.round(to * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) raf.push(requestAnimationFrame(step));
+    };
+    el.textContent = "0";
+    raf.push(requestAnimationFrame(step));
+  };
+  const io = new IntersectionObserver((entries, obs) => {
+    for (const en of entries) if (en.isIntersecting) { obs.unobserve(en.target); run(en.target as HTMLElement); }
+  }, { threshold: 0.6 });
+  els.forEach((el) => io.observe(el));
+  observers.push(io);
+  cleanups.push(() => {
+    raf.forEach(cancelAnimationFrame);
+    els.forEach((el) => { el.textContent = fmt.format(Number(el.dataset.count)); });
+  });
+}
+
 function teardown() {
   observers.forEach((o) => o.disconnect());
   observers = [];
@@ -226,12 +312,14 @@ function init() {
   teardown(); // idempotent — a re-run (page-load after a swap) starts from a clean slate
   initTheme();
   wireMobileMenu();
+  wireThemeProxies();
   wireNavScrolled();
   wireNavActive();
   wireReveal();
   wireRaagClock();
   wireTocActive();
   wireHeroDrift();
+  wireCountUp();
   const nl = wireNewsletter(); // no-op when the env-gated form is absent (this build)
   if (nl) cleanups.push(nl);
 }

@@ -34,7 +34,7 @@ test('reduced motion: reveal content is visible without scrolling', async ({ bro
   const page = await context.newPage();
   await page.goto('/');
   // A .reveal block below the hero must be visible immediately (no scroll-triggered fade-in).
-  await expect(page.locator('.verse-in.reveal')).toBeVisible();
+  await expect(page.locator('.verse-band .cite.reveal')).toBeVisible();
   await expect(page.locator('p.verse[lang="pa"]')).toBeVisible();
   // The motion opt-in class is never armed under Reduce Motion.
   expect(await page.locator('html.js-motion').count()).toBe(0);

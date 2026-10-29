@@ -1,13 +1,17 @@
 ---
-// MarketingNav.astro — sticky top bar for the gurbanisoul.com landing. White text over the dark
-// hero before scroll; frosted paper with a hairline once scrolled (both handled in marketing.css,
-// toggled by landing.ts). Inline links + CTA collapse into a hamburger <dialog> under 840px.
-// The CTA is a real App Store link only when APP_STORE_LIVE (the app is on the App Store);
-// otherwise a "Coming soon" chip.
-// The nav's coming-soon chip is tagged data-app-store="coming-soon-nav" so the page's single
-// canonical "coming soon" element (data-app-store="coming-soon") remains the hero one.
-// The HELP heart: a solid brand-red heart with HELP inside (the one place red appears on the site) beside the CTA (never a gold fill:
-// the app download stays the one gold button); on phones it is a round heart button by the menu. It renders only when /contribute has live/test links (CONTRIBUTE_MODE).
+// MarketingNav.astro — sticky top bar for every Gurbani Soul marketing page. Three zones on one
+// centre line: brand · primary links · actions (theme, Contribute, the one gold "Get the app").
+// White text over the dark hero before scroll; once scrolled the bar becomes a frosted capsule
+// (a ::before layer that fades and settles — the header's height never changes, so nothing on the
+// page shifts) with a gold reading-progress hairline (CSS scroll timeline where supported).
+// ≥1280 full row · 1024–1279 Contribute collapses to its heart (the label stays as its accessible
+// name) · <1024 links/theme/Contribute move into the <dialog> sheet · <420 only brand + menu (the
+// hero's own App Store button is on screen). Styles in marketing.css, behaviour in landing.ts.
+// The CTA is a real App Store link only when APP_STORE_LIVE; otherwise a "Coming soon" chip, tagged
+// data-app-store="coming-soon-nav" so the page's single canonical "coming soon" stays the hero one.
+// Contribute: an outlined button with a small heart — the heart's fill is the site's one use of
+// brand red (--contribute-heart, owner exception; never text, never beside Gurmukhi). Renders only
+// when /contribute has live/test links (CONTRIBUTE_MODE). Privacy lives in the sheet and the footer.
 import { APP_STORE_URL, APP_STORE_LIVE } from "../site";
 import { CONTRIBUTE_MODE } from "../contribute";
 
@@ -17,23 +21,19 @@ import { CONTRIBUTE_MODE } from "../contribute";
 export interface Props { overHero?: boolean }
 const { overHero = true } = Astro.props;
 
-// The nav is a genuine multi-page site now — every item is its own route (no in-page anchors).
 // Active state is by PATHNAME: aria-current="page" on the link whose href matches the current path.
 // landing.ts re-asserts this after each ClientRouter swap (see wireNavActive).
 const here = (Astro.url.pathname || "/").replace(/\/+$/, "") || "/";
 const isCurrent = (href: string) => (href.replace(/\/+$/, "") || "/") === here;
 const giveOn = CONTRIBUTE_MODE !== "off";
-// The nav badge: a solid heart with HELP set inside it (white on the --contribute-heart red, 4.87:1).
-const helpHeart = '<svg class="help-heart" viewBox="0 0 64 56" aria-hidden="true"><path fill="currentColor" d="M32 54.5c-.8 0-1.6-.3-2.2-.8C21.4 46.6 2.5 33.4 2.5 17.8 2.5 9 9.3 2.2 17.6 2.2c6 0 11.2 3.4 14.4 8.4 3.2-5 8.4-8.4 14.4-8.4 8.3 0 15.1 6.8 15.1 15.6 0 15.6-18.9 28.8-27.3 35.9-.6.5-1.4.8-2.2.8z"/><text x="32" y="30.5" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="14.5" font-weight="800" letter-spacing="1">HELP</text></svg>';
 const heart = '<svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21.2c-.3 0-.6-.1-.8-.3C8.2 18.4 2.5 13.9 2.5 8.9A5.2 5.2 0 0 1 12 6a5.2 5.2 0 0 1 9.5 2.9c0 5-5.7 9.5-8.7 12-.2.2-.5.3-.8.3z"/></svg>';
 
 const links = [
   { href: "/features", label: "Features", prefetch: true },
   { href: "/watch", label: "The watch", prefetch: true },
   { href: "/learn", label: "Learn", prefetch: true },
-  { href: "/support", label: "Support", prefetch: true },
-  { href: "/privacy", label: "Privacy", prefetch: true },
   { href: "/search", label: "Knowledge Base" },
+  { href: "/support", label: "Support", prefetch: true },
 ];
 ---
 <header class:list={["mnav", { "mnav--solid": !overHero }]} id="mnav">
@@ -51,43 +51,52 @@ const links = [
     </nav>
 
     <div class="mnav-right">
-      <button id="themeBtn" aria-label="Theme">◐</button>
+      <button id="themeBtn" class="mnav-icon" aria-label="Theme">◐</button>
       {giveOn && (
-        <a class="mnav-give" href="/contribute" data-astro-prefetch aria-label="Help support Gurbani Soul"
+        <a class="mnav-give" href="/contribute" data-astro-prefetch
            aria-current={isCurrent("/contribute") ? "page" : undefined}>
-          <Fragment set:html={helpHeart} />
+          <Fragment set:html={heart} /><span class="lbl">Contribute</span>
         </a>
       )}
       {APP_STORE_LIVE
         ? <a class="pill" href={APP_STORE_URL} aria-label="Get Gurbani Soul on the App Store">Get the app</a>
         : <span class="pill soon" data-app-store="coming-soon-nav">Coming soon</span>}
-      <button class="burger" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <line x1="3" y1="7" x2="21" y2="7" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="17" x2="21" y2="17" />
-        </svg>
+      <button class="burger mnav-icon" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8.5h16M4 15.5h16" /></svg>
       </button>
     </div>
+    <span class="mnav-progress" aria-hidden="true"></span>
   </div>
 </header>
 
 <dialog id="mobileMenu" aria-label="Menu">
   <div class="mm-in">
     <div class="mm-top">
-      <span class="brand" style="color:var(--ink)"><span class="gm" aria-hidden="true">ੴ</span> <span>Gurbani Soul</span></span>
-      <button class="mm-close" aria-label="Close menu">&times;</button>
+      <a class="brand" href="/"><span class="gm" aria-hidden="true">ੴ</span> <span>Gurbani Soul</span></a>
+      <button class="mm-close mnav-icon" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      </button>
     </div>
-    {links.map((l) => (
-      <a href={l.href} data-astro-prefetch={l.prefetch ? "" : undefined}
-         aria-current={isCurrent(l.href) ? "page" : undefined}>{l.label}</a>
-    ))}
-    {giveOn && (
-      <a class="mm-give" href="/contribute" data-astro-prefetch
-         aria-current={isCurrent("/contribute") ? "page" : undefined}>
-        <Fragment set:html={heart} /><span>Help support Gurbani Soul</span>
-      </a>
-    )}
-    {APP_STORE_LIVE
-      ? <a class="pill mm-cta" href={APP_STORE_URL} aria-label="Get Gurbani Soul on the App Store">Get the app</a>
-      : <span class="pill soon mm-cta" data-app-store="coming-soon-nav">Coming soon</span>}
+    <nav class="mm-links" aria-label="Menu">
+      {links.map((l) => (
+        <a href={l.href} data-astro-prefetch={l.prefetch ? "" : undefined}
+           aria-current={isCurrent(l.href) ? "page" : undefined}>{l.label}</a>
+      ))}
+    </nav>
+    <div class="mm-sub">
+      <a href="/privacy" data-astro-prefetch aria-current={isCurrent("/privacy") ? "page" : undefined}>Privacy</a>
+      {giveOn && (
+        <a class="mm-give" href="/contribute" data-astro-prefetch
+           aria-current={isCurrent("/contribute") ? "page" : undefined}>
+          <Fragment set:html={heart} /><span>Contribute</span>
+        </a>
+      )}
+    </div>
+    <div class="mm-actions">
+      {APP_STORE_LIVE
+        ? <a class="pill mm-cta" href={APP_STORE_URL} aria-label="Get Gurbani Soul on the App Store">Get the app</a>
+        : <span class="pill soon mm-cta" data-app-store="coming-soon-nav">Coming soon</span>}
+      <button class="mm-theme mnav-icon" data-theme-proxy aria-label="Theme">◐</button>
+    </div>
   </div>
 </dialog>

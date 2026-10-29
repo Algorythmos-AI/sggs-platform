@@ -84,7 +84,7 @@ test('theme button works on a sub-page', async ({ page }, testInfo) => {
 });
 
 test('mobile menu opens and closes on a sub-page', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'mobile', 'hamburger only shows under 840px');
+  test.skip(testInfo.project.name !== 'mobile', 'the menu button shows under 1024px');
   await page.goto('/watch');
   const burger = page.locator('.burger');
   await expect(burger).toBeVisible();
