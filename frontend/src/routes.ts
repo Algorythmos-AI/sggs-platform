@@ -1,7 +1,7 @@
 // routes.ts — the manifest of public marketing + Knowledge Base routes.
 //
 // Single source of truth for the sitemap (src/pages/sitemap.xml.ts) and for <Seo>'s default OG
-// image (og slug → /og/<slug>.png). It must list EXACTLY the pages that build to HTML under
+// image (og slug → /og/v2/<slug>.png). It must list EXACTLY the pages that build to HTML under
 // webapp/static (the SitemapInvariants gate compares the sitemap's <loc> set to the built HTML
 // route set), so keep it in step when a page is added or removed under src/pages/*.astro.
 //
@@ -15,7 +15,7 @@ export interface Route {
   lastmod: string;     // YYYY-MM-DD
   changefreq: ChangeFreq;
   priority: number;    // 0.0–1.0
-  og: string;          // OG card slug → /og/<og>.png
+  og: string;          // OG card slug → /og/v2/<og>.png (copy in share.ts)
 }
 
 const LASTMOD = "2026-09-23";
@@ -49,26 +49,26 @@ export const routes: Route[] = [
   { path: "/",             lastmod: LASTMOD, changefreq: "weekly",  priority: 1.0, og: "home" },
   { path: "/features",     lastmod: LASTMOD, changefreq: "weekly",  priority: 0.8, og: "features" },
   { path: "/watch",        lastmod: LASTMOD, changefreq: "weekly",  priority: 0.7, og: "watch" },
-  { path: "/library",      lastmod: LASTMOD, changefreq: "weekly",  priority: 0.8, og: "knowledge-base" },
-  { path: "/search",       lastmod: LASTMOD, changefreq: "weekly",  priority: 0.9, og: "knowledge-base" },
-  { path: "/reader",       lastmod: LASTMOD, changefreq: "weekly",  priority: 0.8, og: "knowledge-base" },
-  { path: "/nitnem",       lastmod: LASTMOD, changefreq: "weekly",  priority: 0.7, og: "knowledge-base" },
-  { path: "/browse",       lastmod: LASTMOD, changefreq: "monthly", priority: 0.6, og: "knowledge-base" },
-  { path: "/themes",       lastmod: LASTMOD, changefreq: "monthly", priority: 0.6, og: "knowledge-base" },
-  { path: "/lineage",      lastmod: LASTMOD, changefreq: "monthly", priority: 0.6, og: "knowledge-base" },
-  { path: "/trail",        lastmod: LASTMOD, changefreq: "monthly", priority: 0.5, og: "knowledge-base" },
-  { path: "/analytics",    lastmod: LASTMOD, changefreq: "monthly", priority: 0.6, og: "knowledge-base" },
-  { path: "/constellation",lastmod: LASTMOD, changefreq: "monthly", priority: 0.5, og: "knowledge-base" },
-  { path: "/raag-clock",   lastmod: LASTMOD, changefreq: "monthly", priority: 0.6, og: "knowledge-base" },
-  { path: "/divergence",   lastmod: LASTMOD, changefreq: "monthly", priority: 0.4, og: "knowledge-base" },
+  { path: "/library",      lastmod: LASTMOD, changefreq: "weekly",  priority: 0.8, og: "library" },
+  { path: "/search",       lastmod: LASTMOD, changefreq: "weekly",  priority: 0.9, og: "search" },
+  { path: "/reader",       lastmod: LASTMOD, changefreq: "weekly",  priority: 0.8, og: "reader" },
+  { path: "/nitnem",       lastmod: LASTMOD, changefreq: "weekly",  priority: 0.7, og: "nitnem" },
+  { path: "/browse",       lastmod: LASTMOD, changefreq: "monthly", priority: 0.6, og: "browse" },
+  { path: "/themes",       lastmod: LASTMOD, changefreq: "monthly", priority: 0.6, og: "themes" },
+  { path: "/lineage",      lastmod: LASTMOD, changefreq: "monthly", priority: 0.6, og: "lineage" },
+  { path: "/trail",        lastmod: LASTMOD, changefreq: "monthly", priority: 0.5, og: "trail" },
+  { path: "/analytics",    lastmod: LASTMOD, changefreq: "monthly", priority: 0.6, og: "analytics" },
+  { path: "/constellation",lastmod: LASTMOD, changefreq: "monthly", priority: 0.5, og: "constellation" },
+  { path: "/raag-clock",   lastmod: LASTMOD, changefreq: "monthly", priority: 0.6, og: "raag-clock" },
+  { path: "/divergence",   lastmod: LASTMOD, changefreq: "monthly", priority: 0.4, og: "divergence" },
   { path: "/privacy",      lastmod: LASTMOD, changefreq: "yearly",  priority: 0.4, og: "privacy" },
   { path: "/support",      lastmod: LASTMOD, changefreq: "yearly",  priority: 0.5, og: "support" },
-  { path: "/contribute",   lastmod: "2026-10-17", changefreq: "yearly",  priority: 0.4, og: "support" },
+  { path: "/contribute",   lastmod: "2026-10-17", changefreq: "yearly",  priority: 0.4, og: "contribute" },
   ...learnRoutes,
 ];
 
-// The set of distinct OG card slugs the site needs (drives og/[slug].png getStaticPaths).
-export const ogSlugs = (): string[] => [...new Set(routes.map((r) => r.og))];
+// The set of distinct OG card slugs the site needs (drives og/v2/[slug].png getStaticPaths).
+export const ogSlugs = (): string[] => [...new Set(["knowledge-base", ...routes.map((r) => r.og)])];
 
 // Normalise a URL pathname to a manifest path ("" or "/x/" → "/" or "/x").
 export const normPath = (p: string): string => {
@@ -81,3 +81,6 @@ export const ogForPath = (p: string): string => {
   const n = normPath(p);
   return routes.find((r) => r.path === n)?.og ?? "knowledge-base";
 };
+
+// The share-card URL for an OG slug. "v2" is the cache key link-preview services fetch by.
+export const ogImagePath = (slug: string): string => `/og/v2/${slug}.png`;

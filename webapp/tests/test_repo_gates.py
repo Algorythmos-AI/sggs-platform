@@ -9,6 +9,7 @@ audit. When the finding is fixed the test starts passing, unittest reports an "u
 success" (a failure), and the decorator must be removed in the same PR — so a gate can only ever
 move from "known-open" to "enforcing", never silently back.
 """
+import html as htmlmod
 import json
 import sys
 import re
@@ -773,6 +774,75 @@ class SeoInvariants(unittest.TestCase):
                 self.assertIn(lang, ("en", "x-default"), f"{route}: unexpected hreflang {lang}")
                 self.assertNotIn("/pa/", href, f"{route}: hreflang points at a /pa/ URL")
                 self.assertEqual(_norm_url(href), canonical_want, f"{route}: hreflang not self-referential")
+
+
+class ShareCardMeta(unittest.TestCase):
+    """Every built page unfurls as a complete, versioned share card (frontend/src/og, share.ts).
+
+    The tag set link-preview clients read (WhatsApp, iMessage, X, Facebook, LinkedIn, Slack,
+    Discord, Telegram), the copy limits that keep them from cutting the text, and the card image
+    itself: a 1200x630 PNG on disk, inside its size budget. A missing font glyph already fails the
+    build (src/og/render.ts throws), so a card that exists here has no tofu.
+    """
+
+    REQUIRED = ("og:type", "og:site_name", "og:locale", "og:title", "og:description", "og:url",
+                "og:image", "og:image:secure_url", "og:image:type", "og:image:width",
+                "og:image:height", "og:image:alt", "twitter:card", "twitter:title",
+                "twitter:description", "twitter:image", "twitter:image:alt")
+    BUDGET = 100 * 1024
+
+    def setUp(self):
+        if _unbuilt():
+            self.skipTest("webapp/static not built (cd frontend && npm run build:deploy)")
+
+    @staticmethod
+    def _meta(html):
+        out = {}
+        for attr, key, val in re.findall(r'<meta (property|name)="((?:og|twitter):[^"]+)" content="([^"]*)"', html):
+            out.setdefault(key, []).append(htmlmod.unescape(val))
+        return out
+
+    @staticmethod
+    def _png_size(path):
+        head = path.read_bytes()[:24]
+        if head[:8] != b"\x89PNG\r\n\x1a\n" or head[12:16] != b"IHDR":
+            return None
+        return int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")
+
+    def test_every_page_has_the_full_share_tag_set(self):
+        for route, path in _built_pages():
+            m = self._meta(path.read_text(encoding="utf-8"))
+            for key in self.REQUIRED:
+                self.assertEqual(len(m.get(key, [])), 1, f"{route}: expected exactly one {key}, got {m.get(key)}")
+            one = {k: v[0] for k, v in m.items()}
+            self.assertEqual(one["twitter:card"], "summary_large_image", route)
+            self.assertEqual((one["og:image:width"], one["og:image:height"]), ("1200", "630"), route)
+            self.assertEqual(one["og:image:type"], "image/png", route)
+            self.assertEqual(one["og:image"], one["og:image:secure_url"], route)
+            self.assertEqual(one["og:image"], one["twitter:image"], route)
+            self.assertEqual(one["og:title"], one["twitter:title"], route)
+            self.assertEqual(one["og:description"], one["twitter:description"], route)
+            self.assertEqual(one["og:image:alt"], one["twitter:image:alt"], route)
+            self.assertRegex(one["og:image"], r"^https://gurbanisoul\.com/og/v\d+/[a-z0-9-]+\.png$", route)
+            self.assertLessEqual(len(one["og:title"]), 60, f"{route}: og:title over 60 characters")
+            self.assertGreaterEqual(len(one["og:description"]), 40, f"{route}: og:description under 40")
+            self.assertLessEqual(len(one["og:description"]), 125, f"{route}: og:description over 125 characters")
+            self.assertIn("Gurbani Soul", one["og:image:alt"], route)
+
+    def test_every_card_is_a_1200x630_png_within_budget(self):
+        cards = sorted((STATIC / "og" / "v2").glob("*.png"))
+        self.assertTrue(cards, "no share cards under webapp/static/og/v2")
+        for card in cards:
+            self.assertEqual(self._png_size(card), (1200, 630), f"{card.name}: not a 1200x630 PNG")
+            self.assertLessEqual(card.stat().st_size, self.BUDGET, f"{card.name}: over the 100 KB budget")
+
+    def test_share_copy_is_within_limits(self):
+        src = (ROOT / "frontend" / "src" / "share.ts").read_text(encoding="utf-8")
+        for field, limit in (("social", 125), ("ogTitle", 60)):
+            for val in re.findall(field + r': "([^"]*)"', src):
+                self.assertLessEqual(len(val), limit, f"share.ts {field} over {limit}: {val}")
+        self.assertNotRegex(re.sub(r'ogTitle: "[^"]*"', "", src), "[\u0A00-\u0A7F]",
+                            "share.ts card copy holds Gurmukhi: verses on cards come only from the DB")
 
 
 class SitemapInvariants(unittest.TestCase):

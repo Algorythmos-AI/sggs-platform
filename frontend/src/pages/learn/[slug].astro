@@ -8,7 +8,7 @@ import JsonLd from "../../components/JsonLd.astro";
 import Verse from "../../components/Verse.astro";
 import Explanation from "../../components/Explanation.astro";
 import { SITE_URL } from "../../site";
-import { LEARN_SLUGS } from "../../routes";
+import { LEARN_SLUGS, ogImagePath } from "../../routes";
 
 export async function getStaticPaths() {
   const entries = (await getCollection("learn")).filter((e) => !e.data.draft);
@@ -32,7 +32,7 @@ const fmtDate = (d: Date) =>
   d.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 const canonical = new URL(`/learn/${entry.id}`, SITE_URL).href;
-const ogImage = `/og/learn-${entry.id}.png`;
+const ogImage = ogImagePath(`learn-${entry.id}`);
 
 const articleJsonLd = {
   "@context": "https://schema.org",
