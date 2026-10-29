@@ -77,7 +77,36 @@ test('Share hands over the same text and a link that lands on the verse', async 
   await page.locator('#vsShare').click();
   const shared = await page.evaluate(() => (window as any).__shared);
   expect(shared.text).toBe(`${line.gurmukhi}\n— Sri Guru Granth Sahib Ji · Ang 712`);
-  expect(new URL(shared.url).pathname + new URL(shared.url).search).toBe(`/reader?ang=712&line=${line.id}`);
+  // the link is the Ang's share page (its own card in any chat), which lands on the verse
+  expect(new URL(shared.url).pathname + new URL(shared.url).search).toBe(`/ang/712?line=${line.id}`);
+  await page.goto(new URL(shared.url).pathname + new URL(shared.url).search);
+  await expect(page).toHaveURL(new RegExp(`/reader\\?ang=712&line=${line.id}$`));
+  await expect(page.locator(`#angOut .pin-btn[data-id="${line.id}"]`)).toBeVisible({ timeout: 15_000 });
+});
+
+test('Share as image makes a 1080×1080 card of the verse', async ({ page }) => {
+  await page.addInitScript(() => { delete (navigator as any).canShare; });   // no file sharing: it saves
+  await reader(page, 712);
+  const line = await firstLine(page, 712);
+  await page.locator(`#angOut .pin-btn[data-id="${line.id}"]`).click();
+  const download = page.waitForEvent('download');
+  await page.locator('#vsImage').click();
+  const file = await download;
+  expect(file.suggestedFilename()).toBe('gurbani-soul-ang-712.png');
+  const b = Buffer.from(await (await import('node:fs/promises')).readFile((await file.path())!));
+  expect(b.subarray(1, 4).toString()).toBe('PNG');
+  expect([b.readUInt32BE(16), b.readUInt32BE(20)]).toEqual([1080, 1080]);
+  await expect(page.locator('#toast')).toHaveText('Image saved, with its Ang');
+});
+
+test('Share this Ang hands over the Ang share page', async ({ page }) => {
+  await page.addInitScript(() => { (navigator as any).share = (d: any) => { (window as any).__shared = d; return Promise.resolve(); }; });
+  await reader(page, 917);
+  await page.locator('#readerOptsBtn').click();
+  await page.locator('#shareAngBtn').click();
+  const shared = await page.evaluate(() => (window as any).__shared);
+  expect(shared.title).toBe('Ang 917 · Sri Guru Granth Sahib Ji');
+  expect(new URL(shared.url).pathname).toBe('/ang/917');
 });
 
 test('from a search result: the card under the button does not open, and the actions lead on', async ({ page }) => {

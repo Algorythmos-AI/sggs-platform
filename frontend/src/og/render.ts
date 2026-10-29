@@ -163,23 +163,25 @@ export async function pageCard({ eyebrow, title, sub, host = "gurbanisoul.com" }
   return finish(c, W, H, true);
 }
 
-export interface VerseCard { gurmukhi: string; ang: number; author?: string | null; raag?: string | null; host?: string }
+export interface AngCard { ang: number; raag?: string | null; gurmukhi: string; host?: string }
 
-// Verse card: the verbatim line in ink, the rule, "Sri Guru Granth Sahib Ji · Ang N", the voice, and
-// the raag (Gurmukhi, as stored) at the right. The line is passed through exactly as given.
-export async function verseCard({ gurmukhi, ang, author, raag, host = "gurbanisoul.com" }: VerseCard): Promise<Uint8Array> {
+// Ang card (/ang/N): "ANG", the numeral, the raag (Gurmukhi, as stored) and the citation on the
+// left; the Ang's opening line, verbatim, on the right. No glow: 1430 of these ship per deploy.
+export async function angCard({ ang, raag, gurmukhi, host = "gurbanisoul.com" }: AngCard): Promise<Uint8Array> {
   const c = new Card();
   await chrome(c, host);
-  const size = gurmukhi.length > 44 ? 60 : 72;
-  const lines = await wrap("gm", gurmukhi, size, 400, W - PADX * 2);
-  if (lines.length > 3) throw new Error(`verse too long for a card (Ang ${ang})`);
-  const lh = size * 1.45;
-  const y0 = 330 - (lines.length * lh) / 2 + size * 0.75;
-  for (const [i, l] of lines.entries()) await c.text("gm", l, size, 400, PADX, Math.round(y0 + i * lh), C.ink);
-  const after = y0 + (lines.length - 1) * lh;
-  c.rule(PADX, Math.round(after + 56));
-  await c.text("serif", `Sri Guru Granth Sahib Ji · Ang ${ang}`, 30, 600, PADX, Math.round(after + 112), C.ink);
-  if (raag) await c.text("gm", raag, 30, 400, W - PADX, Math.round(after + 112), C.muted, "end");
-  if (author) await c.text("serif", author, 22, 400, PADX, Math.round(after + 150), C.muted);
-  return finish(c, W, H, true);
+  await c.text("serif", "ANG", 22, 600, PADX, 236, C.muted);
+  await c.text("serif", String(ang), 168, 600, PADX - 6, 392, C.ink);
+  if (raag) await c.text("gm", raag, 44, 400, PADX, 460, C.ink);
+  const ruleY = raag ? 492 : 430;
+  c.rule(PADX, ruleY);
+  await c.text("serif", `Sri Guru Granth Sahib Ji · Ang ${ang}`, 26, 600, PADX, ruleY + 56, C.ink);
+  // the opening line: as large as fits in three lines of the right column, never cut
+  const colX = 560, colW = W - PADX - colX;
+  let size = 48, lines = await wrap("gm", gurmukhi, size, 400, colW);
+  while (lines.length > 3 && size > 32) lines = await wrap("gm", gurmukhi, (size -= 4), 400, colW);
+  if (lines.length > 4) throw new Error(`Ang ${ang}: opening line too long for the card`);
+  const lh = size * 1.45, top = 330 - (lines.length * lh) / 2 + size * 0.75;
+  for (const [i, l] of lines.entries()) await c.text("gm", l, size, 400, colX, Math.round(top + i * lh), C.ink);
+  return finish(c, W, H, false);
 }

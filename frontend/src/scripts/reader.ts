@@ -1,6 +1,6 @@
 // reader.ts — the Reader page (/reader) : the Ang-by-Ang viewer.
 // Ported 1:1 from the original; deep-links via ?ang=<n>&raag=<name>.
-import { $, esc, api, guard, meta, store, validAng, syncToolbarTop, relChip, failHTML, stepFontSize } from './core';
+import { $, esc, api, guard, meta, store, validAng, syncToolbarTop, relChip, failHTML, stepFontSize, toast } from './core';
 import { pinButtonHTML } from './store';
 import { overlayOpen } from './overlay';
 import { initReaderChrome, syncReaderChrome } from './readerchrome';
@@ -186,6 +186,12 @@ document.addEventListener('keydown', showChrome);
 document.addEventListener('pointerdown', (e) => { if (e.clientY < 72) showChrome(); });
 const step = (d: number) => ang(curAng + d, true);
 initReaderChrome({ current: () => curAng, go: (n) => ang(n), turn: (d) => { if (curAng + d >= 1 && curAng + d <= 1430) step(d); } });
+// Share this Ang: the /ang/N link, which unfurls as Ang N's own card (src/pages/ang)
+$('#shareAngBtn')?.addEventListener('click', () => {
+  const url = `${location.origin}/ang/${curAng}`, title = `Ang ${curAng} · Sri Guru Granth Sahib Ji`;
+  if (typeof navigator.share === 'function') { navigator.share({ title, url }).catch(() => { /* dismissed */ }); return; }
+  (navigator.clipboard?.writeText(url) || Promise.reject()).then(() => toast(`Link to Ang ${curAng} copied`), () => toast('Copy is not available in this browser'));
+});
 window.addEventListener('popstate', () => {
   const p = new URLSearchParams(location.search);
   const n = parseInt(p.get('ang') || '', 10);

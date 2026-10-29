@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev --port 4321",
-    "build": "astro build",
+    "build": "astro build && node scripts/check-share-cards.mjs",
     "sync": "node scripts/sync-to-webapp.mjs",
     "rollback": "node scripts/sync-to-webapp.mjs --rollback",
-    "build:deploy": "astro build && node scripts/sync-to-webapp.mjs",
+    "build:deploy": "npm run build && node scripts/sync-to-webapp.mjs",
     "test:pahar": "node scripts/test-pahar.mjs",
     "test:e2e": "playwright test",
     "shots": "node scripts/shots.mjs"
