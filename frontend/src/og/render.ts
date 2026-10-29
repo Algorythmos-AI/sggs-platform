@@ -11,11 +11,14 @@
 // paper), never gold text and never red. The app mark is public/favicon.svg — the app icon's own
 // outlines (scripts/app-icon). The bottom-left of every card stays free of anything essential,
 // because X lays the page title over that corner.
+//
+// This file is shared: docs-site copies it at prebuild (docs-site/scripts/copy-assets.mjs) and
+// draws the wiki's cards with it, so it imports nothing from the frontend; paths resolve against
+// the building package (src/og/fonts, public/favicon.svg).
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
-import theme from "../theme";
 
 // Read from the source tree relative to the build's working directory (frontend/): endpoints are
 // bundled into dist/.prerender/, so import.meta.url would not point at src/og.
@@ -27,13 +30,14 @@ let hbPromise: Promise<HB> | null = null;
 const harfbuzz = (): Promise<HB> => (hbPromise ??= require("harfbuzzjs"));
 
 export const W = 1200, H = 630;
+// Light legs of docs/brand/tokens.json (and src/theme.ts, which the WebThemeMatchesTokens gate pins).
 export const C = {
-  paper: theme.light.paper,          // #FBF7F0
-  ink: theme.light.ink,              // warm ink
-  muted: "#62584D",                  // tokens.json ink.muted[0] (AA on paper)
-  fill: theme.light.accentFill,      // #FFBC0D — fills only
-  edge: theme.light.accent,          // #A87900 — the 1px edge every light-mode gold fill carries
-  deep: "#FFB81C",                   // tokens.json soul.accentDeep[0] — share-card rule gradient end
+  paper: "#FBF7F0",                  // surfaces.paper[0]
+  ink: "#201A12",                    // warm ink (theme.ts light.ink)
+  muted: "#62584D",                  // ink.muted[0] (AA on paper)
+  fill: "#FFBC0D",                   // soul.accentFill[0] — fills only
+  edge: "#A87900",                   // soul.accent[0] — the 1px edge every light-mode gold fill carries
+  deep: "#FFB81C",                   // soul.accentDeep[0] — share-card rule gradient end
 };
 
 interface Face { face: any; upem: number }
@@ -50,6 +54,22 @@ async function loadFaces() {
 }
 
 export interface Shaped { svg: string; width: number; missing: number }
+
+const GURMUKHI = /([\u0A00-\u0A7F]+(?:\s+[\u0A00-\u0A7F]+)*)/;
+// Shape text in its own script: Gurmukhi runs inside English text (a title naming a bani, say)
+// are set in Sant Lipi, the rest in Source Serif 4; "gm" text is Sant Lipi throughout.
+export async function shapeText(script: "gm" | "serif", text: string, size: number, wght: number): Promise<Shaped> {
+  if (script === "gm" || !GURMUKHI.test(text)) return shape(script, text, size, wght);
+  let x = 0, missing = 0;
+  const parts: string[] = [];
+  for (const [i, run] of text.split(GURMUKHI).entries()) {
+    if (!run) continue;
+    const t = await shape(i % 2 ? "gm" : "serif", run, size, i % 2 ? 400 : wght);
+    parts.push(`<g transform="translate(${r(x)} 0)">${t.svg}</g>`);
+    x += t.width; missing += t.missing;
+  }
+  return { svg: parts.join(""), width: x, missing };
+}
 
 // Shape one run of text into outline paths at the origin baseline. `missing` counts .notdef
 // glyphs (gid 0): a card with a missing glyph must fail the build, never ship a tofu box.
@@ -83,7 +103,7 @@ const r = (n: number) => n.toFixed(2);
 export async function wrap(script: "gm" | "serif", text: string, size: number, wght: number, maxW: number) {
   const words = text.split(" ");
   const widths = new Map<string, number>();
-  const width = async (t: string) => widths.get(t) ?? widths.set(t, (await shape(script, t, size, wght)).width).get(t)!;
+  const width = async (t: string) => widths.get(t) ?? widths.set(t, (await shapeText(script, t, size, wght)).width).get(t)!;
   const greedy = async (limit: number) => {
     const lines: string[] = [];
     let cur = "";
@@ -109,7 +129,7 @@ class Card {
   parts: string[] = [];
   missing = 0;
   async text(script: "gm" | "serif", s: string, size: number, wght: number, x: number, y: number, fill: string, anchor: "start" | "end" = "start") {
-    const t = await shape(script, s, size, wght);
+    const t = await shapeText(script, s, size, wght);
     this.missing += t.missing;
     const dx = anchor === "end" ? x - t.width : x;
     this.parts.push(`<g fill="${fill}" transform="translate(${r(dx)} ${y})">${t.svg}</g>`);

@@ -97,7 +97,7 @@ def main():
               ("/pagefind/pagefind-entry.json", "application/json", lambda b: json.loads(b).get("version")),
               ("/api/health", "application/json", lambda b: json.loads(b).get("ok") is True),
               ("/api/meta", "application/json", lambda b: bool(json.loads(b).get("version"))),
-              ("/og/index.png", "image/png", lambda b: b[:8] == b"\x89PNG\r\n\x1a\n")]
+              ("/og/v2/index.png", "image/png", lambda b: b[:8] == b"\x89PNG\r\n\x1a\n")]
     try:
         poster = a.poster or poster_path(a.base_url, bypass)
     except (urllib.error.URLError, TimeoutError, OSError):
