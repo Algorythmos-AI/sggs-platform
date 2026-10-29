@@ -82,21 +82,26 @@ test('nav, footer and home band link to /contribute only when it is on', async (
   }
 });
 
-test('nav contribute link is icon-only at 900px and in the mobile menu at 375px', async ({ page }) => {
+test('nav contribute link is icon-only at 1100px and in the mobile menu at 375px', async ({ page }) => {
   if (!(await contributeOn(page))) test.skip(true, 'contributions are off in this build');
-  await page.setViewportSize({ width: 900, height: 800 });
+  await page.setViewportSize({ width: 1100, height: 800 });
   await page.goto('/features');
   const navGive = page.locator('#mnav a.mnav-give');
   await expect(navGive).toBeVisible();
   await expect(navGive.locator('.lbl')).toHaveCSS('position', 'absolute');
   await expect(navGive).toHaveAccessibleName('Contribute');
-  for (const w of [840, 900, 1000, 1024, 1100]) {
+  await page.setViewportSize({ width: 1440, height: 800 });
+  await expect(navGive.locator('.lbl')).toBeVisible();
+  for (const w of [840, 900, 1000, 1024, 1100, 1280]) {
     await page.setViewportSize({ width: w, height: 800 });
     const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(over, `overflow at ${w}px`).toBeLessThanOrEqual(0);
     const squeeze = await page.locator('#mnav .mnav-in').evaluate((el) => el.scrollWidth - el.clientWidth);
     expect(squeeze, `nav row overflows at ${w}px`).toBeLessThanOrEqual(0);
   }
+  // Under 1024px Contribute moves into the menu sheet.
+  await page.setViewportSize({ width: 900, height: 800 });
+  await expect(navGive).toBeHidden();
   await page.setViewportSize({ width: 375, height: 800 });
   await expect(navGive).toBeHidden();
   await page.locator('#mnav .burger').click();

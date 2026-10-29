@@ -3,6 +3,24 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.5.2] — 2026-10-29
+
+Shares look like Gurbani Soul everywhere, and gurbanisoul.com gets a calmer navigation and a more polished landing page. It ships on the website, the API and the iPhone app together. The dataset (1.3.0) and the scripture are unchanged.
+
+### Added
+- **Share cards (web).** A new card renderer shapes Gurmukhi properly (HarfBuzz + resvg, replacing satori), and every marketing and Knowledge Base page has its own 1200×630 card at `/og/v2/…`, with the full link-preview tag set (`og:image` size, type and alt; `twitter:image:alt`; descriptions short enough for WhatsApp and iMessage) (#326).
+- **A share page for every Ang** at `/ang/N` (1,430 pages, `noindex`): each unfurls as its own card, which shows the Ang's opening line verbatim from the database with "Sri Guru Granth Sahib Ji · Ang N", and then opens the Reader at that verse. A build gate checks every card against the database (#327).
+- **Share as image** in the verse sheet makes a 1080×1080 card in the browser; **Share this Ang** in the Reader options (#327).
+- **docs.gurbanisoul.com** cards are drawn by the same renderer and share the layout (#328).
+
+### Changed
+- **Top navigation (gurbanisoul.com):** one aligned line with a single gold "Get the app" action. Contribute is an outlined button with a small heart, and Privacy moves to the menu sheet and the footer. On scroll the bar becomes a frosted capsule with a reading-progress line, and the phone menu is an accessible sheet (#325).
+- **Landing page:** the hero is larger, with chips for the fine print, and the proof numerals count up. Sections reveal and drift gently, and every motion is off under Reduce Motion. The Gurmukhi verse never moves (#325).
+
+### Changed (iOS, gurbani-soul-ios #115)
+- **One share card** for verses and voices: the app mark, the verbatim verse in ink, the gold rule, and "Sri Guru Granth Sahib Ji · Ang N". The English layer is labelled "English translation".
+- **Shared verses carry a link** to `gurbanisoul.com/ang/N`, so they unfurl as that Ang's card. The share sheet shows a header with the citation. The Reader gains Share this Ang, and "Share Gurbani Soul" sends gurbanisoul.com.
+
 ## [1.5.1] — 2026-10-28
 
 The G3 scholarly review of dataset 1.3.0 is complete. Kanwaljit Singh ruled on every item; his reply was relayed from WhatsApp by the owner and recorded as relayed, with the owner's signature (sggs-data `validation/attribution-g3-review/SIGN-OFF.md`). It ships on the website, the API and the iPhone app together.

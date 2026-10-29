@@ -46,11 +46,14 @@ test('landing renders the brand, the verse and the CTAs @smoke', async ({ page }
   expect(await page.locator('picture source[type="image/avif"]').count()).toBeGreaterThanOrEqual(1);
   await expect(page.locator('.hero-media img')).toHaveAttribute('alt', /Harmandir Sahib/);
 
-  // primary nav is now real routes (Features, The watch, Privacy, Knowledge Base, Support, Learn)
+  // primary nav is real routes (Features, The watch, Learn, Knowledge Base, Support). Privacy left the
+  // top bar (2026-10-29) but stays one tap away: in the menu sheet and the footer on every page.
   expect(await page.locator('nav[aria-label="Primary"] a').count()).toBeGreaterThanOrEqual(5);
-  for (const href of ['/features', '/watch', '/privacy', '/search', '/support', '/learn']) {
+  for (const href of ['/features', '/watch', '/search', '/support', '/learn']) {
     await expect(page.locator(`nav[aria-label="Primary"] a[href="${href}"]`)).toHaveCount(1);
   }
+  await expect(page.locator('#mobileMenu a[href="/privacy"]')).toHaveCount(1);
+  await expect(page.locator('footer nav[aria-label="Footer"] a[href="/privacy"]')).toHaveCount(1);
 
   // v2 product story: numbered chapters, at least one photo band, a five-fact proof strip
   expect(await page.locator('[data-chapter]').count()).toBeGreaterThanOrEqual(6);
@@ -143,7 +146,7 @@ test.describe('light-first default', () => {
 });
 
 test('mobile menu opens, closes on Esc, and restores focus', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'mobile', 'hamburger only shows under 840px');
+  test.skip(testInfo.project.name !== 'mobile', 'the menu button shows under 1024px');
   await page.goto('/');
   const burger = page.locator('.burger');
   await expect(burger).toBeVisible();
