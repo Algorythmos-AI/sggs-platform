@@ -8,12 +8,14 @@ import { $, esc } from './core';
 import { togglePin, isPinned, MAX_PINS } from './store';
 import { themeName } from './themegroups';
 import { overlayOpened, overlayClosed } from './overlay';
+import { verseImage, shareImage } from './shareimage';
 
 type Verse = { id: number; ang: number; cid: number; gm: string };
 let cur: Verse | null = null;
 const el = (id: string) => document.getElementById(id);
 const cite = (v: Verse) => `Sri Guru Granth Sahib Ji · Ang ${v.ang}`;
-const link = (v: Verse) => `${location.origin}/reader?ang=${v.ang}&line=${v.id}`;
+// /ang/N unfurls as Ang N's own card in any chat (src/pages/ang); it opens the Reader at the line
+const link = (v: Verse) => `${location.origin}/ang/${v.ang}?line=${v.id}`;
 const asText = (v: Verse) => `${v.gm}\n— ${cite(v)}`;
 
 function say(msg: string) {                                    // the shared toast (core's #toast)
@@ -98,4 +100,15 @@ el('vsShare')?.addEventListener('click', () => {
   if (!cur) return;
   const v = cur;
   navigator.share({ text: asText(v), url: link(v) }).then(closeVerse, () => { /* dismissed: stay */ });
+});
+el('vsImage')?.addEventListener('click', async (e) => {
+  if (!cur) return;
+  const v = cur, b = e.currentTarget as HTMLButtonElement;
+  b.disabled = true;
+  try {
+    const r = await shareImage(await verseImage(v.gm, v.ang), `gurbani-soul-ang-${v.ang}.png`, asText(v));
+    if (r === 'saved') say('Image saved, with its Ang');
+    if (r !== 'dismissed') closeVerse();
+  } catch { say('Could not make the image in this browser'); }
+  finally { b.disabled = false; }
 });

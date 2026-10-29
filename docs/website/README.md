@@ -128,6 +128,28 @@ Cards are byte-deterministic and each ≤ 100 KB. Gates: `ShareCardMeta` (webapp
 built page's tag set and copy limits and every card's PNG size and weight; `e2e/share-meta.spec.ts`
 checks the same through the server. `public/og.jpg` remains a hero crop for any fixed-image use.
 
+### Sharing a verse or an Ang (`/ang/N`)
+
+Every share from the Knowledge Base (and, from the next app release, from the iOS app) links to
+`/ang/N` (`?line=ID` for a verse). `frontend/src/pages/ang/[n].astro` builds one small page per
+Ang: its own title, description and card (`/og/v2/ang/N.png`: the numeral, the raag and the Ang's
+opening line, verbatim from `frontend/src/generated/ang-cards.json`, which
+`scripts/gen_landing_verse.py` writes from the database). A crawler reads the tags; a person is
+sent on to `/reader?ang=N&line=ID` by a script (never a meta refresh, which some crawlers follow).
+The pages are `noindex, follow` and stay out of `routes.ts` and the sitemap.
+
+The 1430 Ang cards (~60 MB) are built on every deploy and never committed:
+`scripts/sync-to-webapp.mjs` leaves `og/v2/ang/` out of `webapp/static`, and
+`scripts/check-share-cards.mjs` (part of `npm run build`) fails the build if any card or page is
+missing, the wrong size or over budget (100 KB for page cards, 60 KB for Ang cards). Gates:
+`AngSharePages` (card data equals the database's opening lines; every page's tags) and
+`e2e/verse-actions.spec.ts`.
+
+In the verse sheet, **Share** sends the verbatim line, its citation and the `/ang/N?line=ID` link;
+**Share as image** draws a 1080×1080 card in the browser (`src/scripts/shareimage.ts`, the page's
+own Sant Lipi, so the browser shapes the Gurmukhi) and shares it where the browser can share
+files, otherwise saves it. The Reader's options sheet has **Share this Ang**.
+
 ### Analytics
 
 `frontend/src/components/Analytics.astro` is an `is:inline` loader that injects

@@ -716,13 +716,14 @@ def _norm_url(u):
 
 
 def _built_pages():
-    """Yield (route, path) for every built *.html except 404.html.
+    """Yield (route, path) for every built *.html except 404.html and the /ang/N share pages.
 
-    index.html -> "/"; <dir>/index.html -> "/<dir>"; any other x.html -> "/x".
+    index.html -> "/"; <dir>/index.html -> "/<dir>"; any other x.html -> "/x". The 1430 /ang/N
+    pages are share hand-offs (noindex, not in the sitemap) with their own gate, AngSharePages.
     """
     for p in sorted(STATIC.rglob("*.html")):
         rel = p.relative_to(STATIC)
-        if rel.name == "404.html":
+        if rel.name == "404.html" or rel.parts[0] == "ang":
             continue
         if rel.name == "index.html":
             d = rel.parent.as_posix()
@@ -843,6 +844,58 @@ class ShareCardMeta(unittest.TestCase):
                 self.assertLessEqual(len(val), limit, f"share.ts {field} over {limit}: {val}")
         self.assertNotRegex(re.sub(r'ogTitle: "[^"]*"', "", src), "[\u0A00-\u0A7F]",
                             "share.ts card copy holds Gurmukhi: verses on cards come only from the DB")
+
+
+class AngSharePages(unittest.TestCase):
+    """Every Ang has a /ang/N share page that unfurls as that Ang's own card and hands a person on
+    to the Reader. The cards themselves are built on deploy (frontend/scripts/check-share-cards.mjs
+    checks them); the data behind them is checked against the database here.
+    """
+
+    CARDS = ROOT / "frontend" / "src" / "generated" / "ang-cards.json"
+
+    def setUp(self):
+        if _unbuilt():
+            self.skipTest("webapp/static not built (cd frontend && npm run build:deploy)")
+
+    def test_ang_card_data_is_the_database_verbatim(self):
+        data = json.loads(self.CARDS.read_text(encoding="utf-8"))
+        lock = json.loads((ROOT / "dataset.lock.json").read_text(encoding="utf-8"))
+        self.assertEqual(data["_db_sha256"], lock["database"]["sha256"],
+                         "ang-cards.json was generated from another dataset: run scripts/gen_landing_verse.py")
+        if not DB.exists():
+            self.skipTest("db/sggs.sqlite not installed (make dataset)")
+        conn = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        try:
+            rows = dict(((str(a), (i, g)) for a, i, g in conn.execute(
+                "SELECT ang, id, gurmukhi FROM lines WHERE id IN (SELECT min(id) FROM lines GROUP BY ang)")))
+        finally:
+            conn.close()
+        self.assertEqual(set(data["angs"]), set(rows), "ang-cards.json does not cover every Ang")
+        for n, a in data["angs"].items():
+            self.assertEqual((a["line"], a["gurmukhi"]), rows[n], f"Ang {n}: card line is not the DB's opening line")
+
+    def test_every_ang_has_a_share_page(self):
+        angs = json.loads(self.CARDS.read_text(encoding="utf-8"))["angs"]
+        for n in angs:
+            path = STATIC / "ang" / n / "index.html"
+            self.assertTrue(path.is_file(), f"/ang/{n} not built")
+            html = path.read_text(encoding="utf-8")
+            m = ShareCardMeta._meta(html)
+            for key in ShareCardMeta.REQUIRED:
+                self.assertEqual(len(m.get(key, [])), 1, f"/ang/{n}: expected exactly one {key}")
+            self.assertEqual(m["og:image"][0], f"{SITE}/og/v2/ang/{n}.png", f"/ang/{n}")
+            self.assertEqual(m["og:url"][0], f"{SITE}/ang/{n}", f"/ang/{n}")
+            self.assertEqual(m["og:type"][0], "article", f"/ang/{n}")
+            self.assertIn(f"Ang {n}", m["og:title"][0])
+            self.assertLessEqual(len(m["og:description"][0]), 125, f"/ang/{n}")
+            self.assertIn('<meta name="robots" content="noindex, follow"', html, f"/ang/{n} must be noindex")
+            self.assertIn(f'href="/reader?ang={n}"', html, f"/ang/{n}: no link on to the Reader")
+            self.assertNotRegex(html, r'http-equiv="refresh"', f"/ang/{n}: a meta refresh would be followed by crawlers")
+
+    def test_ang_cards_stay_out_of_git(self):
+        self.assertFalse((STATIC / "og" / "v2" / "ang").exists(),
+                         "per-Ang cards are built on deploy; sync-to-webapp.mjs must leave them out")
 
 
 class SitemapInvariants(unittest.TestCase):

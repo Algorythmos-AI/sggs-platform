@@ -13,6 +13,7 @@ export interface Props {
   description: string;
   path: string;          // root-relative, e.g. "/" or "/search"
   ogImage?: string;      // root-relative or absolute; defaults to the path's OG card
+  imageAlt?: string;     // the card's alt text when ogImage is a page's own card
   type?: string;         // og:type, default "website"
   // Browser-chrome colour: always ONE meta that follows the PAGE theme, never the OS, so a
   // dark-OS visitor never gets dark browser chrome over a light page (or the reverse).
@@ -22,7 +23,7 @@ export interface Props {
   // paper and rewritten by scripts/theme.ts on toggle.
   themeColor?: "page" | "light";
 }
-const { title, description, path, ogImage, type = "website", themeColor = "page" } = Astro.props;
+const { title, description, path, ogImage, imageAlt: ownAlt, type = "website", themeColor = "page" } = Astro.props;
 
 const canonical = new URL(path, SITE_URL).href;
 const slug = ogForPath(path);
@@ -35,7 +36,7 @@ const share = SHARE[slug] && !ogImage ? SHARE[slug] : undefined;
 const socialTitle = share?.ogTitle ?? title;
 const social = share?.social ?? description;
 // Alt text for the card: what the image says, for screen readers in every client that reads it.
-const imageAlt = share ? [share.eyebrow, share.title].filter(Boolean).join(": ") + " (Gurbani Soul)" : `${socialTitle} (Gurbani Soul)`;
+const imageAlt = ownAlt ?? (share ? [share.eyebrow, share.title].filter(Boolean).join(": ") + " (Gurbani Soul)" : `${socialTitle} (Gurbani Soul)`);
 const kbChrome = kbThemes.themes.find((t) => t.id === kbThemes.default)!.chrome.light;
 ---
 <link rel="canonical" href={canonical} />
