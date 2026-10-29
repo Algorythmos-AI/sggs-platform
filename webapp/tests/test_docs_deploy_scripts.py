@@ -102,7 +102,7 @@ class _Site(http.server.BaseHTTPRequestHandler):
             "/pagefind/pagefind-entry.json": ("application/json", b'{"version":"1.3.0"}'),
             "/api/health": ("application/json", b'{"ok":true}'),
             "/api/meta": ("application/json", b'{"version":"1.3.10"}'),
-            "/og/index.png": ("image/png", b"\x89PNG\r\n\x1a\n...."),
+            "/og/v2/index.png": ("image/png", b"\x89PNG\r\n\x1a\n...."),
             "/posters/01-system-landscape.svg": ("image/svg+xml", b"<svg xmlns='http://www.w3.org/2000/svg'/>"),
         }
         if p in pages:
