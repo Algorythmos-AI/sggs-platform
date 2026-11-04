@@ -1401,7 +1401,7 @@ class NoBuildOutputTracked(unittest.TestCase):
     #334, so this reads git's index rather than trusting .gitignore.
     """
 
-    BUILD_DIRS = ("frontend/dist/", "frontend/dist-pseudo/", "frontend/.vercel/", "frontend/node_modules/")
+    BUILD_DIRS = ("frontend/dist/", "frontend/dist-pseudo/", "frontend/dist-preview/", "frontend/.vercel/", "frontend/node_modules/")
 
     def test_no_build_output_in_git(self):
         import subprocess
@@ -1414,7 +1414,7 @@ class NoBuildOutputTracked(unittest.TestCase):
 
     def test_build_dirs_are_ignored(self):
         ignore = (FRONTEND / ".gitignore").read_text(encoding="utf-8").split()
-        for d in ("dist/", "dist-pseudo/"):
+        for d in ("dist/", "dist-pseudo/", "dist-preview/"):
             self.assertIn(d, ignore, f"frontend/.gitignore must list {d}")
 
 

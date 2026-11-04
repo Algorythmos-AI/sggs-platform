@@ -20,7 +20,20 @@ export interface LocaleInfo {
 export const I18N = config;
 export const LOCALES = config.locales as Record<Locale, LocaleInfo>;
 export const DEFAULT_LOCALE = config.default as Locale;
-export const ENABLED_LOCALES = config.enabled as Locale[];
+// A preview build (PUBLIC_I18N_PREVIEW=all, never deployed to production) also builds every drafted
+// language that has a catalog, so a reviewer can read it on real pages before it is switched on.
+const PREVIEW = import.meta.env?.PUBLIC_I18N_PREVIEW === "all";
+// import.meta.glob exists only inside a Vite build; scripts that import this module under plain Node
+// (the Playwright specs) get no drafts, which only matters to a preview build.
+let drafted: string[] = [];
+try {
+  drafted = Object.keys(import.meta.glob("./messages/*.json"))
+    .filter((p) => !p.endsWith(".lock.json"))
+    .map((p) => p.replace(/^.*\/|\.json$/g, ""));
+} catch {}
+export const ENABLED_LOCALES = (PREVIEW
+  ? (Object.keys(config.locales) as Locale[]).filter((l) => drafted.includes(l))
+  : config.enabled) as Locale[];
 
 export const isLocale = (s: string | undefined): s is Locale => isLocaleIn(config, s);
 

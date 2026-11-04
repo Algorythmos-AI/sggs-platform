@@ -552,3 +552,6 @@ html.js-motion .reveal.in .draw { transform: none; transition: transform .6s cub
 
 /* KB mock: the decorative query field is a span (no form control, nothing to label). */
 .kbmock .search .q { flex: 1; font-size: 15px; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft); }
+
+/* "In English": an article that is not yet translated, linked from another language's page. */
+.card-lang { display: inline-block; margin: 0 0 8px; padding: 2px 9px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0; color: var(--ink-soft); }

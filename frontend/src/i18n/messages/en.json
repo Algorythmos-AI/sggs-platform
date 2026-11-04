@@ -56,7 +56,8 @@
   "legal": {
     "onThisPage": "On this page",
     "contents": "Contents",
-    "lastUpdated": "Last updated {date}"
+    "lastUpdated": "Last updated {date}",
+    "englishPrevails": "This translation is provided for convenience; the English version prevails. <link1>Read it in English</link1>."
   },
   "home": {
     "title": "Gurbani Soul — Sri Guru Granth Sahib Ji, verbatim & offline",
@@ -653,6 +654,7 @@
     "updated": "· updated {date}",
     "moreArticles": "More articles",
     "backToLearn": "← Back to Learn",
-    "titleSuffix": "{title} — Gurbani Soul"
+    "titleSuffix": "{title} — Gurbani Soul",
+    "inEnglish": "In English"
   }
 }

@@ -10,6 +10,10 @@ const TRANSLATED: Partial<Record<Locale, readonly string[]>> = {};
 export const articleLocales = (slug: string): Locale[] =>
   ENABLED_LOCALES.filter((l) => l === DEFAULT_LOCALE || TRANSLATED[l]?.includes(slug));
 
+// The language a link to the article opens in, from a page in `lang`.
+export const articleLangFor = (lang: Locale, slug: string): Locale =>
+  articleLocales(slug).includes(lang) ? lang : DEFAULT_LOCALE;
+
 // The article's URL from a page in `lang`: its own language when it exists there, else English.
 export const learnHref = (lang: Locale, slug: string): string =>
   localizeHref(`/learn/${slug}`, articleLocales(slug).includes(lang) ? lang : DEFAULT_LOCALE);

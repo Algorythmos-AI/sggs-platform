@@ -20,6 +20,10 @@ case. No hype, no exclamation marks, no comparisons that borrow another traditio
   tax-deductible. In Punjabi do not use `ਦਸਵੰਧ` or `ਦਾਨ`, which carry a religious duty the page must not claim.
 - **"Gurbani Soul" stays as written** (Latin letters) in every language unless the owner decides
   otherwise. Algorythmos, App Store, iPhone, iPad, Siri, Spotlight and Stripe are not translated.
+- **The app's own words stay English.** The app is English-only, so its menu labels, buttons and Siri
+  phrases are quoted as they appear in it: "More → About", « Use my location », « Today’s Hukam ».
+  Say once, where it matters, that the app (or the Knowledge Base, Stripe, the newsletter) is in English.
+  iOS's own settings are quoted as iOS shows them in the reader's language.
 - **Keep placeholders and tags exactly** (`{angs}`, `<link1>…</link1>`); move them where the sentence
   needs them.
 - **Length.** Navigation labels and buttons should stay close to the English length; the review sheet

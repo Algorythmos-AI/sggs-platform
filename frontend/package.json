@@ -14,6 +14,7 @@
     "i18n:redirects": "node scripts/gen-i18n-redirects.mjs",
     "i18n:status": "node scripts/i18n-status.mjs",
     "build:pseudo": "PUBLIC_I18N_PSEUDO=1 astro build --outDir dist-pseudo",
+    "build:preview": "PUBLIC_I18N_PREVIEW=all astro build --outDir dist-preview",
     "test:e2e": "playwright test",
     "shots": "node scripts/shots.mjs"
   },

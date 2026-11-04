@@ -11,7 +11,7 @@ import { useT } from "../../../i18n/t";
 import { fmtDate as fmtDateIn } from "../../../i18n/format";
 import { LOCALES, siteLanguages } from "../../../i18n/locales";
 import { localizeHref } from "../../../i18n/paths";
-import { learnHref } from "../../../i18n/content";
+import { learnHref, articleLangFor } from "../../../i18n/content";
 
 export const getStaticPaths = localeStaticPaths;
 const lang = Astro.params.lang as Locale;
@@ -63,12 +63,14 @@ const jsonLd = {
       <ul class="learn-list">
         {articles.map((a) => (
           <li class="learn-card">
-            <a href={learnHref(lang, a.id)}>
+            <a href={learnHref(lang, a.id)} hreflang={articleLangFor(lang, a.id) !== lang ? "en" : undefined}
+               lang={articleLangFor(lang, a.id) !== lang ? "en" : undefined}>
+              {articleLangFor(lang, a.id) !== lang && <span class="card-lang" lang={LOCALES[lang].htmlLang}>{t("learnArticle.inEnglish")}</span>}
               <h2>{a.data.title}</h2>
               <p class="card-desc">{a.data.description}</p>
               <p class="card-meta">
                 <time datetime={a.data.pubDate.toISOString().slice(0, 10)}>{fmtDate(a.data.pubDate)}</time>
-                <span class="tags">{a.data.tags.map((t) => <span class="tag">{t}</span>)}</span>
+                <span class="tags">{a.data.tags.map((tag) => <span class="tag">{tag}</span>)}</span>
               </p>
             </a>
           </li>

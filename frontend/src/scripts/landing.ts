@@ -278,7 +278,9 @@ function wireHeroDrift() {
 function wireCountUp() {
   const els = Array.from(document.querySelectorAll<HTMLElement>("[data-count]"));
   if (!els.length || !motionOK()) return;
-  const fmt = new Intl.NumberFormat("en-US");
+  // The page's own language formats the figures as they count ("1,430" / "1 430"); the server
+  // rendered the final figure the same way.
+  const fmt = new Intl.NumberFormat(document.documentElement.lang === "en" ? "en-GB" : document.documentElement.lang || "en-GB");
   const raf: number[] = [];
   const run = (el: HTMLElement) => {
     const to = Number(el.dataset.count);

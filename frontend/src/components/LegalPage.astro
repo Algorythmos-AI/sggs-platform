@@ -13,8 +13,8 @@
 // component only frames it. Adopted by /privacy and /support (v1.3.5).
 import MarketingNav from "./MarketingNav.astro";
 import MarketingFooter from "./MarketingFooter.astro";
-import { localeOf } from "../i18n/paths";
-import { useT } from "../i18n/t";
+import { localeOf, localizeHref, stripLocale } from "../i18n/paths";
+import { useT, richMap } from "../i18n/t";
 
 interface Props {
   title: string;
@@ -25,7 +25,10 @@ interface Props {
   updated?: string;
 }
 const { title, eyebrow, lede, id, toc, updated } = Astro.props;
-const { t } = useT(localeOf(Astro.url.pathname));
+const lang = localeOf(Astro.url.pathname);
+const { t, rich } = useT(lang);
+// A translated policy says the English one governs, and links to it (docs/website/translation.md).
+const englishHref = localizeHref(stripLocale(Astro.url.pathname), "en");
 ---
 <MarketingNav overHero={false} />
 
@@ -36,6 +39,7 @@ const { t } = useT(localeOf(Astro.url.pathname));
     <hr class="gold-hair" aria-hidden="true" />
     {lede && <p class="body-lg legal-lede">{lede}</p>}
     {updated && <p class="detail legal-updated">{t("legal.lastUpdated", { date: updated })}</p>}
+    {lang !== "en" && <p class="detail legal-prevails">{richMap(rich("legal.englishPrevails"), { link1: (x: string) => <a href={englishHref} hreflang="en" lang="en">{x}</a> })}</p>}
   </div>
 </header>
 
