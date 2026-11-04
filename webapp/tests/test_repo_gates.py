@@ -463,6 +463,13 @@ class WebThemesAreGeneratedAndReadable(unittest.TestCase):
         self.assertEqual(bad, [], f"text set in the companion colour in: {bad}")
 
 
+def _strings(node):
+    """Every string in a nested message catalog section."""
+    if isinstance(node, str):
+        return [node]
+    return [x for v in (node.values() if isinstance(node, dict) else node) for x in _strings(v)]
+
+
 class StoredKeysAreDisclosed(unittest.TestCase):
     """Every key the site keeps in the browser is named on the privacy page.
 
@@ -502,7 +509,10 @@ class StoredKeysAreDisclosed(unittest.TestCase):
         self.assertGreaterEqual(len(found), 10, "the scan found too few keys to be working")
         unknown = sorted(found - set(self.DISCLOSED))
         self.assertEqual(unknown, [], f"new browser-storage keys: {unknown} — disclose them on the privacy page and add them here")
-        policy = (LANG_PAGES / "privacy.astro").read_text(encoding="utf-8")
+        # The policy's words live in its page and, since i18n PR 2d, in the English catalog's
+        # "privacy" section (frontend/src/i18n/messages/en.json): read both.
+        messages = json.loads((FRONTEND / "src" / "i18n" / "messages" / "en.json").read_text(encoding="utf-8"))
+        policy = (LANG_PAGES / "privacy.astro").read_text(encoding="utf-8") + "\n" + "\n".join(_strings(messages.get("privacy", {})))
         missing = sorted(k for k in found if self.DISCLOSED[k] and self.DISCLOSED[k] not in policy)
         self.assertEqual(missing, [], f"keys the privacy page does not name: {missing}")
 

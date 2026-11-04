@@ -8,9 +8,11 @@ const tag = (l: Locale) => LOCALES[l].intl;
 export const fmtNumber = (l: Locale, n: number, opts: Intl.NumberFormatOptions = {}) =>
   new Intl.NumberFormat(tag(l), opts).format(n);
 
-// Whole Australian dollars: "A$5" (en-GB), "5 $AU" (fr-FR).
-export const fmtAud = (l: Locale, n: number) =>
-  new Intl.NumberFormat(tag(l), { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(n);
+// Australian dollars: "A$5", "A$0.50" (en-GB); "5 $AU", "0,50 $AU" (fr-FR). Cents only when present.
+export const fmtAud = (l: Locale, n: number) => {
+  const cents = Number.isInteger(n) ? 0 : 2;
+  return new Intl.NumberFormat(tag(l), { style: "currency", currency: "AUD", minimumFractionDigits: cents, maximumFractionDigits: cents }).format(n);
+};
 
 export const fmtDate = (l: Locale, d: Date, opts: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" }) =>
   new Intl.DateTimeFormat(tag(l), { timeZone: "UTC", ...opts }).format(d);

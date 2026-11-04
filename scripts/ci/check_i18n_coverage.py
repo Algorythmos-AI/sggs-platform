@@ -45,6 +45,9 @@ PAGES = {
     "en/index.html": [("main", "id", "main"), ("title", None, None)],
     "en/features/index.html": [("main", "id", "main"), ("title", None, None)],
     "en/watch/index.html": [("main", "id", "main"), ("title", None, None)],
+    "en/support/index.html": [("main", "id", "main"), ("title", None, None)],
+    "en/privacy/index.html": [("main", "id", "main"), ("title", None, None)],
+    "en/contribute/index.html": [("main", "id", "main"), ("title", None, None)],
 }
 ATTRS = ("aria-label", "alt", "title", "placeholder")
 ALLOWED = {"Gurbani Soul"}
