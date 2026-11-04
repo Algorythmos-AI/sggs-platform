@@ -1,0 +1,61 @@
+{
+  "shell": {
+    "skipToContent": "Skip to content"
+  },
+  "nav": {
+    "primaryLabel": "Primary",
+    "menuLabel": "Menu",
+    "features": "Features",
+    "watch": "The watch",
+    "learn": "Learn",
+    "knowledgeBase": "Knowledge Base",
+    "support": "Support",
+    "privacy": "Privacy",
+    "contribute": "Contribute",
+    "theme": "Theme",
+    "getApp": "Get the app",
+    "getAppLabel": "Get Gurbani Soul on the App Store",
+    "comingSoon": "Coming soon",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "footer": {
+    "tagline": "A quiet, exact companion to Sri Guru Granth Sahib Ji.",
+    "downloadOnStore": "Download on the App Store",
+    "blurb": "Built by Algorythmos · Sri Guru Granth Sahib Ji is shown verbatim from the source edition, cited by Ang.",
+    "give": "Gurbani Soul is free and ad-free. <link>Contribute</link>",
+    "navLabel": "Footer",
+    "product": "Product",
+    "learn": "Learn",
+    "allArticles": "All articles",
+    "rss": "RSS",
+    "support": "Support",
+    "reportError": "Report a text error",
+    "legal": "Legal",
+    "fontLicences": "Font licences",
+    "santLipiLicence": "Sant Lipi (SIL OFL)",
+    "serifLicence": "Source Serif 4 (SIL OFL)",
+    "copyright": "© {year} Algorythmos Pty Ltd · Built by Algorythmos",
+    "artwork": "Artwork: {what}, made for Gurbani Soul{who, select, Algorythmos {} other { by {who}}}.",
+    "photographs": "Photographs: <list></list> (Unsplash License).",
+    "photoCredit": "<link>{who}</link> / Unsplash",
+    "type": "Type: Sant Lipi and Source Serif 4 — SIL Open Font License."
+  },
+  "contributeBand": {
+    "eyebrow": "Free for everyone",
+    "title": "Kept free by the sangat.",
+    "body": "No ads, no paid tier, nothing behind a paywall. If Gurbani Soul serves your study, you can help cover hosting, scholarly review and licensing. It is optional and unlocks nothing.",
+    "cta": "Contribute",
+    "fine": "From {amount} · once or monthly"
+  },
+  "breadcrumbs": {
+    "label": "Breadcrumb",
+    "home": "Home",
+    "learn": "Learn"
+  },
+  "legal": {
+    "onThisPage": "On this page",
+    "contents": "Contents",
+    "lastUpdated": "Last updated {date}"
+  }
+}

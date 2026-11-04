@@ -13,6 +13,8 @@
 // component only frames it. Adopted by /privacy and /support (v1.3.5).
 import MarketingNav from "./MarketingNav.astro";
 import MarketingFooter from "./MarketingFooter.astro";
+import { localeOf } from "../i18n/paths";
+import { useT } from "../i18n/t";
 
 interface Props {
   title: string;
@@ -23,6 +25,7 @@ interface Props {
   updated?: string;
 }
 const { title, eyebrow, lede, id, toc, updated } = Astro.props;
+const { t } = useT(localeOf(Astro.url.pathname));
 ---
 <MarketingNav overHero={false} />
 
@@ -32,14 +35,14 @@ const { title, eyebrow, lede, id, toc, updated } = Astro.props;
     <h1>{title}</h1>
     <hr class="gold-hair" aria-hidden="true" />
     {lede && <p class="body-lg legal-lede">{lede}</p>}
-    {updated && <p class="detail legal-updated">Last updated {updated}</p>}
+    {updated && <p class="detail legal-updated">{t("legal.lastUpdated", { date: updated })}</p>}
   </div>
 </header>
 
 <div class="sec-thin legal-body"><div class="wrap legal-grid">
   {toc.length > 0 && (
-    <nav class="legal-toc" aria-label="On this page">
-      <p class="legal-toc-h">Contents</p>
+    <nav class="legal-toc" aria-label={t("legal.onThisPage")}>
+      <p class="legal-toc-h">{t("legal.contents")}</p>
       <ul>
         {toc.map((t) => <li><a href={`#${t.id}`}>{t.label}</a></li>)}
       </ul>

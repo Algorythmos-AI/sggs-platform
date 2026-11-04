@@ -1324,6 +1324,31 @@ class AppStoreSwitch(unittest.TestCase):
         self.assertGreaterEqual(len(users), 3, f"expected Seo, MarketingNav and the landing to use the switch, got {users}")
 
 
+class NoBuildOutputTracked(unittest.TestCase):
+    """Build output is never committed except the deliberate webapp/static copy.
+
+    frontend/dist, the pseudo-locale build frontend/dist-pseudo and frontend/.vercel are rebuilt on
+    every run. A `git add -A` after a build once committed 3,172 pseudo-locale pages (67 MB) with
+    #334, so this reads git's index rather than trusting .gitignore.
+    """
+
+    BUILD_DIRS = ("frontend/dist/", "frontend/dist-pseudo/", "frontend/.vercel/", "frontend/node_modules/")
+
+    def test_no_build_output_in_git(self):
+        import subprocess
+        try:
+            out = subprocess.run(["git", "-C", str(ROOT), "ls-files", "--", *self.BUILD_DIRS],
+                                 capture_output=True, text=True, check=True).stdout.split()
+        except (OSError, subprocess.CalledProcessError):
+            self.skipTest("not a git checkout")
+        self.assertEqual(out[:5], [], f"{len(out)} build-output file(s) tracked, e.g. {out[:5]}: git rm -r --cached them")
+
+    def test_build_dirs_are_ignored(self):
+        ignore = (FRONTEND / ".gitignore").read_text(encoding="utf-8").split()
+        for d in ("dist/", "dist-pseudo/"):
+            self.assertIn(d, ignore, f"frontend/.gitignore must list {d}")
+
+
 class NoSecretsInFrontend(unittest.TestCase):
     """No obvious secrets in tracked frontend source. (The newsletter form URL is a build-time
     env var, `import.meta.env.PUBLIC_NEWSLETTER_FORM_URL`; that its VALUE — a buttondown.com URL —

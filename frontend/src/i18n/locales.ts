@@ -12,6 +12,7 @@ export type Locale = "en" | "pa" | "fr";
 
 export interface LocaleInfo {
   htmlLang: string;   // <html lang>
+  intl: string;       // the Intl locale for numbers and dates (en-GB: "26 October 2026")
   ogLocale: string;   // og:locale
   name: string;       // the language's own name, in its own script
 }

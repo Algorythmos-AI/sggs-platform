@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 import {
   isLocalizedPath, localizeHref, localeOf, stripLocale, configProblems, redirects,
 } from "../src/i18n/core.js";
+import { createFormatter } from "../src/i18n/format-message.js";
+import { pseudo } from "../src/i18n/pseudo.js";
 
 const cfg = JSON.parse(readFileSync(fileURLToPath(new URL("../src/i18n/locales.json", import.meta.url)), "utf8"));
 let pass = 0, fail = 0;
@@ -71,6 +73,33 @@ eq("en-US,fr;q=0.8 not fr", re("fr").test("en-US,fr;q=0.8"), false);
 eq("fy (Frisian) not fr", re("fr").test("fy-NL"), false);
 eq("pa-IN → pa", re("pa").test("pa-IN,pa;q=0.9,en;q=0.8"), true);
 eq("pa-Guru-IN → pa", re("pa").test("pa-Guru-IN"), true);
+
+console.log("messages");
+const en = JSON.parse(readFileSync(fileURLToPath(new URL("../src/i18n/messages/en.json", import.meta.url)), "utf8"));
+const flat = (o, pre = "") => Object.entries(o).flatMap(([k, v]) => (typeof v === "string" ? [[pre + k, v]] : flat(v, `${pre}${k}.`)));
+const f = createFormatter(en, "en-GB");
+const throws = (fn) => { try { fn(); return false; } catch { return true; } };
+let parsed = 0, roundTrip = 0;
+for (const [key, src] of flat(en)) {
+  const hasArgs = /[{<]/.test(src);
+  if (!hasArgs) { if (f.t(key) === src) roundTrip++; else eq(`"${key}" renders as written`, f.t(key), src); }
+  else if (throws(() => f.rich(key, { year: "2026", amount: "A$5", what: "x", who: "y", date: "1 May 2026" }))) eq(`"${key}" parses`, false, true);
+  parsed++;
+}
+eq("every source message parses", parsed > 0, true);
+eq("plain messages render exactly as written (ICU apostrophes safe)", roundTrip, flat(en).filter(([, v]) => !/[{<]/.test(v)).length);
+eq("a missing key fails the build", throws(() => f.t("nav.nope")), true);
+eq("a tag message refuses plain t()", throws(() => f.t("footer.give")), true);
+eq("rich parts", f.rich("footer.give"), ["Gurbani Soul is free and ad-free. ", { tag: "link", text: "Contribute" }]);
+eq("values are never markup", f.rich("footer.photoCredit", { who: "<b>x</b>" }), [{ tag: "link", text: "<b>x</b>" }, " / Unsplash"]);
+const nested = createFormatter({ m: "<a>x <b>y</b></a>" }, "en-GB");
+eq("nested tags are refused", throws(() => nested.rich("m")), true);
+const plural = createFormatter({ n: "{n, plural, one {# Ang} other {# Angs}}" }, "fr-FR");
+eq("French plural: 0 is singular", plural.t("n", { n: 0 }), "0 Ang");
+eq("pseudo marks and lengthens", /^⟦.+·+⟧$/.test(pseudo("See every feature")), true);
+eq("pseudo leaves blank text alone", pseudo("  "), "  ");
+const p = createFormatter(en, "en-GB", { pseudo: true });
+eq("pseudo reaches rich text", p.rich("footer.give").every((x) => (typeof x === "string" ? x : x.text).startsWith("⟦")), true);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

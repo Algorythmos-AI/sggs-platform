@@ -10,9 +10,11 @@ import { SUPPORT_EMAIL, IMAGE_CREDITS, APP_STORE_URL, APP_STORE_LIVE } from "../
 import { CONTRIBUTE_MODE } from "../contribute";
 import { LEARN_SLUGS } from "../routes";
 import { localeOf, localizeHref } from "../i18n/paths";
+import { useT } from "../i18n/t";
 
 const lang = localeOf(Astro.url.pathname);
 const L = (href: string) => localizeHref(href, lang);
+const { t, rich } = useT(lang);
 
 // The first three Learn articles, in the curated LEARN_SLUGS order (drafts excluded).
 const order = new Map(LEARN_SLUGS.map((s, i) => [s, i]));
@@ -30,27 +32,27 @@ const photos = IMAGE_CREDITS.filter((c) => c.url);
 
 const columns: { title: string; links: { href: string; label: string }[] }[] = [
   {
-    title: "Product",
+    title: t("footer.product"),
     links: [
-      { href: L("/features"), label: "Features" },
-      { href: L("/watch"), label: "The watch" },
-      { href: "/search", label: "Knowledge Base" },
+      { href: L("/features"), label: t("nav.features") },
+      { href: L("/watch"), label: t("nav.watch") },
+      { href: "/search", label: t("nav.knowledgeBase") },
     ],
   },
   {
-    title: "Learn",
+    title: t("footer.learn"),
     links: [
       ...learnTop.map((a) => ({ href: L(`/learn/${a.id}`), label: a.data.title })),
-      { href: L("/learn"), label: "All articles" },
-      { href: "/rss.xml", label: "RSS" },
+      { href: L("/learn"), label: t("footer.allArticles") },
+      { href: "/rss.xml", label: t("footer.rss") },
     ],
   },
   {
-    title: "Support",
+    title: t("footer.support"),
     links: [
-      { href: L("/support"), label: "Support" },
+      { href: L("/support"), label: t("footer.support") },
       { href: `mailto:${SUPPORT_EMAIL}`, label: SUPPORT_EMAIL },
-      { href: L("/support#contact"), label: "Report a text error" },
+      { href: L("/support#contact"), label: t("footer.reportError") },
     ],
   },
 ];
@@ -62,19 +64,19 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
   <div class="wrap mfoot-top">
     <div>
       <p class="mfoot-name"><span class="gm" aria-hidden="true">ੴ</span> <span>Gurbani Soul</span></p>
-      <p class="mfoot-tag">A quiet, exact companion to Sri Guru Granth Sahib Ji.</p>
+      <p class="mfoot-tag">{t("footer.tagline")}</p>
     </div>
     <div class="mfoot-act">
-      {APP_STORE_LIVE && <a class="mfoot-store" href={APP_STORE_URL} aria-label="Get Gurbani Soul on the App Store">Download on the App Store</a>}
-      <button class="mnav-icon mfoot-theme" data-theme-proxy aria-label="Theme">◐</button>
+      {APP_STORE_LIVE && <a class="mfoot-store" href={APP_STORE_URL} aria-label={t("nav.getAppLabel")}>{t("footer.downloadOnStore")}</a>}
+      <button class="mnav-icon mfoot-theme" data-theme-proxy aria-label={t("nav.theme")}>◐</button>
     </div>
   </div>
   <div class="wrap mfoot-in">
     <div class="mfoot-brand">
-      <p class="mfoot-blurb">Built by Algorythmos · Sri Guru Granth Sahib Ji is shown verbatim from the source edition, cited by Ang.</p>
-      {giveOn && <p class="mfoot-give">Gurbani Soul is free and ad-free. <a href={L("/contribute")}>Contribute <span aria-hidden="true">→</span></a></p>}
+      <p class="mfoot-blurb">{t("footer.blurb")}</p>
+      {giveOn && <p class="mfoot-give">{rich("footer.give").map((p) => typeof p === "string" ? p : <a href={L("/contribute")}>{p.text} <span aria-hidden="true">→</span></a>)}</p>}
     </div>
-    <nav aria-label="Footer" class="mfoot-nav">
+    <nav aria-label={t("footer.navLabel")} class="mfoot-nav">
       {columns.map((col) => (
         <div class="mfoot-col">
           <h2 class="mfoot-h">{col.title}</h2>
@@ -84,28 +86,28 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
         </div>
       ))}
       <div class="mfoot-col">
-        <h2 class="mfoot-h">Legal</h2>
+        <h2 class="mfoot-h">{t("footer.legal")}</h2>
         <ul>
-          <li><a href={L("/privacy")}>Privacy</a></li>
-          <li class="mfoot-sub">Font licences</li>
-          <li><a href="/fonts/OFL.txt">Sant Lipi (SIL OFL)</a></li>
-          <li><a href="/fonts/OFL-SourceSerif4.txt">Source Serif 4 (SIL OFL)</a></li>
+          <li><a href={L("/privacy")}>{t("nav.privacy")}</a></li>
+          <li class="mfoot-sub">{t("footer.fontLicences")}</li>
+          <li><a href="/fonts/OFL.txt">{t("footer.santLipiLicence")}</a></li>
+          <li><a href="/fonts/OFL-SourceSerif4.txt">{t("footer.serifLicence")}</a></li>
         </ul>
       </div>
     </nav>
   </div>
   <div class="wrap mfoot-bottom">
-    <p class="mfoot-copy">© {year} Algorythmos Pty Ltd · Built by Algorythmos</p>
+    <p class="mfoot-copy">{t("footer.copyright", { year: String(year) })}</p>
   <div class="credits">
     {artwork.map((c) => (
-      <p>Artwork: {c.what}, made for Gurbani Soul{c.who === "Algorythmos" ? "" : ` by ${c.who}`}.</p>
+      <p>{t("footer.artwork", { what: c.what, who: c.who })}</p>
     ))}
     {photos.length > 0 && (
-      <p>Photographs: {photos.map((c, i) => (
-        <Fragment>{i > 0 && ", "}<a href={c.url}>{c.who}</a> / Unsplash</Fragment>
-      ))} (Unsplash License).</p>
+      <p>{rich("footer.photographs").map((p) => typeof p === "string" ? p : photos.map((c, i) => (
+        <Fragment>{i > 0 && ", "}{rich("footer.photoCredit", { who: c.who }).map((q) => typeof q === "string" ? q : <a href={c.url}>{q.text}</a>)}</Fragment>
+      )))}</p>
     )}
-    <p>Type: Sant Lipi and Source Serif 4 — SIL Open Font License.</p>
+    <p>{t("footer.type")}</p>
   </div>
   </div>
 </footer>
