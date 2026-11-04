@@ -26,6 +26,7 @@ TABLES = frozenset({
     'theme_fingerprint',
     'theme_network',
     'translations',
+    'translation_spans',
     'vaar_units',
     'vaars',
 })

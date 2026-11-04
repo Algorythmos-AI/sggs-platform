@@ -152,7 +152,7 @@ const openBani = guard(async (key: string, variant?: string) => {
       continue;
     }
     if (l.source === 'sggs') {
-      h += `<div class="sline tap ${l.is_rahao ? 'rahao' : ''}" data-seq="${l.seq}" data-ang="${l.ang}" data-line-id="${l.id}" data-comp="${l.comp_id}"
+      h += `<div class="sline tap ${l.is_rahao ? 'rahao' : ''}${l.en_span ? (l.en ? ' inspan spanend' : ' inspan') : ''}" data-seq="${l.seq}" data-ang="${l.ang}" data-line-id="${l.id}" data-comp="${l.comp_id}"
           title="Open Ang ${l.ang} in the Reader">
         <div class="g gm" lang="pa">${esc(l.gurmukhi)}</div><div class="t">${esc(l.translit)}</div>
         ${l.en ? `<div class="en" lang="en">${esc(l.en)}</div>` : ''}

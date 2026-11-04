@@ -58,6 +58,7 @@ TABLES: dict[str, tuple[str, str]] = {
     "canon_tokens": ("search", "Every distinct token of the transliteration, used to tell a known Roman word from a misspelling."),
     "variants": ("search", "Spelling and phonetic variants, each mapped to the Gurmukhi word it stands for, with frequency, score and type."),
     "translations": ("translation", "The English translation, one row per translated line, with its source and match quality."),
+    "translation_spans": ("translation", "English records that cover several printed lines: the first and last line of each group; the English sits on the last."),
     "fts_en": ("translation", "Full-text index over the English translation."),
     "sources": ("translation", "Where each translation comes from: attribution, licence terms and the date ingested."),
     "banis": ("banis", "Each bani and variant: titles, category, order, length and where it comes from."),
