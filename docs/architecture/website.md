@@ -4,8 +4,8 @@ description: "How gurbanisoul.com is built: a static Astro site with no framewor
 sidebar:
   order: 7
 verified:
-  commit: 05086f58
-  date: "2026-09-27"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # The website
 
@@ -38,11 +38,13 @@ The build holds two properties that are deliberately kept apart
 
 | | Layout | Pages | Scripts it loads |
 |---|---|---|---|
-| **Gurbani Soul** (the app's home) | `Marketing.astro` | `/`, `/features`, `/watch`, `/learn/*`, `/privacy`, `/support` | `landing.ts` only (it never imports the Knowledge Base code), Vercel Web Analytics on `gurbanisoul.com` |
+| **Gurbani Soul** (the app's home) | `Marketing.astro` | `/`, `/features`, `/watch`, `/learn/*`, `/contribute`, `/privacy`, `/support` | `landing.ts` only (it never imports the Knowledge Base code), Vercel Web Analytics on `gurbanisoul.com` |
 | **Sri Guru Granth Sahib Ji Knowledge Base** | `Base.astro` | `/library` (its home), `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`, `/trail`, `/analytics`, `/constellation`, `/raag-clock`, `/divergence`, `/404` | `core`, `panel`, `studytrail`, `saroop` on every page, plus the page's own controller; no analytics |
 
 `frontend/src/routes.ts` is the single list of public routes; the sitemap is built from it, and a
-repository gate fails if the sitemap and the built pages disagree.
+repository gate fails if the sitemap and the built pages disagree. The share pages `/ang/N` (one
+per Ang, `src/pages/ang/[n].astro`) are deliberately outside it: they carry Ang N's own Open Graph
+card for link previews, send a person straight on to the Reader, and are `noindex`.
 
 ## The stack
 

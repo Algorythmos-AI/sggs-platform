@@ -4,8 +4,8 @@ description: "contract/openapi.json is generated from real responses and checked
 sidebar:
   order: 2
 verified:
-  commit: d2f2e415
-  date: "2026-09-27"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # Contract and OpenAPI
 
@@ -24,7 +24,7 @@ route; the generator (`tools/gen_openapi.py:ROUTES`) says what a route takes and
 test fails if a route is on one side and not the other, and `tools/gen_route_table.py --check`
 fails the docs build if the [routes page](routes.md) was not regenerated after either changed.
 
-<!-- sggs:code file="tools/gen_openapi.py" lines="40-60" -->
+<!-- sggs:code file="tools/gen_openapi.py" lines="52-71" -->
 Source: [`tools/gen_openapi.py`](../../tools/gen_openapi.py) — the head of the declarations table, read at build time.
 
 ## How the spec is checked
@@ -46,9 +46,9 @@ where the OpenAPI spec pins *shape*:
 
 | File | What it fixes |
 |---|---|
-| `openapi.json` | every route's parameters and response schema |
+| `openapi.json` | every route's parameters and response schema (shared parameter lists, such as the Constellation's `LENS`, are declared once above the table) |
 | `golden_search.ndjson`, `golden_verify.ndjson` | what search and verification return for recorded inputs |
-| `golden_reader.ndjson`, `golden_timing.ndjson`, `golden_banis.ndjson`, `golden_analytics.ndjson` | the reader, knowledge, Nitnem and insight projections |
+| `golden_reader.ndjson`, `golden_timing.ndjson`, `golden_banis.ndjson`, `golden_analytics.ndjson`, `golden_constellation.ndjson` | the reader, knowledge, Nitnem, insight and Constellation projections |
 | `golden_roman_norm.ndjson`, `golden_difflib.ndjson` | the two pure functions the iOS port must reproduce byte for byte |
 
 `make contract` regenerates the vectors and fails on drift; `tools/contract_http.py` replays them

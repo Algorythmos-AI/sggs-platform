@@ -4,8 +4,8 @@ description: "How the SGGS Knowledge Base is built: three repositories, one read
 sidebar:
   order: 0
 verified:
-  commit: 05086f58
-  date: "2026-09-27"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # Architecture
 

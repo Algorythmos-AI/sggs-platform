@@ -4,8 +4,8 @@ description: "One request, GET /api/ang/712, followed from the browser through t
 sidebar:
   order: 4
 verified:
-  commit: a6615276
-  date: "2026-09-26"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # Request lifecycle
 

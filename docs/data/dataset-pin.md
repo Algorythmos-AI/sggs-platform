@@ -4,8 +4,8 @@ description: "How this platform obtains the scripture database: dataset.lock.jso
 sidebar:
   order: 3
 verified:
-  commit: aced1a01
-  date: "2026-09-27"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # The dataset pin
 
@@ -86,12 +86,13 @@ Three version numbers meet here, and they answer different questions:
 | Number | Where it lives | What it names | Today |
 |---|---|---|---|
 | `APP_VERSION` | `webapp/serve.py`; `/api/health` → `version` | the platform release: code, website, API | the release being served |
-| `dataset_version` | `dataset.lock.json` | the sggs-data release the pin points at (`DATASET_VERSION` there) | `1.0.0` |
-| `meta.version` | inside the database; `/api/health` and `/api/meta` → `db_version` | the build that produced the file | `1.1.4` |
+| `dataset_version` | `dataset.lock.json` | the sggs-data release the pin points at (`DATASET_VERSION` there) | `1.4.0` |
+| `meta.version` | inside the database; `/api/health` and `/api/meta` → `db_version` | the build that produced the file | `1.3.0` |
 
-`dataset_version` and `db_version` differ today only because the pinned database was built on
-2026-09-18, before sggs-data began stamping `DATASET_VERSION` into `meta.version`; the next rebuild
-makes them one number ([delivery](../engineering/delivery.md)). The object itself is identified by
+sggs-data's `build_db.py` stamps `DATASET_VERSION` into `meta.version`, so the two are meant to be
+one number ([delivery](../engineering/delivery.md)). They differ today: the object pinned as dataset
+`1.4.0` still carries `meta.version` `1.3.0` (`meta.built` 2026-10-28), so the 1.4.0 release did not
+restamp it. That is open in sggs-data. The object itself is identified by
 its SHA-256, not by either version: to know exactly what a deployment serves, compare the lock's
 `sha256` with `contract/_meta.json` and read `db_version` and `commit` from `/api/health`. The
 [data dictionary](data-dictionary.md) lists every table of the pinned object.

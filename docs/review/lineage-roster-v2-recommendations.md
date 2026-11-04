@@ -427,7 +427,7 @@ to print is the reviewer's choice.
 **Evidence.** Reference, page image: EoS, *Tegh Bahādur, Gurū*, vol. IV (2nd ed., 2004), p. 332 (leaf 349):
 Gobind Das nominated on 8 July 1675; beheaded at Chandni Chowk, Delhi, on 11 November 1675. Search snippet only, for
 the 24 November observance (a lead, not relied on):
-https://www.queensu.ca/eventscalendar/calendar/events/martyrdom-guru-tegh-bahadur-ji-0 ; https://artsandculture.google.com/entity/m02nnss
+https://www.queensu.ca/eventscalendar/calendar/events/martyrdom-guru-tegh-bahadur-ji-0 (a second snippet, a Google Arts & Culture entity page, has since been removed)
 **Where sources differ.** 11 Nov (historical date) vs 24 Nov (Nanakshahi observance). Gobind Das vs Gobind Rai.
 **Recommended ruling.** Approve the date as written (it is the EoS date); reviewer to choose "Gobind Das" (the EoS's form) or "Gobind Rai".
 **Suggested wording (if Change).** "... having named his son, Gobind Rai, as his successor."
