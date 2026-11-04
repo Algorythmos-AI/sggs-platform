@@ -21,14 +21,18 @@ const lookup = (catalog, key) => {
 /**
  * @param {any} catalog   the language's messages (nested object of strings)
  * @param {string} intl   Intl locale for plurals and numbers, e.g. "en-GB"
- * @param {{ pseudo?: boolean }} [opts]
+ * @param {{ pseudo?: boolean, fallback?: any }} [opts]  fallback: the English catalog, for a draft
  */
 export const createFormatter = (catalog, intl, opts = {}) => {
+  /** @param {string} key */
+  const source = (key) => {
+    try { return lookup(catalog, key); } catch (e) { if (opts.fallback) return lookup(opts.fallback, key); throw e; }
+  };
   const cache = new Map();
   const fmt = (/** @type {string} */ key) => {
     let f = cache.get(key);
     if (!f) {
-      f = new IntlMessageFormat(lookup(catalog, key), intl);
+      f = new IntlMessageFormat(source(key), intl);
       cache.set(key, f);
     }
     return f;
@@ -46,7 +50,7 @@ export const createFormatter = (catalog, intl, opts = {}) => {
    *  @param {string} key @param {Record<string, any>} [values]
    *  @returns {(string | { tag: string, text: string })[]} */
   const rich = (key, values = {}) => {
-    const src = lookup(catalog, key);
+    const src = source(key);
     /** @type {Record<string, any>} */
     const wrapped = { ...values };
     for (const m of src.matchAll(/<([a-zA-Z][\w-]*)>/g)) {

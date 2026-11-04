@@ -61,6 +61,11 @@ export const LAYOUT = [
     page('diagrams'),
     page('website'),
     page('website/constellation'),
+    group('Translating the site', [
+      page('website/translation'),
+      page('website/translation-style-guide'),
+      page('website/translation-glossary'),
+    ]),
     page('risk-register'),
     page('reports'),
     page('archive'),
@@ -114,6 +119,9 @@ export const LABELS = {
   'reports': 'Reports and audit history',
   'risk-register': 'Risk register',
   'website': 'The website',
+  'website/translation': 'How translation works',
+  'website/translation-style-guide': 'Style guide',
+  'website/translation-glossary': 'Glossary',
   // decisions: number · short title (the full title is the page's H1)
   'adr/0001-integration-default-branch': '0001 · Integration is the trunk',
   'adr/0002-comp-id-keep-last-regroup': '0002 · Heading runs join the composition',
