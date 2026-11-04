@@ -9,7 +9,9 @@ import { LEARN_SLUGS } from "../../../routes";
 import { localeStaticPaths, type Locale } from "../../../i18n/locales";
 import { useT } from "../../../i18n/t";
 import { fmtDate as fmtDateIn } from "../../../i18n/format";
+import { LOCALES, siteLanguages } from "../../../i18n/locales";
 import { localizeHref } from "../../../i18n/paths";
+import { learnHref } from "../../../i18n/content";
 
 export const getStaticPaths = localeStaticPaths;
 const lang = Astro.params.lang as Locale;
@@ -32,13 +34,13 @@ const fmtDate = (d: Date) => fmtDateIn(lang, d);
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL, inLanguage: "en" },
+    { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL, inLanguage: siteLanguages() },
     {
       "@type": "CollectionPage",
       name: t("learnIndex.learnSriGuruGranth"),
       description: desc,
       url: new URL(L("/learn"), SITE_URL).href,
-      inLanguage: "en",
+      inLanguage: LOCALES[lang].htmlLang,
       isPartOf: { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL },
     },
   ],
@@ -61,7 +63,7 @@ const jsonLd = {
       <ul class="learn-list">
         {articles.map((a) => (
           <li class="learn-card">
-            <a href={L(`/learn/${a.id}`)}>
+            <a href={learnHref(lang, a.id)}>
               <h2>{a.data.title}</h2>
               <p class="card-desc">{a.data.description}</p>
               <p class="card-meta">

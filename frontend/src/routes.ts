@@ -13,6 +13,7 @@
 // across builds — bump it deliberately when a route's content meaningfully changes.
 import { ENABLED_LOCALES, type Locale } from "./i18n/locales";
 import { isLocalizedPath, stripLocale } from "./i18n/paths";
+import { articleLocales } from "./i18n/content";
 
 export type ChangeFreq =
   | "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
@@ -77,8 +78,14 @@ const pageRoutes: Route[] = [
 // "/features" + "en" → "/en/features"; "/" + "en" → "/en".
 const inLocale = (path: string, l: Locale) => (path === "/" ? `/${l}` : `/${l}${path}`);
 
+// A Learn article exists only in the languages it is published in (i18n/content.ts).
+const langsOf = (path: string): Locale[] => {
+  const article = path.match(/^\/learn\/([^/]+)$/)?.[1];
+  return article ? articleLocales(article) : ENABLED_LOCALES;
+};
+
 export const routes: Route[] = pageRoutes.flatMap((r) =>
-  isLocalizedPath(r.path) ? ENABLED_LOCALES.map((l) => ({ ...r, path: inLocale(r.path, l) })) : [r]);
+  isLocalizedPath(r.path) ? langsOf(r.path).map((l) => ({ ...r, path: inLocale(r.path, l) })) : [r]);
 
 // The set of distinct OG card slugs the site needs (drives og/v2/[slug].png getStaticPaths).
 export const ogSlugs = (): string[] => [...new Set(["knowledge-base", ...pageRoutes.map((r) => r.og)])];

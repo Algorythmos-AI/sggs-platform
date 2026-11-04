@@ -30,3 +30,9 @@ if (problems.length) throw new Error(`locales.json: ${problems.join("; ")}`);
 
 // getStaticPaths() for a page that exists in every enabled language.
 export const localeStaticPaths = () => ENABLED_LOCALES.map((lang) => ({ params: { lang } }));
+
+// The site's languages for a WebSite JSON-LD node: one tag while one language is enabled, else all.
+export const siteLanguages = (): string | string[] => {
+  const tags = ENABLED_LOCALES.map((l) => LOCALES[l].htmlLang);
+  return tags.length === 1 ? tags[0] : tags;
+};

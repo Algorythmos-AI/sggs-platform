@@ -19,7 +19,9 @@ import wRaagLight from "../../assets/app/widget-raagnow-small-light.png";
 import wRaagDark from "../../assets/app/widget-raagnow-small-dark.png";
 import { localeStaticPaths, type Locale } from "../../i18n/locales";
 import { useT } from "../../i18n/t";
+import { LOCALES, siteLanguages } from "../../i18n/locales";
 import { localizeHref } from "../../i18n/paths";
+import { learnHref } from "../../i18n/content";
 
 export const getStaticPaths = localeStaticPaths;
 const lang = Astro.params.lang as Locale;
@@ -45,13 +47,13 @@ const dialNow = timeline.map((c) => t("watch.dialNow", { label: c.label, range: 
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL, inLanguage: "en" },
+    { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL, inLanguage: siteLanguages() },
     {
       "@type": "WebPage",
       name: t("watch.theRaagClockGurbani2"),
       description: desc,
       url: new URL(L("/watch"), SITE_URL).href,
-      inLanguage: "en",
+      inLanguage: LOCALES[lang].htmlLang,
       isPartOf: { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL },
     },
   ],
@@ -195,7 +197,7 @@ const jsonLd = {
       <h2 class="cta-h">{t("watch.seeTheWatchNow")}</h2>
       <div class="cta-row">
         <a class="btn" href="/raag-clock">{t("watch.openTheRaagClock")}</a>
-        <a class="btn ghost" href={L("/learn/the-31-raags-and-the-watches-of-the-day")} data-astro-prefetch>{t("watch.the31RaagsAnd")}</a>
+        <a class="btn ghost" href={learnHref(lang, "the-31-raags-and-the-watches-of-the-day")} data-astro-prefetch>{t("watch.the31RaagsAnd")}</a>
       </div>
     </div>
   </section>

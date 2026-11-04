@@ -40,6 +40,7 @@ import voiceM9 from "../../assets/app/iphone-voice-m9-light.png";
 import compareShot from "../../assets/app/iphone-compare-light.png";
 import { localeStaticPaths, type Locale } from "../../i18n/locales";
 import { useT } from "../../i18n/t";
+import { LOCALES, siteLanguages } from "../../i18n/locales";
 import { localizeHref } from "../../i18n/paths";
 
 export const getStaticPaths = localeStaticPaths;
@@ -100,13 +101,13 @@ const accents = [
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL, inLanguage: "en" },
+    { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL, inLanguage: siteLanguages() },
     {
       "@type": "WebPage",
       name: t("features.featuresGurbaniSoul2"),
       description: desc,
       url: new URL(L("/features"), SITE_URL).href,
-      inLanguage: "en",
+      inLanguage: LOCALES[lang].htmlLang,
       isPartOf: { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL },
     },
   ],
