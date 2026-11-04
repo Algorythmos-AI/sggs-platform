@@ -9,6 +9,10 @@ import { getCollection } from "astro:content";
 import { SUPPORT_EMAIL, IMAGE_CREDITS, APP_STORE_URL, APP_STORE_LIVE } from "../site";
 import { CONTRIBUTE_MODE } from "../contribute";
 import { LEARN_SLUGS } from "../routes";
+import { localeOf, localizeHref } from "../i18n/paths";
+
+const lang = localeOf(Astro.url.pathname);
+const L = (href: string) => localizeHref(href, lang);
 
 // The first three Learn articles, in the curated LEARN_SLUGS order (drafts excluded).
 const order = new Map(LEARN_SLUGS.map((s, i) => [s, i]));
@@ -28,25 +32,25 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
   {
     title: "Product",
     links: [
-      { href: "/features", label: "Features" },
-      { href: "/watch", label: "The watch" },
+      { href: L("/features"), label: "Features" },
+      { href: L("/watch"), label: "The watch" },
       { href: "/search", label: "Knowledge Base" },
     ],
   },
   {
     title: "Learn",
     links: [
-      ...learnTop.map((a) => ({ href: `/learn/${a.id}`, label: a.data.title })),
-      { href: "/learn", label: "All articles" },
+      ...learnTop.map((a) => ({ href: L(`/learn/${a.id}`), label: a.data.title })),
+      { href: L("/learn"), label: "All articles" },
       { href: "/rss.xml", label: "RSS" },
     ],
   },
   {
     title: "Support",
     links: [
-      { href: "/support", label: "Support" },
+      { href: L("/support"), label: "Support" },
       { href: `mailto:${SUPPORT_EMAIL}`, label: SUPPORT_EMAIL },
-      { href: "/support#contact", label: "Report a text error" },
+      { href: L("/support#contact"), label: "Report a text error" },
     ],
   },
 ];
@@ -68,7 +72,7 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
   <div class="wrap mfoot-in">
     <div class="mfoot-brand">
       <p class="mfoot-blurb">Built by Algorythmos · Sri Guru Granth Sahib Ji is shown verbatim from the source edition, cited by Ang.</p>
-      {giveOn && <p class="mfoot-give">Gurbani Soul is free and ad-free. <a href="/contribute">Contribute <span aria-hidden="true">→</span></a></p>}
+      {giveOn && <p class="mfoot-give">Gurbani Soul is free and ad-free. <a href={L("/contribute")}>Contribute <span aria-hidden="true">→</span></a></p>}
     </div>
     <nav aria-label="Footer" class="mfoot-nav">
       {columns.map((col) => (
@@ -82,7 +86,7 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
       <div class="mfoot-col">
         <h2 class="mfoot-h">Legal</h2>
         <ul>
-          <li><a href="/privacy">Privacy</a></li>
+          <li><a href={L("/privacy")}>Privacy</a></li>
           <li class="mfoot-sub">Font licences</li>
           <li><a href="/fonts/OFL.txt">Sant Lipi (SIL OFL)</a></li>
           <li><a href="/fonts/OFL-SourceSerif4.txt">Source Serif 4 (SIL OFL)</a></li>

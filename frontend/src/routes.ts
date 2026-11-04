@@ -5,8 +5,15 @@
 // webapp/static (the SitemapInvariants gate compares the sitemap's <loc> set to the built HTML
 // route set), so keep it in step when a page is added or removed under src/pages/*.astro.
 //
+// Marketing pages are listed once, unprefixed ("/features"), and expand to one route per enabled
+// language ("/en/features", …; the home page is "/en"). Knowledge Base pages are not localized.
+// The bare "/" is a noindex language chooser (pages/index.astro), so it is not a route here.
+//
 // `lastmod` is a FIXED ISO date (never Date.now()) so the built sitemap is byte-deterministic
 // across builds — bump it deliberately when a route's content meaningfully changes.
+import { ENABLED_LOCALES, type Locale } from "./i18n/locales";
+import { isLocalizedPath, stripLocale } from "./i18n/paths";
+
 export type ChangeFreq =
   | "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
 
@@ -45,7 +52,7 @@ const learnRoutes: Route[] = [
   })),
 ];
 
-export const routes: Route[] = [
+const pageRoutes: Route[] = [
   { path: "/",             lastmod: LASTMOD, changefreq: "weekly",  priority: 1.0, og: "home" },
   { path: "/features",     lastmod: LASTMOD, changefreq: "weekly",  priority: 0.8, og: "features" },
   { path: "/watch",        lastmod: LASTMOD, changefreq: "weekly",  priority: 0.7, og: "watch" },
@@ -67,8 +74,14 @@ export const routes: Route[] = [
   ...learnRoutes,
 ];
 
+// "/features" + "en" → "/en/features"; "/" + "en" → "/en".
+const inLocale = (path: string, l: Locale) => (path === "/" ? `/${l}` : `/${l}${path}`);
+
+export const routes: Route[] = pageRoutes.flatMap((r) =>
+  isLocalizedPath(r.path) ? ENABLED_LOCALES.map((l) => ({ ...r, path: inLocale(r.path, l) })) : [r]);
+
 // The set of distinct OG card slugs the site needs (drives og/v2/[slug].png getStaticPaths).
-export const ogSlugs = (): string[] => [...new Set(["knowledge-base", ...routes.map((r) => r.og)])];
+export const ogSlugs = (): string[] => [...new Set(["knowledge-base", ...pageRoutes.map((r) => r.og)])];
 
 // Normalise a URL pathname to a manifest path ("" or "/x/" → "/" or "/x").
 export const normPath = (p: string): string => {
@@ -76,10 +89,11 @@ export const normPath = (p: string): string => {
   return s === "" ? "/" : s;
 };
 
-// OG slug for a given path (default "knowledge-base" when the path is not in the manifest).
+// OG slug for a given path, in any language (default "knowledge-base" when the path is not in the
+// manifest). Every language shares the page's card.
 export const ogForPath = (p: string): string => {
-  const n = normPath(p);
-  return routes.find((r) => r.path === n)?.og ?? "knowledge-base";
+  const n = normPath(stripLocale(p));
+  return pageRoutes.find((r) => r.path === n)?.og ?? "knowledge-base";
 };
 
 // The share-card URL for an OG slug. "v2" is the cache key link-preview services fetch by.

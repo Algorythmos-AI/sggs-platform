@@ -324,11 +324,12 @@ function init() {
   if (nl) cleanups.push(nl);
 }
 
-// Forward legacy /?q= bookmarks to /search after a client-side swap lands on `/`.
+// Forward legacy /?q= bookmarks to /search after a client-side swap lands on a home page. The bare
+// root redirects to a language's home with its query kept (vercel.json), so check every home.
 function forwardLegacyQuery() {
   try {
     const p = new URLSearchParams(location.search);
-    if (p.has("q") && location.pathname === "/") location.replace("/search" + location.search);
+    if (p.has("q") && /^\/(?:en|pa|fr)?\/?$/.test(location.pathname)) location.replace("/search" + location.search);
   } catch {}
 }
 // Re-assert the resolved theme after a swap (the fresh document starts from the pre-paint value).

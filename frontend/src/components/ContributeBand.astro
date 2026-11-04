@@ -4,6 +4,10 @@
 // here, so src/contribute.ts stays the single source. Renders nothing when CONTRIBUTE_MODE is
 // "off". Wording: "contribute", never "donate" — Algorythmos Pty Ltd is not a charity.
 import { CONTRIBUTE_MODE } from "../contribute";
+import { localeOf, localizeHref } from "../i18n/paths";
+
+const lang = localeOf(Astro.url.pathname);
+const L = (href: string) => localizeHref(href, lang);
 
 export interface Props { surface?: "paper" | "warm" }
 const { surface = "warm" } = Astro.props;
@@ -18,7 +22,7 @@ const on = CONTRIBUTE_MODE !== "off";
         <p class="body-lg">No ads, no paid tier, nothing behind a paywall. If Gurbani Soul serves your study, you can help cover hosting, scholarly review and licensing. It is optional and unlocks nothing.</p>
       </div>
       <div class="give-act">
-        <a class="btn" href="/contribute" data-astro-prefetch>Contribute</a>
+        <a class="btn" href={L("/contribute")} data-astro-prefetch>Contribute</a>
         <p class="give-fine">From A$5 · once or monthly</p>
       </div>
     </div>

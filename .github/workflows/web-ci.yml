@@ -93,6 +93,8 @@ jobs:
           npx astro check || true   # informational until types are clean
           npm run build
           npm run test:pahar
+          npm run test:i18n
+          node scripts/gen-i18n-redirects.mjs --check
       - name: webapp/static is this commit's build (report-only)
         # The tracked webapp/static must be the build of the commit it sits in: text assets, byte
         # for byte, built like this job builds (no PUBLIC_* variable set). Report-only until a copy

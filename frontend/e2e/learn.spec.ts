@@ -3,14 +3,14 @@ import AxeBuilder from '@axe-core/playwright';
 
 // The Learn section (PR3): /learn index, the eight articles, RSS and per-article OG cards.
 test('learn index lists the eight articles @smoke', async ({ page }) => {
-  const res = await page.goto('/learn');
+  const res = await page.goto('/en/learn');
   expect(res?.status()).toBe(200);
   await expect(page.locator('h1')).toContainText('Learn');
   await expect(page.locator('.learn-card')).toHaveCount(8);
 });
 
 test('an article renders verbatim, cited and labelled @smoke', async ({ page }) => {
-  const res = await page.goto('/learn/what-is-an-ang');
+  const res = await page.goto('/en/learn/what-is-an-ang');
   expect(res?.status()).toBe(200);
 
   // verbatim Gurmukhi, in a lang=pa verse paragraph
@@ -40,14 +40,14 @@ test('per-article OG card is a png @smoke', async ({ request }) => {
 });
 
 test('learn index has no serious/critical accessibility violations', async ({ page }) => {
-  await page.goto('/learn');
+  await page.goto('/en/learn');
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   const bad = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''));
   expect(bad, JSON.stringify(bad.map((v) => v.id))).toEqual([]);
 });
 
 test('an article has no serious/critical accessibility violations', async ({ page }) => {
-  await page.goto('/learn/how-gurbani-soul-verifies-scripture');
+  await page.goto('/en/learn/how-gurbani-soul-verifies-scripture');
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   const bad = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''));
   expect(bad, JSON.stringify(bad.map((v) => v.id))).toEqual([]);

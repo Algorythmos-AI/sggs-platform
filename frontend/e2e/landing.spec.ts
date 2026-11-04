@@ -31,7 +31,7 @@ async function expectAppStoreState(page: Page) {
 
 // The gurbanisoul.com landing at / — App Review and first-time visitors see this first.
 test('landing renders the brand, the verse and the CTAs @smoke', async ({ page }) => {
-  const res = await page.goto('/');
+  const res = await page.goto('/en');
   expect(res?.status()).toBe(200);
   await expect(page.locator('h1')).toHaveText('Gurbani Soul');
 
@@ -49,11 +49,11 @@ test('landing renders the brand, the verse and the CTAs @smoke', async ({ page }
   // primary nav is real routes (Features, The watch, Learn, Knowledge Base, Support). Privacy left the
   // top bar (2026-10-29) but stays one tap away: in the menu sheet and the footer on every page.
   expect(await page.locator('nav[aria-label="Primary"] a').count()).toBeGreaterThanOrEqual(5);
-  for (const href of ['/features', '/watch', '/search', '/support', '/learn']) {
+  for (const href of ['/en/features', '/en/watch', '/search', '/en/support', '/en/learn']) {
     await expect(page.locator(`nav[aria-label="Primary"] a[href="${href}"]`)).toHaveCount(1);
   }
-  await expect(page.locator('#mobileMenu a[href="/privacy"]')).toHaveCount(1);
-  await expect(page.locator('footer nav[aria-label="Footer"] a[href="/privacy"]')).toHaveCount(1);
+  await expect(page.locator('#mobileMenu a[href="/en/privacy"]')).toHaveCount(1);
+  await expect(page.locator('footer nav[aria-label="Footer"] a[href="/en/privacy"]')).toHaveCount(1);
 
   // v2 product story: numbered chapters, at least one photo band, a five-fact proof strip
   expect(await page.locator('[data-chapter]').count()).toBeGreaterThanOrEqual(6);
@@ -61,7 +61,7 @@ test('landing renders the brand, the verse and the CTAs @smoke', async ({ page }
   await expect(page.locator('ul.proof > li')).toHaveCount(5);
   await expect(page.locator('ul.proof')).toContainText('network calls in the app');
   // the story links on to the sub-pages
-  for (const href of ['/watch', '/learn', '/privacy', '/search']) {
+  for (const href of ['/en/watch', '/en/learn', '/en/privacy', '/search']) {
     expect(await page.locator(`main a[href="${href}"]`).count()).toBeGreaterThanOrEqual(1);
   }
   // exactly one verse on Home (the download band's CTA is checked by expectAppStoreState)
@@ -73,7 +73,7 @@ test('landing renders the brand, the verse and the CTAs @smoke', async ({ page }
   await expect(page.locator('#story-watch[data-theme="dark"]')).toHaveCount(1);
 
   // visible links to KB, support, privacy (footer works on desktop and mobile)
-  for (const href of ['/search', '/support', '/privacy']) {
+  for (const href of ['/search', '/en/support', '/en/privacy']) {
     await expect(page.locator(`nav[aria-label="Footer"] a[href="${href}"]`)).toBeVisible();
   }
   // the shared footer: four columns in ONE footer nav, and the artwork + type credits
@@ -83,7 +83,7 @@ test('landing renders the brand, the verse and the CTAs @smoke', async ({ page }
   await expect(page.locator('footer .credits')).toContainText('SIL Open Font License');
 
   // canonical
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://gurbanisoul.com/');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://gurbanisoul.com/en');
 });
 
 test('legacy /?q= bookmark forwards to /search @smoke', async ({ page }) => {
@@ -93,7 +93,7 @@ test('legacy /?q= bookmark forwards to /search @smoke', async ({ page }) => {
 
 test('theme button toggles the document theme', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === 'mobile', 'theme button is in the collapsed nav on mobile');
-  await page.goto('/');
+  await page.goto('/en');
   const html = page.locator('html');
   const btn = page.locator('#themeBtn');
   const before = await html.getAttribute('data-theme');
@@ -112,7 +112,7 @@ test.describe('light-first default', () => {
   test.use({ colorScheme: 'dark' });
 
   test('marketing default is light with no stored choice', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en');
     await page.evaluate(() => { try { localStorage.removeItem('theme'); } catch (e) {} });
     await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
@@ -129,7 +129,7 @@ test.describe('light-first default', () => {
 
   test('an explicit dark choice still wins on the marketing site', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'mobile', 'theme button is in the collapsed nav on mobile');
-    await page.goto('/features');
+    await page.goto('/en/features');
     await page.evaluate(() => { try { localStorage.setItem('theme', 'dark'); } catch (e) {} });
     await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
@@ -147,7 +147,7 @@ test.describe('light-first default', () => {
 
 test('mobile menu opens, closes on Esc, and restores focus', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile', 'the menu button shows under 1024px');
-  await page.goto('/');
+  await page.goto('/en');
   const burger = page.locator('.burger');
   await expect(burger).toBeVisible();
   await burger.click();
@@ -158,7 +158,7 @@ test('mobile menu opens, closes on Esc, and restores focus', async ({ page }, te
 });
 
 test('landing has no serious/critical accessibility violations', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/en');
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   const bad = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''));
   expect(bad, JSON.stringify(bad.map((v) => v.id))).toEqual([]);

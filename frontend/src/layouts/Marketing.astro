@@ -8,16 +8,19 @@ import { ClientRouter } from "astro:transitions";
 import Seo from "../components/Seo.astro";
 import Analytics from "../components/Analytics.astro";
 import "../styles/marketing.css";
+import { LOCALES } from "../i18n/locales";
+import { localeOf } from "../i18n/paths";
 export interface Props {
   title: string;
   description: string;
-  path?: string;      // e.g. "/" — for canonical + og:url
+  path?: string;      // the page's own localized path, e.g. "/en/features" — for canonical + og:url
   ogImage?: string;   // absolute or root-relative; defaults to the path's OG card
 }
 const { title, description, path = "/", ogImage } = Astro.props;
+const locale = LOCALES[localeOf(Astro.url.pathname)];
 ---
 <!DOCTYPE html>
-<html lang="en">
+<html lang={locale.htmlLang}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />

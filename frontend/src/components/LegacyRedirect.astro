@@ -1,0 +1,25 @@
+---
+// LegacyRedirect.astro — the page left at a pre-i18n marketing URL (/features, /privacy, …), for
+// hosts without vercel.json. On gurbanisoul.com these URLs never reach a page: vercel.json answers
+// them with a 308 to the English page (scripts/gen-i18n-redirects.mjs). Under serve.py (the offline
+// app) this page forwards at once. It is noindex, names the new URL as canonical, and carries a
+// plain link for anyone with refresh disabled.
+import { SITE_URL } from "../site";
+export interface Props { to: string }
+const { to } = Astro.props;
+const canonical = new URL(to, SITE_URL).href;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gurbani Soul</title>
+  <meta name="robots" content="noindex, follow" />
+  <link rel="canonical" href={canonical} />
+  <meta http-equiv="refresh" content={`0; url=${to}`} />
+</head>
+<body>
+  <p>This page has moved to <a href={to}>{canonical}</a>.</p>
+</body>
+</html>

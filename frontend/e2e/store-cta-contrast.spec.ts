@@ -15,7 +15,7 @@ const PLACES = [
 for (const theme of ['light', 'dark'] as const) {
   test(`the live App Store buttons are readable (${theme})`, async ({ page }) => {
     await page.addInitScript((t) => { try { localStorage.setItem('theme', t); } catch {} }, theme);
-    await page.goto('/');
+    await page.goto('/en');
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
     const results = await page.evaluate((places) => {
       const rgb = (c: string) => (c.match(/[\d.]+/g) || []).slice(0, 4).map(Number);

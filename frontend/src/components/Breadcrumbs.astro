@@ -2,14 +2,18 @@
 // Breadcrumbs.astro — Home / Learn / {title} trail with a matching BreadcrumbList JSON-LD.
 import JsonLd from "./JsonLd.astro";
 import { SITE_URL } from "../site";
+import { localeOf, localizeHref } from "../i18n/paths";
+
+const lang = localeOf(Astro.url.pathname);
+const L = (href: string) => localizeHref(href, lang);
 
 export interface Props { title: string; slug?: string }
 const { title, slug } = Astro.props;
 
 const trail = [
-  { name: "Home", url: new URL("/", SITE_URL).href },
-  { name: "Learn", url: new URL("/learn", SITE_URL).href },
-  { name: title, url: slug ? new URL(`/learn/${slug}`, SITE_URL).href : undefined },
+  { name: "Home", url: new URL(L("/"), SITE_URL).href },
+  { name: "Learn", url: new URL(L("/learn"), SITE_URL).href },
+  { name: title, url: slug ? new URL(L(`/learn/${slug}`), SITE_URL).href : undefined },
 ];
 
 const jsonLd = {
@@ -25,8 +29,8 @@ const jsonLd = {
 ---
 <nav class="crumbs" aria-label="Breadcrumb">
   <ol>
-    <li><a href="/">Home</a></li>
-    <li><a href="/learn">Learn</a></li>
+    <li><a href={L("/")}>Home</a></li>
+    <li><a href={L("/learn")}>Learn</a></li>
     <li aria-current="page">{title}</li>
   </ol>
 </nav>
