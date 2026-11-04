@@ -485,6 +485,7 @@ class StoredKeysAreDisclosed(unittest.TestCase):
         "sggs_bani_pos_": "Nitnem reading positions", "sggs_rehras_variant": "Rehras choice",
         "sggs_pins": "pin", "pahar_mode": "Raag Clock setting", "pahar_loc": "Location",
         "sggs_trail": "Semantic Trail",
+        "gs_lang": "language you chose",
         "sggs_meta": None, "sggs_timing_v": None,
     }
     PATTERNS = (
@@ -1062,6 +1063,14 @@ class LanguageRouting(unittest.TestCase):
                     self.assertEqual(other, [], f"{route}: links into another language: {href}")
                 seen += 1
         self.assertGreater(seen, 5, "no language pages found")
+
+    def test_the_switcher_appears_only_with_a_second_language(self):
+        if _unbuilt():
+            self.skipTest("webapp/static not built")
+        html = (STATIC / self.default / "index.html").read_text(encoding="utf-8")
+        n = len(self.cfg["enabled"])
+        for marker in ("data-lang-switcher", 'class="lang-row"', 'class="lang-foot"'):
+            self.assertEqual(marker in html, n > 1, f"language switcher {marker} {'missing' if n > 1 else 'shown'} with {n} language(s) enabled")
 
     def test_root_is_a_noindex_language_chooser(self):
         if _unbuilt():

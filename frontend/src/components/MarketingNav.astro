@@ -16,6 +16,7 @@ import { APP_STORE_URL, APP_STORE_LIVE } from "../site";
 import { CONTRIBUTE_MODE } from "../contribute";
 import { localeOf, localizeHref } from "../i18n/paths";
 import { useT } from "../i18n/t";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
 
 const lang = localeOf(Astro.url.pathname);
 const L = (href: string) => localizeHref(href, lang);
@@ -57,6 +58,7 @@ const links = [
     </nav>
 
     <div class="mnav-right">
+      <LanguageSwitcher variant="nav" />
       <button id="themeBtn" class="mnav-icon" aria-label={t("nav.theme")}>◐</button>
       {giveOn && (
         <a class="mnav-give" href={L("/contribute")} data-astro-prefetch
@@ -98,6 +100,7 @@ const links = [
         </a>
       )}
     </div>
+    <LanguageSwitcher variant="sheet" />
     <div class="mm-actions">
       {APP_STORE_LIVE
         ? <a class="pill mm-cta" href={APP_STORE_URL} aria-label={t("nav.getAppLabel")}>{t("nav.getApp")}</a>

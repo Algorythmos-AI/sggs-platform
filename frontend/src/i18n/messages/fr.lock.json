@@ -403,7 +403,7 @@
   "privacy.thisWebsite": "60b896e5173a5e7d",
   "privacy.theSiteIsStatic": "0632bdccfe12df94",
   "privacy.theKnowledgeBasePages": "0d36a87928a62be3",
-  "privacy.yourBrowserKeepsYour": "c67745c974dda2df",
+  "privacy.yourBrowserKeepsYour": "8b9a7ea25b0e0782",
   "privacy.theEngineeringWikiAt": "b0d767da2d26ca66",
   "privacy.searchesAndPageRequests": "718090521aa01687",
   "privacy.contributions": "7219a0256285ca25",
@@ -540,5 +540,7 @@
   "learnArticle.moreArticles": "9b33bb209c3ad251",
   "learnArticle.backToLearn": "610358d3f69694e0",
   "learnArticle.titleSuffix": "15805843855bcd0f",
-  "learnArticle.inEnglish": "278e2655789ec743"
+  "learnArticle.inEnglish": "278e2655789ec743",
+  "language.choose": "f6d5b7cd75aca8be",
+  "language.label": "a4fe65264ef7dbb3"
 }

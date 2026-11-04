@@ -101,6 +101,9 @@ jobs:
         run: |
           npm run build:pseudo
           python3 ../scripts/ci/check_i18n_coverage.py dist-pseudo
+      - name: Every drafted language still builds (preview, never deployed)
+        working-directory: frontend
+        run: npm run build:preview
       - name: webapp/static is this commit's build (report-only)
         # The tracked webapp/static must be the build of the commit it sits in: text assets, byte
         # for byte, built like this job builds (no PUBLIC_* variable set). Report-only until a copy

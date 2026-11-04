@@ -131,6 +131,48 @@ function wireNavScrolled() {
   cleanups.push(() => sentinel.remove());
 }
 
+// The reader's language choice, kept in this browser only (named on the privacy page).
+const LANG_KEY = "gs_lang";
+
+/** The language switcher (components/LanguageSwitcher.astro): the nav list opens from its button
+    and closes on Escape (focus back on the button), an outside click or a choice. Every choice
+    keeps the #section and is remembered, so a later visit to gurbanisoul.com/ opens in it. */
+function wireLanguageSwitcher() {
+  const box = document.querySelector<HTMLElement>("[data-lang-switcher]");
+  const btn = box?.querySelector<HTMLButtonElement>(".lang-btn");
+  const list = box?.querySelector<HTMLElement>(".lang-list");
+  const set = (open: boolean) => {
+    if (!btn || !list) return;
+    btn.setAttribute("aria-expanded", String(open));
+    list.hidden = !open;
+  };
+  const onBtn = () => {
+    const open = btn?.getAttribute("aria-expanded") !== "true";
+    set(open);
+    if (open) list?.querySelector<HTMLAnchorElement>("a")?.focus();
+  };
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === "Escape" && btn?.getAttribute("aria-expanded") === "true") { set(false); btn.focus(); }
+  };
+  const onDoc = (e: MouseEvent) => { if (box && !box.contains(e.target as Node)) set(false); };
+  const onChoice = (e: Event) => {
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[data-lang-choice]");
+    if (!a) return;
+    try { localStorage.setItem(LANG_KEY, a.dataset.langChoice || ""); } catch {}
+    if (location.hash && !a.hash) a.hash = location.hash;
+  };
+  btn?.addEventListener("click", onBtn);
+  document.addEventListener("keydown", onKey);
+  document.addEventListener("click", onDoc);
+  document.addEventListener("click", onChoice, true);
+  cleanups.push(() => {
+    btn?.removeEventListener("click", onBtn);
+    document.removeEventListener("keydown", onKey);
+    document.removeEventListener("click", onDoc);
+    document.removeEventListener("click", onChoice, true);
+  });
+}
+
 /** aria-current="page" on the primary/mobile nav link whose route matches the current pathname.
     The server renders this correctly per page; this re-asserts it after each ClientRouter swap. */
 function wireNavActive() {
@@ -319,6 +361,7 @@ function init() {
   wireThemeProxies();
   wireNavScrolled();
   wireNavActive();
+  wireLanguageSwitcher();
   wireReveal();
   wireRaagClock();
   wireTocActive();

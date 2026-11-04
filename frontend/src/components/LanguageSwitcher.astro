@@ -1,0 +1,62 @@
+---
+// LanguageSwitcher.astro — the reader's choice of language, in three forms: "nav" (a quiet button
+// with a small list, beside the theme button), "sheet" (a row in the phone menu) and "footer" (a
+// plain list). Renders nothing while one language is enabled.
+//
+// Each link opens the SAME page in the other language (a Learn article not yet translated there
+// opens that language's Learn index), each name in its own language and script, with lang/hreflang;
+// no flags — languages are not countries. A full page load (data-astro-reload): fonts, <html lang>
+// and the client strings all change. landing.ts wireLanguageSwitcher() opens and closes the list
+// (Escape returns focus), keeps the #section on the way, and remembers the choice in localStorage
+// ("gs_lang", named on the privacy page) — never a cookie.
+import { ENABLED_LOCALES, LOCALES } from "../i18n/locales";
+import { localeOf, localizeHref, stripLocale } from "../i18n/paths";
+import { alternates } from "../i18n/content";
+import { useT } from "../i18n/t";
+
+export interface Props { variant: "nav" | "sheet" | "footer" }
+const { variant } = Astro.props;
+const here = Astro.url.pathname;
+const lang = localeOf(here);
+const { t } = useT(lang);
+const page = stripLocale(here);
+const versions = new Set(alternates(here).map((a) => a.lang));
+const choices = ENABLED_LOCALES.map((l) => ({
+  code: l,
+  ...LOCALES[l],
+  href: versions.has(l) ? localizeHref(page, l) : localizeHref(page.startsWith("/learn") ? "/learn" : "/", l),
+  current: l === lang,
+}));
+const show = ENABLED_LOCALES.length > 1;
+---
+{show && variant === "nav" && (
+  <div class="lang-sw" data-lang-switcher>
+    <button type="button" class="lang-btn" aria-expanded="false" aria-controls="langList" aria-label={t("language.choose")}>
+      <span class="lang-name" lang={LOCALES[lang].htmlLang}>{LOCALES[lang].name}</span>
+      <span class="lang-code" aria-hidden="true">{lang.toUpperCase()}</span>
+      <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+    </button>
+    <ul class="lang-list" id="langList" hidden>
+      {choices.map((c) => (
+        <li><a href={c.href} lang={c.htmlLang} hreflang={c.htmlLang} data-lang-choice={c.code} data-astro-reload
+               aria-current={c.current ? "true" : undefined}>{c.name}</a></li>
+      ))}
+    </ul>
+  </div>
+)}
+{show && variant === "sheet" && (
+  <nav class="lang-row" aria-label={t("language.label")}>
+    {choices.map((c) => (
+      <a href={c.href} lang={c.htmlLang} hreflang={c.htmlLang} data-lang-choice={c.code} data-astro-reload
+         aria-current={c.current ? "true" : undefined}>{c.name}</a>
+    ))}
+  </nav>
+)}
+{show && variant === "footer" && (
+  <ul class="lang-foot" aria-label={t("language.label")}>
+    {choices.map((c) => (
+      <li><a href={c.href} lang={c.htmlLang} hreflang={c.htmlLang} data-lang-choice={c.code} data-astro-reload
+             aria-current={c.current ? "true" : undefined}>{c.name}</a></li>
+    ))}
+  </ul>
+)}

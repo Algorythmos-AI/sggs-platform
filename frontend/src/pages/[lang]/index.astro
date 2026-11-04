@@ -40,7 +40,7 @@ import compareShot from '../../assets/app/iphone-compare-light.png';
 import { localeStaticPaths, type Locale } from "../../i18n/locales";
 import { localizeHref } from "../../i18n/paths";
 import { fmtNumber } from "../../i18n/format";
-import { LOCALES } from "../../i18n/locales";
+import { ENABLED_LOCALES, LOCALES } from "../../i18n/locales";
 import { learnHref, articleLangFor } from "../../i18n/content";
 import { useT } from "../../i18n/t";
 
@@ -157,6 +157,21 @@ const softwareApplication = {
       } catch (e) {}
     })();
   </script>
+  {ENABLED_LOCALES.length > 1 && (
+    <script is:inline define:vars={{ enabled: ENABLED_LOCALES, here: lang }}>
+      // The bare root sent this visitor here by browser language (vercel.json). If they chose
+      // another language on this site before (localStorage "gs_lang"), open that one instead —
+      // only right after that redirect, so a link or a back-button visit is never redirected.
+      (function () {
+        try {
+          var nav = performance.getEntriesByType("navigation")[0];
+          if (!nav || !nav.redirectCount) return;
+          var pref = localStorage.getItem("gs_lang");
+          if (pref && pref !== here && enabled.indexOf(pref) !== -1) location.replace("/" + pref + location.search + location.hash);
+        } catch (e) {}
+      })();
+    </script>
+  )}
 
   <MarketingNav />
 
