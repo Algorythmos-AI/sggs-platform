@@ -11,7 +11,7 @@ Every table in the pinned database: 41 tables, of which 4 are full-text indexes 
 
 | The pinned dataset | |
 |---|---|
-| Built by | [`Algorythmos-AI/sggs-data`](https://github.com/Algorythmos-AI/sggs-data) at `cc9ed992` |
+| Built by | [`Algorythmos-AI/sggs-data`](https://github.com/Algorythmos-AI/sggs-data) at `ff6f6339` |
 | `DATASET_VERSION` (the lock) | `1.4.0` |
 | Database build version (`meta.version`) | `1.3.0`, built 2026-10-28 |
 | SHA-256 | `86d7ec96f12a6e69…` |
