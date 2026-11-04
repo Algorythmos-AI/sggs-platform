@@ -12,11 +12,12 @@ covered the region becomes the whole page.
 
 Exempt: Gurmukhi (anything inside lang="pa" or class="gm" — scripture and the ੴ mark are never
 translated here) and its transliteration (class="rom"), text without letters (numbers, symbols, punctuation), the product name, email
-addresses, web addresses, clock ranges formatted per language, and Learn article titles and descriptions (content, translated with the
+addresses, web addresses, dates and clock ranges formatted per language, and Learn article titles and descriptions (content, translated with the
 articles themselves). Stdlib only.
 """
 from __future__ import annotations
 
+import fnmatch
 import re
 import sys
 from html.parser import HTMLParser
@@ -48,10 +49,16 @@ PAGES = {
     "en/support/index.html": [("main", "id", "main"), ("title", None, None)],
     "en/privacy/index.html": [("main", "id", "main"), ("title", None, None)],
     "en/contribute/index.html": [("main", "id", "main"), ("title", None, None)],
+    "en/learn/index.html": [("main", "id", "main"), ("title", None, None)],
+    # Learn articles: the page chrome only; the article body is content, translated per article.
+    "en/learn/*/index.html": [("nav", "class", "art-nav"), ("p", "class", "explain-label"),
+                              ("figcaption", "class", "cite"), ("p", "class", "art-meta"), ("title", None, None)],
 }
 ATTRS = ("aria-label", "alt", "title", "placeholder")
 ALLOWED = {"Gurbani Soul"}
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
+# A date formatted per language by i18n/format.ts (fmtDate): "22 September 2026".
+DATE = re.compile(r"\d{1,2} \w+ \d{4}")
 # A clock range formatted per language by i18n/format.ts (fmtPaharRange): "6–9 AM", "9 AM–12 PM".
 CLOCK = re.compile(r"\d{1,2}(:\d\d)?( ?[AP]M)?\s*[–-]\s*\d{1,2}(:\d\d)?( ?[AP]M)?")
 ADDRESS = re.compile(r"[\w-]+(\.[\w-]+)+(/[\w./-]*)?")   # gurbanisoul.com/search
@@ -59,7 +66,7 @@ VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "met
 
 
 def learn_titles() -> set[str]:
-    """Learn article titles, descriptions and cover alt text: content, translated with the articles."""
+    """Learn article titles, descriptions, tags and cover alt text: content, translated with the articles."""
     out = set()
     for p in LEARN.rglob("*.mdx"):
         text = p.read_text(encoding="utf-8")
@@ -67,6 +74,9 @@ def learn_titles() -> set[str]:
             m = re.search(rf'(?m)^{field}:\s*["\']?(.*?)["\']?\s*$', text)
             if m:
                 out.add(" ".join(m.group(1).split()))
+        tags = re.search(r"(?m)^tags:\s*\[(.*?)\]", text)
+        if tags:
+            out.update(t.strip().strip("\"'") for t in tags.group(1).split(","))
     out.update(re.findall(r"alt: '([^']*)'", COVERS.read_text(encoding="utf-8")))
     return out
 
@@ -118,7 +128,8 @@ class Scan(HTMLParser):
     def _check(self, s: str, where: str):
         s = " ".join(s.split())
         if (not s or MARK in s or not re.search(r"[A-Za-z]", s) or s in ALLOWED or s in self.exempt
-                or EMAIL.fullmatch(s) or ADDRESS.fullmatch(s) or CLOCK.fullmatch(s)):
+                or EMAIL.fullmatch(s) or ADDRESS.fullmatch(s) or CLOCK.fullmatch(s) or DATE.fullmatch(s)
+                or s.strip("←→ ") in self.exempt):                   # "← Article title" (prev/next)
             return
         self.bad.append(f"{where} {s!r}".strip())
 
@@ -137,7 +148,8 @@ def main(argv: list[str]) -> int:
     for p in pages:
         html = p.read_text(encoding="utf-8")
         marked += html.count(MARK)
-        s = Scan(exempt, PAGES.get(p.relative_to(out).as_posix()))
+        rel = p.relative_to(out).as_posix()
+        s = Scan(exempt, [m for pat, ms in PAGES.items() if fnmatch.fnmatch(rel, pat) for m in ms])
         s.feed(html)
         for b in s.bad:
             print(f"{p.relative_to(out).as_posix()}: {b}")
