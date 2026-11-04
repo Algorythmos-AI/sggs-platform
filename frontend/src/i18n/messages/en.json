@@ -57,5 +57,184 @@
     "onThisPage": "On this page",
     "contents": "Contents",
     "lastUpdated": "Last updated {date}"
+  },
+  "home": {
+    "title": "Gurbani Soul — Sri Guru Granth Sahib Ji, verbatim & offline",
+    "description": "Gurbani Soul is a quiet, exact companion to Sri Guru Granth Sahib Ji for iPhone and iPad — the complete Granth, verbatim and cited by Ang, fully offline, never AI-generated.",
+    "hero": {
+      "imageAlt": "Sri Harmandir Sahib at sunset — artistic rendering",
+      "eyebrow": "For iPhone and iPad",
+      "lede": "A quiet, exact companion to Sri Guru Granth Sahib Ji. Verbatim, cited by Ang, never invented.",
+      "download": "Download on the App Store",
+      "comingSoon": "Coming soon to the App Store",
+      "openKnowledgeBase": "Open the Knowledge Base",
+      "chipsLabel": "The app",
+      "chipOffline": "Fully offline",
+      "chipNoAccount": "No account",
+      "chipNoTracking": "No tracking",
+      "deviceAlt": "Gurbani Soul Reader on iPhone, open at Ang 1 in Sant Lipi"
+    },
+    "proof": {
+      "label": "The Granth in numbers",
+      "angs": "Angs — the complete Granth",
+      "lines": "lines, each cited by Ang",
+      "characters": "characters, zero loss",
+      "networkCalls": "network calls in the app",
+      "none": "None",
+      "dataCollected": "data collected — the App Store label is “Data Not Collected”"
+    },
+    "verse": {
+      "cite": "Sri Guru Granth Sahib Ji · Ang {ang}",
+      "note": "Shown verbatim from the source edition."
+    },
+    "read": {
+      "chapter": "Read",
+      "title": "The whole Granth, set to be read",
+      "body": "All {angs} Angs in Sant Lipi, on warm paper or in a night scheme that is never pure black. Turn pages, jump to any Ang, pick up where you left off. Every composition opens with its printed heading.",
+      "facts": {
+        "santLipi": "Sant Lipi",
+        "saroop": "Traditional saroop",
+        "sehaj": "Sehaj focus",
+        "accents": "Five accents",
+        "night": "Night scheme",
+        "ipad": "iPad landscape"
+      },
+      "ipadAlt": "Reader on iPad in landscape, open at Ang 705 with transliteration under each line",
+      "phoneAlt": "Reader on iPhone in the night scheme, open at Ang 1"
+    },
+    "search": {
+      "chapter": "Search",
+      "title": "Search the way you remember",
+      "body": "A word in Gurmukhi, a word as it sounds in Roman letters, or just the first letters of each word — the way a line comes back to you. Auto mode works out which you meant. Verify checks a line you were sent against the text and tells you plainly.",
+      "facts": {
+        "auto": "Auto",
+        "gurmukhi": "Gurmukhi",
+        "roman": "Roman",
+        "firstLetters": "First letters",
+        "theme": "Theme",
+        "verify": "Verify"
+      },
+      "romanAlt": "Search on iPhone: the Roman word naam, in Auto mode, finds matching lines with their Ang and voice",
+      "firstAlt": "Search on iPhone by first letters, finding a line from Ang 1"
+    },
+    "photoBand": {
+      "alt": "Sri Harmandir Sahib at night, lit gold and reflected in the sarovar",
+      "statement": "Made for every day, not for scrolling.",
+      "sub": "No feed. No notifications you did not ask for. The text, and your place in it."
+    },
+    "nitnem": {
+      "chapter": "Nitnem",
+      "title": "Nitnem, with your place kept",
+      "body": "The daily banis by time of day — Japji, Jaap, Savaiye, Chaupai and Anand in the morning, Rehras at dusk, Sohila at night — with Sukhmani, Asa di Vaar and Ardaas alongside. The app remembers where you are in each and keeps a quiet record of the days you read. Reminders are optional, local, and yours to set.",
+      "detail": "Banis from Sri Guru Granth Sahib Ji come from the same verified corpus, cited by Ang. Dasam Granth and Ardaas text are a separate, labelled, scholar-reviewed layer.",
+      "ipadAlt": "Nitnem on iPad in landscape: the morning banis with progress rings, and the full list by time of day",
+      "phoneAlt": "Japji Sahib open in the Nitnem reader on iPhone, cited Ang 1 to 8, at line 1 of 385"
+    },
+    "watch": {
+      "chapter": "The watch",
+      "title": "Eight watches. {raagsWord} raags. One face.",
+      "body": "The day is divided into eight pahars, and different raags belong to different watches. The Raag Clock shows which belong to this one — by fixed hours, or by your local sunrise and sunset. The deep night is left in silence.",
+      "cta": "See the Raag Clock",
+      "alt": "Raag Clock on iPhone in the dark scheme: the 2nd pahar of day and the raags sung in this watch"
+    },
+    "widgets": {
+      "chapter": "At a glance",
+      "title": "On your Home Screen and Lock Screen",
+      "body": "Three widgets: the raag of the moment, the Hukam of the day with its Ang, and today's Nitnem — in sizes from small to large, with Lock Screen accessories for the raag and the Nitnem. The Hukam of the day is one complete Hukam for the whole day, chosen by the date: the same in the app and in Siri, with its opening verse on the widget. An optional Live Activity shows how far you have read a bani. It never shows a verse.",
+      "detail": "Ask Siri for “Today’s Hukam”, “What raag is it now”, “Read a Vaar”, “Open a theme” or “Open a voice”. Spotlight finds your saved verses and every theme.",
+      "raagLightAlt": "Raag Now widget, small: the 24-hour dial at 4:40 pm, the 4th pahar of day",
+      "hukamAlt": "Hukam of the day widget, medium: an opening verse with its transliteration, cited Sri Guru Granth Sahib Ji, Ang 13",
+      "nitnemAlt": "Nitnem widget, medium: the morning banis, with Jaap Sahib next and a progress ring",
+      "raagDarkAlt": "Raag Now widget, small, in the dark scheme: the 24-hour dial at 4:40 pm, the 4th pahar of day",
+      "liveActivityAlt": "Live Activity on the Lock Screen: reading Japji Sahib, a progress ring at 1%",
+      "liveActivityCaption": "Live Activity on the Lock Screen — progress only, never a verse."
+    },
+    "explore": {
+      "chapter": "Explore",
+      "title": "Explore the Granth from every side",
+      "body": "An Index in the order of the saroop, with a page for every raag. All {vaars} Vaars, woven pauri by pauri as printed. {themes} themes, each with its own page. The {voices} voices of the Granth, {centuries}, each with a page of their own. Constellation, Insights and the Raag Clock beside them.",
+      "centuries": "{firstOrdinal} to {lastOrdinal} century",
+      "cta": "See what each one does",
+      "tiles": {
+        "vaars": {
+          "name": "The Vaars",
+          "caption": "All {vaars} Vaars, with the voices who wrote each one's pauris and saloks.",
+          "alt": "The Vaars screen on iPhone: 22 Vaars, 471 pauris and 972 saloks, then each Vaar by raag with its voices"
+        },
+        "index": {
+          "name": "The Index",
+          "caption": "The Granth in saroop order, Ang 1 to Ang {angs}.",
+          "alt": "The Index on iPhone: the saroop ribbon across 1,430 Angs, and the major compositions with their reading times"
+        },
+        "forms": {
+          "name": "Forms",
+          "caption": "The poetic forms the printed headings name, and where each is found.",
+          "alt": "The Index on iPhone, Forms tab: each poetic form named in the printed headings, with the raag and Ang of each place"
+        },
+        "voice": {
+          "name": "A voice's page",
+          "caption": "Guru Tegh Bahadur Ji's page: where their Bani sits in the Granth, and in which raags.",
+          "alt": "The page for Guru Tegh Bahadur Ji on iPhone: dates, the Angs where their Bani appears, and counts of verses, compositions and raags"
+        },
+        "compare": {
+          "name": "Compare",
+          "caption": "Two voices side by side: where each appears, and the themes each dwells on.",
+          "alt": "Compare on iPhone: Guru Tegh Bahadur Ji beside Guru Nanak Dev Ji, the Angs where each appears and how strongly each carries a theme"
+        }
+      },
+      "figuresLabel": "The Granth, counted",
+      "figures": {
+        "raags": "raags, a page for each",
+        "vaars": "Vaars, woven as printed",
+        "themes": "themes, a page for each",
+        "voices": "voices, a page for each"
+      }
+    },
+    "verbatim": {
+      "chapter": "Verbatim",
+      "statement": "Nothing corrected. Nothing invented.",
+      "body": "The text is reproduced character for character from the source edition. Nothing is normalised, modernised or improved.",
+      "never": "Never AI-generated.",
+      "reconciledTitle": "Reconciled",
+      "reconciledBody": "All {characters} characters are proven against the source edition, character for character — zero loss.",
+      "sealedTitle": "Sealed",
+      "sealedBody": "The bundled text carries a SHA-256 checksum, fixed when the app is built.",
+      "checkedTitle": "Checked",
+      "checkedBody": "The app checks it when it is installed or updated. If a check fails, the app refuses to show the text rather than risk showing it altered."
+    },
+    "private": {
+      "chapter": "Private",
+      "statement": "Nothing leaves your device.",
+      "body": "No account. No network connections — the app works in Airplane Mode. The app has no analytics, no tracking and no third-party code. Its App Store privacy label is ‘Data Not Collected’.",
+      "facts": {
+        "accounts": "No accounts",
+        "network": "No network",
+        "tracking": "No tracking",
+        "dataNotCollected": "Data Not Collected"
+      },
+      "cta": "Read the privacy policy",
+      "alt": "About screen on iPhone, version 1.4.9: the four scripture integrity checks, all passed"
+    },
+    "learn": {
+      "eyebrow": "Learn",
+      "title": "Understand what you are reading",
+      "body": "Short, plain explanations. Every quotation is verbatim and cited by its Ang; interpretation is always labelled.",
+      "readMore": "Read the article →",
+      "allArticles": "All articles",
+      "kbTitle": "Prefer the browser?",
+      "kbBody": "The same verified text and study tools live on the web, cited by Ang.",
+      "kbCta": "Open the Knowledge Base",
+      "kbMockSearch": "Search by word, sound or first letters",
+      "kbMockGo": "Search"
+    },
+    "download": {
+      "imageAlt": "Sri Harmandir Sahib at sunset — artistic rendering, shown faintly",
+      "statement": "Quiet, exact, always with you.",
+      "body": "Sri Guru Granth Sahib Ji on your iPhone and iPad — the complete Granth, verbatim, fully offline.",
+      "store": "Download on the App Store",
+      "comingSoon": "Coming soon to the App Store",
+      "features": "See every feature",
+      "fine": "Free · iPhone and iPad · no account"
+    }
   }
 }

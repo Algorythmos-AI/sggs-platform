@@ -83,7 +83,11 @@ let parsed = 0, roundTrip = 0;
 for (const [key, src] of flat(en)) {
   const hasArgs = /[{<]/.test(src);
   if (!hasArgs) { if (f.t(key) === src) roundTrip++; else eq(`"${key}" renders as written`, f.t(key), src); }
-  else if (throws(() => f.rich(key, { year: "2026", amount: "A$5", what: "x", who: "y", date: "1 May 2026" }))) eq(`"${key}" parses`, false, true);
+  else {
+    // A value for every placeholder the message names ({name} or {name, select, …}).
+    const values = Object.fromEntries([...src.matchAll(/\{\s*(\w+)/g)].map(([, n]) => [n, "x"]));
+    if (throws(() => f.rich(key, values))) eq(`"${key}" parses`, false, true);
+  }
   parsed++;
 }
 eq("every source message parses", parsed > 0, true);
