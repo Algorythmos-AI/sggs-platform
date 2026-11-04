@@ -71,3 +71,20 @@ export const createFormatter = (catalog, intl, opts = {}) => {
 
   return { t, rich };
 };
+
+/** Escape text for HTML. @param {unknown} s */
+export const escapeHtml = (s) =>
+  String(s).replace(/[&<>"']/g, (c) => /** @type {Record<string,string>} */ ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+/** Rich parts as an HTML string, for the few places that need markup as text (the FAQ answers and
+ *  their FAQPage JSON-LD). Every text part and tag text is escaped; only the renderers — written
+ *  in our own pages — produce markup.
+ *  @param {(string | { tag: string, text: string })[]} parts
+ *  @param {Record<string, (escapedText: string) => string>} renderers */
+export const richHtml = (parts, renderers) =>
+  parts.map((p) => {
+    if (typeof p === "string") return escapeHtml(p);
+    const r = renderers[p.tag];
+    if (!r) throw new Error(`i18n: no renderer for <${p.tag}>`);
+    return r(escapeHtml(p.text));
+  }).join("");

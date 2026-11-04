@@ -436,5 +436,205 @@
   },
   "raagArc": {
     "label": "A dial of the eight pahars — the watches of the day"
+  },
+  "privacy": {
+    "privacyPolicyGurbaniSoul": "Privacy Policy — Gurbani Soul",
+    "privacyPolicy": "Privacy Policy",
+    "theAppCollectsNothing": "The app collects nothing. Here is exactly what that means.",
+    "appliesToTheGurbani": "Applies to the <strong1>Gurbani Soul</strong1> app for iPhone and iPad (bundle <code1>org.sggs.app</code1>, including its widgets and Live Activity) and to this website.",
+    "theAppMakesNo": "The app makes <strong1>no network connections</strong1>. It works fully in Airplane Mode.",
+    "noAnalyticsNoAdvertising": "No analytics, no advertising, no tracking, no third-party SDKs in the app. This website counts page views anonymously, without cookies; see <link1>This website</link1>.",
+    "savedVersesAreStored": "<strong1>Saved verses</strong1> are stored in the app's own database on your device. If you save a verse, it is also added to your device's Spotlight index so you can find it from the Home Screen search; unsaving removes it. Spotlight data stays on your device.",
+    "themesInSpotlightThe": "<strong1>Themes in Spotlight</strong1>: the app also adds the {themes} theme names, with their Gurmukhi words and verse counts, to Spotlight so a theme can be opened from the Home Screen search. These entries hold nothing about you.",
+    "yourThemesOnThe": "<strong1>Your themes</strong1> on the Themes page is worked out on your device from your saved verses. It is never sent anywhere, and you can turn it off in More (“Show Your themes”).",
+    "settingsAccentColourTransliteration": "<strong1>Settings</strong1> (accent colour, transliteration, traditional rendering, last Ang read) are stored in the app's local preferences.",
+    "vaarsWhereYouAre": "<strong1>Vaars</strong1>: where you are in a Vaar you are reading is stored in a small file in the app's own App Group container on your device. It is never transmitted.",
+    "nitnemProgressWhereYou": "<strong1>Nitnem</strong1> progress (where you are in each bani, which days you completed it, your own sets and journey) is stored in small files in the app's own App Group container on your device, so the Nitnem widget can show it. It is never transmitted.",
+    "remindersAreOptionalLocal": "<strong1>Reminders</strong1> are optional local notifications. The app asks for notification permission only when you turn a reminder on, schedules them on your device at the times you choose, and uses no push service: no notification ever comes from a server, and no device token is created or sent anywhere.",
+    "liveActivityIsOptional": "<strong1>Live Activity</strong1> is optional and off by default. When you turn it on, a reading session shows its progress on your Lock Screen and in the Dynamic Island. It is driven entirely on your device (no push updates) and never shows a verse.",
+    "widgetsReadASmall": "<strong1>Widgets</strong1> read a small snapshot the app writes into its own App Group container on your device: the raag watch, the Hukam of the day for the next two weeks with their Angs, today's Nitnem progress, and — if you use solar mode — your clock-mode choice and the same ~1 km rounded coordinates. Nothing leaves the device.",
+    "locationIsUsedOnly": "<strong1>Location</strong1> is used only by the Raag Clock's optional solar mode to compute local sunrise and sunset. It is requested only when you tap “Use my location” in solar mode. The fix is rounded to two decimal places (about 1 km) before it is stored in the app's own App Group container — shared only with the app's widgets on the same device — and the raw position is never kept. You can enter a location manually instead, or deny the permission; the clock still works.",
+    "integrityChecksReadThe": "<strong1>Integrity checks</strong1> read the bundled scripture database's size and modification date to decide whether its checksum needs re-verifying. This is why the app's privacy manifest declares the \"file timestamp\" and \"user defaults\" API reasons. Nothing is displayed or transmitted.",
+    "diagnosticsIfTheApp": "<strong1>Diagnostics</strong1>: if the app ever crashes or hangs, iOS may hand it a diagnostic report. The app writes that report to its own local folder; it is never uploaded. You can see how many there are, share them via the system share sheet to a destination you choose, or delete them under More → About & credits → Integrity — nothing leaves the device unless you send it. Separately, Apple may share crash reports with us through App Store Connect <em1>only</em1> if you have enabled \"Share with App Developers\" in your iOS Privacy & Security → Analytics settings. Those reports are governed by Apple's privacy policy and contain no account or identity information.",
+    "becauseTheAppCollects": "Because the app collects no data, its App Store privacy label is <strong1>\"Data Not Collected\"</strong1>.",
+    "theGurbaniSoulPages": "The Gurbani Soul pages (the home page, Features, The watch, Learn, Support, Contribute and this policy) count page views with <strong1>Vercel Web Analytics</strong1>, and only when served from gurbanisoul.com. It uses no cookies and does not follow you across other sites. It records the page, the referring site, and your country, browser, operating system and device type as anonymous totals; visitors are counted with a short-lived hash that is discarded after a day. We do not build profiles from it or share it.",
+    "ifYouAskTo": "If you ask to be told when the app is on the App Store, the email address you type is sent to <strong1>Buttondown</strong1>, which sends that one email. Nothing else is sent with it, and you can unsubscribe from the email itself.",
+    "locationIsUsedOn": "<strong1>Location</strong1> is used on this website only if you switch the Raag Clock to solar mode, to work out local sunrise and sunset. Switching the mode on asks for nothing: your browser asks your permission only when you press “Use my location”, or you can type coordinates in yourself. The position is rounded to two decimal places (about 1 km) and kept in your browser's local storage; it is never sent to us or anyone else, and “Forget location” removes it. Without a location, the clock stays on fixed hours.",
+    "ifYouChooseTo": "If you choose to contribute on <link1>gurbanisoul.com/contribute</link1>, you leave this site for a checkout page run by <strong1>Stripe</strong1>, which processes the payment under its own <link2>privacy policy</link2>. Our pages load no Stripe code before you click. We never see or store your card details. Stripe gives us your email address, name, the amount and the date, which we use only for receipts, refunds and our business records (kept as long as Australian tax law requires) and never share or use for marketing.",
+    "questionsAboutPrivacySupport": "Questions about privacy: <link1>support@gurbanisoul.com</link1>. For help with the app, see <link2>Support</link2>.",
+    "theShortVersion": "The short version",
+    "noAccountsNothingTo": "No accounts. Nothing to sign up for, nothing to log in to.",
+    "everythingYouDoIn": "Everything you do in the app (saved verses, settings, reading position, Nitnem progress and reminders) stays on your device.",
+    "locationIsOptionalUsed": "Location is optional, used only on your device, and never transmitted.",
+    "theApp": "The app",
+    "theAppBundlesThe": "The app bundles the complete text of Sri Guru Granth Sahib Ji, plus the Nitnem banis as a separate, labelled layer, and searches it locally. It never sends a request to any server, so we cannot see what you read, search for or save. Specifically:",
+    "thisWebsite": "This website",
+    "theSiteIsStatic": "The site is static, carries no advertising, and sets no cookies.",
+    "theKnowledgeBasePages": "The Knowledge Base pages (search, reader and the study tools) load no analytics.",
+    "yourBrowserKeepsYour": "Your browser keeps your settings for this site in its local storage: theme (light or dark, colour theme and paper tone), text size, transliteration, the traditional-rendering toggle, the raag-timing label and focus mode. It also keeps the Ang you last read in the Reader, your Nitnem reading positions and Rehras choice, the verses you pin to the Study Trail, and your Raag Clock setting. While you browse, session storage holds the path you walk on the Semantic Trail, and the tab clears it when you close it. All of this lives in your browser; clearing site data removes it.",
+    "theEngineeringWikiAt": "The engineering wiki at docs.gurbanisoul.com offers links that open ChatGPT or Claude with the address of the page you are reading. Following one takes you to that service, under its own privacy policy; the wiki records nothing.",
+    "searchesAndPageRequests": "Searches and page requests are answered by our API. The hosting providers we use (Vercel for the site, Render for the API) keep standard server logs — IP address, user agent, request path and time — for security and operations, under their own retention rules. We do not add tracking to those logs, do not build profiles from them, and do not share them.",
+    "contributions": "Contributions",
+    "children": "Children",
+    "theAppIsRated": "The app is rated 4+ and collects no personal information from anyone, of any age.",
+    "yourDataYourControl": "Your data, your control",
+    "weHoldNoData": "We hold no data about you, so there is nothing for us to export, correct or delete. Everything the app stores is on your device: deleting the app removes it. Everything the site stores is in your browser: clearing site data removes it.",
+    "changes": "Changes",
+    "ifThisPolicyEver": "If this policy ever changes, the date at the top changes with it and the new text is published here before it takes effect. The app will not start collecting data without a new version, a new policy, and a new App Store privacy label.",
+    "contact": "Contact",
+    "theShortVersion2": "The short version",
+    "theApp2": "The app",
+    "thisWebsite2": "This website",
+    "contributions2": "Contributions",
+    "children2": "Children",
+    "yourDataYourControl2": "Your data, your control",
+    "changes2": "Changes",
+    "contact2": "Contact",
+    "theGurbaniSoulApp": "The Gurbani Soul app collects nothing: no accounts, no network connections, no analytics. Exactly what stays on your device, and what this website does."
+  },
+  "contributeTiers": {
+    "once": "{amount}",
+    "monthly": "{amount} / month",
+    "notes": {
+      "once-5": "A small offering",
+      "once-11": "Helps keep the lights on",
+      "once-21": "Helps cover a month of hosting",
+      "once-51": "Helps fund scholarly review",
+      "monthly-5": "Steady sewa",
+      "monthly-11": "Steady sewa",
+      "monthly-21": "Steady sewa"
+    },
+    "customMin": "from {amount}"
+  },
+  "contribute": {
+    "contributeGurbaniSoul": "Contribute — Gurbani Soul",
+    "contribute": "Contribute",
+    "keepGurbaniSoulFree": "Keep Gurbani Soul free, offline and ad-free",
+    "testModeTheseLinks": "<strong1>Test mode.</strong1> These links use Stripe's test environment; no real payment is taken.",
+    "hostingForTheWebsite": "<strong1>Hosting</strong1> for the website, search and the Knowledge Base.",
+    "scholarlyReviewOfThe": "<strong1>Scholarly review</strong1> of the text and of how it is presented.",
+    "licensingIncludingALicence": "<strong1>Licensing</strong1>, including a licence for an English translation layer, and typefaces.",
+    "feesTheAppleDeveloper": "<strong1>Fees</strong1>: the Apple Developer Program and the domain.",
+    "yesEmailWithin30": "Yes. Email <link1></link1> within 30 days and we will refund it in full.",
+    "anyTimeYourselfFrom": "Any time, yourself, from the <link1>Stripe customer portal</link1> (sign in with the email on your receipt), or email us.",
+    "anyTimeUseThe": "Any time: use the link in your Stripe receipt, or email <link1></link1>.",
+    "stripeProcessesThePayment": "Stripe processes the payment and keeps the details it needs, under its own privacy policy. We see your name, email, the amount and the date, use them only for receipts, refunds and our accounts, and never share them. See the <link1>Privacy Policy</link1>.",
+    "thankYou": "Thank you",
+    "ifYourPaymentWent": "If your payment went through, Stripe has emailed your receipt. Thank you for helping keep Gurbani Soul free for everyone.",
+    "whySupport": "Why support",
+    "gurbaniSoulHasNo": "Gurbani Soul has no advertising, sells no data and has no paid tier. The scripture will never be behind a paywall. Contributions pay for the work that keeps the text exact and the app available: hosting, scholarly review, licensing and the yearly developer fees.",
+    "contribute2": "Contribute",
+    "chooseYourOwnAmount": "Choose your own amount",
+    "chooseYourOwnAmount2": "Choose your own amount — link not connected yet.",
+    "once": "Once",
+    "contribute3": "Contribute",
+    "linkNotConnectedYet": "Link not connected yet",
+    "monthly": "Monthly",
+    "contribute4": "Contribute",
+    "linkNotConnectedYet2": "Link not connected yet",
+    "paymentsAreHandledOn": "Payments are handled on Stripe's secure checkout page; we never see your card details. Prices are in Australian dollars; your bank may convert them.",
+    "contributionsAreOpeningSoon": "Contributions are opening soon. Thank you for your patience.",
+    "whereItGoes": "Where it goes",
+    "questions": "Questions",
+    "isMyContributionTax": "Is my contribution tax-deductible?",
+    "noGurbaniSoulIs": "No. Gurbani Soul is built by Algorythmos Pty Ltd (ABN 22 701 006 626), an Australian company, not a registered charity. A contribution is a payment to the company to support the project, not a charitable gift.",
+    "doesContributingUnlockAnything": "Does contributing unlock anything?",
+    "noEverythingStaysFree": "No. Everything stays free for everyone, whether or not they contribute.",
+    "canIGetA": "Can I get a refund?",
+    "howDoIStop": "How do I stop a monthly contribution?",
+    "whatDoYouKeep": "What do you keep about me?",
+    "whySupport2": "Why support",
+    "contribute5": "Contribute",
+    "whereItGoes2": "Where it goes",
+    "questions2": "Questions",
+    "gurbaniSoulIsFree": "Gurbani Soul is free, offline and ad-free. An optional contribution helps keep it that way.",
+    "lede": "Every feature of Gurbani Soul and this Knowledge Base is free for everyone, with no ads and no tracking. If it serves your seva and study, you can help cover what it costs to run. Contributing is optional and unlocks nothing."
+  },
+  "supportFaq": {
+    "q1": {
+      "q": "Does the app need an internet connection?",
+      "a": "No. The whole Granth is bundled inside the app. It never connects to any server, so it works on a flight, in a basement, or with mobile data switched off."
+    },
+    "q2": {
+      "q": "Why is there no English translation in the app?",
+      "a": "The English translation we would like to include is licensed for personal study only, and distributing it through the App Store requires a written licence we do not yet hold. Rather than ship it without permission, the app is Gurmukhi-only, with transliteration. If a licence is granted, the translation will arrive in an update as a separate, clearly labelled layer, never mixed into the scripture."
+    },
+    "q3": {
+      "q": "What does the \"traditional saroop\" toggle do?",
+      "a": "It changes only how the text is <em>drawn</em>: the doubled subjoined ya (<yayya></yayya>) is shown as the single tucked form used in the printed Bir. The stored text, search, and Copy are always the verbatim characters. Turn it off in <em>More → Display</em> to see the exact source characters."
+    },
+    "q4": {
+      "q": "Why does the app ask for my location?",
+      "a": "Only if you tap “Use my location” on the Raag Clock’s solar mode, which times the watches of the day by local sunrise and sunset. The location is rounded to about 1 km, kept only on your device, and never transmitted. You can deny the permission and enter a location manually, or stay in fixed mode. See the <privacy>Privacy Policy</privacy>."
+    },
+    "q5": {
+      "q": "How do Nitnem reminders work?",
+      "a": "In <em>More</em>, under Nitnem, <em>Reminders</em> you can switch on a reminder for each part of the day and choose its time. iOS asks for notification permission the first time you switch one on. Reminders are scheduled on your device; nothing comes from a server. Once you complete that part of the day's Nitnem, that day's reminder is dropped. If reminders do not appear, check <em>Settings → Notifications → Gurbani Soul</em>."
+    },
+    "q6": {
+      "q": "What is the Live Activity while reading?",
+      "a": "An optional progress indicator on the Lock Screen and in the Dynamic Island while you read a bani, so you can return to your place with one tap. It is off by default (turn it on in <em>More</em>, under Nitnem), shows progress only, never a verse, and ends when you finish or leave the bani."
+    },
+    "q7": {
+      "q": "Where do the Nitnem banis come from?",
+      "a": "Banis from Sri Guru Granth Sahib Ji are this project's own verified, verbatim corpus, cited by Ang. Bani ordering and the Sri Dasam Granth / Ardaas text come via the ShabadOS open database and are shown as a separate, labelled layer, never presented as part of Sri Guru Granth Sahib Ji."
+    },
+    "q8": {
+      "q": "What is the Hukam of the day?",
+      "a": "One complete Hukam for the whole day, chosen on your device by the date: the same unit in the app and when you ask Siri for \"Today's Hukam\", and the Hukam of the day widget shows its opening verse with its Ang. It is not the Hukamnama issued from Sri Harmandir Sahib. To read another, draw a fresh Hukam; the Hukam of the day stays as it is until the date changes."
+    },
+    "q9": {
+      "q": "The widgets are empty.",
+      "a": "Open the app once; the widgets read a small snapshot the app writes, including the Hukam of the day for the next two weeks. If they stay empty, check <em>More → About & credits → Integrity</em> and confirm it says \"Widget App Group available\", then email us with that screen."
+    },
+    "q10": {
+      "q": "What is the Integrity section in About?",
+      "a": "When you install or update the app, it verifies that the bundled scripture database is bit-for-bit the certified one (a SHA-256 checksum). Every launch after that re-checks that the file has not changed and re-runs the structural checks. If verification ever fails, the app refuses to show scripture rather than risk showing altered text. Reinstalling from the App Store fixes a corrupted download."
+    },
+    "q11": {
+      "q": "How do I save, share, or find a verse later?",
+      "a": "Long-press a verse (or use the actions on a verse card) to Save, Copy, Share or Explore related verses. Saved verses appear under <em>More → Saved verses</em> and in your device's Spotlight search. Share cards always carry the Ang citation."
+    },
+    "q12": {
+      "q": "Siri and Shortcuts",
+      "a": "The app offers nine Siri shortcuts: \"Today's Hukam\", \"Draw a Hukam\", \"What raag is it now\", \"Read a bani\", \"Read a Vaar\", \"Search Gurbani\", \"Show the constellation\", \"Open a theme\" and \"Open a voice\", and \"Open Ang\" as a Shortcuts action. Your saved verses and the {themes} themes appear in Spotlight. Links such as <code>sggs://ang/500</code>, <code>sggs://hukam/today</code>, <code>sggs://vaar/1</code> or <code>sggs://voice/guru-tegh-bahadur-ji</code> open the app directly."
+    },
+    "q13": {
+      "q": "Why does a voice's page say \"Context pending scholarly review\"?",
+      "a": "Notes that explain the text rather than show it — about a Vaar, a theme, or the fuller story of a voice's life — wait until a scholar has reviewed them, and until then the app does not show them. A voice's page says so where its note is waiting. The verbatim lines, their Ang citations and the counts are shown as usual, and the Gurmukhi itself is never touched by this review."
+    },
+    "q14": {
+      "q": "Accessibility",
+      "a": "The app supports VoiceOver (each verse is read as one item, in Punjabi, with its Ang), Dynamic Type up to the largest accessibility sizes, Reduce Motion and Increase Contrast. If something is unreadable or unreachable with assistive technology, that is a bug: please tell us."
+    },
+    "q15": {
+      "q": "iPad",
+      "a": "The app runs on iPad in portrait and landscape. It deliberately runs as a single window."
+    }
+  },
+  "support": {
+    "supportGurbaniSoul": "Support — Gurbani Soul",
+    "support": "Support",
+    "helpWithTheGurbani": "Help with the Gurbani Soul app and this site",
+    "questions": "Questions",
+    "emailSupportGurbanisoulCom": "Email <link1>support@gurbanisoul.com</link1>. Please include your device model, iOS version, and the app version shown in <em1>More → About</em1>. We aim to reply within a few days.",
+    "emailSupport": "<link1>Email support</link1>",
+    "ifSomethingInThe": "<strong1>If something in the Gurmukhi looks wrong</strong1>, tell us the Ang and the line, and a photo of the printed page if you have one. We never \"correct\" the text ourselves: the app reproduces the source edition character for character, so every report is checked against the printed Bir by a person before anything changes.",
+    "theGurmukhiIsReproduced": "The Gurmukhi is reproduced verbatim from the source edition and cited by Ang throughout. Transliteration is a mechanical reading aid, not the scripture. The Gurmukhi typeface is Sant Lipi, © Shabad OS, used under the SIL Open Font License 1.1 (<link1>licence</link1>).",
+    "theSiteOffersThe": "The site offers the same text and search in a browser, plus study tools (themes, lineage, insights, constellation, Raag Clock). It stores your settings, pinned verses and reading place in your browser only. See the <link1>Privacy Policy</link1>.",
+    "contribute": "<link1>Contribute</link1>",
+    "gurbaniSoulIsFree": "Gurbani Soul is free and ad-free. If you would like to help cover its costs, see <link1>Contribute</link1>.",
+    "contact": "Contact",
+    "frequentlyAsked": "Frequently asked",
+    "aboutTheText": "About the text",
+    "thisWebsite": "This website",
+    "helpKeepItFree": "Help keep it free",
+    "gurbaniSoulIsFree2": "Gurbani Soul is free and ad-free, with no paid tier. If you would like to help cover hosting, scholarly review and licensing, you can contribute once or monthly. It is optional and unlocks nothing.",
+    "contact2": "Contact",
+    "frequentlyAsked2": "Frequently asked",
+    "aboutTheText2": "About the text",
+    "thisWebsite2": "This website",
+    "helpWithTheGurbani2": "Help with the Gurbani Soul app for iPhone and iPad: contact, reporting a text error, and answers to common questions.",
+    "lede": "Gurbani Soul is a fully offline reader, search tool and Nitnem companion for Sri Guru Granth Sahib Ji, all {angs} Angs. This page answers the common questions; anything else, write to us."
   }
 }
