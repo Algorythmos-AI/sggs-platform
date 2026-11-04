@@ -10,7 +10,9 @@ import Explanation from "../../../components/Explanation.astro";
 import { SITE_URL } from "../../../site";
 import { LEARN_SLUGS, ogImagePath } from "../../../routes";
 import { ENABLED_LOCALES, type Locale } from "../../../i18n/locales";
+import { LOCALES } from "../../../i18n/locales";
 import { localizeHref } from "../../../i18n/paths";
+import { articleLocales, learnHref } from "../../../i18n/content";
 import { useT } from "../../../i18n/t";
 import { fmtDate as fmtDateIn } from "../../../i18n/format";
 
@@ -18,12 +20,13 @@ export async function getStaticPaths() {
   const entries = (await getCollection("learn")).filter((e) => !e.data.draft);
   const order = new Map(LEARN_SLUGS.map((s, i) => [s, i]));
   const ordered = [...entries].sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
-  return ENABLED_LOCALES.flatMap((lang) => ordered.map((entry, i) => ({
+  // An article has a page only in the languages it is published in (i18n/content.ts).
+  return ENABLED_LOCALES.flatMap((lang) => ordered.filter((entry) => articleLocales(entry.id).includes(lang)).map((entry, i, list) => ({
     params: { lang, slug: entry.id },
     props: {
       entry,
-      prev: ordered[i - 1] ?? null,
-      next: ordered[i + 1] ?? null,
+      prev: list[i - 1] ?? null,        // neighbours among this language's articles
+      next: list[i + 1] ?? null,
     },
   })));
 }
@@ -49,7 +52,7 @@ const articleJsonLd = {
   dateModified: iso(updatedDate ?? pubDate),
   author: { "@type": "Organization", name: "Algorythmos" },
   publisher: { "@type": "Organization", name: "Algorythmos" },
-  inLanguage: "en",
+  inLanguage: LOCALES[lang].htmlLang,
   isAccessibleForFree: true,
   image: new URL(ogImage, SITE_URL).href,
   mainEntityOfPage: canonical,
@@ -79,8 +82,8 @@ const articleJsonLd = {
       <nav class="art-nav" aria-label={t("learnArticle.moreArticles")}>
         <a class="back" href={L("/learn")}>{t("learnArticle.backToLearn")}</a>
         <div class="prevnext">
-          {prev && <a href={L(`/learn/${prev.id}`)} rel="prev">← {prev.data.title}</a>}
-          {next && <a href={L(`/learn/${next.id}`)} rel="next">{next.data.title} →</a>}
+          {prev && <a href={learnHref(lang, prev.id)} rel="prev">← {prev.data.title}</a>}
+          {next && <a href={learnHref(lang, next.id)} rel="next">{next.data.title} →</a>}
         </div>
       </nav>
     </div>

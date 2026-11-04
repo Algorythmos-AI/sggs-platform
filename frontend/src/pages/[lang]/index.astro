@@ -39,6 +39,7 @@ import voiceShot from '../../assets/app/iphone-voice-m9-light.png';
 import compareShot from '../../assets/app/iphone-compare-light.png';
 import { localeStaticPaths, type Locale } from "../../i18n/locales";
 import { localizeHref } from "../../i18n/paths";
+import { learnHref } from "../../i18n/content";
 import { useT } from "../../i18n/t";
 
 export const getStaticPaths = localeStaticPaths;
@@ -128,6 +129,7 @@ const softwareApplication = {
   "@type": "SoftwareApplication",
   name: "Gurbani Soul",
   applicationCategory: "ReferenceApplication",
+  inLanguage: "en",            // the app itself is English, on every language's page
   operatingSystem: "iOS",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   publisher: { "@id": orgId },
@@ -397,7 +399,7 @@ const softwareApplication = {
       <ul class="cards">
         {learnTop.map((a, i) => (
           <li class="card reveal" data-delay={String(i)}>
-            <a href={L(`/learn/${a.id}`)}>
+            <a href={learnHref(lang, a.id)}>
               <div class="cover">
                 <Image src={LEARN_COVERS[a.id].src} width={800} widths={[480, 800]} sizes="(min-width: 760px) 380px, 92vw"
                   quality={60} loading="lazy" decoding="async" alt={LEARN_COVERS[a.id].alt} />

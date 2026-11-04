@@ -792,11 +792,32 @@ class SeoInvariants(unittest.TestCase):
             if route in marketing:
                 self.assertRegex(html, r'rel="manifest"', f"{route}: marketing page missing manifest link")
 
-            # hreflang alternates (if any) must be en / x-default and self-referential — no /pa/ yet.
-            for lang, href in re.findall(r'<link rel="alternate" hreflang="([^"]+)" href="([^"]+)"', html):
-                self.assertIn(lang, ("en", "x-default"), f"{route}: unexpected hreflang {lang}")
-                self.assertNotIn("/pa/", href, f"{route}: hreflang points at a /pa/ URL")
-                self.assertEqual(_norm_url(href), canonical_want, f"{route}: hreflang not self-referential")
+            self._check_hreflang(route, html, canonical_want)
+
+    def _check_hreflang(self, route, html, canonical):
+        """A marketing page lists every enabled language it exists in, itself included, plus
+        x-default = the bare root; every alternate is a built page listing the same set back
+        (reciprocal). Knowledge Base pages carry none."""
+        cfg = json.loads((FRONTEND / "src" / "i18n" / "locales.json").read_text(encoding="utf-8"))
+        alts = re.findall(r'<link rel="alternate" hreflang="([^"]+)" href="([^"]+)"', html)
+        lang = route.split("/")[1] if route != "/" else ""
+        if lang not in cfg["enabled"]:
+            self.assertEqual(alts, [], f"{route}: hreflang outside the marketing site")
+            return
+        got = dict(alts)
+        self.assertEqual(len(got), len(alts), f"{route}: a hreflang value appears twice")
+        self.assertEqual(_norm_url(got.get("x-default", "")), _norm_url(SITE + "/"), f"{route}: x-default must be the root")
+        own = cfg["locales"][lang]["htmlLang"]
+        self.assertEqual(_norm_url(got.get(own, "")), canonical, f"{route}: its own hreflang must be its canonical")
+        known = {cfg["locales"][l]["htmlLang"] for l in cfg["enabled"]} | {"x-default"}
+        self.assertLessEqual(set(got), known, f"{route}: hreflang for a language that is not enabled")
+        for hl, href in got.items():
+            if hl == "x-default":
+                continue
+            other = STATIC / href.split(SITE, 1)[-1].lstrip("/") / "index.html"
+            self.assertTrue(other.is_file(), f"{route}: hreflang {hl} points at a page that is not built: {href}")
+            back = dict(re.findall(r'<link rel="alternate" hreflang="([^"]+)" href="([^"]+)"', other.read_text(encoding="utf-8")))
+            self.assertEqual(back, got, f"{route}: hreflang is not reciprocal with {href}")
 
 
 class ShareCardMeta(unittest.TestCase):
