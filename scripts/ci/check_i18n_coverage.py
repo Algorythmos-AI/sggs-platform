@@ -12,7 +12,8 @@ covered the region becomes the whole page.
 
 Exempt: Gurmukhi (anything inside lang="pa" or class="gm" — scripture and the ੴ mark are never
 translated here), text without letters (numbers, symbols, punctuation), the product name, email
-addresses, and Learn article titles (content, translated with the articles themselves). Stdlib only.
+addresses and web addresses, and Learn article titles and descriptions (content, translated with the
+articles themselves). Stdlib only.
 """
 from __future__ import annotations
 
@@ -23,6 +24,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 LEARN = ROOT / "frontend" / "src" / "content" / "learn"
+COVERS = ROOT / "frontend" / "src" / "covers.ts"         # Learn cover photos (alt text is content)
 MARK = "⟦"
 
 # (tag, attribute, value): an element that matches starts a covered region. "class" matches one
@@ -37,25 +39,36 @@ COVERED = [
     ("p", "class", "legal-toc-h"),          # LegalPage (its entries come from each page)
     ("p", "class", "legal-updated"),        # LegalPage
 ]
+# Whole pages whose copy has moved into messages: (page, matchers), the page given as its path under
+# the build ("en/index.html"). A matcher with no attribute matches every element with that tag.
+PAGES = {
+    "en/index.html": [("main", "id", "main"), ("title", None, None)],
+}
 ATTRS = ("aria-label", "alt", "title", "placeholder")
 ALLOWED = {"Gurbani Soul"}
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
+ADDRESS = re.compile(r"[\w-]+(\.[\w-]+)+(/[\w./-]*)?")   # gurbanisoul.com/search
 VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
 
 
 def learn_titles() -> set[str]:
+    """Learn article titles, descriptions and cover alt text: content, translated with the articles."""
     out = set()
     for p in LEARN.rglob("*.mdx"):
-        m = re.search(r'(?m)^title:\s*["\']?(.*?)["\']?\s*$', p.read_text(encoding="utf-8"))
-        if m:
-            out.add(m.group(1).strip())
+        text = p.read_text(encoding="utf-8")
+        for field in ("title", "description"):
+            m = re.search(rf'(?m)^{field}:\s*["\']?(.*?)["\']?\s*$', text)
+            if m:
+                out.add(" ".join(m.group(1).split()))
+    out.update(re.findall(r"alt: '([^']*)'", COVERS.read_text(encoding="utf-8")))
     return out
 
 
 class Scan(HTMLParser):
-    def __init__(self, exempt: set[str]):
+    def __init__(self, exempt: set[str], regions=None):
         super().__init__(convert_charrefs=True)
         self.exempt = exempt
+        self.regions = COVERED + list(regions or [])
         self.stack: list[tuple[str, bool, bool]] = []   # (tag, covered, gurmukhi)
         self.bad: list[str] = []
 
@@ -67,7 +80,8 @@ class Scan(HTMLParser):
         covered, gm = self._flags()
         classes = (a.get("class") or "").split()
         if not covered:
-            covered = any(tag == t and (v in classes if k == "class" else a.get(k) == v) for t, k, v in COVERED)
+            covered = any(tag == t and (k is None or (v in classes if k == "class" else a.get(k) == v))
+                          for t, k, v in self.regions)
         gm = gm or a.get("lang") == "pa" or "gm" in classes
         if covered and not gm:
             for name in ATTRS:
@@ -97,7 +111,7 @@ class Scan(HTMLParser):
     def _check(self, s: str, where: str):
         s = " ".join(s.split())
         if (not s or MARK in s or not re.search(r"[A-Za-z]", s) or s in ALLOWED or s in self.exempt
-                or EMAIL.fullmatch(s)):
+                or EMAIL.fullmatch(s) or ADDRESS.fullmatch(s)):
             return
         self.bad.append(f"{where} {s!r}".strip())
 
@@ -116,7 +130,7 @@ def main(argv: list[str]) -> int:
     for p in pages:
         html = p.read_text(encoding="utf-8")
         marked += html.count(MARK)
-        s = Scan(exempt)
+        s = Scan(exempt, PAGES.get(p.relative_to(out).as_posix()))
         s.feed(html)
         for b in s.bad:
             print(f"{p.relative_to(out).as_posix()}: {b}")

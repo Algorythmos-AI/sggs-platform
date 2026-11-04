@@ -165,3 +165,8 @@ class I18nCoverage(unittest.TestCase):
 
     def test_a_region_ends_with_its_element(self):
         self.assertEqual(self.bad('<nav class="crumbs"><a>⟦Ĥöɱé⟧</a></nav><p>After the region</p>'), [])
+
+    def test_a_whole_page_region_and_a_tag_matcher(self):
+        s = cov.Scan(set(), [("main", "id", "main"), ("title", None, None)])
+        s.feed('<title>Typed title</title><main id="main"><p>⟦Ţéẋţ⟧</p><img alt="Typed alt"><p>gurbanisoul.com/search</p></main>')
+        self.assertEqual(s.bad, ["'Typed title'", "[alt] 'Typed alt'"])
