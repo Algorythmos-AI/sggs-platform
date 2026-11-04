@@ -18,6 +18,16 @@ const lookup = (catalog, key) => {
   return v;
 };
 
+/** French typography, applied to a message's own text (never inside {placeholders} or <tags>): a
+ *  narrow no-break space before ; : ! ? and inside « », replacing any plain space typed there, so
+ *  translators never type U+202F. "https://" and times come from values, so they are never touched.
+ *  @param {string} src */
+export const frenchSpacing = (src) =>
+  src.split(/(\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}|<\/?\w+>)/).map((part, i) => (i % 2 ? part : part
+    .replace(/[ \u00a0\u202f]*([;:!?])(?!\/\/)/g, "\u202f$1")
+    .replace(/«[ \u00a0\u202f]*/g, "«\u202f")
+    .replace(/[ \u00a0\u202f]*»/g, "\u202f»"))).join("");
+
 /**
  * @param {any} catalog   the language's messages (nested object of strings)
  * @param {string} intl   Intl locale for plurals and numbers, e.g. "en-GB"
@@ -32,7 +42,8 @@ export const createFormatter = (catalog, intl, opts = {}) => {
   const fmt = (/** @type {string} */ key) => {
     let f = cache.get(key);
     if (!f) {
-      f = new IntlMessageFormat(source(key), intl);
+      const src = source(key);
+      f = new IntlMessageFormat(intl.startsWith("fr") ? frenchSpacing(src) : src, intl);
       cache.set(key, f);
     }
     return f;
@@ -50,7 +61,8 @@ export const createFormatter = (catalog, intl, opts = {}) => {
    *  @param {string} key @param {Record<string, any>} [values]
    *  @returns {(string | { tag: string, text: string })[]} */
   const rich = (key, values = {}) => {
-    const src = source(key);
+    const raw = source(key);
+    const src = intl.startsWith("fr") ? frenchSpacing(raw) : raw;
     /** @type {Record<string, any>} */
     const wrapped = { ...values };
     for (const m of src.matchAll(/<([a-zA-Z][\w-]*)>/g)) {

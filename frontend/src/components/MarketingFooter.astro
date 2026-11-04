@@ -10,7 +10,7 @@ import { SUPPORT_EMAIL, IMAGE_CREDITS, APP_STORE_URL, APP_STORE_LIVE } from "../
 import { CONTRIBUTE_MODE } from "../contribute";
 import { LEARN_SLUGS } from "../routes";
 import { localeOf, localizeHref } from "../i18n/paths";
-import { learnHref } from "../i18n/content";
+import { learnHref, articleLangFor } from "../i18n/content";
 import { useT } from "../i18n/t";
 
 const lang = localeOf(Astro.url.pathname);
@@ -31,7 +31,7 @@ const year = new Date().getFullYear();
 const artwork = IMAGE_CREDITS.filter((c) => !c.url);
 const photos = IMAGE_CREDITS.filter((c) => c.url);
 
-const columns: { title: string; links: { href: string; label: string }[] }[] = [
+const columns: { title: string; links: { href: string; label: string; lang?: string }[] }[] = [
   {
     title: t("footer.product"),
     links: [
@@ -43,7 +43,7 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
   {
     title: t("footer.learn"),
     links: [
-      ...learnTop.map((a) => ({ href: learnHref(lang, a.id), label: a.data.title })),
+      ...learnTop.map((a) => ({ href: learnHref(lang, a.id), label: a.data.title, lang: articleLangFor(lang, a.id) !== lang ? "en" : undefined })),
       { href: L("/learn"), label: t("footer.allArticles") },
       { href: "/rss.xml", label: t("footer.rss") },
     ],
@@ -82,7 +82,7 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
         <div class="mfoot-col">
           <h2 class="mfoot-h">{col.title}</h2>
           <ul>
-            {col.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+            {col.links.map((l) => <li><a href={l.href} lang={l.lang} hreflang={l.lang}>{l.label}</a></li>)}
           </ul>
         </div>
       ))}

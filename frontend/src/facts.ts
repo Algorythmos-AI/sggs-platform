@@ -26,3 +26,18 @@ export const spell = (n: number) => {
   const w = n < 20 ? ONES[n] : n < 100 ? TENS[Math.floor(n / 10)] + (n % 10 ? `-${ONES[n % 10]}` : "") : fmt(n);
   return w.charAt(0).toUpperCase() + w.slice(1);
 };
+
+// Language-neutral forms of the figures above, for messages in every language: plain numbers, and
+// Roman numerals for centuries (French writes "du XIIe au XVIIe siècle").
+const roman = (n: number) => {
+  const r: [number, string][] = [[10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
+  let out = "";
+  for (const [v, s] of r) while (n >= v) { out += s; n -= v; }
+  return out;
+};
+export const CENTURY_VALUES = {
+  first: String(FACTS.voices_first_century),
+  last: String(FACTS.voices_last_century),
+  firstRoman: roman(FACTS.voices_first_century),
+  lastRoman: roman(FACTS.voices_last_century),
+};

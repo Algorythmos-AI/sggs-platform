@@ -10,7 +10,7 @@ import FeatureChapter from "../../components/FeatureChapter.astro";
 import PhotoBand from "../../components/PhotoBand.astro";
 import JsonLd from "../../components/JsonLd.astro";
 import { SITE_URL } from "../../site.ts";
-import { FACTS, fmt, ordinal, spell, VOICE_CENTURIES } from "../../facts.ts";
+import { FACTS, ordinal, spell, VOICE_CENTURIES, CENTURY_VALUES } from "../../facts.ts";
 import widePhoto from "../../assets/landing/unsplash-reubx-harmandir-sahib-wide.jpg";
 import ipadReader from "../../assets/app/ipad-reader-landscape-light.png";
 import saroopOff from "../../assets/app/iphone-saroop-off-light.png";
@@ -42,10 +42,13 @@ import { localeStaticPaths, type Locale } from "../../i18n/locales";
 import { useT } from "../../i18n/t";
 import { LOCALES, siteLanguages } from "../../i18n/locales";
 import { localizeHref } from "../../i18n/paths";
+import { fmtNumber } from "../../i18n/format";
 
 export const getStaticPaths = localeStaticPaths;
 const lang = Astro.params.lang as Locale;
 const L = (href: string) => localizeHref(href, lang);
+// Figures in the page's language: "1,430" (en), "1 430" (fr).
+const fmt = (n: number) => fmtNumber(lang, n);
 const { t } = useT(lang);
 
 const desc =
@@ -238,7 +241,7 @@ const jsonLd = {
     <div class="wrap story-grid story--flip">
       <div class="story-text reveal">
         <p class="chapter-no"><span>05</span> {t("features.theWatch")}</p>
-        <h2 class="h-story">{t("features.eightWatchesRaagsOne", { raags: String(spell(FACTS.raags)) })}</h2>
+        <h2 class="h-story">{t("features.eightWatchesRaagsOne", { raags: String(spell(FACTS.raags)), raagsN: String(FACTS.raags) })}</h2>
         <p class="body-lg">{t("features.theDayIsDivided")}</p>
         <p class="cta-row"><a class="btn ghost" href={L("/watch")} data-astro-prefetch>{t("features.moreAboutTheWatch")}</a></p>
       </div>
@@ -293,10 +296,10 @@ const jsonLd = {
     figures={[
       { n: fmt(FACTS.voices), l: t("features.voicesWithBaniIn") },
       { n: fmt(FACTS.voice_traditions), l: t("features.traditionsGurusBhagatsBhatts") },
-      { n: t("features.centuriesSpan", { firstOrdinal: ordinal(FACTS.voices_first_century), lastOrdinal: ordinal(FACTS.voices_last_century), first: String(FACTS.voices_first_century), last: String(FACTS.voices_last_century) }), l: t("features.centuriesTheirDatedLives") },
+      { n: t("features.centuriesSpan", { firstOrdinal: ordinal(FACTS.voices_first_century), lastOrdinal: ordinal(FACTS.voices_last_century), ...CENTURY_VALUES }), l: t("features.centuriesTheirDatedLives") },
     ]}
     figuresLabel={t("features.theVoicesOfThe")}>
-    <p class="body-lg">{t("features.lineageFollowsEveryVoice", { voiceCenturies: String(VOICE_CENTURIES) })}</p>
+    <p class="body-lg">{t("features.lineageFollowsEveryVoice", { voiceCenturies: String(VOICE_CENTURIES), ...CENTURY_VALUES })}</p>
     <p class="body-lg">{t("features.inInsightsTheGranth")}</p>
     <p class="detail">{t("features.whoWroteEachLine")}</p>
   </FeatureChapter>

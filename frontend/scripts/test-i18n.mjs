@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import {
   isLocalizedPath, localizeHref, localeOf, stripLocale, configProblems, redirects,
 } from "../src/i18n/core.js";
-import { createFormatter } from "../src/i18n/format-message.js";
+import { createFormatter, frenchSpacing } from "../src/i18n/format-message.js";
 import { pseudo } from "../src/i18n/pseudo.js";
 
 const cfg = JSON.parse(readFileSync(fileURLToPath(new URL("../src/i18n/locales.json", import.meta.url)), "utf8"));
@@ -104,6 +104,19 @@ eq("pseudo marks and lengthens", /^⟦.+·+⟧$/.test(pseudo("See every feature"
 eq("pseudo leaves blank text alone", pseudo("  "), "  ");
 const p = createFormatter(en, "en-GB", { pseudo: true });
 eq("pseudo reaches rich text", p.rich("footer.give").every((x) => (typeof x === "string" ? x : x.text).startsWith("⟦")), true);
+
+console.log("French typography");
+const nn = (s) => s.replace(/\u202f/g, "⍽");
+eq("space before ? and !", nn(frenchSpacing("Pourquoi ? Oui !")), "Pourquoi⍽? Oui⍽!");
+eq("no space typed becomes a narrow one", nn(frenchSpacing("Siri: oui;")), "Siri⍽: oui⍽;");
+eq("guillemets", nn(frenchSpacing("« Hukam du jour »")), "«⍽Hukam du jour⍽»");
+eq("after a tag", nn(frenchSpacing("<link1>ceci</link1> : oui")), "<link1>ceci</link1>⍽: oui");
+eq("placeholders untouched", frenchSpacing("{n, select, a {x} other {y}}"), "{n, select, a {x} other {y}}");
+eq("URLs untouched", frenchSpacing("https://gurbanisoul.com"), "https://gurbanisoul.com");
+const fr = createFormatter({ q: "Pourquoi ?", r: "Voir <link1>ceci</link1> : oui" }, "fr-FR");
+eq("applied by the French formatter", nn(fr.t("q")), "Pourquoi⍽?");
+eq("and to rich parts", nn(fr.rich("r").at(-1)), "⍽: oui");
+eq("never by the English one", createFormatter({ q: "Why ?" }, "en-GB").t("q"), "Why ?");
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

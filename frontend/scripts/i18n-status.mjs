@@ -10,8 +10,8 @@
 //   extra     — a key English no longer has
 //   stale     — the English changed since the translation was made (<lang>.lock.json keeps, per
 //               key, a hash of the English it was translated from)
-//   mismatch  — its {placeholders} or <tags> differ from the English (the page would break), or it
-//               does not parse as an ICU message
+//   mismatch  — its <tags> differ from the English (the page would break), or it does not parse as
+//               an ICU message (placeholders may differ; the preview build proves each one exists)
 //   review    — src/i18n/reviews/<lang>.json must name a fluent reviewer and the sha256 of the exact
 //               catalog they signed off (docs/website/translation.md)
 // A language may be ENABLED (locales.json) only when all of these are clean; CI runs this script.
@@ -27,7 +27,7 @@ const cfg = JSON.parse(readFileSync(here("../src/i18n/locales.json"), "utf8"));
 const read = (p) => JSON.parse(readFileSync(p, "utf8"));
 const flat = (o, pre = "") => Object.entries(o).flatMap(([k, v]) => (typeof v === "string" ? [[pre + k, v]] : flat(v, `${pre}${k}.`)));
 const hash = (s) => createHash("sha256").update(s).digest("hex").slice(0, 16);
-const shape = (s) => [...new Set([...s.matchAll(/\{\s*(\w+)|<\/?(\w+)>/g)].map((m) => m[1] ? `{${m[1]}}` : `<${m[2]}>`))].sort().join(" ");
+const tags = (s) => [...new Set([...s.matchAll(/<\/?(\w+)>/g)].map((m) => m[1]))].sort().join(" ");
 
 const en = new Map(flat(read(DIR + "en.json")));
 
@@ -44,7 +44,10 @@ export function status(lang) {
     out.translated++;
     if (lock[k] !== hash(src)) out.stale.push(k);
     const v = tr.get(k);
-    if (shape(v) !== shape(src)) out.mismatch.push(`${k}: has ${shape(v) || "nothing"}, English has ${shape(src) || "nothing"}`);
+    // Tags must match exactly (each one is an element the page renders). Placeholders may differ: a
+    // translation picks among the values the page passes (e.g. {first} instead of {firstOrdinal}),
+    // which the preview build (PUBLIC_I18N_PREVIEW=all) proves by rendering every page.
+    if (tags(v) !== tags(src)) out.mismatch.push(`${k}: tags ${tags(v) || "none"}, English has ${tags(src) || "none"}`);
     else { try { new IntlMessageFormat(v, cfg.locales[lang].intl); } catch (e) { out.mismatch.push(`${k}: ${e.message}`); } }
   }
   for (const k of tr.keys()) if (!en.has(k)) out.extra.push(k);
