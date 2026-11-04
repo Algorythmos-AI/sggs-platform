@@ -10,6 +10,8 @@
     "rollback": "node scripts/sync-to-webapp.mjs --rollback",
     "build:deploy": "npm run build && node scripts/sync-to-webapp.mjs",
     "test:pahar": "node scripts/test-pahar.mjs",
+    "test:i18n": "node scripts/test-i18n.mjs",
+    "i18n:redirects": "node scripts/gen-i18n-redirects.mjs",
     "test:e2e": "playwright test",
     "shots": "node scripts/shots.mjs"
   },

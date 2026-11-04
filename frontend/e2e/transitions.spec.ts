@@ -9,7 +9,7 @@ test('landing → Knowledge Base is a working navigation and theme persists', as
   test.skip(testInfo.project.name === 'mobile', 'uses the desktop theme button');
   // Start from "no stored choice": clear once, then reload (not addInitScript, which would re-run
   // on the Knowledge Base navigation below and wipe the choice under test).
-  await page.goto('/');
+  await page.goto('/en');
   await page.evaluate(() => { try { localStorage.removeItem('theme'); } catch (e) {} });
   await page.reload();
   // The marketing site is light-first, so ONE click makes the explicit dark choice (light → dark).
@@ -32,7 +32,7 @@ test('landing → Knowledge Base is a working navigation and theme persists', as
 test('reduced motion: reveal content is visible without scrolling', async ({ browser }) => {
   const context = await browser.newContext({ reducedMotion: 'reduce' });
   const page = await context.newPage();
-  await page.goto('/');
+  await page.goto('/en');
   // A .reveal block below the hero must be visible immediately (no scroll-triggered fade-in).
   await expect(page.locator('.verse-band .cite.reveal')).toBeVisible();
   await expect(page.locator('p.verse[lang="pa"]')).toBeVisible();

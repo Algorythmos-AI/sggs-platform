@@ -1,0 +1,147 @@
+---
+// support.astro — the public Support page for the Gurbani Soul iOS app (org.sggs.app) and this site.
+// Linked from the App Store listing (Support URL). Answers must match the shipped app: the
+// public (Gurmukhi-only) profile has no English layer; location is optional; nothing is sent.
+// Rendered in the marketing shell (LegalPage) since v1.3.5; /support must keep working: it 308s to /en/support
+// (App Store Connect + the app's AppLinks). The FAQ stays fully visible (no accordion).
+import Marketing from '../../layouts/Marketing.astro';
+import LegalPage from '../../components/LegalPage.astro';
+import JsonLd from '../../components/JsonLd.astro';
+import { SITE_URL } from '../../site.ts';
+import { CONTRIBUTE_MODE } from '../../contribute.ts';
+import { FACTS, fmt } from '../../facts.ts';
+import { localeStaticPaths, type Locale } from "../../i18n/locales";
+import { localizeHref } from "../../i18n/paths";
+
+export const getStaticPaths = localeStaticPaths;
+const lang = Astro.params.lang as Locale;
+const L = (href: string) => localizeHref(href, lang);
+
+// Single source for the "Frequently asked" block: it renders BOTH the visible <h3>+<p> HTML and the
+// FAQPage JSON-LD below, so the two can never diverge (the FAQPage `name`s are exactly these
+// questions — enforced by the JsonLdInvariants gate). Answers may carry the same inline HTML the
+// visible copy uses; JsonLd.astro escapes "<" so the payload is always well-formed.
+const faqs: { q: string; a: string }[] = [
+  { q: "Does the app need an internet connection?",
+    a: "No. The whole Granth is bundled inside the app. It never connects to any server, so it works on a flight, in a basement, or with mobile data switched off." },
+  { q: "Why is there no English translation in the app?",
+    a: "The English translation we would like to include is licensed for personal study only, and distributing it through the App Store requires a written licence we do not yet hold. Rather than ship it without permission, the app is Gurmukhi-only, with transliteration. If a licence is granted, the translation will arrive in an update as a separate, clearly labelled layer, never mixed into the scripture." },
+  { q: "What does the \"traditional saroop\" toggle do?",
+    a: "It changes only how the text is <em>drawn</em>: the doubled subjoined ya (<span class=\"gm\" lang=\"pa\">੍ਯ੍ਯ</span>) is shown as the single tucked form used in the printed Bir. The stored text, search, and Copy are always the verbatim characters. Turn it off in <em>More → Display</em> to see the exact source characters." },
+  { q: "Why does the app ask for my location?",
+    a: "Only if you tap “Use my location” on the Raag Clock’s solar mode, which times the watches of the day by local sunrise and sunset. The location is rounded to about 1 km, kept only on your device, and never transmitted. You can deny the permission and enter a location manually, or stay in fixed mode. See the <a href=\"" + L("/privacy") + "\">Privacy Policy</a>." },
+  { q: "How do Nitnem reminders work?",
+    a: "In <em>More</em>, under Nitnem, <em>Reminders</em> you can switch on a reminder for each part of the day and choose its time. iOS asks for notification permission the first time you switch one on. Reminders are scheduled on your device; nothing comes from a server. Once you complete that part of the day's Nitnem, that day's reminder is dropped. If reminders do not appear, check <em>Settings → Notifications → Gurbani Soul</em>." },
+  { q: "What is the Live Activity while reading?",
+    a: "An optional progress indicator on the Lock Screen and in the Dynamic Island while you read a bani, so you can return to your place with one tap. It is off by default (turn it on in <em>More</em>, under Nitnem), shows progress only, never a verse, and ends when you finish or leave the bani." },
+  { q: "Where do the Nitnem banis come from?",
+    a: "Banis from Sri Guru Granth Sahib Ji are this project's own verified, verbatim corpus, cited by Ang. Bani ordering and the Sri Dasam Granth / Ardaas text come via the ShabadOS open database and are shown as a separate, labelled layer, never presented as part of Sri Guru Granth Sahib Ji." },
+  { q: "What is the Hukam of the day?",
+    a: "One complete Hukam for the whole day, chosen on your device by the date: the same unit in the app and when you ask Siri for \"Today's Hukam\", and the Hukam of the day widget shows its opening verse with its Ang. It is not the Hukamnama issued from Sri Harmandir Sahib. To read another, draw a fresh Hukam; the Hukam of the day stays as it is until the date changes." },
+  { q: "The widgets are empty.",
+    a: "Open the app once; the widgets read a small snapshot the app writes, including the Hukam of the day for the next two weeks. If they stay empty, check <em>More → About &amp; credits → Integrity</em> and confirm it says \"Widget App Group available\", then email us with that screen." },
+  { q: "What is the Integrity section in About?",
+    a: "When you install or update the app, it verifies that the bundled scripture database is bit-for-bit the certified one (a SHA-256 checksum). Every launch after that re-checks that the file has not changed and re-runs the structural checks. If verification ever fails, the app refuses to show scripture rather than risk showing altered text. Reinstalling from the App Store fixes a corrupted download." },
+  { q: "How do I save, share, or find a verse later?",
+    a: "Long-press a verse (or use the actions on a verse card) to Save, Copy, Share or Explore related verses. Saved verses appear under <em>More → Saved verses</em> and in your device's Spotlight search. Share cards always carry the Ang citation." },
+  { q: "Siri and Shortcuts",
+    a: "The app offers nine Siri shortcuts: \"Today's Hukam\", \"Draw a Hukam\", \"What raag is it now\", \"Read a bani\", \"Read a Vaar\", \"Search Gurbani\", \"Show the constellation\", \"Open a theme\" and \"Open a voice\", and \"Open Ang\" as a Shortcuts action. Your saved verses and the " + FACTS.themes + " themes appear in Spotlight. Links such as <code>sggs://ang/500</code>, <code>sggs://hukam/today</code>, <code>sggs://vaar/1</code> or <code>sggs://voice/guru-tegh-bahadur-ji</code> open the app directly." },
+  { q: "Why does a voice's page say \"Context pending scholarly review\"?",
+    a: "Notes that explain the text rather than show it — about a Vaar, a theme, or the fuller story of a voice's life — wait until a scholar has reviewed them, and until then the app does not show them. A voice's page says so where its note is waiting. The verbatim lines, their Ang citations and the counts are shown as usual, and the Gurmukhi itself is never touched by this review." },
+  { q: "Accessibility",
+    a: "The app supports VoiceOver (each verse is read as one item, in Punjabi, with its Ang), Dynamic Type up to the largest accessibility sizes, Reduce Motion and Increase Contrast. If something is unreadable or unreachable with assistive technology, that is a bug: please tell us." },
+  { q: "iPad",
+    a: "The app runs on iPad in portrait and landscape. It deliberately runs as a single window." },
+];
+
+// Stable, readable anchors for each question (jump list + deep links from the app or email).
+const slug = (q: string) => "faq-" + q.toLowerCase().replace(/<[^>]+>/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+const toc = [
+  { id: "contact", label: "Contact" },
+  { id: "faq", label: "Frequently asked" },
+  { id: "about-the-text", label: "About the text" },
+  { id: "this-website", label: "This website" },
+];
+const desc = "Help with the Gurbani Soul app for iPhone and iPad: contact, reporting a text error, and answers to common questions.";
+
+// Plain-text answer for JSON-LD (strip the inline HTML tags the visible copy uses).
+const stripTags = (s: string) => s.replace(/<[^>]+>/g, "");
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": `${SITE_URL}/support#faq`,
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptableAnswer: { "@type": "Answer", text: stripTags(f.a) },
+  })),
+};
+---
+<Marketing title="Support — Gurbani Soul" description={desc} path={L("/support")}>
+  <JsonLd slot="head" data={faqLd} />
+  <LegalPage
+    eyebrow="Support"
+    title="Help with the Gurbani Soul app and this site"
+    lede={`Gurbani Soul is a fully offline reader, search tool and Nitnem companion for Sri Guru Granth Sahib Ji, all ${fmt(FACTS.angs)} Angs. This page answers the common questions; anything else, write to us.`}
+    id="v-support"
+    toc={toc}
+  >
+    <section id="contact">
+      <h2>Contact</h2>
+      <div class="contact-card">
+        <hr class="gold-hair" aria-hidden="true" />
+        <p>Email <a href="mailto:support@gurbanisoul.com?subject=Gurbani%20Soul%20support">support@gurbanisoul.com</a>. Please include your device model, iOS version, and the app version shown in <em>More → About</em>. We aim to reply within a few days.</p>
+        <p class="contact-cta"><a class="btn" href="mailto:support@gurbanisoul.com?subject=Gurbani%20Soul%20support">Email support</a></p>
+      </div>
+      <p><strong>If something in the Gurmukhi looks wrong</strong>, tell us the Ang and the line, and a photo of the printed page if you have one. We never "correct" the text ourselves: the app reproduces the source edition character for character, so every report is checked against the printed Bir by a person before anything changes.</p>
+    </section>
+
+    <section id="faq">
+      <h2>Frequently asked</h2>
+      <nav class="faq-jump" aria-label="Questions">
+        <ul>
+          {faqs.map((f) => <li><a href={`#${slug(f.q)}`}>{f.q}</a></li>)}
+        </ul>
+      </nav>
+      {faqs.map((f) => (
+        <div class="faq-item">
+          <h3 id={slug(f.q)}>{f.q}</h3>
+          <p set:html={f.a} />
+        </div>
+      ))}
+    </section>
+
+    <section id="about-the-text">
+      <h2>About the text</h2>
+      <p>The Gurmukhi is reproduced verbatim from the source edition and cited by Ang throughout. Transliteration is a mechanical reading aid, not the scripture. The Gurmukhi typeface is Sant Lipi, © Shabad OS, used under the SIL Open Font License 1.1 (<a href="/fonts/OFL.txt">licence</a>).</p>
+    </section>
+
+    <section id="this-website">
+      <h2>This website</h2>
+      <p>The site offers the same text and search in a browser, plus study tools (themes, lineage, insights, constellation, Raag Clock). It stores your settings, pinned verses and reading place in your browser only. See the <a href={L("/privacy")}>Privacy Policy</a>.</p>
+      {CONTRIBUTE_MODE !== "off" ? (
+        <div class="contact-card give-card">
+          <h3>Help keep it free</h3>
+          <p>Gurbani Soul is free and ad-free, with no paid tier. If you would like to help cover hosting, scholarly review and licensing, you can contribute once or monthly. It is optional and unlocks nothing.</p>
+          <p class="contact-cta"><a class="btn" href={L("/contribute")}>Contribute</a></p>
+        </div>
+      ) : (
+        <p>Gurbani Soul is free and ad-free. If you would like to help cover its costs, see <a href={L("/contribute")}>Contribute</a>.</p>
+      )}
+    </section>
+  </LegalPage>
+
+  <style>
+    .contact-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px 20px; margin: 0 0 22px; }
+    .contact-card .gold-hair { margin: 0 0 16px; }
+    .contact-card .contact-cta { margin: 4px 0 0; }
+    .give-card { margin-top: 18px; }
+    .give-card h3 { margin-top: 0; }
+    :global(.legal) .contact-card a.btn { color: var(--on-accent); text-decoration: none; min-height: 44px; }
+    .faq-jump ul { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 2px; }
+    .faq-jump a { display: inline-block; padding: 6px 0; font-size: 15.5px; }
+    .faq-item { padding: 18px 0 4px; border-top: 1px solid var(--line); scroll-margin-top: 92px; }
+    .faq-item h3 { scroll-margin-top: 92px; margin-top: 0; }
+    :global(.legal code) { font-size: .85em; padding: 1px 6px; border-radius: 6px; background: var(--paper-2); border: 1px solid var(--line); }
+  </style>
+</Marketing>

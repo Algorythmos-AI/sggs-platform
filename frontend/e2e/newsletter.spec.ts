@@ -10,7 +10,7 @@ test('landing has no newsletter form and makes no Buttondown request (env unset)
     if (req.url().includes('buttondown.com')) buttondownRequests.push(req.url());
   });
 
-  await page.goto('/');
+  await page.goto('/en');
   await page.waitForLoadState('networkidle').catch(() => {});
 
   await expect(page.locator('form.newsletter')).toHaveCount(0);

@@ -20,16 +20,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 STATIC = ROOT / "webapp" / "static"
+# The marketing pages live under a language prefix (frontend/src/pages/[lang]/, languages in
+# frontend/src/i18n/locales.json); the English pages are the reference build for these gates.
+EN = STATIC / "en"
 LANDING_ASSETS = ROOT / "frontend" / "src" / "assets" / "landing"
 SITE_TS = ROOT / "frontend" / "src" / "site.ts"
 # Built marketing pages (route -> built file) that carry the v2 budgets/eager/alt discipline.
 # /privacy and /support render in the marketing shell (LegalPage) since v1.3.5.
 MARKETING_BUILT = {
-    "/": STATIC / "index.html",
-    "/features": STATIC / "features" / "index.html",
-    "/watch": STATIC / "watch" / "index.html",
-    "/privacy": STATIC / "privacy" / "index.html",
-    "/support": STATIC / "support" / "index.html",
+    "/en": EN / "index.html",
+    "/en/features": EN / "features" / "index.html",
+    "/en/watch": EN / "watch" / "index.html",
+    "/en/privacy": EN / "privacy" / "index.html",
+    "/en/support": EN / "support" / "index.html",
 }
 LANDING_IMAGE_SUFFIXES = (".jpg", ".jpeg", ".png", ".webp")
 
@@ -50,7 +53,7 @@ def _image_credits():
 
 
 def _learn_built_pages():
-    learn = STATIC / "learn"
+    learn = EN / "learn"
     return sorted(learn.rglob("index.html")) if learn.exists() else []
 
 
@@ -60,7 +63,7 @@ class LandingPage(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.index = STATIC / "index.html"
+        cls.index = EN / "index.html"
         cls.html = cls.index.read_text(encoding="utf-8") if cls.index.exists() else None
 
     def _skip_if_unbuilt(self):
@@ -131,7 +134,7 @@ class LandingPage(unittest.TestCase):
 
     def test_seo_head_present(self):
         self._skip_if_unbuilt()
-        self.assertIn('rel="canonical" href="https://gurbanisoul.com/"', self.html)
+        self.assertIn('rel="canonical" href="https://gurbanisoul.com/en"', self.html)
         self.assertRegex(self.html, r'property="og:image" content="https://gurbanisoul\.com/')
         self.assertRegex(self.html, r'name="description" content="[^"]{40,}"')
 
@@ -162,8 +165,8 @@ class LandingPage(unittest.TestCase):
             imgs = re.findall(r"<img\b[^>]*>", html)
             eager = [t for t in imgs if 'loading="eager"' in t]
             high = re.findall(r'fetchpriority="high"', html)
-            if route == "/":
-                self.assertLessEqual(len(eager), 2, f"/: {len(eager)} eager images (max 2)")
+            if route == "/en":
+                self.assertLessEqual(len(eager), 2, f"/en: {len(eager)} eager images (max 2)")
                 self.assertEqual(len(high), 1, f"/: expected exactly one fetchpriority=high, got {len(high)}")
             else:
                 self.assertEqual(eager, [], f"{route}: eager image(s) off the home page")
@@ -229,7 +232,7 @@ class LandingPage(unittest.TestCase):
         # The marketing pages render in the Gurbani Soul shell, never the Knowledge Base's
         # (Base.astro) header/toolbar — including the App Store's /privacy and /support.
         self._skip_if_unbuilt()
-        for route in ("/", "/features", "/watch", "/privacy", "/support"):
+        for route in MARKETING_BUILT:
             f = MARKETING_BUILT[route]
             if not f.exists():
                 continue
@@ -305,7 +308,7 @@ class LandingPage(unittest.TestCase):
         # and pahar 7 (the silent night) must list none. Since the multi-page redesign the raag
         # <li data-pahar> markup lives on the dedicated /watch page (webapp/static/watch/index.html).
         self._skip_if_unbuilt()
-        watch = STATIC / "watch" / "index.html"
+        watch = EN / "watch" / "index.html"
         if not watch.exists():
             self.skipTest("webapp/static/watch/index.html not built (cd frontend && npm run build:deploy)")
         html = watch.read_text(encoding="utf-8")
@@ -328,7 +331,8 @@ class LandingPage(unittest.TestCase):
 MARKETING_CSS = ROOT / "frontend" / "src" / "styles" / "marketing.css"
 COMPONENTS = ROOT / "frontend" / "src" / "components"
 PAGES = ROOT / "frontend" / "src" / "pages"
-INDEX_ASTRO = PAGES / "index.astro"
+LANG_PAGES = PAGES / "[lang]"       # the marketing pages, one build per language
+INDEX_ASTRO = LANG_PAGES / "index.astro"
 # Marketing pages (Marketing.astro shell) whose scoped CSS the brand discipline also governs.
 MARKETING_PAGES = ("index.astro", "features.astro", "watch.astro", "privacy.astro", "support.astro")
 
@@ -339,7 +343,7 @@ def _marketing_style_sources():
     for p in sorted(COMPONENTS.glob("*.astro")):
         out.append((p.name, p.read_text(encoding="utf-8")))
     for name in MARKETING_PAGES:
-        p = PAGES / name
+        p = LANG_PAGES / name
         if p.exists():
             out.append((name, p.read_text(encoding="utf-8")))
     return out
@@ -498,7 +502,7 @@ class StoredKeysAreDisclosed(unittest.TestCase):
         self.assertGreaterEqual(len(found), 10, "the scan found too few keys to be working")
         unknown = sorted(found - set(self.DISCLOSED))
         self.assertEqual(unknown, [], f"new browser-storage keys: {unknown} — disclose them on the privacy page and add them here")
-        policy = (ROOT / "frontend" / "src" / "pages" / "privacy.astro").read_text(encoding="utf-8")
+        policy = (LANG_PAGES / "privacy.astro").read_text(encoding="utf-8")
         missing = sorted(k for k in found if self.DISCLOSED[k] and self.DISCLOSED[k] not in policy)
         self.assertEqual(missing, [], f"keys the privacy page does not name: {missing}")
 
@@ -592,7 +596,8 @@ class ScriptureDisplayInSource(unittest.TestCase):
     SRC = ROOT / "frontend" / "src"
 
     def _sources(self):
-        files = sorted((self.SRC / "scripts").glob("*.ts")) + sorted((self.SRC / "pages").glob("*.astro"))
+        files = (sorted((self.SRC / "scripts").glob("*.ts")) + sorted((self.SRC / "pages").glob("*.astro"))
+                 + sorted((self.SRC / "pages" / "[lang]").rglob("*.astro")))
         files.append(self.SRC / "layouts" / "Base.astro")
         return [(p.relative_to(ROOT).as_posix(), p.read_text(encoding="utf-8")) for p in files]
 
@@ -715,15 +720,22 @@ def _norm_url(u):
     return u.rstrip("/")
 
 
+_NOINDEX = re.compile(r'<meta name="robots" content="noindex')
+
+
 def _built_pages():
-    """Yield (route, path) for every built *.html except 404.html and the /ang/N share pages.
+    """Yield (route, path) for every built, indexable *.html except 404.html and /ang/N.
 
     index.html -> "/"; <dir>/index.html -> "/<dir>"; any other x.html -> "/x". The 1430 /ang/N
     pages are share hand-offs (noindex, not in the sitemap) with their own gate, AngSharePages.
+    Other noindex pages (the bare root's language chooser and the pre-i18n URLs' forwarding pages)
+    have their own gate, LanguageRouting.
     """
     for p in sorted(STATIC.rglob("*.html")):
         rel = p.relative_to(STATIC)
         if rel.name == "404.html" or rel.parts[0] == "ang":
+            continue
+        if _NOINDEX.search(p.read_text(encoding="utf-8")):
             continue
         if rel.name == "index.html":
             d = rel.parent.as_posix()
@@ -747,7 +759,7 @@ class SeoInvariants(unittest.TestCase):
     def test_every_page_has_correct_seo_head(self):
         pages = list(_built_pages())
         self.assertTrue(pages, "no built HTML pages found")
-        marketing = {"/"}
+        marketing = {"/en"}
         for route, path in pages:
             html = path.read_text(encoding="utf-8")
             canonical_want = _norm_url(SITE + route)
@@ -927,10 +939,122 @@ class SitemapInvariants(unittest.TestCase):
     def test_learn_routes_present(self):
         root = ET.parse(STATIC / "sitemap.xml").getroot()
         locs = {_norm_url(el.text) for el in root.iter(f"{SITEMAP_NS}loc")}
-        self.assertIn(_norm_url(SITE + "/learn"), locs, "sitemap missing /learn")
+        self.assertIn(_norm_url(SITE + "/en/learn"), locs, "sitemap missing /en/learn")
         # every built Learn article route must be in the sitemap
         for route, _ in _learn_articles():
             self.assertIn(_norm_url(SITE + route), locs, f"sitemap missing {route}")
+
+
+LOCALES_JSON = FRONTEND / "src" / "i18n" / "locales.json"
+VERCEL_JSON = FRONTEND / "vercel.json"
+_HREF = re.compile(r'<a\b[^>]*\bhref="([^"]*)"')
+
+
+class LanguageRouting(unittest.TestCase):
+    """Every marketing page lives under a language prefix; the old URLs, the bare root and the
+    languages not yet enabled all redirect, and no page links across into another language.
+
+    The rules are generated (frontend/scripts/gen-i18n-redirects.mjs, unit-tested by
+    frontend/scripts/test-i18n.mjs); this gate re-derives what must hold from locales.json alone.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cfg = json.loads(LOCALES_JSON.read_text(encoding="utf-8"))
+        cls.redirects = json.loads(VERCEL_JSON.read_text(encoding="utf-8")).get("redirects", [])
+        cls.default = cls.cfg["default"]
+        cls.pages = [p for p in cls.cfg["localizedPages"] if p != "/"]
+
+    def _rule(self, source):
+        return [r for r in self.redirects if r["source"] == source]
+
+    def test_old_urls_redirect_permanently_to_the_default_language(self):
+        # App Store Connect and the app link /privacy and /support: these must never break.
+        for page in ("/support", "/privacy"):
+            self.assertIn(page, self.pages, f"{page} must stay a localized page")
+        for page in self.pages:
+            rules = self._rule(page)
+            self.assertEqual(len(rules), 1, f"{page}: expected one redirect, got {rules}")
+            self.assertEqual(rules[0]["destination"], f"/{self.default}{page}", page)
+            self.assertIs(rules[0].get("permanent"), True, f"{page}: must be a permanent (308) redirect")
+
+    def test_root_negotiates_and_falls_back_to_the_default(self):
+        roots = self._rule("/")
+        self.assertTrue(roots, "no redirect for /")
+        last = roots[-1]
+        self.assertNotIn("has", last, "the last / rule must be unconditional")
+        self.assertEqual((last["destination"], last.get("statusCode")), (f"/{self.default}", 302))
+        for r in roots[:-1]:
+            self.assertEqual(r.get("statusCode"), 302, "/ answers per visitor: never permanent")
+            lang = r["destination"].lstrip("/")
+            self.assertIn(lang, self.cfg["enabled"], f"/ negotiates to a language that is not enabled: {lang}")
+            self.assertEqual(r["has"][0]["key"], "accept-language")
+
+    def test_disabled_languages_redirect_and_enabled_ones_never_do(self):
+        for lang in self.cfg["locales"]:
+            rules = self._rule(f"/{lang}") + [r for r in self.redirects if r["source"].startswith(f"/{lang}/")]
+            if lang in self.cfg["enabled"]:
+                self.assertEqual(rules, [], f"/{lang} is enabled but redirected: {rules}")
+            else:
+                self.assertTrue(rules, f"/{lang} is not enabled but not redirected")
+                self.assertTrue(all(r.get("statusCode") == 302 for r in rules), f"/{lang}: must be temporary (302)")
+
+    def test_built_languages_match_the_config(self):
+        if _unbuilt():
+            self.skipTest("webapp/static not built")
+        for lang in self.cfg["locales"]:
+            home = STATIC / lang / "index.html"
+            if lang in self.cfg["enabled"]:
+                self.assertTrue(home.is_file(), f"/{lang} is enabled but not built")
+            else:
+                self.assertFalse((STATIC / lang).exists(), f"/{lang} is not enabled but was built")
+
+    def test_every_language_page_declares_its_language_and_links_within_it(self):
+        if _unbuilt():
+            self.skipTest("webapp/static not built")
+        legacy = tuple(self.pages)
+        seen = 0
+        for lang in self.cfg["enabled"]:
+            want = self.cfg["locales"][lang]["htmlLang"]
+            for p in sorted((STATIC / lang).rglob("index.html")):
+                html = p.read_text(encoding="utf-8")
+                route = "/" + p.parent.relative_to(STATIC).as_posix()
+                self.assertRegex(html, rf'<html lang="{re.escape(want)}"', f"{route}: wrong <html lang>")
+                for href in _HREF.findall(html):
+                    path = href.split("#")[0].split("?")[0]
+                    if not path.startswith("/") or path.startswith("//"):
+                        continue
+                    self.assertFalse(path != "/" and path.endswith("/"), f"{route}: trailing-slash link {href}")
+                    self.assertFalse(path == "/" or path in legacy or path.startswith(tuple(x + "/" for x in legacy)),
+                                     f"{route}: links to the pre-i18n URL {href} (use localizeHref)")
+                    other = [l for l in self.cfg["locales"] if l != lang and (path == f"/{l}" or path.startswith(f"/{l}/"))]
+                    self.assertEqual(other, [], f"{route}: links into another language: {href}")
+                seen += 1
+        self.assertGreater(seen, 5, "no language pages found")
+
+    def test_root_is_a_noindex_language_chooser(self):
+        if _unbuilt():
+            self.skipTest("webapp/static not built")
+        html = (STATIC / "index.html").read_text(encoding="utf-8")
+        self.assertRegex(html, r'<meta name="robots" content="noindex, follow"', "/ must be noindex")
+        for lang in self.cfg["enabled"]:
+            self.assertIn(f'href="/{lang}"', html, f"/ does not offer /{lang}")
+
+    def test_pre_i18n_urls_forward_to_english_without_being_indexed(self):
+        if _unbuilt():
+            self.skipTest("webapp/static not built")
+        stubs = [STATIC / page.lstrip("/") / "index.html" for page in self.pages]
+        stubs += sorted(p for p in (STATIC / "learn").glob("*/index.html"))
+        self.assertGreater(len(stubs), len(self.pages), "no forwarding pages for the old Learn articles")
+        for p in stubs:
+            route = "/" + p.parent.relative_to(STATIC).as_posix()
+            self.assertTrue(p.is_file(), f"{route}: no forwarding page (serve.py would 404)")
+            html = p.read_text(encoding="utf-8")
+            to = f"/{self.default}{route}"
+            self.assertIn('<meta name="robots" content="noindex, follow"', html, route)
+            self.assertIn(f'<link rel="canonical" href="{SITE}{to}"', html, route)
+            self.assertIn(f'<meta http-equiv="refresh" content="0; url={to}"', html, route)
+            self.assertTrue((STATIC / to.lstrip("/") / "index.html").is_file(), f"{route} forwards to a missing page {to}")
 
 
 class RssInvariants(unittest.TestCase):
@@ -952,8 +1076,8 @@ class RssInvariants(unittest.TestCase):
         for it in items:
             link = it.find("link")
             self.assertIsNotNone(link, "rss item has no <link>")
-            self.assertTrue(link.text.startswith(SITE + "/learn/"),
-                            f"rss item link not a /learn/ URL: {link.text}")
+            self.assertTrue(link.text.startswith(SITE + "/en/learn/"),
+                            f"rss item link not an /en/learn/ URL: {link.text}")
 
 
 # ------------------------------------------------------------------------------------------------
@@ -974,18 +1098,18 @@ _LD_JSON = re.compile(r'<script type="application/ld\+json"[^>]*>(.*?)</script>'
 
 def _learn_articles():
     """(route, html) for every built Learn ARTICLE page (excludes the /learn index)."""
-    base = STATIC / "learn"
+    base = EN / "learn"
     if not base.exists():
         return
     for p in sorted(base.rglob("index.html")):
-        if p.parent.name == "learn":          # the /learn index itself, not an article
+        if p.parent.name == "learn":          # the /en/learn index itself, not an article
             continue
-        yield "/learn/" + p.parent.name, p.read_text(encoding="utf-8")
+        yield "/en/learn/" + p.parent.name, p.read_text(encoding="utf-8")
 
 
 def _all_learn_html():
     """html of every built Learn page, index included."""
-    base = STATIC / "learn"
+    base = EN / "learn"
     if not base.exists():
         return
     for p in sorted(base.rglob("index.html")):
@@ -1016,7 +1140,7 @@ def _iter_ld_objects(node):
 class LearnSection(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.unbuilt = _unbuilt() or not (STATIC / "learn").exists()
+        cls.unbuilt = _unbuilt() or not (EN / "learn").exists()
         cls.no_db = not (DB.exists() and DB.read_bytes()[:15] == b"SQLite format 3")
         cls.conn = None if cls.no_db else sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
 
@@ -1126,9 +1250,9 @@ class ExternalRequestAllowlist(unittest.TestCase):
             self.skipTest("webapp/static not built")
 
     def _marketing_sources(self):
-        index = STATIC / "index.html"
+        index = EN / "index.html"
         html = index.read_text(encoding="utf-8")
-        sources = [("index.html", html)]
+        sources = [("en/index.html", html)]
         for ref in re.findall(r'(?:src|href)="(/_astro/[^"]+\.js)"', html):
             js = STATIC / ref.lstrip("/")
             if js.is_file():
@@ -1144,7 +1268,7 @@ class ExternalRequestAllowlist(unittest.TestCase):
         self.assertEqual(bad, [], f"marketing references non-allowlisted host(s): {bad}")
 
     def test_vercel_insights_is_hostname_guarded(self):
-        html = (STATIC / "index.html").read_text(encoding="utf-8").splitlines()
+        html = (EN / "index.html").read_text(encoding="utf-8").splitlines()
         for i, line in enumerate(html):
             if "_vercel/insights" in line:
                 window = " ".join(html[max(0, i - 1): i + 2])
@@ -1320,7 +1444,7 @@ class JsonLdInvariants(unittest.TestCase):
                     self.fail(f"{route}: ld+json does not parse: {e}")
 
     def test_landing_has_org_website_and_software_application(self):
-        objs = self._ld_objects(self._page_html("/"))
+        objs = self._ld_objects(self._page_html("/en"))
         types = [o.get("@type") for o in objs]
         self.assertIn("Organization", types, "landing missing Organization JSON-LD")
 
@@ -1343,7 +1467,7 @@ class JsonLdInvariants(unittest.TestCase):
                          "SoftwareApplication must not carry a fabricated aggregateRating")
 
     def test_support_faqpage_questions_are_visible_headings(self):
-        html = self._page_html("/support")
+        html = self._page_html("/en/support")
         objs = self._ld_objects(html)
         faq = next((o for o in objs if o.get("@type") == "FAQPage"), None)
         self.assertIsNotNone(faq, "/support missing FAQPage JSON-LD")

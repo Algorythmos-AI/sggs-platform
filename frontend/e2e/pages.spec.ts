@@ -6,7 +6,7 @@ import AxeBuilder from '@axe-core/playwright';
 // toggle, mobile menu) keeps working off the landing.
 
 test('/features renders the chapters, the at-a-glance list and device shots @smoke', async ({ page }) => {
-  const res = await page.goto('/features');
+  const res = await page.goto('/en/features');
   expect(res?.status()).toBe(200);
   await expect(page.locator('h1')).toBeVisible();
 
@@ -28,11 +28,11 @@ test('/features renders the chapters, the at-a-glance list and device shots @smo
     await expect(page.locator(`img[alt*="${alt}" i]`).first()).toBeVisible();
   }
 
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://gurbanisoul.com/features');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://gurbanisoul.com/en/features');
 });
 
 test('/watch renders the live dial, its caption and the raag list @smoke', async ({ page }) => {
-  const res = await page.goto('/watch');
+  const res = await page.goto('/en/watch');
   expect(res?.status()).toBe(200);
   await expect(page.locator('h1')).toBeVisible();
 
@@ -57,26 +57,26 @@ test('/watch renders the live dial, its caption and the raag list @smoke', async
 
   // CTA to the Knowledge Base Raag Clock tool (the one gold action) + the Learn article
   await expect(page.locator('a.btn[href="/raag-clock"]')).toBeVisible();
-  await expect(page.locator('a[href="/learn/the-31-raags-and-the-watches-of-the-day"]').first()).toBeVisible();
+  await expect(page.locator('a[href="/en/learn/the-31-raags-and-the-watches-of-the-day"]').first()).toBeVisible();
 
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://gurbanisoul.com/watch');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://gurbanisoul.com/en/watch');
 });
 
 test('nav active state marks the current route @smoke', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === 'mobile', 'primary nav is collapsed on mobile');
-  await page.goto('/features');
-  await expect(page.locator('nav[aria-label="Primary"] a[href="/features"]')).toHaveAttribute('aria-current', 'page');
+  await page.goto('/en/features');
+  await expect(page.locator('nav[aria-label="Primary"] a[href="/en/features"]')).toHaveAttribute('aria-current', 'page');
   // exactly one active link
   await expect(page.locator('nav[aria-label="Primary"] a[aria-current="page"]')).toHaveCount(1);
 
-  await page.goto('/watch');
-  await expect(page.locator('nav[aria-label="Primary"] a[href="/watch"]')).toHaveAttribute('aria-current', 'page');
-  await expect(page.locator('nav[aria-label="Primary"] a[href="/features"]')).not.toHaveAttribute('aria-current', 'page');
+  await page.goto('/en/watch');
+  await expect(page.locator('nav[aria-label="Primary"] a[href="/en/watch"]')).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('nav[aria-label="Primary"] a[href="/en/features"]')).not.toHaveAttribute('aria-current', 'page');
 });
 
 test('theme button works on a sub-page', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === 'mobile', 'theme button is in the collapsed nav on mobile');
-  await page.goto('/features');
+  await page.goto('/en/features');
   const html = page.locator('html');
   const btn = page.locator('#themeBtn');
   await btn.click();
@@ -85,7 +85,7 @@ test('theme button works on a sub-page', async ({ page }, testInfo) => {
 
 test('mobile menu opens and closes on a sub-page', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile', 'the menu button shows under 1024px');
-  await page.goto('/watch');
+  await page.goto('/en/watch');
   const burger = page.locator('.burger');
   await expect(burger).toBeVisible();
   await burger.click();
@@ -98,7 +98,7 @@ test('mobile menu opens and closes on a sub-page', async ({ page }, testInfo) =>
 // measures the real, settled colours rather than a mid-fade frame.
 test('/features has no serious/critical accessibility violations', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/features');
+  await page.goto('/en/features');
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   const bad = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''));
   expect(bad, JSON.stringify(bad.map((v) => v.id))).toEqual([]);
@@ -106,7 +106,7 @@ test('/features has no serious/critical accessibility violations', async ({ page
 
 test('/watch has no serious/critical accessibility violations', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/watch');
+  await page.goto('/en/watch');
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   const bad = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''));
   expect(bad, JSON.stringify(bad.map((v) => v.id))).toEqual([]);

@@ -14,6 +14,10 @@
 // when /contribute has live/test links (CONTRIBUTE_MODE). Privacy lives in the sheet and the footer.
 import { APP_STORE_URL, APP_STORE_LIVE } from "../site";
 import { CONTRIBUTE_MODE } from "../contribute";
+import { localeOf, localizeHref } from "../i18n/paths";
+
+const lang = localeOf(Astro.url.pathname);
+const L = (href: string) => localizeHref(href, lang);
 
 // `overHero` (default) floats the bar over the dark hero with white text until scrolled. Pages with
 // no dark hero (e.g. Learn, Features, The watch) pass overHero={false} so the resting bar uses ink
@@ -29,16 +33,16 @@ const giveOn = CONTRIBUTE_MODE !== "off";
 const heart = '<svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21.2c-.3 0-.6-.1-.8-.3C8.2 18.4 2.5 13.9 2.5 8.9A5.2 5.2 0 0 1 12 6a5.2 5.2 0 0 1 9.5 2.9c0 5-5.7 9.5-8.7 12-.2.2-.5.3-.8.3z"/></svg>';
 
 const links = [
-  { href: "/features", label: "Features", prefetch: true },
-  { href: "/watch", label: "The watch", prefetch: true },
-  { href: "/learn", label: "Learn", prefetch: true },
+  { href: L("/features"), label: "Features", prefetch: true },
+  { href: L("/watch"), label: "The watch", prefetch: true },
+  { href: L("/learn"), label: "Learn", prefetch: true },
   { href: "/search", label: "Knowledge Base" },
-  { href: "/support", label: "Support", prefetch: true },
+  { href: L("/support"), label: "Support", prefetch: true },
 ];
 ---
 <header class:list={["mnav", { "mnav--solid": !overHero }]} id="mnav">
   <div class="mnav-in">
-    <a class="brand" href="/">
+    <a class="brand" href={L("/")}>
       <span class="gm" aria-hidden="true">ੴ</span>
       <span>Gurbani Soul</span>
     </a>
@@ -53,8 +57,8 @@ const links = [
     <div class="mnav-right">
       <button id="themeBtn" class="mnav-icon" aria-label="Theme">◐</button>
       {giveOn && (
-        <a class="mnav-give" href="/contribute" data-astro-prefetch
-           aria-current={isCurrent("/contribute") ? "page" : undefined}>
+        <a class="mnav-give" href={L("/contribute")} data-astro-prefetch
+           aria-current={isCurrent(L("/contribute")) ? "page" : undefined}>
           <Fragment set:html={heart} /><span class="lbl">Contribute</span>
         </a>
       )}
@@ -72,7 +76,7 @@ const links = [
 <dialog id="mobileMenu" aria-label="Menu">
   <div class="mm-in">
     <div class="mm-top">
-      <a class="brand" href="/"><span class="gm" aria-hidden="true">ੴ</span> <span>Gurbani Soul</span></a>
+      <a class="brand" href={L("/")}><span class="gm" aria-hidden="true">ੴ</span> <span>Gurbani Soul</span></a>
       <button class="mm-close mnav-icon" aria-label="Close menu">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
       </button>
@@ -84,10 +88,10 @@ const links = [
       ))}
     </nav>
     <div class="mm-sub">
-      <a href="/privacy" data-astro-prefetch aria-current={isCurrent("/privacy") ? "page" : undefined}>Privacy</a>
+      <a href={L("/privacy")} data-astro-prefetch aria-current={isCurrent(L("/privacy")) ? "page" : undefined}>Privacy</a>
       {giveOn && (
-        <a class="mm-give" href="/contribute" data-astro-prefetch
-           aria-current={isCurrent("/contribute") ? "page" : undefined}>
+        <a class="mm-give" href={L("/contribute")} data-astro-prefetch
+           aria-current={isCurrent(L("/contribute")) ? "page" : undefined}>
           <Fragment set:html={heart} /><span>Contribute</span>
         </a>
       )}
