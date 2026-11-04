@@ -3,11 +3,11 @@
 // /api/analytics/vaars) — the spans are the raags and sections tables' first_ang..last_ang.
 // Layout (posters/kit.mjs): the bar to scale with square segments in two strong shades, the Vaars as
 // thin ticks in two lanes (adjacent Vaars share an Ang), then every raag named in a two-column list.
-const V = { version: '1.3.10', date: '2026-09-27', commit: 'd85c2adc' };
+const V = { version: '1.5.2', date: '2026-11-05', commit: '49c71652' };
 // [seq, roman name, first Ang, last Ang, shabads]
 const RAAGS = [
   [1, 'Sireeraag', 14, 93, 208], [2, 'Maajh', 94, 150, 177], [3, 'Gaurhee', 151, 346, 740], [4, 'Aasaa', 347, 488, 448], [5, 'Goojaree', 489, 526, 194],
-  [6, 'Devagandhaaree', 527, 536, 47], [7, 'Bihaagarhaa', 537, 556, 79], [8, 'Vadahans', 557, 594, 119], [9, 'Sorath', 595, 659, 243], [10, 'Dhanaasaree', 660, 695, 105],
+  [6, 'Devagandhaaree', 527, 536, 47], [7, 'Bihaagarhaa', 537, 556, 79], [8, 'Vadahans', 557, 594, 119], [9, 'Sorath', 595, 659, 243], [10, 'Dhanaasaree', 660, 695, 108],
   [11, 'Jaitasaree', 696, 710, 75], [12, 'Todee', 711, 718, 33], [13, 'Bairaarhee', 719, 720, 7], [14, 'Tilang', 721, 727, 19], [15, 'Soohee', 728, 794, 207],
   [16, 'Bilaaval', 795, 858, 230], [17, 'Gond', 859, 875, 49], [18, 'Raamakalee', 876, 974, 270], [19, 'Nat', 975, 983, 25], [20, 'Maalee Gaurhaa', 984, 988, 15],
   [21, 'Maaroo', 989, 1106, 311], [22, 'Tukhaaree', 1107, 1117, 11], [23, 'Kedaaraa', 1118, 1124, 20], [24, 'Bhairau', 1125, 1167, 105], [25, 'Basant', 1168, 1196, 81],
@@ -46,7 +46,7 @@ export default {
   number: '13', slug: 'structure-of-the-granth',
   title: 'The structure of the Granth',
   subtitle: 'Angs 1 to 1430 as one bar to scale — the opening, the thirty-one raags in printed order, the closing sections; the twenty-two Vaars marked',
-  description: 'Sri Guru Granth Sahib Ji opens with Japji Sahib, So Dar, So Purakh and Sohila on Angs 1–13, is ordered by thirty-one raags from Sireeraag on Ang 14 to Jaijaavantee on Ang 1353, and closes with the Sahaskriti saloks, Gatha, Phunhe, Chaubole, the Bhatts’ Swaiyye, the saloks beyond the Vaars, Guru Tegh Bahadur Ji’s saloks, Mundavani and Raagmala on Angs 1353–1430. Twenty-two Vaars sit inside the raags. Six Gurus, fifteen Bhagats, eleven Bhatts and three others wrote it; 60,658 lines in 4,527 compositions.',
+  description: 'Sri Guru Granth Sahib Ji opens with Japji Sahib, So Dar, So Purakh and Sohila on Angs 1–13, is ordered by thirty-one raags from Sireeraag on Ang 14 to Jaijaavantee on Ang 1353, and closes with the Sahaskriti saloks, Gatha, Phunhe, Chaubole, Bhagat Kabir Ji’s and Sheikh Farid Ji’s saloks, the Bhatts’ Swaiyye, the saloks beyond the Vaars, Guru Tegh Bahadur Ji’s saloks, Mundavani and Raagmala on Angs 1353–1430. Twenty-two Vaars sit inside the raags. Six Gurus, fifteen Bhagats, eleven Bhatts and three others wrote it; 60,658 lines in 4,531 compositions.',
   height: 1700, verified: V,
   sources: ['webapp/sggs/reader.py', 'webapp/sggs/insights.py', 'docs/scripture/structure.md'],
   badges: false,
@@ -64,10 +64,10 @@ export default {
   edges: [],
   steps: [
     { id: 'step-01', title: 'One bar, 1,430 Angs', caption: 'The whole scripture drawn to scale: every Ang is the same width, from Ang 1 at the left to Ang 1430 at the right. Hover a segment for its name and span. Every number on this poster comes from the pinned database, the same one the site and the app serve.', link: '/scripture/structure/' },
-    { id: 'step-02', title: 'The opening: Angs 1–13', caption: 'The Granth opens with the Mool Mantar and Japji Sahib (Angs 1–8, 385 lines, no author line in the print), then So Dar, So Purakh and Sohila — the evening and night prayers — before the first raag begins on Ang 14.', link: '/scripture/what-sggs-is/' },
+    { id: 'step-02', title: 'The opening: Angs 1–13', caption: 'The Granth opens with the Mool Mantar and Japji Sahib (Angs 1–8, 385 lines; no author line in the print, attributed to Guru Nanak Dev Ji in the database), then So Dar, So Purakh and Sohila — the evening and night prayers — before the first raag begins on Ang 14.', link: '/scripture/what-sggs-is/' },
     { id: 'step-03', title: 'Thirty-one raags: Angs 14–1353', caption: 'From Ang 14 the hymns are arranged by raag, the musical mode they are sung in — Sireeraag first, Jaijaavantee last on Ang 1353. Inside a raag the compositions follow the Gurus in order, then the Bhagats. A raag’s span in the database is the longest run of Angs where it is the majority, so a liturgical mention elsewhere never drags a raag’s start. Gaurhee, Maaroo and Raamakalee are the largest.', link: '/scripture/structure/' },
     { id: 'step-04', title: 'After the raags: Angs 1353–1430', caption: 'The closing sections leave the raag framework: the Sahaskriti saloks, Gatha, Phunhe and Chaubole (Guru Arjan Dev Ji), the Bhatts’ Swaiyye in praise of the Gurus (1385–1409), the saloks beyond the Vaars, Guru Tegh Bahadur Ji’s saloks, Mundavani — the seal — and Raagmala. The database clears the raag column here and detects these sections from their headings.', link: '/scripture/bhatts-and-swaiyye/' },
     { id: 'step-05', title: 'The twenty-two Vaars', caption: 'Twenty-two Vaars sit inside the raags, marked under the bar: ballads of pauris by one author with saloks interleaved from several Gurus. The pipeline detects them by their title headers, and a Vaar’s pauris keep the Vaar’s author even where the interleaved saloks carry other ਮਃ headers.', link: '/scripture/vaars-saloks-pauris/' },
-    { id: 'step-06', title: 'The voices, and the numbers', caption: 'Six Gurus, fifteen Bhagats, eleven Bhatts, Satta and Balwand, and Bhai Mardana: 29 attributed authors, with Japji carrying no author line. 60,658 lines in 4,527 compositions; 13 named sections outside the raags; 54 themes in the concept index. Every figure is read from the database — the structure page lists them all.', link: '/scripture/structure/' },
+    { id: 'step-06', title: 'The voices, and the numbers', caption: 'Six Gurus, fifteen Bhagats, eleven Bhatts (and the Bhatts as a group), Satta and Balwand, Bhai Mardana and Baba Sundar Ji: 36 attributed authors. 60,658 lines in 4,531 compositions; 15 named sections outside the raags; 54 themes in the concept index. Every figure is read from the database — the structure page lists them all.', link: '/scripture/structure/' },
   ],
 };

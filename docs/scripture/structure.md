@@ -1,11 +1,11 @@
 ---
 title: "The structure of the Granth"
-description: "Angs 1–1430 as one bar: the opening banis, thirty-one raags in printed order, the closing sections, twenty-two Vaars, twenty-nine voices — every number read from the pinned database, with a poster."
+description: "Angs 1–1430 as one bar: the opening banis, thirty-one raags in printed order, the closing sections, twenty-two Vaars, thirty-six voices — every number read from the pinned database, with a poster."
 sidebar:
   order: 2
 verified:
-  commit: 6332e947
-  date: "2026-09-25"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # The structure of the Granth
 
@@ -23,19 +23,19 @@ number on it is read from the pinned database, which the tables below list in fu
 
 1. **The opening, Angs 1–13.** The [[Mool Mantar]] and [[Japji]] Sahib (385 lines,
    Angs 1–8), then So Dar, So Purakh and Sohila — the [[Sohila|evening and night prayers]].
-   In the database these are the first four named sections; Japji's lines carry `author = null`
-   because the print has no ਮਹਲਾ line for it.
+   In the database these are the first four named sections; Japji's lines are attributed to Guru
+   Nanak Dev Ji, although the print has no ਮਹਲਾ line for it.
 2. **The raags, Angs 14–1353.** Thirty-one [[Raag|raags]], from `ਸਿਰੀਰਾਗੁ` on Ang 14 to `ਜੈਜਾਵੰਤੀ` on
    Ang 1353. Inside a raag the compositions run through the Gurus in order, then the Bhagats; the
    headings name the Guru as [[Mahalla]] (`ਮਹਲਾ ੧` to `੫`, and `੯`). A raag's *span* in the database
    is the longest run of Angs where it is the majority, so a liturgical mention of a raag elsewhere
    never drags its start.
-3. **After the raags, Angs 1353–1430.** The [[Sahaskriti]] saloks, Gatha, Phunhe and Chaubole, the
-   Bhatts' [[Swaiyye]], the saloks beyond the Vaars, Guru Tegh Bahadur Ji's
+3. **After the raags, Angs 1353–1430.** The [[Sahaskriti]] saloks, Gatha, Phunhe and Chaubole,
+   Bhagat Kabir Ji's and Sheikh Farid Ji's saloks, the Bhatts' [[Swaiyye]], the saloks beyond the Vaars, Guru Tegh Bahadur Ji's
    saloks, [[Mundavani]] — the seal — and [[Raagmala]]. The database clears the raag column from
    Ang 1353 (`POST_RAAG_ANG`) and detects these sections from their headings.
 
-## The named sections (13)
+## The named sections (15)
 
 | Section | Angs | Lines |
 |---|---|---|
@@ -46,7 +46,9 @@ number on it is read from the pinned database, which the tables below list in fu
 | `ਸਲੋਕ ਸਹਸਕ੍ਰਿਤੀ` | 1353–1360 | 261 |
 | `ਗਾਥਾ` | 1360–1361 | 61 |
 | `ਫੁਨਹੇ` | 1361–1363 | 94 |
-| `ਚਉਬੋਲੇ` | 1363–1384 | 815 |
+| `ਚਉਬੋਲੇ ਮਹਲਾ ੫` | 1363–1364 | 24 |
+| `ਸਲੋਕ ਭਗਤ ਕਬੀਰ ਜੀਉ ਕੇ` | 1364–1377 | 494 |
+| `ਸਲੋਕ ਸੇਖ ਫਰੀਦ ਕੇ` | 1377–1384 | 297 |
 | `ਸਵਈਏ` | 1385–1409 | 780 |
 | `ਸਲੋਕ ਵਾਰਾਂ ਤੇ ਵਧੀਕ` | 1410–1426 | 601 |
 | `ਸਲੋਕ ਮਹਲਾ ੯` | 1426–1429 | 117 |
@@ -66,7 +68,7 @@ number on it is read from the pinned database, which the tables below list in fu
 | 7 | `ਬਿਹਾਗੜਾ` | *bihaagarhaa* | 537–556 | 79 | 712 |
 | 8 | `ਵਡਹੰਸੁ` | *vadahans* | 557–594 | 119 | 1,425 |
 | 9 | `ਸੋਰਠਿ` | *sorath* | 595–659 | 243 | 2,643 |
-| 10 | `ਧਨਾਸਰੀ` | *dhanaasaree* | 660–695 | 105 | 1,415 |
+| 10 | `ਧਨਾਸਰੀ` | *dhanaasaree* | 660–695 | 108 | 1,415 |
 | 11 | `ਜੈਤਸਰੀ` | *jaitasaree* | 696–710 | 75 | 590 |
 | 12 | `ਟੋਡੀ` | *todee* | 711–718 | 33 | 282 |
 | 13 | `ਬੈਰਾੜੀ` | *bairaarhee* | 719–720 | 7 | 51 |
@@ -89,54 +91,62 @@ number on it is read from the pinned database, which the tables below list in fu
 | 30 | `ਪ੍ਰਭਾਤੀ` | *prabhaatee* | 1328–1351 | 65 | 1,046 |
 | 31 | `ਜੈਜਾਵੰਤੀ` | *jaijaavantee* | 1352–1353 | 4 | 33 |
 
-## The voices (29 attributed authors)
+## The voices (36 attributed authors)
 
 Six Gurus, fifteen [[Bhagat|Bhagats]], eleven [[Bhatt|Bhatts]] (plus the generic Bhatt
-attribution where a Swaiyya's signature names no single bard), Satta and Balwand, and Bhai
-Mardana. Japji's 385 lines are unattributed in the print.
+attribution where a Swaiyya's signature names no single bard), Satta and Balwand, Bhai Mardana
+and Baba Sundar Ji. Japji's 385 lines are attributed to Guru Nanak Dev Ji in the database,
+although the print carries no ਮਹਲਾ line for it; two lines elsewhere carry no author.
 
 | Author | Angs | Lines |
 |---|---|---|
-| Guru Arjan Dev Ji (M5) | 10–1430 | 25,285 |
-| Guru Nanak Dev Ji (M1) | 8–1412 | 11,792 |
-| Guru Amar Das Ji (M3) | 26–1421 | 10,170 |
-| Guru Ram Das Ji (M4) | 10–1424 | 6,612 |
-| Bhagat Kabir Ji | 91–1375 | 3,284 |
-| Bhagat Namdev Ji | 345–1351 | 680 |
-| Guru Tegh Bahadur Ji (M9) | 219–1429 | 614 |
-| Bhagat Ravidas Ji | 345–1293 | 473 |
+| Guru Arjan Dev Ji (M5) | 10–1430 | 25,025 |
+| Guru Nanak Dev Ji (M1) | 1–1412 | 12,175 |
+| Guru Amar Das Ji (M3) | 26–1421 | 9,998 |
+| Guru Ram Das Ji (M4) | 10–1424 | 6,589 |
+| Bhagat Kabir Ji | 91–1377 | 3,370 |
+| Bhagat Namdev Ji | 345–1351 | 759 |
+| Guru Tegh Bahadur Ji (M9) | 219–1429 | 591 |
+| Bhagat Ravidas Ji | 93–1293 | 463 |
+| Sheikh Farid Ji | 488–1384 | 318 |
 | Guru Angad Dev Ji (M2) | 83–1290 | 294 |
 | Bhatt Kalsahar (ਭਟ) | 1389–1408 | 279 |
-| Bhagat Beni Ji | 93–1351 | 99 |
-| Satta & Balwand | 966–968 | 91 |
-| Sheikh Farid Ji | 488–1378 | 90 |
+| Bhagat Beni Ji | 93–1351 | 90 |
+| Satta & Balwand | 966–968 | 90 |
 | Bhatt Nal (ਭਟ) | 1398–1401 | 84 |
-| Bhagat Trilochan Ji | 525–695 | 70 |
 | Bhatt Mathura (ਭਟ) | 1404–1409 | 69 |
+| Bhagat Trilochan Ji | 92–695 | 57 |
 | The Bhatts (ਭਟ) | 1389–1410 | 54 |
 | Bhatt Kirat (ਭਟ) | 1395–1406 | 40 |
+| Baba Sundar Ji | 923–924 | 38 |
 | Bhatt Gayand (ਭਟ) | 1402–1404 | 38 |
+| Bhagat Dhanna Ji | 487–695 | 31 |
 | Bhatt Bal (ਭਟ) | 1405–1405 | 26 |
 | Bhatt Jalap (ਭਟ) | 1394–1395 | 25 |
+| Bhagat Jaidev Ji | 526–1106 | 23 |
 | Bhatt Sal (ਭਟ) | 1396–1406 | 18 |
 | Bhagat Bhikhan Ji | 659–659 | 16 |
 | Bhagat Ramanand Ji | 1195–1195 | 16 |
-| Bhagat Jaidev Ji | 526–526 | 15 |
 | Bhai Mardana | 553–553 | 15 |
 | Bhatt Bhikha (ਭਟ) | 1395–1396 | 13 |
+| Bhagat Sadhna Ji | 858–858 | 12 |
+| Bhagat Sain Ji | 695–695 | 11 |
+| Bhagat Parmanand Ji | 1253–1253 | 10 |
+| Bhagat Pipa Ji | 695–695 | 7 |
 | Bhatt Haribans (ਭਟ) | 1409–1409 | 7 |
 | Bhatt Bhal (ਭਟ) | 1396–1396 | 4 |
+| Bhagat Surdas Ji | 1253–1253 | 1 |
 
 ## The numbers, from the database
 
 | | |
 |---|---|
 | Line records | 60,658 |
-| Compositions (`comp_id`) | 4,527 distinct, `max(comp_id)` 5,376 — the gaps are permanent |
-| Heading lines | 5,147 |
+| Compositions (`comp_id`) | 4,531 distinct, `max(comp_id)` 5,384 — the gaps are permanent |
+| Heading lines | 5,150 |
 | Rahao lines | 2,676 |
 | Lines carrying ੴ | 568 (the health check requires at least 560) |
-| Raags · sections · Vaars · themes | 31 · 13 · 22 · 54 |
+| Raags · sections · Vaars · themes | 31 · 15 · 22 · 54 |
 
 ## Check yourself
 

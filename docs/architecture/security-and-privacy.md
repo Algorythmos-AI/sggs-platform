@@ -4,8 +4,8 @@ description: "The defences at each layer — browser headers, a read-only API wi
 sidebar:
   order: 8
 verified:
-  commit: 05086f58
-  date: "2026-09-27"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # Security and privacy
 
@@ -91,7 +91,9 @@ states it (every statement there is checked against the code):
   SDKs. Its App Store label is "Data Not Collected". Location for the raag clock is rounded to
   about 1 km and stays on the device.
 - **The Knowledge Base pages** load no analytics and set no cookies. Preferences, reading
-  positions, pins and a rounded location (about 1 km) stay in the browser's storage.
+  positions, pins and a rounded location (about 1 km) stay in the browser's storage. The raag
+  clock asks for location only when the reader presses "Use my location" in solar mode, and
+  "Forget location" removes it.
 - **The Gurbani Soul pages** on `gurbanisoul.com` use Vercel Web Analytics: cookieless totals of
   page, referrer, country, browser, OS and device type, with a visitor hash discarded daily.
 - **The API log** is one JSON line per request with the method, the path, the status, the
@@ -99,6 +101,11 @@ states it (every statement there is checked against the code):
   agent; a test fails if a query string appears
   ([ADR-0009](../adr/0009-production-verification.md)). Hosting providers keep their own standard
   logs.
+- **Contributions**, when `/contribute` is on (`CONTRIBUTE_MODE` in `frontend/src/contribute.ts`),
+  leave the site for a checkout page run by Stripe; no Stripe code loads before the click, and
+  the site never sees card details. The policy's Contributions section appears only in that mode.
+- **The wiki's "open in ChatGPT / Claude" links** pass only the page's address to that service;
+  the wiki records nothing.
 - **The newsletter**, when enabled, sends only an email address to Buttondown, with double
   opt-in ([newsletter runbook](../process/runbooks/newsletter.md)).
 
