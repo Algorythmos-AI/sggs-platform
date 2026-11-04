@@ -9,21 +9,25 @@ import JsonLd from "../../components/JsonLd.astro";
 import { SITE_URL } from "../../site.ts";
 import { FACTS, spell } from "../../facts.ts";
 import raagData from "../../generated/landing-raags.json";
-import { paharLabel, paharRange } from "../../scripts/pahar.js";
+import { fmtPaharRange } from "../../i18n/format";
+import ClientStrings from "../../components/ClientStrings.astro";
+import { ordinal } from "../../facts.ts";
 import clockDark from "../../assets/app/iphone-clock-dark.png";
 import clockSolar from "../../assets/app/iphone-clock-solar-dark.png";
 import divergenceShot from "../../assets/app/iphone-pahar-divergence-light.png";
 import wRaagLight from "../../assets/app/widget-raagnow-small-light.png";
 import wRaagDark from "../../assets/app/widget-raagnow-small-dark.png";
 import { localeStaticPaths, type Locale } from "../../i18n/locales";
+import { useT } from "../../i18n/t";
 import { localizeHref } from "../../i18n/paths";
 
 export const getStaticPaths = localeStaticPaths;
 const lang = Astro.params.lang as Locale;
 const L = (href: string) => localizeHref(href, lang);
+const { t } = useT(lang);
 
 const desc =
-  "The Raag Clock in Gurbani Soul follows the eight pahars — the watches of the day — and shows which raags belong to the current watch, with an optional solar mode. Times follow your device's clock.";
+  t("watch.theRaagClockIn");
 
 const pahars = raagData.pahars as Record<string, { name: string; roman: string }[]>;
 
@@ -31,8 +35,12 @@ const pahars = raagData.pahars as Record<string, { name: string; roman: string }
 // ranges from pahar.js, raag names from the DB-generated landing-raags.json (never typed by hand).
 const timeline = Array.from({ length: 8 }, (_, i) => {
   const p = i + 1;
-  return { p, label: paharLabel(p), range: paharRange(p), night: p > 4, raags: pahars[String(p)] ?? [] };
+  const n = p <= 4 ? p : p - 4;
+  const label = t("watch.paharLabel", { ordinal: ordinal(n), n: String(n), half: p <= 4 ? "day" : "night" });
+  return { p, label, range: fmtPaharRange(lang, p), night: p > 4, raags: pahars[String(p)] ?? [] };
 });
+// The live dial's caption for each pahar, for landing.ts (which picks the current one in the browser).
+const dialNow = timeline.map((c) => t("watch.dialNow", { label: c.label, range: c.range }));
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -40,7 +48,7 @@ const jsonLd = {
     { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL, inLanguage: "en" },
     {
       "@type": "WebPage",
-      name: "The Raag Clock — Gurbani Soul",
+      name: t("watch.theRaagClockGurbani2"),
       description: desc,
       url: new URL(L("/watch"), SITE_URL).href,
       inLanguage: "en",
@@ -49,7 +57,7 @@ const jsonLd = {
   ],
 };
 ---
-<Marketing title="The Raag Clock — Gurbani Soul" description={desc} path={L("/watch")}>
+<Marketing title={t("watch.theRaagClockGurbani")} description={desc} path={L("/watch")}>
   <JsonLd slot="head" data={jsonLd} />
   <MarketingNav />
 
@@ -57,14 +65,14 @@ const jsonLd = {
   <section class="watch-hero surface-ink" data-theme="dark">
     <div class="wrap story-grid story-grid--6-6">
       <div class="story-text">
-        <p class="eyebrow">The Raag Clock</p>
-        <h1>The watch of the day</h1>
+        <p class="eyebrow">{t("watch.theRaagClock")}</p>
+        <h1>{t("watch.theWatchOfThe")}</h1>
         <span class="gold-hair" aria-hidden="true"></span>
-        <p class="lead">Eight pahars. {spell(FACTS.raags)} raags. The clock that knows which belong to now.</p>
+        <p class="lead">{t("watch.eightPaharsRaagsThe", { raags: String(spell(FACTS.raags)) })}</p>
       </div>
       <div class="story-media">
         <div class="stage wash">
-          <DeviceFrame src={clockDark} alt="Raag Clock on iPhone in the dark scheme: the 2nd pahar of day and the raags sung in this watch" />
+          <DeviceFrame src={clockDark} alt={t("watch.raagClockOnIphone")} />
         </div>
       </div>
     </div>
@@ -74,19 +82,17 @@ const jsonLd = {
   <section class="section watch-sec">
     <div class="wrap watch-grid">
       <div class="watch-copy reveal">
-        <p class="lead">The day is divided into eight pahars — the watches of the day — and different
-          raags belong to different watches.</p>
-        <p class="muted">The dial follows the current watch: as the pahar turns, the raags beneath it
-          change with it. The deep night, from midnight to the small hours, is left in silence and
-          carries no raag.</p>
-        <p class="muted">Times follow your device's clock; the app can also follow sunrise and sunset.</p>
+        <p class="lead">{t("watch.theDayIsDivided")}</p>
+        <p class="muted">{t("watch.theDialFollowsThe")}</p>
+        <p class="muted">{t("watch.timesFollowYourDevice")}</p>
       </div>
 
       <figure class="watch-dial reveal">
-        <p class="dial-now lead" data-raag-now>The dial follows the eight pahars — the watches of the day.</p>
+        <ClientStrings data={{ dialNow }} />
+        <p class="dial-now lead" data-raag-now>{t("watch.theDialFollowsThe2")}</p>
         <div class="watch-arc"><RaagArc /></div>
         <figcaption class="dial-cap">
-          <p class="dial-cap-label eyebrow">Raags of this watch</p>
+          <p class="dial-cap-label eyebrow">{t("watch.raagsOfThisWatch")}</p>
           <ul class="raags">
             {Array.from({ length: 8 }, (_, i) => String(i + 1)).map((p) => (
               <li data-pahar={p} hidden>
@@ -94,7 +100,7 @@ const jsonLd = {
                   ? pahars[p].map((r) => (
                       <span class="raag-chip"><span class="gm" lang="pa">{r.name}</span> <span class="rom">{r.roman}</span></span>
                     ))
-                  : <span class="silence">The deep night is left in silence.</span>}
+                  : <span class="silence">{t("watch.theDeepNightIs")}</span>}
               </li>
             ))}
           </ul>
@@ -107,20 +113,20 @@ const jsonLd = {
   <section class="sec surface-warm" aria-labelledby="pahars-h">
     <div class="wrap">
       <div class="story-head reveal">
-        <p class="eyebrow">The whole day</p>
-        <h2 id="pahars-h" class="h-story">Eight watches, from dawn to dawn</h2>
-        <p class="body-lg">By the clock, each pahar is three hours, starting at 6 AM. Four watches of day, four of night — and the seventh, around midnight, carries no raag.</p>
+        <p class="eyebrow">{t("watch.theWholeDay")}</p>
+        <h2 id="pahars-h" class="h-story">{t("watch.eightWatchesFromDawn")}</h2>
+        <p class="body-lg">{t("watch.byTheClockEach")}</p>
       </div>
-      <div class="pline-box reveal" data-delay="1" tabindex="0" role="region" aria-label="The eight pahars and their raags">
+      <div class="pline-box reveal" data-delay="1" tabindex="0" role="region" aria-label={t("watch.theEightPaharsAnd")}>
         <ol class="pline">
-          {timeline.map((t) => (
-            <li class:list={["pcell", { night: t.night, silent: t.raags.length === 0 }]} data-p={t.p}>
-              <p class="pc-no">{t.p}</p>
-              <p class="pc-label">{t.label}</p>
-              <p class="pc-range">{t.range}</p>
-              {t.raags.length
-                ? <p class="pc-raags">{t.raags.map((r) => <span class="gm" lang="pa">{r.name}</span>)}</p>
-                : <p class="pc-silence">Silence</p>}
+          {timeline.map((cell) => (
+            <li class:list={["pcell", { night: cell.night, silent: cell.raags.length === 0 }]} data-p={cell.p}>
+              <p class="pc-no">{cell.p}</p>
+              <p class="pc-label">{cell.label}</p>
+              <p class="pc-range">{cell.range}</p>
+              {cell.raags.length
+                ? <p class="pc-raags">{cell.raags.map((r) => <span class="gm" lang="pa">{r.name}</span>)}</p>
+                : <p class="pc-silence">{t("watch.silence")}</p>}
             </li>
           ))}
         </ol>
@@ -132,16 +138,16 @@ const jsonLd = {
   <section class="sec surface-paper">
     <div class="wrap story-grid story--flip">
       <div class="story-text reveal">
-        <p class="eyebrow">Fixed or solar</p>
-        <h2 class="h-story">By the clock, or by the sun</h2>
-        <p class="body-lg"><strong>Fixed</strong> divides the day into eight three-hour watches from 6 AM — the same everywhere, every day.</p>
-        <p class="body-lg"><strong>Solar</strong> follows the older way: four equal watches of daylight and four of night, from your local sunrise and sunset, so the watches stretch and shrink with the season.</p>
-        <p class="detail">Sunrise and sunset are computed on the device with the NOAA solar equations. Location is optional, rounded to about 1 km, and never transmitted.</p>
+        <p class="eyebrow">{t("watch.fixedOrSolar")}</p>
+        <h2 class="h-story">{t("watch.byTheClockOr")}</h2>
+        <p class="body-lg"><strong>{t("watch.fixed2")}</strong> {t("watch.dividesTheDayInto")}</p>
+        <p class="body-lg"><strong>{t("watch.solar2")}</strong> {t("watch.followsTheOlderWay")}</p>
+        <p class="detail">{t("watch.sunriseAndSunsetAre")}</p>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="pair">
-          <DeviceFrame src={clockDark} label="Fixed" alt="Raag Clock on iPhone, fixed hours: the 2nd pahar of day, 9 am to 12 pm" />
-          <DeviceFrame src={clockSolar} label="Solar" alt="Raag Clock on iPhone, solar mode: the watch computed from local sunrise and sunset" />
+          <DeviceFrame src={clockDark} label={t("watch.fixed")} alt={t("watch.raagClockOnIphone2")} />
+          <DeviceFrame src={clockSolar} label={t("watch.solar")} alt={t("watch.raagClockOnIphone3")} />
         </div>
       </div>
     </div>
@@ -151,15 +157,15 @@ const jsonLd = {
   <section class="sec surface-ink" data-theme="dark">
     <div class="wrap story-grid story-grid--7-5">
       <div class="story-text reveal">
-        <p class="eyebrow">Sources</p>
-        <h2 class="h-story">Where traditions disagree</h2>
-        <p class="body-lg">Not every source places a raag in the same watch. Where they differ, every claim is kept with its citation — primary, variant or disputed — so you can see the disagreement rather than a single silent answer.</p>
-        <p class="detail">In the app, every raag has its own page in the Index, with its traditional time and the source of each claim, and “In this hour” gathers the raags of the current watch.</p>
-        <p class="cta-row"><a class="link-more" href="/divergence">See every disagreement</a></p>
+        <p class="eyebrow">{t("watch.sources")}</p>
+        <h2 class="h-story">{t("watch.whereTraditionsDisagree")}</h2>
+        <p class="body-lg">{t("watch.notEverySourcePlaces")}</p>
+        <p class="detail">{t("watch.inTheAppEvery")}</p>
+        <p class="cta-row"><a class="link-more" href="/divergence">{t("watch.seeEveryDisagreement")}</a></p>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="stage">
-          <DeviceFrame src={divergenceShot} alt="Where traditions disagree, on iPhone: raags with primary, variant and disputed watch claims and their sources" />
+          <DeviceFrame src={divergenceShot} alt={t("watch.whereTraditionsDisagreeOn")} />
         </div>
       </div>
     </div>
@@ -169,15 +175,15 @@ const jsonLd = {
   <section class="sec surface-paper">
     <div class="wrap story-grid story-grid--6-6">
       <div class="story-text reveal">
-        <p class="eyebrow">On your Home Screen</p>
-        <h2 class="h-story">The watch, at a glance</h2>
-        <p class="body-lg">The Raag Now widget shows the current watch on its clock face on your Home Screen, in light or dark; the medium and large sizes name its raags — never a feed, never a notification you did not ask for.</p>
-        <p class="detail">Siri: “What raag is it now”.</p>
+        <p class="eyebrow">{t("watch.onYourHomeScreen")}</p>
+        <h2 class="h-story">{t("watch.theWatchAtA")}</h2>
+        <p class="body-lg">{t("watch.theRaagNowWidget")}</p>
+        <p class="detail">{t("watch.siriWhatRaagIs")}</p>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="wpair">
-          <figure class="widget widget--s"><Image src={wRaagLight} widths={[260, 520]} sizes="(min-width: 980px) 260px, 42vw" loading="lazy" decoding="async" alt="Raag Now widget, small: the 24-hour dial at 4:40 pm, the 4th pahar of day" /></figure>
-          <figure class="widget widget--s"><Image src={wRaagDark} widths={[260, 520]} sizes="(min-width: 980px) 260px, 42vw" loading="lazy" decoding="async" alt="Raag Now widget, small, in the dark scheme: the 24-hour dial at 4:40 pm, the 4th pahar of day" /></figure>
+          <figure class="widget widget--s"><Image src={wRaagLight} widths={[260, 520]} sizes="(min-width: 980px) 260px, 42vw" loading="lazy" decoding="async" alt={t("watch.raagNowWidgetSmall")} /></figure>
+          <figure class="widget widget--s"><Image src={wRaagDark} widths={[260, 520]} sizes="(min-width: 980px) 260px, 42vw" loading="lazy" decoding="async" alt={t("watch.raagNowWidgetSmall2")} /></figure>
         </div>
       </div>
     </div>
@@ -186,10 +192,10 @@ const jsonLd = {
   <!-- 7 · CTA ROW -->
   <section class="sec-thin surface-warm hair-top">
     <div class="wrap cta-band reveal">
-      <h2 class="cta-h">See the watch now</h2>
+      <h2 class="cta-h">{t("watch.seeTheWatchNow")}</h2>
       <div class="cta-row">
-        <a class="btn" href="/raag-clock">Open the Raag Clock</a>
-        <a class="btn ghost" href={L("/learn/the-31-raags-and-the-watches-of-the-day")} data-astro-prefetch>The 31 raags and the watches of the day</a>
+        <a class="btn" href="/raag-clock">{t("watch.openTheRaagClock")}</a>
+        <a class="btn ghost" href={L("/learn/the-31-raags-and-the-watches-of-the-day")} data-astro-prefetch>{t("watch.the31RaagsAnd")}</a>
       </div>
     </div>
   </section>

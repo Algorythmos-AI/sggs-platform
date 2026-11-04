@@ -1,0 +1,7 @@
+---
+// ClientStrings.astro — hands a page's client scripts their strings (scripts/i18n-client.ts). The
+// JSON is escaped so no value can close the script element; it is data, never executed.
+export interface Props { data: Record<string, unknown> }
+const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
+---
+<script is:inline type="application/json" id="i18n-client" set:html={json} />

@@ -39,14 +39,16 @@ import raagGauri from "../../assets/app/iphone-raag-gauri-light.png";
 import voiceM9 from "../../assets/app/iphone-voice-m9-light.png";
 import compareShot from "../../assets/app/iphone-compare-light.png";
 import { localeStaticPaths, type Locale } from "../../i18n/locales";
+import { useT } from "../../i18n/t";
 import { localizeHref } from "../../i18n/paths";
 
 export const getStaticPaths = localeStaticPaths;
 const lang = Astro.params.lang as Locale;
 const L = (href: string) => localizeHref(href, lang);
+const { t } = useT(lang);
 
 const desc =
-  "Everything Gurbani Soul does on your iPhone and iPad — read the whole Granth, search the way you remember, keep your Nitnem, receive the Hukam of the day, read the Vaars, and explore the Index, themes and voices. Verbatim, cited by Ang, fully offline.";
+  t("features.everythingGurbaniSoulDoes");
 
 const ANGS = fmt(FACTS.angs);
 
@@ -54,45 +56,45 @@ const ANGS = fmt(FACTS.angs);
 // SHOTS.md); while one is empty its chapter shows its copy and figures alone. Themes and Explore
 // (Constellation) have no verified 1.4.9 shot yet.
 const vaarShots: { src: ImageMetadata; alt: string; label?: string }[] = [
-  { src: vaarWeave, label: "The weave",
-    alt: "Maajh Ki Vaar on iPhone, Angs 137 to 150: its voices with their pauris and saloks, and the weave in reading order, each salok and pauri cited by Ang" },
-  { src: vaarReader, label: "The reader",
-    alt: "Maajh Ki Vaar open in the Vaar reader on iPhone: its printed heading, then the first salok with transliteration under each line" },
+  { src: vaarWeave, label: t("features.theWeave"),
+    alt: t("features.maajhKiVaarOn") },
+  { src: vaarReader, label: t("features.theReader"),
+    alt: t("features.maajhKiVaarOpen") },
 ];
 const indexShots: { src: ImageMetadata; alt: string; label?: string }[] = [
-  { src: indexShot, label: "The saroop",
-    alt: "The Index on iPhone: the saroop ribbon across 1,430 Angs, and the major compositions with their reading times" },
-  { src: raagGauri, label: "A raag's page",
-    alt: "Raag Gauri's page on iPhone: raag 3 of 31, Angs 151 to 346, its counts of shabads, verses, Angs and voices, and the voices in this raag" },
+  { src: indexShot, label: t("features.theSaroop"),
+    alt: t("features.theIndexOnIphone") },
+  { src: raagGauri, label: t("features.aRaagSPage"),
+    alt: t("features.raagGauriSPage") },
 ];
 const themeShots: { src: ImageMetadata; alt: string; label?: string }[] = [];
 const voiceShots: { src: ImageMetadata; alt: string; label?: string }[] = [
-  { src: voiceM9, label: "A voice's page",
-    alt: "The page for Guru Tegh Bahadur Ji on iPhone: dates, the Angs where their Bani appears, and counts of verses, compositions and raags" },
-  { src: compareShot, label: "Compare",
-    alt: "Compare on iPhone: Guru Tegh Bahadur Ji beside Guru Nanak Dev Ji, the Angs where each appears and how strongly each carries a theme" },
+  { src: voiceM9, label: t("features.aVoiceSPage"),
+    alt: t("features.thePageForGuru") },
+  { src: compareShot, label: t("features.compare"),
+    alt: t("features.compareOnIphoneGuru") },
 ];
 const exploreShots: { src: ImageMetadata; alt: string; label?: string }[] = [];
 
 // At a glance — nine rows, each linking to its chapter below (a hairline 3×3 grid).
 const glance = [
-  { id: "reader", t: "Read the whole Granth", d: `All ${ANGS} Angs in Sant Lipi. Turn pages, jump to any Ang, resume where you left off.` },
-  { id: "search", t: "Search how you remember", d: "By word, by sound in Roman letters, by first letters, or by theme — and verify a line you were sent." },
-  { id: "hukam", t: "The Hukam of the day", d: "One complete Hukam for the whole day, in the app and from Siri, with its opening verse on a widget — or draw a fresh one." },
-  { id: "nitnem", t: "Nitnem, with your place kept", d: "The daily banis by time of day, your place kept in each, and a quiet record of the days you read." },
-  { id: "raag-clock", t: "The Raag Clock", d: "Which raags belong to this watch of the day — by fixed hours or by your local sunrise and sunset." },
-  { id: "vaars", t: "The Vaars, as printed", d: `All ${FACTS.vaars} Vaars, pauri by pauri and salok by salok, with a reader that keeps your place.` },
-  { id: "index", t: "An Index in saroop order", d: `The Granth from Ang 1 to Ang ${ANGS}, and a page for each of the ${FACTS.raags} raags.` },
-  { id: "themes", t: `${FACTS.themes} themes`, d: "A page for every theme, a theme of the day, and the themes your own saved verses carry." },
-  { id: "voices", t: "The voices of the Granth", d: `All ${FACTS.voices} voices, a page for each, and two side by side.` },
+  { id: "reader", t: t("features.readTheWholeGranth"), d: t("features.allAngsInSant2", { angs: String(ANGS) }) },
+  { id: "search", t: t("features.searchHowYouRemember"), d: t("features.byWordBySound") },
+  { id: "hukam", t: t("features.theHukamOfThe4"), d: t("features.oneCompleteHukamFor") },
+  { id: "nitnem", t: t("features.nitnemWithYourPlace2"), d: t("features.theDailyBanisBy2") },
+  { id: "raag-clock", t: t("features.theRaagClock"), d: t("features.whichRaagsBelongTo") },
+  { id: "vaars", t: t("features.theVaarsAsPrinted"), d: t("features.allVaarsPauriBy", { vaars: String(FACTS.vaars) }) },
+  { id: "index", t: t("features.anIndexInSaroop"), d: t("features.theGranthFromAng", { angs: String(ANGS), raags: String(FACTS.raags) }) },
+  { id: "themes", t: t("features.themes2", { themes: String(FACTS.themes) }), d: t("features.aPageForEvery") },
+  { id: "voices", t: t("features.theVoicesOfThe2"), d: t("features.allVoicesAPage", { voices: String(FACTS.voices) }) },
 ];
 
 const accents = [
-  { src: accentSoul, name: "Soul" },
-  { src: accentSaffron, name: "Saffron" },
-  { src: accentGold, name: "Gold" },
-  { src: accentIndigo, name: "Indigo" },
-  { src: accentTeal, name: "Teal" },
+  { src: accentSoul, name: t("features.soul") },
+  { src: accentSaffron, name: t("features.saffron") },
+  { src: accentGold, name: t("features.gold") },
+  { src: accentIndigo, name: t("features.indigo") },
+  { src: accentTeal, name: t("features.teal") },
 ];
 
 const jsonLd = {
@@ -101,7 +103,7 @@ const jsonLd = {
     { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL, inLanguage: "en" },
     {
       "@type": "WebPage",
-      name: "Features — Gurbani Soul",
+      name: t("features.featuresGurbaniSoul2"),
       description: desc,
       url: new URL(L("/features"), SITE_URL).href,
       inLanguage: "en",
@@ -110,24 +112,23 @@ const jsonLd = {
   ],
 };
 ---
-<Marketing title="Features — Gurbani Soul" description={desc} path={L("/features")}>
+<Marketing title={t("features.featuresGurbaniSoul")} description={desc} path={L("/features")}>
   <JsonLd slot="head" data={jsonLd} />
   <MarketingNav overHero={false} />
 
   <header class="page-hero">
     <div class="wrap">
-      <p class="eyebrow">Everything, on your device</p>
-      <h1>Made for reading, not for scrolling</h1>
+      <p class="eyebrow">{t("features.everythingOnYourDevice")}</p>
+      <h1>{t("features.madeForReadingNot")}</h1>
       <span class="gold-hair" aria-hidden="true"></span>
-      <p class="lede">The whole Granth, the daily banis and the study tools — quiet, exact, and entirely
-        on your device. No feeds, no accounts, nothing asking for your attention.</p>
+      <p class="lede">{t("features.theWholeGranthThe")}</p>
     </div>
   </header>
 
   <!-- At a glance: nine capabilities, each anchoring its chapter -->
   <section class="sec-thin glance-sec" aria-labelledby="glance-h">
     <div class="wrap">
-      <h2 id="glance-h" class="glance-h">At a glance</h2>
+      <h2 id="glance-h" class="glance-h">{t("features.atAGlance")}</h2>
       <dl class="feat-list">
         {glance.map((f) => (
           <div class="feat-row reveal">
@@ -143,13 +144,13 @@ const jsonLd = {
   <section class="sec surface-paper hair-top" id="reader" data-chapter="reader">
     <div class="wrap">
       <div class="story-head reveal">
-        <p class="chapter-no"><span>01</span> Read</p>
-        <h2 class="h-story">The whole Granth, set to be read</h2>
-        <p class="body-lg">All {ANGS} Angs in Sant Lipi, on warm paper or in a night scheme that is never pure black. Turn pages, jump to any Ang, pick up where you left off. Every composition opens with its printed heading, and transliteration can sit quietly under each line. Sehaj focus leaves only the Gurmukhi, with room to breathe.</p>
+        <p class="chapter-no"><span>01</span> {t("features.read")}</p>
+        <h2 class="h-story">{t("features.theWholeGranthSet")}</h2>
+        <p class="body-lg">{t("features.allAngsInSant", { angs: String(ANGS) })}</p>
       </div>
       <div class="reader-wide reveal" data-delay="1">
         <DeviceFrame kind="ipad" frame={false} src={ipadReader} sizes="(min-width: 1240px) 1160px, 94vw"
-          alt="Reader on iPad in landscape, open at Ang 705 — Gurmukhi in Sant Lipi with transliteration under each line" />
+          alt={t("features.readerOnIpadIn")} />
       </div>
     </div>
   </section>
@@ -158,14 +159,14 @@ const jsonLd = {
   <section class="sec surface-warm" id="saroop" data-chapter="saroop">
     <div class="wrap story-grid story-grid--6-6">
       <div class="story-text reveal">
-        <p class="eyebrow">Traditional saroop</p>
-        <h2 class="h-story">Two ways to draw the same characters</h2>
-        <p class="body-lg">Traditional saroop draws the doubled subjoined ya as the single tucked form used in the printed Bir; turn it off to see the exact source characters. Only the drawing changes — stored text, search and Copy are always the verbatim characters.</p>
+        <p class="eyebrow">{t("features.traditionalSaroop")}</p>
+        <h2 class="h-story">{t("features.twoWaysToDraw")}</h2>
+        <p class="body-lg">{t("features.traditionalSaroopDrawsThe")}</p>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="pair pair--shots">
-          <DeviceFrame frame={false} src={saroopOff} label="Saroop off" alt="Reader on iPhone at Ang 1400 with traditional saroop off" />
-          <DeviceFrame frame={false} src={saroopOn} label="Saroop on (default)" alt="Reader on iPhone at Ang 1400 with traditional saroop on" />
+          <DeviceFrame frame={false} src={saroopOff} label={t("features.saroopOff")} alt={t("features.readerOnIphoneAt")} />
+          <DeviceFrame frame={false} src={saroopOn} label={t("features.saroopOnDefault")} alt={t("features.readerOnIphoneAt2")} />
         </div>
       </div>
     </div>
@@ -175,18 +176,18 @@ const jsonLd = {
   <section class="sec surface-paper" id="search" data-chapter="search">
     <div class="wrap story-grid">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>02</span> Search</p>
-        <h2 class="h-story">Search the way you remember</h2>
-        <p class="body-lg">A word in Gurmukhi, a word as it sounds in Roman letters, or just the first letters of each word — the way a line comes back to you. Auto mode works out which you meant.</p>
-        <p class="body-lg">Verify checks a line you were sent against the text and tells you plainly whether it is there, and where.</p>
+        <p class="chapter-no"><span>02</span> {t("features.search")}</p>
+        <h2 class="h-story">{t("features.searchTheWayYou")}</h2>
+        <p class="body-lg">{t("features.aWordInGurmukhi")}</p>
+        <p class="body-lg">{t("features.verifyChecksALine")}</p>
         <ul class="factrail detail-row">
-          <li>Auto</li><li>Gurmukhi</li><li>Roman</li><li>First letters</li><li>Theme</li><li>Verify</li>
+          <li>{t("features.auto")}</li><li>{t("features.gurmukhi")}</li><li>{t("features.roman")}</li><li>{t("features.firstLetters")}</li><li>{t("features.theme")}</li><li>{t("features.verify")}</li>
         </ul>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="pair">
-          <DeviceFrame src={searchRoman} alt="Search on iPhone: the Roman word naam, in Auto mode, finds matching lines with their Ang and voice" />
-          <DeviceFrame src={verifyShot} alt="Verify on iPhone: a line typed in Roman letters, confirmed as scripture and shown as its canonical line, Ang 8" />
+          <DeviceFrame src={searchRoman} alt={t("features.searchOnIphoneThe")} />
+          <DeviceFrame src={verifyShot} alt={t("features.verifyOnIphoneA")} />
         </div>
       </div>
     </div>
@@ -196,15 +197,15 @@ const jsonLd = {
   <section class="sec surface-paper hair-top" id="hukam" data-chapter="hukam">
     <div class="wrap story-grid story-grid--6-6 story--flip">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>03</span> Hukam</p>
-        <h2 class="h-story">The Hukam of the day, or a fresh one</h2>
-        <p class="body-lg">The Hukam of the day is one complete Hukam for the whole day, chosen by the date — the same in the app and when you ask Siri, and the Hukam of the day widget shows its opening verse with its Ang. When you want another, draw a fresh one.</p>
-        <p class="body-lg">Either way it is a complete unit — a whole shabad, or a Vaar's pauri with the saloks set before it — never a fragment, read verbatim and cited by its Ang. One tap takes you to that Ang in the Reader.</p>
-        <p class="detail">The Hukam of the day is chosen on your device by the date. It is not the Hukamnama issued from Sri Harmandir Sahib.</p>
+        <p class="chapter-no"><span>03</span> {t("features.hukam")}</p>
+        <h2 class="h-story">{t("features.theHukamOfThe")}</h2>
+        <p class="body-lg">{t("features.theHukamOfThe2")}</p>
+        <p class="body-lg">{t("features.eitherWayItIs")}</p>
+        <p class="detail">{t("features.theHukamOfThe3")}</p>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="stage">
-          <DeviceFrame src={hukamShot} alt="A Hukam open on iPhone: a complete shabad in Raag Kalyan, Ang 1319, with its Rahao line marked and a button to open the Ang in the Reader" />
+          <DeviceFrame src={hukamShot} alt={t("features.aHukamOpenOn")} />
         </div>
       </div>
     </div>
@@ -214,17 +215,17 @@ const jsonLd = {
   <section class="sec surface-warm" id="nitnem" data-chapter="nitnem">
     <div class="wrap story-grid">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>04</span> Nitnem</p>
-        <h2 class="h-story">Nitnem, with your place kept</h2>
-        <p class="body-lg">The daily banis by time of day — Japji, Jaap, Savaiye, Chaupai and Anand in the morning, Rehras at dusk, Sohila at night — with Sukhmani, Asa di Vaar and Ardaas alongside. The app remembers where you are in each.</p>
-        <p class="body-lg">Short-line banis such as Jaap, Chaupai and Savaiye are set two half-lines to a row, as in a gutka. Rehras follows the SGPC Nitnem Gutka or the longer Damdami Taksal reading — your choice. Make your own sets, and a reading journey keeps a quiet record of the days you read. Reminders are optional, local, and yours to set.</p>
-        <p class="detail">Banis from Sri Guru Granth Sahib Ji come from the same verified corpus, cited by Ang. Dasam Granth and Ardaas text are a separate, labelled, scholar-reviewed layer.</p>
+        <p class="chapter-no"><span>04</span> {t("features.nitnem")}</p>
+        <h2 class="h-story">{t("features.nitnemWithYourPlace")}</h2>
+        <p class="body-lg">{t("features.theDailyBanisBy")}</p>
+        <p class="body-lg">{t("features.shortLineBanisSuch")}</p>
+        <p class="detail">{t("features.banisFromSriGuru")}</p>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="stage stage--ipad">
-          <DeviceFrame kind="ipad" src={ipadNitnem} alt="Nitnem on iPad in landscape: the morning banis with progress rings, and the full list by time of day" />
+          <DeviceFrame kind="ipad" src={ipadNitnem} alt={t("features.nitnemOnIpadIn")} />
           <div class="overlap media-secondary">
-            <DeviceFrame src={journeyShot} sizes="200px" alt="Nitnem reading journey on iPhone: the calendar where the days you read are kept" />
+            <DeviceFrame src={journeyShot} sizes="200px" alt={t("features.nitnemReadingJourneyOn")} />
           </div>
         </div>
       </div>
@@ -235,92 +236,92 @@ const jsonLd = {
   <section class="sec surface-ink" id="raag-clock" data-theme="dark" data-chapter="raag-clock">
     <div class="wrap story-grid story--flip">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>05</span> The watch</p>
-        <h2 class="h-story">Eight watches. {spell(FACTS.raags)} raags. One face.</h2>
-        <p class="body-lg">The day is divided into eight pahars, and different raags belong to different watches. The Raag Clock shows which belong to this one — by fixed hours, or by your local sunrise and sunset, worked out on the device. The deep night is left in silence.</p>
-        <p class="cta-row"><a class="btn ghost" href={L("/watch")} data-astro-prefetch>More about the watch</a></p>
+        <p class="chapter-no"><span>05</span> {t("features.theWatch")}</p>
+        <h2 class="h-story">{t("features.eightWatchesRaagsOne", { raags: String(spell(FACTS.raags)) })}</h2>
+        <p class="body-lg">{t("features.theDayIsDivided")}</p>
+        <p class="cta-row"><a class="btn ghost" href={L("/watch")} data-astro-prefetch>{t("features.moreAboutTheWatch")}</a></p>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="pair wash">
-          <DeviceFrame src={clockDark} label="Fixed hours" alt="Raag Clock on iPhone, fixed hours: the 2nd pahar of day, 9 am to 12 pm" />
-          <DeviceFrame src={clockSolar} label="Sunrise and sunset" alt="Raag Clock on iPhone, solar mode: the watch computed from local sunrise and sunset" />
+          <DeviceFrame src={clockDark} label={t("features.fixedHours")} alt={t("features.raagClockOnIphone")} />
+          <DeviceFrame src={clockSolar} label={t("features.sunriseAndSunset")} alt={t("features.raagClockOnIphone2")} />
         </div>
       </div>
     </div>
   </section>
 
   <!-- 6 · VAARS -->
-  <FeatureChapter id="vaars" no="06" label="Vaars" title="The Vaars, woven as printed" shots={vaarShots}
+  <FeatureChapter id="vaars" no="06" label={t("features.vaars")} title={t("features.theVaarsWovenAs")} shots={vaarShots}
     figures={[
-      { n: fmt(FACTS.vaars), l: "Vaars" },
-      { n: fmt(FACTS.vaar_pauris), l: "pauris" },
-      { n: fmt(FACTS.vaar_saloks), l: "saloks set beside them" },
+      { n: fmt(FACTS.vaars), l: t("features.vaars2") },
+      { n: fmt(FACTS.vaar_pauris), l: t("features.pauris") },
+      { n: fmt(FACTS.vaar_saloks), l: t("features.saloksSetBesideThem") },
     ]}
-    figuresLabel="The Vaars, counted as the Granth prints them">
-    <p class="body-lg">All {FACTS.vaars} Vaars, each with its voices: who wrote the pauris, and whose saloks are set beside them. The weave lays a Vaar out in reading order, pauri by pauri and salok by salok, as the Granth prints it.</p>
-    <p class="body-lg">The reader carries you through a whole Vaar and keeps your place. Show the pauris only, and the saloks are hidden, never removed.</p>
-    <p class="detail">Ask Siri to “Read a Vaar”, or reach the Vaars from a raag's page in the Index.</p>
+    figuresLabel={t("features.theVaarsCountedAs")}>
+    <p class="body-lg">{t("features.allVaarsEachWith", { vaars: String(FACTS.vaars) })}</p>
+    <p class="body-lg">{t("features.theReaderCarriesYou")}</p>
+    <p class="detail">{t("features.askSiriToRead")}</p>
   </FeatureChapter>
 
   <!-- 7 · INDEX -->
-  <FeatureChapter id="index" no="07" label="Index" title="An Index that follows the saroop" surface="warm" flip shots={indexShots}
+  <FeatureChapter id="index" no="07" label={t("features.index")} title={t("features.anIndexThatFollows")} surface="warm" flip shots={indexShots}
     figures={[
-      { n: ANGS, l: "Angs, from the first to the last" },
-      { n: fmt(FACTS.raags), l: "raags, each with its own page" },
+      { n: ANGS, l: t("features.angsFromTheFirst") },
+      { n: fmt(FACTS.raags), l: t("features.raagsEachWithIts") },
     ]}
-    figuresLabel="The Index in numbers">
-    <p class="body-lg">The Index lays the Granth out in the order of the saroop: a ribbon from Ang 1 to Ang {ANGS}, the major compositions with your place kept, and all {FACTS.raags} raags. Every raag has its own page — where it sits in the Granth, the voices in it, the forms its headings name, and the time tradition gives it.</p>
-    <p class="body-lg">“In this hour” gathers the raags of the current watch. Find in Index goes straight to a raag, a bani, a composition or a voice, and Forms lists the poetic forms the printed headings name.</p>
-    <p class="detail">A raag's traditional time is tradition, not scripture — the app says so, and names the source of every claim.</p>
+    figuresLabel={t("features.theIndexInNumbers")}>
+    <p class="body-lg">{t("features.theIndexLaysThe", { angs: String(ANGS), raags: String(FACTS.raags) })}</p>
+    <p class="body-lg">{t("features.inThisHourGathers")}</p>
+    <p class="detail">{t("features.aRaagSTraditional")}</p>
   </FeatureChapter>
 
   <!-- 8 · THEMES -->
-  <FeatureChapter id="themes" no="08" label="Themes" title={`${FACTS.themes} themes, a page for each`} shots={themeShots}
+  <FeatureChapter id="themes" no="08" label={t("features.themes")} title={t("features.themesAPageFor", { themes: String(FACTS.themes) })} shots={themeShots}
     figures={[
-      { n: fmt(FACTS.themes), l: "themes, each with its own page" },
-      { n: fmt(FACTS.themed_lines), l: "lines of the Granth carry a theme's words" },
+      { n: fmt(FACTS.themes), l: t("features.themesEachWithIts") },
+      { n: fmt(FACTS.themed_lines), l: t("features.linesOfTheGranth") },
     ]}
-    figuresLabel="Themes in numbers">
-    <p class="body-lg">Themes traces ideas across the whole Granth by the words that carry them, with a theme of the day at the top. Every theme has its own page: the Rahao lines that carry it, where it lives by raag and by voice, the forms of its words, and the themes it often appears with — and a verse list you can narrow to a single word form.</p>
-    <p class="body-lg">Your themes shows which themes your saved verses carry. It is worked out on your device, never sent anywhere, and you can turn it off.</p>
-    <p class="detail">A theme's number counts the verses that carry its words — never a measure of importance. Themes are also in Spotlight, and Siri can “Open a theme”.</p>
+    figuresLabel={t("features.themesInNumbers")}>
+    <p class="body-lg">{t("features.themesTracesIdeasAcross")}</p>
+    <p class="body-lg">{t("features.yourThemesShowsWhich")}</p>
+    <p class="detail">{t("features.aThemeSNumber")}</p>
   </FeatureChapter>
 
   <!-- 9 · VOICES -->
-  <FeatureChapter id="voices" no="09" label="Voices" title={`${FACTS.voices} voices, one Granth`} surface="warm" flip shots={voiceShots}
+  <FeatureChapter id="voices" no="09" label={t("features.voices")} title={t("features.voicesOneGranth", { voices: String(FACTS.voices) })} surface="warm" flip shots={voiceShots}
     figures={[
-      { n: fmt(FACTS.voices), l: "voices with Bani in the Granth" },
-      { n: fmt(FACTS.voice_traditions), l: "traditions: Gurus, Bhagats, Bhatts and Gursikh companions" },
-      { n: `${ordinal(FACTS.voices_first_century)}–${ordinal(FACTS.voices_last_century)}`, l: "centuries their dated lives span" },
+      { n: fmt(FACTS.voices), l: t("features.voicesWithBaniIn") },
+      { n: fmt(FACTS.voice_traditions), l: t("features.traditionsGurusBhagatsBhatts") },
+      { n: t("features.centuriesSpan", { firstOrdinal: ordinal(FACTS.voices_first_century), lastOrdinal: ordinal(FACTS.voices_last_century), first: String(FACTS.voices_first_century), last: String(FACTS.voices_last_century) }), l: t("features.centuriesTheirDatedLives") },
     ]}
-    figuresLabel="The voices of the Granth">
-    <p class="body-lg">Lineage follows every voice whose Bani is in the Granth — the Gurus, the Bhagats, the court Bhatts and the Gursikh companions — from the {VOICE_CENTURIES}, as a roll or as a river through time, with a voice of the day. Every voice has a page: their Bani in the Granth and its raags, their notable Banis, how they sign their verses, who they name and who names them, their distinctive words, and the voices they echo. Compare sets two side by side.</p>
-    <p class="body-lg">In Insights, the Granth becomes a field of dots, one for about 50 lines, coloured by tradition, and a ribbon shows where each voice sings.</p>
-    <p class="detail">Who wrote each line follows the evidence printed in the Granth: a composition's heading, or the pen-name in its closing verse. Dates are approximate and cited; fuller notes on each life wait for scholarly review and are marked so.</p>
+    figuresLabel={t("features.theVoicesOfThe")}>
+    <p class="body-lg">{t("features.lineageFollowsEveryVoice", { voiceCenturies: String(VOICE_CENTURIES) })}</p>
+    <p class="body-lg">{t("features.inInsightsTheGranth")}</p>
+    <p class="detail">{t("features.whoWroteEachLine")}</p>
   </FeatureChapter>
 
   <!-- 10 · WIDGETS, SIRI AND SPOTLIGHT -->
   <section class="sec surface-paper" id="widgets" data-chapter="widgets">
     <div class="wrap story-grid story-grid--4-8">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>10</span> At a glance</p>
-        <h2 class="h-story">On your Home Screen, Lock Screen and in Siri</h2>
-        <p class="body-lg">Three widgets: the raag of the moment, the Hukam of the day with its Ang, and today's Nitnem — in sizes from small to large, with Lock Screen accessories for the raag and the Nitnem. An optional Live Activity shows how far you have read a bani. It never shows a verse.</p>
-        <p class="detail">Siri: “Today’s Hukam”, “Draw a Hukam”, “What raag is it now”, “Read a bani”, “Read a Vaar”, “Search Gurbani”, “Show the constellation”, “Open a theme”, “Open a voice”. Shortcuts: “Open Ang”. Spotlight finds your saved verses and all {FACTS.themes} themes.</p>
+        <p class="chapter-no"><span>10</span> {t("features.atAGlance2")}</p>
+        <h2 class="h-story">{t("features.onYourHomeScreen")}</h2>
+        <p class="body-lg">{t("features.threeWidgetsTheRaag")}</p>
+        <p class="detail">{t("features.siriTodaySHukam", { themes: String(FACTS.themes) })}</p>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="widgets">
           <div class="wrow wrow--rev">
-            <figure class="widget widget--m"><Image src={wHukamDark} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Hukam of the day widget, medium, in the dark scheme: an opening verse with its transliteration, cited Sri Guru Granth Sahib Ji, Ang 13" /></figure>
-            <figure class="widget widget--s"><Image src={wRaag} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt="Raag Now widget, small: the 24-hour dial at 4:40 pm, the 4th pahar of day" /></figure>
+            <figure class="widget widget--m"><Image src={wHukamDark} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt={t("features.hukamOfTheDay")} /></figure>
+            <figure class="widget widget--s"><Image src={wRaag} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt={t("features.raagNowWidgetSmall")} /></figure>
           </div>
           <div class="wrow">
-            <figure class="widget widget--s"><Image src={wNitnemSmall} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt="Nitnem widget, small: the morning banis, with Jaap Sahib next" /></figure>
-            <figure class="widget widget--m"><Image src={wNitnemDark} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt="Nitnem widget, medium, in the dark scheme: the morning banis, with Jaap Sahib next and a progress ring" /></figure>
+            <figure class="widget widget--s"><Image src={wNitnemSmall} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt={t("features.nitnemWidgetSmallThe")} /></figure>
+            <figure class="widget widget--m"><Image src={wNitnemDark} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt={t("features.nitnemWidgetMediumIn")} /></figure>
           </div>
           <figure class="la">
-            <div class="la-card"><Image src={laCard} widths={[450, 900]} sizes="(min-width: 980px) 740px, 92vw" loading="lazy" decoding="async" alt="Live Activity on the Lock Screen: reading Japji Sahib, a progress ring at 1%" /></div>
-            <figcaption>Live Activity on the Lock Screen — progress only, never a verse.</figcaption>
+            <div class="la-card"><Image src={laCard} widths={[450, 900]} sizes="(min-width: 980px) 740px, 92vw" loading="lazy" decoding="async" alt={t("features.liveActivityOnThe")} /></div>
+            <figcaption>{t("features.liveActivityOnThe2")}</figcaption>
           </figure>
         </div>
       </div>
@@ -328,32 +329,32 @@ const jsonLd = {
   </section>
 
   <!-- 11 · EXPLORE -->
-  <FeatureChapter id="explore" no="11" label="Explore" title="Seven ways into the Granth" surface="warm" shots={exploreShots}>
-    <p class="body-lg">Explore gathers them in one place: the Index, Themes, Lineage, Insights, Constellation, the Vaars and the Raag Clock. On iPad, all of it at once.</p>
-    <p class="body-lg">Constellation shows which themes travel together in the same verses — matched by a shared word, not by meaning — with a focus on one theme, lenses by voice, raag and hour, and the Sky of all {FACTS.themes} themes. Insights counts and compares, described plainly.</p>
+  <FeatureChapter id="explore" no="11" label={t("features.explore")} title={t("features.sevenWaysIntoThe")} surface="warm" shots={exploreShots}>
+    <p class="body-lg">{t("features.exploreGathersThemIn")}</p>
+    <p class="body-lg">{t("features.constellationShowsWhichThemes", { themes: String(FACTS.themes) })}</p>
   </FeatureChapter>
 
   <!-- Photo band (dark scope) — between two light chapters, never beside Gurmukhi text -->
   <PhotoBand src={widePhoto} position="center 55%"
-    alt="Sri Harmandir Sahib across the sarovar, the causeway and the marble parikrama">
-    <p class="h-statement">Quiet enough to hear.</p>
-    <p class="pb-sub">A place to read, and nothing else.</p>
+    alt={t("features.sriHarmandirSahibAcross")}>
+    <p class="h-statement">{t("features.quietEnoughToHear")}</p>
+    <p class="pb-sub">{t("features.aPlaceToRead")}</p>
   </PhotoBand>
 
   <!-- Display: the accent strip -->
   <section class="sec surface-warm" id="accents" data-chapter="accents">
     <div class="wrap">
       <div class="story-head reveal">
-        <p class="eyebrow">Display</p>
-        <h2 class="h-story">Five accents. Gold leads.</h2>
-        <p class="body-lg">Soul gold by default, with saffron, gold, indigo and teal to choose from. Display also sets the Gurmukhi size, transliteration, appearance and traditional saroop. The Gurmukhi itself always stays in ink.</p>
+        <p class="eyebrow">{t("features.display")}</p>
+        <h2 class="h-story">{t("features.fiveAccentsGoldLeads")}</h2>
+        <p class="body-lg">{t("features.soulGoldByDefault")}</p>
       </div>
-      <div class="accent-box reveal" data-delay="1" tabindex="0" role="region" aria-label="The five accents">
+      <div class="accent-box reveal" data-delay="1" tabindex="0" role="region" aria-label={t("features.theFiveAccents")}>
       <ul class="accent-strip">
         {accents.map((a) => (
           <li>
             <figure class="shot">
-              <div class="shot-in"><Image src={a.src} widths={[240, 480]} sizes="(min-width: 980px) 220px, 44vw" loading="lazy" decoding="async" alt={`Reader on iPhone at Ang 1 with the ${a.name} accent`} /></div>
+              <div class="shot-in"><Image src={a.src} widths={[240, 480]} sizes="(min-width: 980px) 220px, 44vw" loading="lazy" decoding="async" alt={t("features.readerOnIphoneAt3", { name: String(a.name) })} /></div>
               <figcaption>{a.name}</figcaption>
             </figure>
           </li>
@@ -367,11 +368,11 @@ const jsonLd = {
   <section class="sec surface-ink closing" id="verbatim" data-theme="dark" data-chapter="verbatim">
     <div class="wrap closing-in reveal">
       <span class="gold-hair" aria-hidden="true"></span>
-      <h2 class="h-statement">Nothing corrected. Nothing invented.</h2>
-      <p class="body-lg">The text is reproduced character for character from the source edition and checked against a SHA-256 checksum when the app is installed or updated. Nothing is normalised, modernised or improved. Never AI-generated.</p>
+      <h2 class="h-statement">{t("features.nothingCorrectedNothingInvented")}</h2>
+      <p class="body-lg">{t("features.theTextIsReproduced")}</p>
       <div class="cta-row">
-        <a class="btn" href={L("/privacy")}>Read the privacy policy</a>
-        <a class="btn ghost" href={L("/support")}>Get support</a>
+        <a class="btn" href={L("/privacy")}>{t("features.readThePrivacyPolicy")}</a>
+        <a class="btn ghost" href={L("/support")}>{t("features.getSupport")}</a>
       </div>
     </div>
   </section>

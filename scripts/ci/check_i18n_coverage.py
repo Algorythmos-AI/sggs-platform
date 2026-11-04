@@ -11,8 +11,8 @@ covered regions grow as pages move their copy into messages (COVERED); when ever
 covered the region becomes the whole page.
 
 Exempt: Gurmukhi (anything inside lang="pa" or class="gm" — scripture and the ੴ mark are never
-translated here), text without letters (numbers, symbols, punctuation), the product name, email
-addresses and web addresses, and Learn article titles and descriptions (content, translated with the
+translated here) and its transliteration (class="rom"), text without letters (numbers, symbols, punctuation), the product name, email
+addresses, web addresses, clock ranges formatted per language, and Learn article titles and descriptions (content, translated with the
 articles themselves). Stdlib only.
 """
 from __future__ import annotations
@@ -43,10 +43,14 @@ COVERED = [
 # the build ("en/index.html"). A matcher with no attribute matches every element with that tag.
 PAGES = {
     "en/index.html": [("main", "id", "main"), ("title", None, None)],
+    "en/features/index.html": [("main", "id", "main"), ("title", None, None)],
+    "en/watch/index.html": [("main", "id", "main"), ("title", None, None)],
 }
 ATTRS = ("aria-label", "alt", "title", "placeholder")
 ALLOWED = {"Gurbani Soul"}
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
+# A clock range formatted per language by i18n/format.ts (fmtPaharRange): "6–9 AM", "9 AM–12 PM".
+CLOCK = re.compile(r"\d{1,2}(:\d\d)?( ?[AP]M)?\s*[–-]\s*\d{1,2}(:\d\d)?( ?[AP]M)?")
 ADDRESS = re.compile(r"[\w-]+(\.[\w-]+)+(/[\w./-]*)?")   # gurbanisoul.com/search
 VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
 
@@ -82,7 +86,7 @@ class Scan(HTMLParser):
         if not covered:
             covered = any(tag == t and (k is None or (v in classes if k == "class" else a.get(k) == v))
                           for t, k, v in self.regions)
-        gm = gm or a.get("lang") == "pa" or "gm" in classes
+        gm = gm or a.get("lang") == "pa" or "gm" in classes or "rom" in classes   # rom: transliteration
         if covered and not gm:
             for name in ATTRS:
                 if a.get(name):
@@ -111,7 +115,7 @@ class Scan(HTMLParser):
     def _check(self, s: str, where: str):
         s = " ".join(s.split())
         if (not s or MARK in s or not re.search(r"[A-Za-z]", s) or s in ALLOWED or s in self.exempt
-                or EMAIL.fullmatch(s) or ADDRESS.fullmatch(s)):
+                or EMAIL.fullmatch(s) or ADDRESS.fullmatch(s) or CLOCK.fullmatch(s)):
             return
         self.bad.append(f"{where} {s!r}".strip())
 
