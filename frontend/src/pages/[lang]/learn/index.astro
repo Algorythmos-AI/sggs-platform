@@ -7,25 +7,27 @@ import JsonLd from "../../../components/JsonLd.astro";
 import { SITE_URL } from "../../../site";
 import { LEARN_SLUGS } from "../../../routes";
 import { localeStaticPaths, type Locale } from "../../../i18n/locales";
+import { useT } from "../../../i18n/t";
+import { fmtDate as fmtDateIn } from "../../../i18n/format";
 import { localizeHref } from "../../../i18n/paths";
 
 export const getStaticPaths = localeStaticPaths;
 const lang = Astro.params.lang as Locale;
 const L = (href: string) => localizeHref(href, lang);
+const { t, rich } = useT(lang);
 
 const desc =
-  "Plain, sourced explanations of Sri Guru Granth Sahib Ji from Gurbani Soul — what a Hukamnama is, how to read Nitnem, the raags and the watches of the day, and how the text is verified.";
+  t("learnIndex.plainSourcedExplanationsOf");
 
 const order = new Map(LEARN_SLUGS.map((s, i) => [s, i]));
 const articles = (await getCollection("learn"))
   .filter((a) => !a.data.draft)
   .sort((a, b) => {
-    const t = b.data.pubDate.getTime() - a.data.pubDate.getTime();
-    return t !== 0 ? t : (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0);
+    const diff = b.data.pubDate.getTime() - a.data.pubDate.getTime();
+    return diff !== 0 ? diff : (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0);
   });
 
-const fmtDate = (d: Date) =>
-  d.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
+const fmtDate = (d: Date) => fmtDateIn(lang, d);
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -33,7 +35,7 @@ const jsonLd = {
     { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL, inLanguage: "en" },
     {
       "@type": "CollectionPage",
-      name: "Learn — Sri Guru Granth Sahib Ji",
+      name: t("learnIndex.learnSriGuruGranth"),
       description: desc,
       url: new URL(L("/learn"), SITE_URL).href,
       inLanguage: "en",
@@ -42,17 +44,15 @@ const jsonLd = {
   ],
 };
 ---
-<Marketing title="Learn — Gurbani Soul" description={desc} path={L("/learn")}>
+<Marketing title={t("learnIndex.learnGurbaniSoul")} description={desc} path={L("/learn")}>
   <JsonLd slot="head" data={jsonLd} />
   <MarketingNav overHero={false} />
 
   <header class="learn-hero">
     <div class="wrap">
-      <p class="eyebrow">Learn</p>
-      <h1>Learn about Sri Guru Granth Sahib Ji</h1>
-      <p class="lede">Short, plain explanations of how the Granth is read and how Gurbani Soul stays
-        faithful to it. Every quotation is verbatim and cited by its Ang; anything that is
-        interpretation is clearly labelled as such.</p>
+      <p class="eyebrow">{t("learnIndex.learn")}</p>
+      <h1>{t("learnIndex.learnAboutSriGuru")}</h1>
+      <p class="lede">{t("learnIndex.shortPlainExplanationsOf")}</p>
     </div>
   </header>
 

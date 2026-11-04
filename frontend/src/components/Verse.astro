@@ -7,6 +7,8 @@
 // Public web is Gurmukhi-only: no English translation, no transliteration of the verse — just the
 // verbatim line (ink-coloured) and the citation "Sri Guru Granth Sahib Ji · Ang N".
 import data from "../generated/quotes.json";
+import { localeOf } from "../i18n/paths";
+import { useT } from "../i18n/t";
 
 export interface Props { id: number }
 const { id } = Astro.props;
@@ -24,8 +26,11 @@ if (!q) {
   );
 }
 
+const { t } = useT(localeOf(Astro.url.pathname));
+// The citation form is a message (each language names the Granth and the Ang its own way); the raag
+// and the voice are data from the database.
 const cite =
-  `Sri Guru Granth Sahib Ji · Ang ${q.ang}` +
+  t("scripture.cite", { ang: String(q.ang) }) +
   (q.raag ? ` · ${q.raag}` : "") +
   (q.author ? ` · ${q.author}` : "");
 ---

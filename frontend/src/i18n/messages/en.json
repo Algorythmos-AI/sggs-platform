@@ -636,5 +636,23 @@
     "thisWebsite2": "This website",
     "helpWithTheGurbani2": "Help with the Gurbani Soul app for iPhone and iPad: contact, reporting a text error, and answers to common questions.",
     "lede": "Gurbani Soul is a fully offline reader, search tool and Nitnem companion for Sri Guru Granth Sahib Ji, all {angs} Angs. This page answers the common questions; anything else, write to us."
+  },
+  "learnIndex": {
+    "learnGurbaniSoul": "Learn — Gurbani Soul",
+    "learn": "Learn",
+    "learnAboutSriGuru": "Learn about Sri Guru Granth Sahib Ji",
+    "shortPlainExplanationsOf": "Short, plain explanations of how the Granth is read and how Gurbani Soul stays faithful to it. Every quotation is verbatim and cited by its Ang; anything that is interpretation is clearly labelled as such.",
+    "learnSriGuruGranth": "Learn — Sri Guru Granth Sahib Ji",
+    "plainSourcedExplanationsOf": "Plain, sourced explanations of Sri Guru Granth Sahib Ji from Gurbani Soul — what a Hukamnama is, how to read Nitnem, the raags and the watches of the day, and how the text is verified."
+  },
+  "scripture": {
+    "cite": "Sri Guru Granth Sahib Ji · Ang {ang}",
+    "explanationLabel": "Explanation (interpretation, not scripture)"
+  },
+  "learnArticle": {
+    "updated": "· updated {date}",
+    "moreArticles": "More articles",
+    "backToLearn": "← Back to Learn",
+    "titleSuffix": "{title} — Gurbani Soul"
   }
 }

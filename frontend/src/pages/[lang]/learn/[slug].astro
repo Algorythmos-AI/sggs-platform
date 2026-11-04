@@ -11,6 +11,8 @@ import { SITE_URL } from "../../../site";
 import { LEARN_SLUGS, ogImagePath } from "../../../routes";
 import { ENABLED_LOCALES, type Locale } from "../../../i18n/locales";
 import { localizeHref } from "../../../i18n/paths";
+import { useT } from "../../../i18n/t";
+import { fmtDate as fmtDateIn } from "../../../i18n/format";
 
 export async function getStaticPaths() {
   const entries = (await getCollection("learn")).filter((e) => !e.data.draft);
@@ -28,12 +30,12 @@ export async function getStaticPaths() {
 
 const lang = Astro.params.lang as Locale;
 const L = (href: string) => localizeHref(href, lang);
+const { t } = useT(lang);
 const { entry, prev, next } = Astro.props;
 const { Content } = await render(entry);
 const { title, description, pubDate, updatedDate, tags } = entry.data;
 
-const fmtDate = (d: Date) =>
-  d.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
+const fmtDate = (d: Date) => fmtDateIn(lang, d);
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 const canonical = new URL(L(`/learn/${entry.id}`), SITE_URL).href;
 const ogImage = ogImagePath(`learn-${entry.id}`);
@@ -53,7 +55,7 @@ const articleJsonLd = {
   mainEntityOfPage: canonical,
 };
 ---
-<Marketing title={`${title} — Gurbani Soul`} description={description} path={L(`/learn/${entry.id}`)} ogImage={ogImage}>
+<Marketing title={t("learnArticle.titleSuffix", { title })} description={description} path={L(`/learn/${entry.id}`)} ogImage={ogImage}>
   <JsonLd slot="head" data={articleJsonLd} />
   <MarketingNav overHero={false} />
 
@@ -65,8 +67,8 @@ const articleJsonLd = {
         <h1>{title}</h1>
         <p class="art-meta">
           <time datetime={iso(pubDate)}>{fmtDate(pubDate)}</time>
-          {updatedDate && <span>· updated {fmtDate(updatedDate)}</span>}
-          <span class="tags">{tags.map((t) => <span class="tag">{t}</span>)}</span>
+          {updatedDate && <span>{t("learnArticle.updated", { date: fmtDate(updatedDate) })}</span>}
+          <span class="tags">{tags.map((tag) => <span class="tag">{tag}</span>)}</span>
         </p>
       </header>
 
@@ -74,8 +76,8 @@ const articleJsonLd = {
         <Content components={{ Verse, Explanation }} />
       </div>
 
-      <nav class="art-nav" aria-label="More articles">
-        <a class="back" href={L("/learn")}>← Back to Learn</a>
+      <nav class="art-nav" aria-label={t("learnArticle.moreArticles")}>
+        <a class="back" href={L("/learn")}>{t("learnArticle.backToLearn")}</a>
         <div class="prevnext">
           {prev && <a href={L(`/learn/${prev.id}`)} rel="prev">← {prev.data.title}</a>}
           {next && <a href={L(`/learn/${next.id}`)} rel="next">{next.data.title} →</a>}
