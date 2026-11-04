@@ -51,3 +51,38 @@ test('a language that is not enabled has no pages', async ({ request }) => {
     expect([302, 404]).toContain(res.status());
   }
 });
+
+// The switcher exists only once two languages are enabled; these run then (and in a preview build).
+const second = config.enabled.find((l) => l !== config.default);
+test.describe('language switcher', () => {
+  test.skip(!second, 'one language enabled: there is no switcher to test');
+
+  test('it opens, closes on Escape, and keeps focus', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === 'mobile', 'phones use the menu sheet');
+    await page.goto(`/${second}/features`);
+    const btn = page.locator('.lang-btn');
+    await btn.click();
+    await expect(page.locator('#langList')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#langList')).toBeHidden();
+    await expect(btn).toBeFocused();
+  });
+
+  test('a choice opens the same page in that language, keeps the section and is remembered', async ({ page, context }, testInfo) => {
+    test.skip(testInfo.project.name === 'mobile', 'phones use the menu sheet');
+    await page.goto(`/${second}/features#vaars`);
+    await page.locator('.lang-btn').click();
+    await page.locator(`#langList a[data-lang-choice="${config.default}"]`).click();
+    await expect(page).toHaveURL(new RegExp(`/${config.default}/features#vaars$`));
+    await expect(page.locator('html')).toHaveAttribute('lang', config.locales[config.default as 'en'].htmlLang);
+    expect(await page.evaluate(() => localStorage.getItem('gs_lang'))).toBe(config.default);
+    expect(await context.cookies()).toEqual([]);
+  });
+
+  test('phones choose from a row in the menu sheet', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile', 'desktop uses the nav button');
+    await page.goto(`/${second}/support`);
+    await page.locator('.burger').click();
+    await expect(page.locator('#mobileMenu .lang-row')).toBeVisible();
+  });
+});

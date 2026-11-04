@@ -21,9 +21,12 @@ const desc = "Gurbani Soul: a quiet, exact companion to Sri Guru Granth Sahib Ji
       (function () {
         try {
           if (/[?&]q=/.test(location.search)) { location.replace("/search" + location.search); return; }
+          var pref = null;
+          try { pref = localStorage.getItem("gs_lang"); } catch (e) {}
           var first = ((navigator.languages && navigator.languages[0]) || navigator.language || "").toLowerCase();
           var tag = first.split(/[-_]/)[0];
-          var pick = enabled.indexOf(tag) !== -1 ? tag : fallback;
+          // A language the visitor chose on this site wins; else the browser's first language.
+          var pick = enabled.indexOf(pref) !== -1 ? pref : enabled.indexOf(tag) !== -1 ? tag : fallback;
           location.replace("/" + pick + location.hash);
         } catch (e) {}
       })();

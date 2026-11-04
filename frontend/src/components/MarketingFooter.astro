@@ -12,6 +12,7 @@ import { LEARN_SLUGS } from "../routes";
 import { localeOf, localizeHref } from "../i18n/paths";
 import { learnHref, articleLangFor } from "../i18n/content";
 import { useT } from "../i18n/t";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
 
 const lang = localeOf(Astro.url.pathname);
 const L = (href: string) => localizeHref(href, lang);
@@ -69,6 +70,7 @@ const columns: { title: string; links: { href: string; label: string; lang?: str
     </div>
     <div class="mfoot-act">
       {APP_STORE_LIVE && <a class="mfoot-store" href={APP_STORE_URL} aria-label={t("nav.getAppLabel")}>{t("footer.downloadOnStore")}</a>}
+      <LanguageSwitcher variant="footer" />
       <button class="mnav-icon mfoot-theme" data-theme-proxy aria-label={t("nav.theme")}>◐</button>
     </div>
   </div>
