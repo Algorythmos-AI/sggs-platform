@@ -5,6 +5,10 @@
 // segment — landing.ts adds `.now` to the live pahar and rotates #arcHand. Colours come from
 // marketing.css: an inactive segment is a --line hairline; the current one is bordered gold
 // (valid in light). The centre ੴ is flat ink. Reduced motion disables the hand transition (CSS).
+import { localeOf } from "../i18n/paths";
+import { useT } from "../i18n/t";
+
+const { t } = useT(localeOf(Astro.url.pathname));
 const cx = 120, cy = 120, r = 92;
 const GAP = 3.2;                       // degrees trimmed at each end so segments read as separate
 const polar = (deg: number) => {
@@ -18,7 +22,7 @@ const segPath = (i: number) => {
 };
 const segs = Array.from({ length: 8 }, (_, i) => ({ pahar: i + 1, d: segPath(i) }));
 ---
-<svg class="raag-arc" viewBox="0 0 240 240" role="img" aria-label="A dial of the eight pahars — the watches of the day">
+<svg class="raag-arc" viewBox="0 0 240 240" role="img" aria-label={t("raagArc.label")}>
   {segs.map((s) => (
     <path class={`seg${s.pahar === 7 ? " dashed" : ""}`} data-pahar={s.pahar} d={s.d} />
   ))}

@@ -4,6 +4,7 @@
 // core.ts (the Knowledge Base's DOM/API layer) — only the self-contained theme + pahar helpers.
 import { initTheme, applyTheme, setDefaultTheme } from "./theme";
 import { paharFixed, paharLabel, paharRange } from "./pahar.js";
+import { clientStrings } from "./i18n-client";
 import { wireNewsletter } from "./newsletter";
 
 type Theme = "light" | "dark" | "system";
@@ -172,6 +173,7 @@ function wireRaagClock() {
   // /watch's eight-pahar timeline cells (data-p, deliberately NOT data-pahar: they are never hidden).
   const cells = document.querySelectorAll<HTMLElement>(".pcell[data-p]");
   if (!svg && !caption && !lis.length && !cells.length) return;
+  const strings = clientStrings<{ dialNow?: string[] }>();
 
   const render = () => {
     const p = paharFixed(new Date());
@@ -180,7 +182,7 @@ function wireRaagClock() {
     });
     const hand = document.getElementById("arcHand");
     if (hand) hand.style.transform = `rotate(${(p - 1) * 45 + 22.5}deg)`;
-    if (caption) caption.textContent = `It is the ${paharLabel(p)} — ${paharRange(p)}.`;
+    if (caption) caption.textContent = strings?.dialNow?.[p - 1] ?? `It is the ${paharLabel(p)} — ${paharRange(p)}.`;
     lis.forEach((li) => {
       li.hidden = Number(li.dataset.pahar) !== p;
     });
