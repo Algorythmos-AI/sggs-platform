@@ -98,7 +98,7 @@ const ang = guard(async (n: number, turn = false) => {
     if (g.headers.length) h += `<div class="hdr gm" lang="pa">${g.headers.map((x: any) =>
       `<div class="${x.gurmukhi.startsWith('ੴ') ? 'invoc' : ''}">${esc(x.gurmukhi)}</div>`).join('')}
         <div class="t">${g.headers.map((x: any) => esc(x.translit)).join(' · ')}</div></div>`;
-    h += g.body.map((l: any) => `<div class="sline tap haspin ${l.is_rahao ? 'rahao' : ''}" data-line-id="${l.id}" title="Tap for related verses">
+    h += g.body.map((l: any) => `<div class="sline tap haspin ${l.is_rahao ? 'rahao' : ''}${l.en_span ? (l.en ? ' inspan spanend' : ' inspan') : ''}" data-line-id="${l.id}" title="Tap for related verses">
         ${pinButtonHTML(l.id, curAng, l.comp_id, l.gurmukhi)}
         <div class="g gm" lang="pa">${esc(l.gurmukhi)}</div><div class="t">${esc(l.translit)}</div>
         ${l.en ? `<div class="en" lang="en">${esc(l.en)}</div>` : ''}</div>`).join('');

@@ -8,7 +8,7 @@ import { pinButtonHTML } from './store';
 import { overlayOpened, overlayClosed } from './overlay';
 
 function panelLines(lines: any[]): string {
-  return lines.map((l: any) => `<div class="sline ${l.is_rahao ? 'rahao' : ''}${l.is_header ? '' : ' haspin'}"${l.is_header ? '' : ` data-line-id="${l.id}"`}>
+  return lines.map((l: any) => `<div class="sline ${l.is_rahao ? 'rahao' : ''}${l.is_header ? '' : ' haspin'}${l.en_span ? (l.en ? ' inspan spanend' : ' inspan') : ''}"${l.is_header ? '' : ` data-line-id="${l.id}"`}>
       ${l.is_header ? '' : pinButtonHTML(l.id, l.ang, l.comp_id, l.gurmukhi)}
       <div class="g gm${l.is_header ? ' ph' : ''}${l.is_header && l.gurmukhi.startsWith('ੴ') ? ' invoc' : ''}" lang="pa">${esc(l.gurmukhi)}</div>
       <div class="t${l.is_header ? ' ph' : ''}">${esc(l.translit)}</div>
