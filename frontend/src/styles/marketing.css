@@ -584,3 +584,21 @@ html.js-motion .reveal.in .draw { transform: none; transition: transform .6s cub
   .lang-btn { padding: 0 10px; }
   :lang(fr) .mnav nav.mnav-links a { padding: 0 7px; font-size: 13.5px; }
 }
+
+/* Punjabi interface text (docs/website/translation-style-guide.md). Interface Gurmukhi is set in the
+   reader's system Gurmukhi face — never in Sant Lipi, which is kept for scripture (.gm / .verse), so
+   interface words can never be mistaken for Gurbani. Gurmukhi needs room above and below the line,
+   has no italics (emphasis is weight), and spacing letters apart breaks the headline bar. */
+:root:lang(pa) {
+  --gm-ui: "Noto Sans Gurmukhi", "Gurmukhi MN", "Mukta Mahee", "Raavi", "Nirmala UI", sans-serif;
+}
+:lang(pa) body { font-family: var(--sans), var(--gm-ui); line-height: 1.7; }
+:lang(pa) :is(h1, h2, h3, .h-story, .h-statement, .eyebrow, .chapter-no, .mfoot-tag, .lede, .hero-lede) {
+  font-family: var(--serif-display), var(--gm-ui); letter-spacing: 0; text-transform: none; line-height: 1.35;
+}
+/* Spacing letters apart breaks the headline bar (and conjuncts) of Gurmukhi, so it is never applied
+   on a Punjabi page — the only !important here: page-scoped styles must not win this one. */
+:lang(pa) * { letter-spacing: 0 !important; }
+:lang(pa) :is(em, i) { font-style: normal; font-weight: 600; }
+:lang(pa) * { font-synthesis: none; }
+:lang(pa) :is(.gm, .verse) { font-family: var(--gm); }        /* scripture keeps Sant Lipi */
