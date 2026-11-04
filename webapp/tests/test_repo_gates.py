@@ -1088,6 +1088,44 @@ class LanguageRouting(unittest.TestCase):
             self.assertTrue((STATIC / to.lstrip("/") / "index.html").is_file(), f"{route} forwards to a missing page {to}")
 
 
+class NoGurbaniInTranslations(unittest.TestCase):
+    """A message catalog never carries scripture: Gurbani on a page always comes from the corpus.
+
+    The English catalog holds no Gurmukhi at all. A translation (Punjabi especially) may hold
+    interface Gurmukhi, but no corpus line: every translated string, reduced to its Gurmukhi letters,
+    must not contain any line of the Granth reduced the same way (lines of at least 8 letters, so
+    a single common word is not a match).
+    """
+
+    MESSAGES = FRONTEND / "src" / "i18n" / "messages"
+    _letters = staticmethod(lambda s: re.sub(r"[^\u0A05-\u0A39\u0A3C-\u0A4D\u0A59-\u0A5E\u0A70-\u0A75]", "", s))
+
+    def test_english_catalog_has_no_gurmukhi(self):
+        en = (self.MESSAGES / "en.json").read_text(encoding="utf-8")
+        self.assertNotRegex(en, r"[\u0A00-\u0A7F]", "en.json holds Gurmukhi: scripture belongs in the corpus, samples in page code")
+
+    def test_translations_quote_no_line_of_the_granth(self):
+        catalogs = [p for p in sorted(self.MESSAGES.glob("*.json")) if p.name != "en.json" and not p.name.endswith(".lock.json")]
+        if not catalogs:
+            self.skipTest("no translation catalogs yet")
+        if not DB.exists():
+            self.skipTest("db/sggs.sqlite not installed (make dataset)")
+        conn = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        try:
+            lines = {self._letters(g) for (g,) in conn.execute("SELECT gurmukhi FROM lines")}
+        finally:
+            conn.close()
+        lines = {x for x in lines if len(x) >= 8}
+        self.assertGreater(len(lines), 10000, "corpus not read")
+        for cat in catalogs:
+            for value in _strings(json.loads(cat.read_text(encoding="utf-8"))):
+                text = self._letters(value)
+                if len(text) < 8:
+                    continue
+                hit = next((x for x in lines if x in text), None)
+                self.assertIsNone(hit, f"{cat.name}: a message contains a line of the Granth: {value!r}")
+
+
 class RssInvariants(unittest.TestCase):
     def setUp(self):
         if _unbuilt() or not (STATIC / "rss.xml").exists():

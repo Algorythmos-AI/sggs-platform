@@ -95,6 +95,7 @@ jobs:
           npm run test:pahar
           npm run test:i18n
           node scripts/gen-i18n-redirects.mjs --check
+          node scripts/i18n-status.mjs
       - name: No interface English outside the message files (pseudo-locale build)
         working-directory: frontend
         run: |
