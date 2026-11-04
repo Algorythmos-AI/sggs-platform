@@ -125,6 +125,9 @@ body.has-pagebar { --kb-bottom:calc(var(--kb-tab) + env(safe-area-inset-bottom, 
 .sline .t { font-size:13px; color:var(--soft); font-style:italic; margin-top:2px; }
 /* Gurmukhi is always ink: the refrain is marked by a rule in the margin, never by colouring the verse */
 .sline.rahao { border-left:3px solid var(--accent); border-radius:0; padding-left:13px; margin:7px 0; }
+/* One English record covering several printed lines: a quiet bracket joins them, the English sits once under the last */
+.sline.inspan { box-shadow:inset 2px 0 0 var(--line); padding-left:12px; }
+.sline.inspan:not(.spanend) + .sline.inspan { padding-top:0; }
 .en { font-size:13px; color:var(--accent); margin-top:4px; line-height:1.55; }
 .en::before { content:'EN · '; font-size:10px; color:var(--faint); letter-spacing:.5px; font-weight:600; }
 body.hide-t .t { display:none; }

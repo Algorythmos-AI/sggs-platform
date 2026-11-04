@@ -18,6 +18,7 @@ TABLES = frozenset({
     'fts_shabad',
     'lines',
     'translations',
+    'translation_spans',
     'variants',
     'word_freq',
 })
