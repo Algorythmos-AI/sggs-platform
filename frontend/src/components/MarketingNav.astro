@@ -15,9 +15,11 @@
 import { APP_STORE_URL, APP_STORE_LIVE } from "../site";
 import { CONTRIBUTE_MODE } from "../contribute";
 import { localeOf, localizeHref } from "../i18n/paths";
+import { useT } from "../i18n/t";
 
 const lang = localeOf(Astro.url.pathname);
 const L = (href: string) => localizeHref(href, lang);
+const { t } = useT(lang);
 
 // `overHero` (default) floats the bar over the dark hero with white text until scrolled. Pages with
 // no dark hero (e.g. Learn, Features, The watch) pass overHero={false} so the resting bar uses ink
@@ -33,11 +35,11 @@ const giveOn = CONTRIBUTE_MODE !== "off";
 const heart = '<svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21.2c-.3 0-.6-.1-.8-.3C8.2 18.4 2.5 13.9 2.5 8.9A5.2 5.2 0 0 1 12 6a5.2 5.2 0 0 1 9.5 2.9c0 5-5.7 9.5-8.7 12-.2.2-.5.3-.8.3z"/></svg>';
 
 const links = [
-  { href: L("/features"), label: "Features", prefetch: true },
-  { href: L("/watch"), label: "The watch", prefetch: true },
-  { href: L("/learn"), label: "Learn", prefetch: true },
-  { href: "/search", label: "Knowledge Base" },
-  { href: L("/support"), label: "Support", prefetch: true },
+  { href: L("/features"), label: t("nav.features"), prefetch: true },
+  { href: L("/watch"), label: t("nav.watch"), prefetch: true },
+  { href: L("/learn"), label: t("nav.learn"), prefetch: true },
+  { href: "/search", label: t("nav.knowledgeBase") },
+  { href: L("/support"), label: t("nav.support"), prefetch: true },
 ];
 ---
 <header class:list={["mnav", { "mnav--solid": !overHero }]} id="mnav">
@@ -47,7 +49,7 @@ const links = [
       <span>Gurbani Soul</span>
     </a>
 
-    <nav class="mnav-links" aria-label="Primary">
+    <nav class="mnav-links" aria-label={t("nav.primaryLabel")}>
       {links.map((l) => (
         <a href={l.href} data-astro-prefetch={l.prefetch ? "" : undefined}
            aria-current={isCurrent(l.href) ? "page" : undefined}>{l.label}</a>
@@ -55,17 +57,17 @@ const links = [
     </nav>
 
     <div class="mnav-right">
-      <button id="themeBtn" class="mnav-icon" aria-label="Theme">◐</button>
+      <button id="themeBtn" class="mnav-icon" aria-label={t("nav.theme")}>◐</button>
       {giveOn && (
         <a class="mnav-give" href={L("/contribute")} data-astro-prefetch
            aria-current={isCurrent(L("/contribute")) ? "page" : undefined}>
-          <Fragment set:html={heart} /><span class="lbl">Contribute</span>
+          <Fragment set:html={heart} /><span class="lbl">{t("nav.contribute")}</span>
         </a>
       )}
       {APP_STORE_LIVE
-        ? <a class="pill" href={APP_STORE_URL} aria-label="Get Gurbani Soul on the App Store">Get the app</a>
-        : <span class="pill soon" data-app-store="coming-soon-nav">Coming soon</span>}
-      <button class="burger mnav-icon" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+        ? <a class="pill" href={APP_STORE_URL} aria-label={t("nav.getAppLabel")}>{t("nav.getApp")}</a>
+        : <span class="pill soon" data-app-store="coming-soon-nav">{t("nav.comingSoon")}</span>}
+      <button class="burger mnav-icon" aria-expanded="false" aria-controls="mobileMenu" aria-label={t("nav.openMenu")}>
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8.5h16M4 15.5h16" /></svg>
       </button>
     </div>
@@ -73,34 +75,34 @@ const links = [
   </div>
 </header>
 
-<dialog id="mobileMenu" aria-label="Menu">
+<dialog id="mobileMenu" aria-label={t("nav.menuLabel")}>
   <div class="mm-in">
     <div class="mm-top">
       <a class="brand" href={L("/")}><span class="gm" aria-hidden="true">ੴ</span> <span>Gurbani Soul</span></a>
-      <button class="mm-close mnav-icon" aria-label="Close menu">
+      <button class="mm-close mnav-icon" aria-label={t("nav.closeMenu")}>
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
       </button>
     </div>
-    <nav class="mm-links" aria-label="Menu">
+    <nav class="mm-links" aria-label={t("nav.menuLabel")}>
       {links.map((l) => (
         <a href={l.href} data-astro-prefetch={l.prefetch ? "" : undefined}
            aria-current={isCurrent(l.href) ? "page" : undefined}>{l.label}</a>
       ))}
     </nav>
     <div class="mm-sub">
-      <a href={L("/privacy")} data-astro-prefetch aria-current={isCurrent(L("/privacy")) ? "page" : undefined}>Privacy</a>
+      <a href={L("/privacy")} data-astro-prefetch aria-current={isCurrent(L("/privacy")) ? "page" : undefined}>{t("nav.privacy")}</a>
       {giveOn && (
         <a class="mm-give" href={L("/contribute")} data-astro-prefetch
            aria-current={isCurrent(L("/contribute")) ? "page" : undefined}>
-          <Fragment set:html={heart} /><span>Contribute</span>
+          <Fragment set:html={heart} /><span>{t("nav.contribute")}</span>
         </a>
       )}
     </div>
     <div class="mm-actions">
       {APP_STORE_LIVE
-        ? <a class="pill mm-cta" href={APP_STORE_URL} aria-label="Get Gurbani Soul on the App Store">Get the app</a>
-        : <span class="pill soon mm-cta" data-app-store="coming-soon-nav">Coming soon</span>}
-      <button class="mm-theme mnav-icon" data-theme-proxy aria-label="Theme">◐</button>
+        ? <a class="pill mm-cta" href={APP_STORE_URL} aria-label={t("nav.getAppLabel")}>{t("nav.getApp")}</a>
+        : <span class="pill soon mm-cta" data-app-store="coming-soon-nav">{t("nav.comingSoon")}</span>}
+      <button class="mm-theme mnav-icon" data-theme-proxy aria-label={t("nav.theme")}>◐</button>
     </div>
   </div>
 </dialog>

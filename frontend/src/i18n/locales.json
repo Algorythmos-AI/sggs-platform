@@ -3,9 +3,9 @@
   "default": "en",
   "enabled": ["en"],
   "locales": {
-    "en": { "htmlLang": "en", "ogLocale": "en_GB", "name": "English" },
-    "pa": { "htmlLang": "pa", "ogLocale": "pa_IN", "name": "ਪੰਜਾਬੀ" },
-    "fr": { "htmlLang": "fr", "ogLocale": "fr_FR", "name": "Français" }
+    "en": { "htmlLang": "en", "intl": "en-GB", "ogLocale": "en_GB", "name": "English" },
+    "pa": { "htmlLang": "pa", "intl": "pa-IN", "ogLocale": "pa_IN", "name": "ਪੰਜਾਬੀ" },
+    "fr": { "htmlLang": "fr", "intl": "fr-FR", "ogLocale": "fr_FR", "name": "Français" }
   },
   "localizedPages": ["/", "/features", "/watch", "/learn", "/support", "/privacy", "/contribute"]
 }
