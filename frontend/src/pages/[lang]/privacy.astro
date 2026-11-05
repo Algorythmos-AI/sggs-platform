@@ -1,0 +1,128 @@
+---
+// privacy.astro — the public Privacy Policy for the Gurbani Soul iOS app (org.sggs.app) and this site.
+// Linked from the App Store listing (Privacy Policy URL) and from /support. Every statement
+// here is checked against the code: PrivacyInfo.xcprivacy, Info.plist, SolarLocation.swift,
+// CrashMonitor.swift, SpotlightIndex.swift, WidgetShared.swift, NitnemReminders.swift,
+// NitnemProgress.swift, ReadingActivityController.swift, and the frontend scripts
+// (components/Analytics.astro loads Vercel Web Analytics on the gurbanisoul.com marketing pages only).
+// Keep it true before you keep it short. Rendered in the marketing shell (LegalPage) since v1.3.5;
+// /privacy must keep working (App Store Connect + the app's AppLinks): it 308s to /en/privacy
+// (vercel.json; LanguageRouting gate).
+import Marketing from "../../layouts/Marketing.astro";
+import LegalPage from "../../components/LegalPage.astro";
+import { CONTRIBUTE_MODE } from "../../contribute.ts";
+import { FACTS } from "../../facts.ts";
+import { localeStaticPaths, type Locale } from "../../i18n/locales";
+import { useT, richMap } from "../../i18n/t";
+import { localizeHref } from "../../i18n/paths";
+import { fmtDate } from "../../i18n/format";
+
+export const getStaticPaths = localeStaticPaths;
+const lang = Astro.params.lang as Locale;
+const L = (href: string) => localizeHref(href, lang);
+const { t, rich } = useT(lang);
+// The English text this policy states, by date; every language shows the same date in its own words.
+const updated = fmtDate(lang, new Date("2026-10-26"));
+// The launch-notice sign-up (Newsletter.astro) renders only when this build-time env var is set;
+// the disclosure below follows it, so the policy never describes a form the site does not show.
+const newsletterOn = !!import.meta.env.PUBLIC_NEWSLETTER_FORM_URL;
+// Likewise the Contributions section follows /contribute's mode (src/contribute.ts).
+const contributeOn = CONTRIBUTE_MODE !== "off";
+const desc = t("privacy.theGurbaniSoulApp");
+const toc = [
+  { id: "short-version", label: t("privacy.theShortVersion2") },
+  { id: "the-app", label: t("privacy.theApp2") },
+  { id: "this-website", label: t("privacy.thisWebsite2") },
+  ...(contributeOn ? [{ id: "contributions", label: t("privacy.contributions2") }] : []),
+  { id: "children", label: t("privacy.children2") },
+  { id: "your-data", label: t("privacy.yourDataYourControl2") },
+  { id: "changes", label: t("privacy.changes2") },
+  { id: "contact", label: t("privacy.contact2") },
+];
+---
+<Marketing title={t("privacy.privacyPolicyGurbaniSoul")} description={desc} path={L("/privacy")}>
+  <LegalPage
+    eyebrow={t("privacy.privacyPolicy")}
+    title={t("privacy.theAppCollectsNothing")}
+    id="v-privacy"
+    toc={toc}
+    updated={updated}
+  >
+    <section id="short-version">
+      <h2>{t("privacy.theShortVersion")}</h2>
+      <p class="legal-scope">{richMap(rich("privacy.appliesToTheGurbani", {}), { strong1: (x: string) => <strong>{x}</strong>, code1: (x: string) => <code>{x}</code> })}</p>
+      <ul>
+        <li>{t("privacy.noAccountsNothingTo")}</li>
+        <li>{richMap(rich("privacy.theAppMakesNo", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.noAnalyticsNoAdvertising", {}), { link1: (x: string) => <a href="#this-website">{x}</a> })}</li>
+        <li>{t("privacy.everythingYouDoIn")}</li>
+        <li>{t("privacy.locationIsOptionalUsed")}</li>
+      </ul>
+    </section>
+
+    <section id="the-app">
+      <h2>{t("privacy.theApp")}</h2>
+      <p>{t("privacy.theAppBundlesThe")}</p>
+      <ul>
+        <li>{richMap(rich("privacy.savedVersesAreStored", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.themesInSpotlightThe", { themes: String(FACTS.themes) }), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.yourThemesOnThe", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.settingsAccentColourTransliteration", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.vaarsWhereYouAre", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.nitnemProgressWhereYou", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.remindersAreOptionalLocal", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.liveActivityIsOptional", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.widgetsReadASmall", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.locationIsUsedOnly", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.integrityChecksReadThe", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("privacy.diagnosticsIfTheApp", {}), { strong1: (x: string) => <strong>{x}</strong>, em1: (x: string) => <em>{x}</em> })}</li>
+      </ul>
+      <p>{richMap(rich("privacy.becauseTheAppCollects", {}), { strong1: (x: string) => <strong>{x}</strong> })}</p>
+    </section>
+
+    <section id="this-website">
+      <h2>{t("privacy.thisWebsite")}</h2>
+      <ul>
+        <li>{t("privacy.theSiteIsStatic")}</li>
+        <li>{richMap(rich("privacy.theGurbaniSoulPages", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{t("privacy.theKnowledgeBasePages")}</li>
+        {newsletterOn && <li>{richMap(rich("privacy.ifYouAskTo", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>}
+        <li>{t("privacy.yourBrowserKeepsYour")}</li>
+        <li>{richMap(rich("privacy.locationIsUsedOn", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{t("privacy.theEngineeringWikiAt")}</li>
+        <li>{t("privacy.searchesAndPageRequests")}</li>
+      </ul>
+    </section>
+
+    {contributeOn && <section id="contributions">
+      <h2>{t("privacy.contributions")}</h2>
+      <p>{richMap(rich("privacy.ifYouChooseTo", {}), { link1: (x: string) => <a href={L("/contribute")}>{x}</a>, strong1: (x: string) => <strong>{x}</strong>, link2: (x: string) => <a href="https://stripe.com/privacy">{x}</a> })}</p>
+    </section>}
+
+    <section id="children">
+      <h2>{t("privacy.children")}</h2>
+      <p>{t("privacy.theAppIsRated")}</p>
+    </section>
+
+    <section id="your-data">
+      <h2>{t("privacy.yourDataYourControl")}</h2>
+      <p>{t("privacy.weHoldNoData")}</p>
+    </section>
+
+    <section id="changes">
+      <h2>{t("privacy.changes")}</h2>
+      <p>{t("privacy.ifThisPolicyEver")}</p>
+    </section>
+
+    <section id="contact">
+      <h2>{t("privacy.contact")}</h2>
+      <p>{richMap(rich("privacy.questionsAboutPrivacySupport", {}), { link1: (x: string) => <a href="mailto:support@gurbanisoul.com">{x}</a>, link2: (x: string) => <a href={L("/support")}>{x}</a> })}</p>
+    </section>
+  </LegalPage>
+
+  <style>
+    .legal-scope { color: var(--ink-soft); }
+    :global(.legal code) { font-size: .85em; padding: 1px 6px; border-radius: 6px; background: var(--paper-2); border: 1px solid var(--line); }
+    :global(.legal li) { margin: 6px 0; }
+  </style>
+</Marketing>

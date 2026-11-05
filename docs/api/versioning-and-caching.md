@@ -4,8 +4,8 @@ description: "The two API surfaces and their errors, request ids, which response
 sidebar:
   order: 3
 verified:
-  commit: c761e513
-  date: "2026-09-27"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # Versioning and caching
 

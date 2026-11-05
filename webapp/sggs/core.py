@@ -101,7 +101,25 @@ def attach_translations(lines):
         for l in lines:
             if l['id'] in tr: l['en'] = tr[l['id']]
     except sqlite3.OperationalError:
-        pass                                   # older DB without translations table
+        return lines                           # older DB without translations table
+    try:
+        # One English record can cover 2-4 printed lines (dataset 1.4.0+). Every member line
+        # carries en_span; the English goes on the last member present in this response, so a
+        # list shows it once under the group even when an Ang boundary cuts the span.
+        spans = db().execute(
+            "SELECT s.first_line_id, s.last_line_id, t.text FROM translation_spans s "
+            "JOIN translations t ON t.line_id = s.last_line_id AND t.lang = s.lang "
+            "WHERE s.lang='en' AND s.first_line_id <= ? AND s.last_line_id >= ?",
+            (max(ids), min(ids))).fetchall()
+    except sqlite3.OperationalError:
+        return lines                           # DB before translation_spans
+    for first, last, text in spans:
+        members = [l for l in lines if first <= l['id'] <= last]
+        for l in members:
+            l['en_span'] = {'first': first, 'last': last}
+            l.pop('en', None)
+        if members:
+            members[-1]['en'] = text
     return lines
 
 

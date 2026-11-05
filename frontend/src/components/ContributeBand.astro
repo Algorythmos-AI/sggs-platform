@@ -4,6 +4,13 @@
 // here, so src/contribute.ts stays the single source. Renders nothing when CONTRIBUTE_MODE is
 // "off". Wording: "contribute", never "donate" — Algorythmos Pty Ltd is not a charity.
 import { CONTRIBUTE_MODE } from "../contribute";
+import { localeOf, localizeHref } from "../i18n/paths";
+import { useT } from "../i18n/t";
+import { fmtAud } from "../i18n/format";
+
+const lang = localeOf(Astro.url.pathname);
+const L = (href: string) => localizeHref(href, lang);
+const { t } = useT(lang);
 
 export interface Props { surface?: "paper" | "warm" }
 const { surface = "warm" } = Astro.props;
@@ -13,13 +20,13 @@ const on = CONTRIBUTE_MODE !== "off";
   <section class:list={["sec-thin give-band", `surface-${surface}`]} id="contribute-band" aria-labelledby="give-h">
     <div class="wrap give-in reveal">
       <div class="give-copy">
-        <p class="eyebrow">Free for everyone</p>
-        <h2 class="h-story" id="give-h">Kept free by the sangat.</h2>
-        <p class="body-lg">No ads, no paid tier, nothing behind a paywall. If Gurbani Soul serves your study, you can help cover hosting, scholarly review and licensing. It is optional and unlocks nothing.</p>
+        <p class="eyebrow">{t("contributeBand.eyebrow")}</p>
+        <h2 class="h-story" id="give-h">{t("contributeBand.title")}</h2>
+        <p class="body-lg">{t("contributeBand.body")}</p>
       </div>
       <div class="give-act">
-        <a class="btn" href="/contribute" data-astro-prefetch>Contribute</a>
-        <p class="give-fine">From A$5 · once or monthly</p>
+        <a class="btn" href={L("/contribute")} data-astro-prefetch>{t("contributeBand.cta")}</a>
+        <p class="give-fine">{t("contributeBand.fine", { amount: fmtAud(lang, 5) })}</p>
       </div>
     </div>
   </section>

@@ -3,6 +3,7 @@ import contextlib, io, re, sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "ci"))
 import check_static_fresh as fresh  # noqa: E402
+import check_i18n_coverage as cov  # noqa: E402
 import vercel_deploy_url as v  # noqa: E402
 import wait_for_checks as w  # noqa: E402
 
@@ -139,3 +140,33 @@ class StaticFreshness(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class I18nCoverage(unittest.TestCase):
+    """The hard-coded-English detector (scripts/ci/check_i18n_coverage.py) on hand-made pages."""
+
+    def bad(self, html):
+        s = cov.Scan(set())
+        s.feed(html)
+        return s.bad
+
+    def test_typed_english_in_a_covered_region_is_caught(self):
+        self.assertEqual(self.bad('<header id="mnav"><a>Features</a></header>'), ["'Features'"])
+
+    def test_an_untranslated_accessible_name_is_caught(self):
+        self.assertEqual(self.bad('<header id="mnav"><button aria-label="Open menu">≡</button></header>'),
+                         ["[aria-label] 'Open menu'"])
+
+    def test_messages_gurmukhi_names_and_uncovered_text_pass(self):
+        html = ('<p>Uncovered body copy</p><footer class="foot mfoot"><p>⟦Ƒéåţûŕéš ··⟧</p>'
+                '<span class="gm" lang="pa">ੴ Ang text</span><p>Gurbani Soul</p><p>© 2026 · 1,430</p>'
+                '<a href="mailto:a@b.co">support@gurbanisoul.com</a><script>var x = "Hello";</script></footer>')
+        self.assertEqual(self.bad(html), [])
+
+    def test_a_region_ends_with_its_element(self):
+        self.assertEqual(self.bad('<nav class="crumbs"><a>⟦Ĥöɱé⟧</a></nav><p>After the region</p>'), [])
+
+    def test_a_whole_page_region_and_a_tag_matcher(self):
+        s = cov.Scan(set(), [("main", "id", "main"), ("title", None, None)])
+        s.feed('<title>Typed title</title><main id="main"><p>⟦Ţéẋţ⟧</p><img alt="Typed alt"><p>gurbanisoul.com/search</p></main>')
+        self.assertEqual(s.bad, ["'Typed title'", "[alt] 'Typed alt'"])

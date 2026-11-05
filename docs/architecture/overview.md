@@ -4,8 +4,8 @@ description: "The system in one page: who uses it, the containers across three r
 sidebar:
   order: 1
 verified:
-  commit: a6615276
-  date: "2026-09-26"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # Architecture Overview
 
@@ -48,11 +48,11 @@ carries no API-base configuration. `gateway/routes.json` decides the routing per
 
 - **Staging** routes each of the five bounded contexts (`reader`, `search`, `verify`, `insights`,
   `knowledge`) to its own function, with `all` — the whole API — as the catch-all.
-- **Production (v1.3.10, and 1.4.0)** answers every `/api` path with `all`.
-- **From a later release, after the app is live on the App Store,** production routes the five
-  contexts the same way as staging, all five in that one release
-  ([services-production](../process/runbooks/services-production.md), step 3). It is one line in
-  `gateway/routes.json`; 1.4.0 leaves it out.
+- **Production (every release so far, through v1.5.2)** answers every `/api` path with `all`:
+  `production.services` in `gateway/routes.json` is empty.
+- **From a later release** production routes the five contexts the same way as staging, all five
+  in that one release ([services-production](../process/runbooks/services-production.md), step 3).
+  It is one line in `gateway/routes.json`; no release has listed them yet.
 
 Setting production's `api_platform` back to `render` proxies `/api` to the Render single API, which
 every release still deploys as the rollback target until it is retired. See

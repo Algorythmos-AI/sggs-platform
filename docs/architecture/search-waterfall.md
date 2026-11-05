@@ -4,8 +4,8 @@ description: "How /api/search decides, tier by tier, in the order do_search runs
 sidebar:
   order: 2
 verified:
-  commit: 7a343c62
-  date: "2026-09-25"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # Search waterfall
 
@@ -33,9 +33,9 @@ build if the code gains a tier this page does not name.
 |---|---|---|---|
 | 1 | always | length ≤ 300; dandas and punctuation → spaces; script detected | — |
 | 2 | auto · Gurmukhi **and** Latin present | `mixed_search` (one AND over text, variants, lexicon, fold); else the Latin tokens alone, re-run | `mixed-script`, `mixed-script (latin part: …)` |
-| 3 | an explicit `mode` | `gurmukhi` → text FTS then skeleton; `roman` → translit then the fold; `first` → `fl_g`/`fl_r` phrase; `theme` → concept index; `english` → `fts_en` | `gurmukhi`, `gurmukhi-skeleton`, `roman`, `roman-spelling-tolerant`, `first-letters`, `theme`, `english` |
+| 3 | an explicit `mode` | `gurmukhi` → text FTS then skeleton; `roman` → translit then the fold; `first` → `fl_g`/`fl_r` phrase; `theme` → concept index (a name in another spelling resolves by the fold: `waheguru` → `vahiguru`); `english` → `fts_en` | `gurmukhi`, `gurmukhi-skeleton`, `roman`, `roman-spelling-tolerant`, `first-letters`, `theme`, `english` |
 | 4 | auto · Gurmukhi | all single-letter tokens → `fl_g` phrase; else text FTS; else vowel signs stripped → `skeleton LIKE` | `first-letters`, `gurmukhi`, `gurmukhi-skeleton` |
-| 5 | auto · Roman | exactly a concept name → theme; ≥ 2 tokens of ≤ 3 letters → `fl_r` phrase (then translit); else translit FTS | `theme`, `first-letters`, `roman` |
+| 5 | auto · Roman | exactly a concept name → theme (except `vahiguru`, left to the lexicon: `LEXICON_OVER_SLUG`); ≥ 2 tokens of ≤ 3 letters → `fl_r` phrase (then translit); else translit FTS | `theme`, `first-letters`, `roman` |
 | 6 | nothing yet | the seeker lexicon: curated words → a transliteration term or a theme | `seeker-lexicon (term)` |
 | 7 | nothing yet | the precomputed romanisation-variant index, hybrid per-token resolution | `variant-match` |
 | 8 | nothing yet | the English layer, `fts_en` — before the fold, so "mercy" reaches translations | `english-translation` |

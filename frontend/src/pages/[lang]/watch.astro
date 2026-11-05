@@ -1,0 +1,271 @@
+---
+import { Image } from "astro:assets";
+import Marketing from "../../layouts/Marketing.astro";
+import MarketingNav from "../../components/MarketingNav.astro";
+import MarketingFooter from "../../components/MarketingFooter.astro";
+import RaagArc from "../../components/RaagArc.astro";
+import DeviceFrame from "../../components/DeviceFrame.astro";
+import JsonLd from "../../components/JsonLd.astro";
+import { SITE_URL } from "../../site.ts";
+import { FACTS, spell } from "../../facts.ts";
+import raagData from "../../generated/landing-raags.json";
+import { fmtPaharRange } from "../../i18n/format";
+import ClientStrings from "../../components/ClientStrings.astro";
+import { ordinal } from "../../facts.ts";
+import clockDark from "../../assets/app/iphone-clock-dark.png";
+import clockSolar from "../../assets/app/iphone-clock-solar-dark.png";
+import divergenceShot from "../../assets/app/iphone-pahar-divergence-light.png";
+import wRaagLight from "../../assets/app/widget-raagnow-small-light.png";
+import wRaagDark from "../../assets/app/widget-raagnow-small-dark.png";
+import { localeStaticPaths, type Locale } from "../../i18n/locales";
+import { useT } from "../../i18n/t";
+import { LOCALES, siteLanguages } from "../../i18n/locales";
+import { localizeHref } from "../../i18n/paths";
+import { learnHref } from "../../i18n/content";
+
+export const getStaticPaths = localeStaticPaths;
+const lang = Astro.params.lang as Locale;
+const L = (href: string) => localizeHref(href, lang);
+const { t } = useT(lang);
+
+const desc =
+  t("watch.theRaagClockIn");
+
+const pahars = raagData.pahars as Record<string, { name: string; roman: string }[]>;
+
+// The eight-pahar timeline (additive to the gate-locked .watch-grid below): labels and fixed-clock
+// ranges from pahar.js, raag names from the DB-generated landing-raags.json (never typed by hand).
+const timeline = Array.from({ length: 8 }, (_, i) => {
+  const p = i + 1;
+  const n = p <= 4 ? p : p - 4;
+  const label = t("watch.paharLabel", { ordinal: ordinal(n), n: String(n), half: p <= 4 ? "day" : "night" });
+  return { p, label, range: fmtPaharRange(lang, p), night: p > 4, raags: pahars[String(p)] ?? [] };
+});
+// The live dial's caption for each pahar, for landing.ts (which picks the current one in the browser).
+const dialNow = timeline.map((c) => t("watch.dialNow", { label: c.label, range: c.range }));
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL, inLanguage: siteLanguages() },
+    {
+      "@type": "WebPage",
+      name: t("watch.theRaagClockGurbani2"),
+      description: desc,
+      url: new URL(L("/watch"), SITE_URL).href,
+      inLanguage: LOCALES[lang].htmlLang,
+      isPartOf: { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL },
+    },
+  ],
+};
+---
+<Marketing title={t("watch.theRaagClockGurbani")} description={desc} path={L("/watch")}>
+  <JsonLd slot="head" data={jsonLd} />
+  <MarketingNav />
+
+  <!-- 1 · HERO BAND (dark; the nav floats over it) -->
+  <section class="watch-hero surface-ink" data-theme="dark">
+    <div class="wrap story-grid story-grid--6-6">
+      <div class="story-text">
+        <p class="eyebrow">{t("watch.theRaagClock")}</p>
+        <h1>{t("watch.theWatchOfThe")}</h1>
+        <span class="gold-hair" aria-hidden="true"></span>
+        <p class="lead">{t("watch.eightPaharsRaagsThe", { raags: String(spell(FACTS.raags)), raagsN: String(FACTS.raags) })}</p>
+      </div>
+      <div class="story-media">
+        <div class="stage wash">
+          <DeviceFrame src={clockDark} alt={t("watch.raagClockOnIphone")} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · LIVE ARC — prose left, the live dial with its caption right (gate-locked markup) -->
+  <section class="section watch-sec">
+    <div class="wrap watch-grid">
+      <div class="watch-copy reveal">
+        <p class="lead">{t("watch.theDayIsDivided")}</p>
+        <p class="muted">{t("watch.theDialFollowsThe")}</p>
+        <p class="muted">{t("watch.timesFollowYourDevice")}</p>
+      </div>
+
+      <figure class="watch-dial reveal">
+        <ClientStrings data={{ dialNow }} />
+        <p class="dial-now lead" data-raag-now>{t("watch.theDialFollowsThe2")}</p>
+        <div class="watch-arc"><RaagArc /></div>
+        <figcaption class="dial-cap">
+          <p class="dial-cap-label eyebrow">{t("watch.raagsOfThisWatch")}</p>
+          <ul class="raags">
+            {Array.from({ length: 8 }, (_, i) => String(i + 1)).map((p) => (
+              <li data-pahar={p} hidden>
+                {pahars[p] && pahars[p].length
+                  ? pahars[p].map((r) => (
+                      <span class="raag-chip"><span class="gm" lang="pa">{r.name}</span> <span class="rom">{r.roman}</span></span>
+                    ))
+                  : <span class="silence">{t("watch.theDeepNightIs")}</span>}
+              </li>
+            ))}
+          </ul>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 3 · EIGHT PAHARS — the whole day as one line (scroll-snap inside its own box on mobile) -->
+  <section class="sec surface-warm" aria-labelledby="pahars-h">
+    <div class="wrap">
+      <div class="story-head reveal">
+        <p class="eyebrow">{t("watch.theWholeDay")}</p>
+        <h2 id="pahars-h" class="h-story">{t("watch.eightWatchesFromDawn")}</h2>
+        <p class="body-lg">{t("watch.byTheClockEach")}</p>
+      </div>
+      <div class="pline-box reveal" data-delay="1" tabindex="0" role="region" aria-label={t("watch.theEightPaharsAnd")}>
+        <ol class="pline">
+          {timeline.map((cell) => (
+            <li class:list={["pcell", { night: cell.night, silent: cell.raags.length === 0 }]} data-p={cell.p}>
+              <p class="pc-no">{cell.p}</p>
+              <p class="pc-label">{cell.label}</p>
+              <p class="pc-range">{cell.range}</p>
+              {cell.raags.length
+                ? <p class="pc-raags">{cell.raags.map((r) => <span class="gm" lang="pa">{r.name}</span>)}</p>
+                : <p class="pc-silence">{t("watch.silence")}</p>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · FIXED vs SOLAR -->
+  <section class="sec surface-paper">
+    <div class="wrap story-grid story--flip">
+      <div class="story-text reveal">
+        <p class="eyebrow">{t("watch.fixedOrSolar")}</p>
+        <h2 class="h-story">{t("watch.byTheClockOr")}</h2>
+        <p class="body-lg"><strong>{t("watch.fixed2")}</strong> {t("watch.dividesTheDayInto")}</p>
+        <p class="body-lg"><strong>{t("watch.solar2")}</strong> {t("watch.followsTheOlderWay")}</p>
+        <p class="detail">{t("watch.sunriseAndSunsetAre")}</p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="pair">
+          <DeviceFrame src={clockDark} label={t("watch.fixed")} alt={t("watch.raagClockOnIphone2")} />
+          <DeviceFrame src={clockSolar} label={t("watch.solar")} alt={t("watch.raagClockOnIphone3")} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · WHERE TRADITIONS DISAGREE (dark, short) -->
+  <section class="sec surface-ink" data-theme="dark">
+    <div class="wrap story-grid story-grid--7-5">
+      <div class="story-text reveal">
+        <p class="eyebrow">{t("watch.sources")}</p>
+        <h2 class="h-story">{t("watch.whereTraditionsDisagree")}</h2>
+        <p class="body-lg">{t("watch.notEverySourcePlaces")}</p>
+        <p class="detail">{t("watch.inTheAppEvery")}</p>
+        <p class="cta-row"><a class="link-more" href="/divergence">{t("watch.seeEveryDisagreement")}</a></p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="stage">
+          <DeviceFrame src={divergenceShot} alt={t("watch.whereTraditionsDisagreeOn")} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · ON YOUR HOME SCREEN -->
+  <section class="sec surface-paper">
+    <div class="wrap story-grid story-grid--6-6">
+      <div class="story-text reveal">
+        <p class="eyebrow">{t("watch.onYourHomeScreen")}</p>
+        <h2 class="h-story">{t("watch.theWatchAtA")}</h2>
+        <p class="body-lg">{t("watch.theRaagNowWidget")}</p>
+        <p class="detail">{t("watch.siriWhatRaagIs")}</p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="wpair">
+          <figure class="widget widget--s"><Image src={wRaagLight} widths={[260, 520]} sizes="(min-width: 980px) 260px, 42vw" loading="lazy" decoding="async" alt={t("watch.raagNowWidgetSmall")} /></figure>
+          <figure class="widget widget--s"><Image src={wRaagDark} widths={[260, 520]} sizes="(min-width: 980px) 260px, 42vw" loading="lazy" decoding="async" alt={t("watch.raagNowWidgetSmall2")} /></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · CTA ROW -->
+  <section class="sec-thin surface-warm hair-top">
+    <div class="wrap cta-band reveal">
+      <h2 class="cta-h">{t("watch.seeTheWatchNow")}</h2>
+      <div class="cta-row">
+        <a class="btn" href="/raag-clock">{t("watch.openTheRaagClock")}</a>
+        <a class="btn ghost" href={learnHref(lang, "the-31-raags-and-the-watches-of-the-day")} data-astro-prefetch>{t("watch.the31RaagsAnd")}</a>
+      </div>
+    </div>
+  </section>
+
+  <MarketingFooter />
+
+  <style>
+    /* 1 · Hero band */
+    .watch-hero { margin-top: calc(-1 * var(--mnav-h)); padding: calc(var(--mnav-h) + clamp(40px, 7vw, 96px)) 0 clamp(56px, 8vw, 104px); }
+    .watch-hero h1 { font-size: clamp(40px, 6.4vw, 76px); margin: 0 0 20px; color: var(--ink); line-height: 1.02; }
+    .watch-hero .lead { color: var(--ink); max-width: 30ch; margin: 0; }
+    .watch-hero .stage :global(.device) { max-width: 320px; }
+    @media (max-width: 979px) { .watch-hero .stage :global(.device) { max-width: 240px; } }
+
+    /* 2 · Two-column body — prose left, dial right */
+    .watch-grid { display: grid; grid-template-columns: 1fr; gap: clamp(40px, 6vw, 72px); align-items: center; }
+    .watch-copy .lead { margin: 0 0 20px; }
+    .watch-copy .muted { max-width: 46ch; font-size: 16px; }
+    .watch-copy .muted + .muted { margin-top: 14px; }
+
+    /* Dial column — arc centred in its column, caption directly under it (no orphaned elements) */
+    .watch-dial { margin: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; }
+    .dial-now { margin: 0; max-width: 30ch; text-wrap: balance; }
+    .watch-arc { display: flex; justify-content: center; }
+    .dial-cap { max-width: 34ch; }
+    .dial-cap-label { margin: 0 0 12px; }
+    .raags { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px 12px; justify-content: center; }
+    /* Only the current watch's raags show; [hidden] must beat the flex rule (attribute specificity). */
+    .raags li { display: flex; flex-wrap: wrap; gap: 10px 12px; justify-content: center; }
+    .raags li[hidden] { display: none; }
+    .raag-chip { display: inline-flex; align-items: baseline; gap: 7px; padding: 7px 13px; border: 1px solid var(--line); border-radius: 999px; font-size: 15px; }
+    .raag-chip .gm { color: var(--ink); font-size: 16px; }
+    .raag-chip .rom { color: var(--ink-soft); font-size: 13px; }
+    .silence { font-family: var(--serif-display); font-size: 18px; color: var(--ink-soft); font-style: italic; }
+    @media (min-width: 900px) {
+      .watch-grid { grid-template-columns: 5fr 6fr; align-items: center; }
+      .watch-copy .muted { max-width: 44ch; }
+    }
+
+    /* 3 · Eight-pahar timeline */
+    .pline-box { overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding: 4px 2px 10px; }
+    .pline-box:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
+    .pline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(8, minmax(168px, 1fr)); gap: 10px; }
+    .pcell { scroll-snap-align: start; border: 1px solid var(--line); border-radius: 16px; background: var(--card); padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 4px; min-height: 212px; }
+    .pcell.night { background: var(--paper); }
+    .pcell.silent { background: transparent; border-style: dashed; border-color: var(--ink-soft); }
+    .pcell[data-now] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .pcell p { margin: 0; }
+    .pc-no { font-family: var(--serif-display); font-weight: 600; font-size: 28px; line-height: 1; color: var(--accent-text); font-variant-numeric: tabular-nums lining-nums; }
+    .pc-label { margin-top: 8px !important; font-size: 14px; font-weight: 650; color: var(--ink); }
+    .pc-range { font-size: 13.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+    .pc-raags { margin-top: 10px !important; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+    .pc-raags .gm { font-size: 16.5px; color: var(--ink); line-height: 1.6; }
+    .pc-silence { margin-top: 10px !important; font-family: var(--serif-display); font-style: italic; color: var(--ink-soft); font-size: 17px; }
+    @media (min-width: 1100px) { .pline-box { overflow: visible; } .pline { grid-template-columns: repeat(8, minmax(0, 1fr)); } .pcell { padding: 14px 12px 16px; } }
+
+    /* 4 · Fixed vs solar */
+    .story-text strong { color: var(--ink); font-weight: 650; }
+
+    /* 6 · Widgets */
+    .wpair { display: flex; gap: clamp(14px, 3vw, 28px); justify-content: center; align-items: flex-start; }
+    .wpair .widget { margin: 0; flex: 0 1 260px; }
+    .wpair .widget:nth-child(2) { margin-top: 40px; }
+    .wpair img { display: block; width: 100%; height: auto; filter: drop-shadow(0 18px 26px rgba(20,14,6,.16)); }
+
+    /* 7 · CTA band */
+    .cta-band { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 32px; }
+    .cta-h { font-size: clamp(24px, 3vw, 34px); margin: 0; color: var(--ink); }
+    .cta-band .cta-row { margin: 0; }
+  </style>
+</Marketing>

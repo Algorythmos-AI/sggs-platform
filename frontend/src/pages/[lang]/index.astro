@@ -1,0 +1,604 @@
+---
+import { Picture, Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { getCollection } from 'astro:content';
+import Marketing from '../../layouts/Marketing.astro';
+import MarketingNav from '../../components/MarketingNav.astro';
+import MarketingFooter from '../../components/MarketingFooter.astro';
+import DeviceFrame from '../../components/DeviceFrame.astro';
+import PhotoBand from '../../components/PhotoBand.astro';
+import Newsletter from '../../components/Newsletter.astro';
+import ContributeBand from '../../components/ContributeBand.astro';
+import JsonLd from '../../components/JsonLd.astro';
+import { SITE_URL, APP_STORE_URL, APP_STORE_LIVE, SUPPORT_EMAIL } from '../../site.ts';
+import { LEARN_SLUGS } from '../../routes';
+import { LEARN_COVERS } from '../../covers';
+import { FACTS, spell, VOICE_CENTURIES, CENTURY_VALUES } from '../../facts';
+import Figures from '../../components/Figures.astro';
+import verse from '../../generated/landing-verse.json';
+import heroImg from '../../assets/landing/harmandir-sahib-sunset.jpg';
+import nightPhoto from '../../assets/landing/unsplash-salilkoli-harmandir-sahib-night.jpg';
+import readerLight from '../../assets/app/iphone-reader-light.png';
+import readerDark from '../../assets/app/iphone-reader-dark.png';
+import ipadReader from '../../assets/app/ipad-reader-landscape-light.png';
+import searchRoman from '../../assets/app/iphone-search-roman-light.png';
+import searchFirst from '../../assets/app/iphone-search-first-letters-light.png';
+import ipadNitnem from '../../assets/app/ipad-nitnem-landscape-light.png';
+import baniJapji from '../../assets/app/iphone-bani-japji-light.png';
+import clockDark from '../../assets/app/iphone-clock-dark.png';
+import wRaagLight from '../../assets/app/widget-raagnow-small-light.png';
+import wRaagDark from '../../assets/app/widget-raagnow-small-dark.png';
+import wHukam from '../../assets/app/widget-hukam-medium-light.png';
+import wNitnem from '../../assets/app/widget-nitnem-medium-light.png';
+import laCard from '../../assets/app/iphone-live-activity-card.png';
+import aboutShot from '../../assets/app/iphone-about-light.png';
+import vaarsShot from '../../assets/app/iphone-vaars-light.png';
+import indexShot from '../../assets/app/iphone-index-light.png';
+import formsShot from '../../assets/app/iphone-index-forms-light.png';
+import voiceShot from '../../assets/app/iphone-voice-m9-light.png';
+import compareShot from '../../assets/app/iphone-compare-light.png';
+import { localeStaticPaths, type Locale } from "../../i18n/locales";
+import { localizeHref } from "../../i18n/paths";
+import { fmtNumber } from "../../i18n/format";
+import { ENABLED_LOCALES, LOCALES } from "../../i18n/locales";
+import { learnHref, articleLangFor } from "../../i18n/content";
+import { useT } from "../../i18n/t";
+
+export const getStaticPaths = localeStaticPaths;
+const lang = Astro.params.lang as Locale;
+const L = (href: string) => localizeHref(href, lang);
+// Figures in the page's language: "1,430" (en), "1 430" (fr).
+const fmt = (n: number) => fmtNumber(lang, n);
+const { t } = useT(lang);
+
+// Explore tiles: the app's own 1.4.9 screenshots (src/assets/app, provenance in SHOTS.md). The first
+// is drawn tall. Themes and Constellation have no verified 1.4.9 shot yet, so they stay copy only.
+const exploreTiles: { src: ImageMetadata; alt: string; name: string; caption: string }[] = [
+  { src: vaarsShot, name: t("home.explore.tiles.vaars.name"),
+    caption: t("home.explore.tiles.vaars.caption", { vaars: String(FACTS.vaars) }),
+    alt: t("home.explore.tiles.vaars.alt") },
+  { src: indexShot, name: t("home.explore.tiles.index.name"),
+    caption: t("home.explore.tiles.index.caption", { angs: fmt(FACTS.angs) }),
+    alt: t("home.explore.tiles.index.alt") },
+  { src: formsShot, name: t("home.explore.tiles.forms.name"),
+    caption: t("home.explore.tiles.forms.caption"),
+    alt: t("home.explore.tiles.forms.alt") },
+  { src: voiceShot, name: t("home.explore.tiles.voice.name"),
+    caption: t("home.explore.tiles.voice.caption"),
+    alt: t("home.explore.tiles.voice.alt") },
+  { src: compareShot, name: t("home.explore.tiles.compare.name"),
+    caption: t("home.explore.tiles.compare.caption"),
+    alt: t("home.explore.tiles.compare.alt") },
+];
+
+const desc = t("home.description");
+
+// The hero artwork is the LCP. Its preload is generated with the SAME options as the rendered
+// <Picture> (src, widths, quality, AVIF) so the browser reuses the preloaded variant instead of
+// fetching a second one (gate: preload imagesrcset ⊆ the hero's AVIF srcset).
+const HERO_WIDTHS = [640, 960, 1280, 1600, 1920];
+const HERO_QUALITY = 62;
+const heroAvif = await getImage({ src: heroImg, format: 'avif', widths: HERO_WIDTHS, quality: HERO_QUALITY });
+
+// Proof strip — the corpus facts, generated from the DB (src/facts.ts). The "0 network calls"
+// claim is scoped to the APP: the website itself runs privacy-scoped analytics on gurbanisoul.com.
+// `count` marks the figures that count up once on first view (landing.ts wireCountUp); the real
+// figure is always the rendered text.
+const proof: { n: string; l: string; count?: number }[] = [
+  { n: fmt(FACTS.angs), l: t("home.proof.angs"), count: FACTS.angs },
+  { n: fmt(FACTS.lines), l: t("home.proof.lines"), count: FACTS.lines },
+  { n: fmt(FACTS.characters), l: t("home.proof.characters"), count: FACTS.characters },
+  { n: "0", l: t("home.proof.networkCalls") },
+  { n: t("home.proof.none"), l: t("home.proof.dataCollected") },
+];
+
+// Learn cards: the first three curated articles (LEARN_SLUGS order), each with its photo cover.
+const order = new Map(LEARN_SLUGS.map((s, i) => [s, i]));
+const learnTop = (await getCollection('learn'))
+  .filter((a) => !a.data.draft && LEARN_COVERS[a.id])
+  .sort((a, b) => (order.get(a.id) ?? 999) - (order.get(b.id) ?? 999))
+  .slice(0, 3);
+
+// --- Structured data (JSON-LD) — emitted via <JsonLd>, which escapes "<". ---
+// One Organization node, referenced by @id from WebSite and SoftwareApplication so search engines
+// resolve them to the same publisher. installUrl/url are added only once the app is live (APP_STORE_LIVE).
+const orgId = `${SITE_URL}/#org`;
+const organization = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": orgId,
+  name: "Algorythmos Pty Ltd",
+  url: SITE_URL,
+  logo: `${SITE_URL}/icons/icon-512.png`,
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer support",
+    email: SUPPORT_EMAIL,
+  },
+};
+const website = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  url: SITE_URL,
+  name: "Gurbani Soul",
+  publisher: { "@id": orgId },
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${SITE_URL}/search?q={search_term_string}`,
+    "query-input": "required name=search_term_string",
+  },
+};
+const softwareApplication = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Gurbani Soul",
+  applicationCategory: "ReferenceApplication",
+  inLanguage: "en",            // the app itself is English, on every language's page
+  operatingSystem: "iOS",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  publisher: { "@id": orgId },
+  ...(APP_STORE_LIVE ? { url: APP_STORE_URL, installUrl: APP_STORE_URL } : {}),
+};
+---
+<Marketing title={t("home.title")} description={desc} path={L("/")}>
+  <JsonLd slot="head" data={organization} />
+  <JsonLd slot="head" data={website} />
+  <JsonLd slot="head" data={softwareApplication} />
+  <link slot="head" rel="preload" as="image" type="image/avif"
+    imagesrcset={heroAvif.srcSet.attribute} imagesizes="100vw" />
+
+  <!-- Forward legacy /?q=… search bookmarks to the Knowledge Base search page (first load; the
+       client-router case is handled in landing.ts astro:after-swap). -->
+  <script is:inline>
+    (function () {
+      try {
+        var p = new URLSearchParams(location.search);
+        if (p.has('q')) location.replace('/search' + location.search);
+      } catch (e) {}
+    })();
+  </script>
+  {ENABLED_LOCALES.length > 1 && (
+    <script is:inline define:vars={{ enabled: ENABLED_LOCALES, here: lang }}>
+      // The bare root sent this visitor here by browser language (vercel.json). If they chose
+      // another language on this site before (localStorage "gs_lang"), open that one instead —
+      // only right after that redirect, so a link or a back-button visit is never redirected.
+      (function () {
+        try {
+          var nav = performance.getEntriesByType("navigation")[0];
+          if (!nav || !nav.redirectCount) return;
+          var pref = localStorage.getItem("gs_lang");
+          if (pref && pref !== here && enabled.indexOf(pref) !== -1) location.replace("/" + pref + location.search + location.hash);
+        } catch (e) {}
+      })();
+    </script>
+  )}
+
+  <MarketingNav />
+
+  <!-- 1 · HERO (dark) — the artwork is the LCP (eager + fetchpriority=high + mirrored preload) -->
+  <section class="hero" id="top" data-theme="dark">
+    <div class="hero-media">
+      <Picture src={heroImg} formats={['avif','webp']} widths={HERO_WIDTHS}
+        sizes="100vw" quality={HERO_QUALITY} loading="eager" fetchpriority="high"
+        alt={t("home.hero.imageAlt")}
+        pictureAttributes={{ class: 'hero-pic' }} />
+      <div class="hero-scrim"></div>
+    </div>
+    <div class="wrap hero-in">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow hero-rise" style="--i:0">{t("home.hero.eyebrow")}</p>
+          <h1 class="hero-rise" style="--i:1">Gurbani Soul</h1>
+          <p class="hero-lede hero-rise" style="--i:2">{t("home.hero.lede")}</p>
+          <div class="hero-cta hero-rise" style="--i:3">
+            {APP_STORE_LIVE
+              ? <a class="pill" href={APP_STORE_URL} aria-label={t("nav.getAppLabel")}><svg class="apple" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.9-1.1-2.9-4.3zM13.9 5.3c.7-.9 1.2-2 1-3.2-1 0-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.1 1.2.1 2.4-.6 3.1-1.5z"/></svg>{t("home.hero.download")}</a>
+              : <span class="pill soon" data-app-store="coming-soon">{t("home.hero.comingSoon")}</span>}
+            <a class="hero-ghost" href="/search">{t("home.hero.openKnowledgeBase")}</a>
+          </div>
+          <ul class="hero-chips hero-rise" style="--i:4" aria-label={t("home.hero.chipsLabel")}>
+            <li>{t("home.hero.chipOffline")}</li><li>{t("home.hero.chipNoAccount")}</li><li>{t("home.hero.chipNoTracking")}</li>
+          </ul>
+        </div>
+        <div class="hero-device">
+          <DeviceFrame src={readerLight} eager alt={t("home.hero.deviceAlt")} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · PROOF STRIP -->
+  <section class="sec-thin surface-paper proof-sec" aria-label={t("home.proof.label")}>
+    <div class="wrap">
+      <ul class="proof reveal">
+        {proof.map((p) => <li><strong data-count={p.count}>{p.n}</strong><span>{p.l}</span></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <!-- 3 · THE VERSE (the only Gurmukhi verse on Home — byte-gated against the DB) -->
+  <section class="verse-band">
+    <!-- The Gurmukhi never moves: only the rule draws in and the citation fades in after it. -->
+    <div class="wrap verse-in">
+      <hr class="gold-rule reveal draw" aria-hidden="true" />
+      <p class="verse gm" lang="pa">{verse.gurmukhi}</p>
+      <p class="cite reveal" data-delay="1">{t("home.verse.cite", { ang: String(verse.ang) })}</p>
+      <p class="verse-note reveal" data-delay="2">{t("home.verse.note")}</p>
+    </div>
+  </section>
+
+  <!-- 4 · READER -->
+  <section class="sec surface-paper" id="story-read" data-chapter="read">
+    <div class="wrap story-grid">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>01</span> {t("home.read.chapter")}</p>
+        <h2 class="h-story">{t("home.read.title")}</h2>
+        <p class="body-lg">{t("home.read.body", { angs: fmt(FACTS.angs) })}</p>
+        <ul class="factrail detail-row">
+          <li>{t("home.read.facts.santLipi")}</li><li>{t("home.read.facts.saroop")}</li><li>{t("home.read.facts.sehaj")}</li><li>{t("home.read.facts.accents")}</li><li>{t("home.read.facts.night")}</li><li>{t("home.read.facts.ipad")}</li>
+        </ul>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="stage stage--ipad">
+          <DeviceFrame kind="ipad" src={ipadReader} alt={t("home.read.ipadAlt")} />
+          <div class="overlap media-secondary">
+            <DeviceFrame src={readerDark} sizes="200px" alt={t("home.read.phoneAlt")} />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · SEARCH -->
+  <section class="sec surface-paper hair-top" id="story-search" data-chapter="search">
+    <div class="wrap story-grid story-grid--6-6 story--flip">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>02</span> {t("home.search.chapter")}</p>
+        <h2 class="h-story">{t("home.search.title")}</h2>
+        <p class="body-lg">{t("home.search.body")}</p>
+        <ul class="factrail detail-row">
+          <li>{t("home.search.facts.auto")}</li><li>{t("home.search.facts.gurmukhi")}</li><li>{t("home.search.facts.roman")}</li><li>{t("home.search.facts.firstLetters")}</li><li>{t("home.search.facts.theme")}</li><li>{t("home.search.facts.verify")}</li>
+        </ul>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="pair">
+          <DeviceFrame src={searchRoman} alt={t("home.search.romanAlt")} />
+          <DeviceFrame src={searchFirst} alt={t("home.search.firstAlt")} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · PHOTO DIVIDER (dark scope; no Gurmukhi beside it) -->
+  <PhotoBand src={nightPhoto} position="center 60%"
+    alt={t("home.photoBand.alt")}>
+    <p class="h-statement">{t("home.photoBand.statement")}</p>
+    <p class="pb-sub">{t("home.photoBand.sub")}</p>
+  </PhotoBand>
+
+  <!-- 7 · NITNEM -->
+  <section class="sec surface-warm" id="story-nitnem" data-chapter="nitnem">
+    <div class="wrap story-grid">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>03</span> {t("home.nitnem.chapter")}</p>
+        <h2 class="h-story">{t("home.nitnem.title")}</h2>
+        <p class="body-lg">{t("home.nitnem.body")}</p>
+        <p class="detail">{t("home.nitnem.detail")}</p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="stage stage--ipad">
+          <DeviceFrame kind="ipad" src={ipadNitnem} alt={t("home.nitnem.ipadAlt")} />
+          <div class="overlap media-secondary">
+            <DeviceFrame src={baniJapji} sizes="200px" alt={t("home.nitnem.phoneAlt")} />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · RAAG CLOCK (dark) — a static screenshot only; the live dial lives on /watch -->
+  <section class="sec surface-ink" id="story-watch" data-theme="dark" data-chapter="watch">
+    <div class="wrap story-grid story-grid--7-5 story--flip">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>04</span> {t("home.watch.chapter")}</p>
+        <h2 class="h-story">{t("home.watch.title", { raagsWord: spell(FACTS.raags), raagsN: String(FACTS.raags) })}</h2>
+        <p class="body-lg">{t("home.watch.body")}</p>
+        <p class="cta-row"><a class="btn ghost" href={L("/watch")} data-astro-prefetch>{t("home.watch.cta")}</a></p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="stage wash">
+          <DeviceFrame src={clockDark} alt={t("home.watch.alt")} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · WIDGETS + LIVE ACTIVITY -->
+  <section class="sec surface-paper" id="story-widgets" data-chapter="widgets">
+    <div class="wrap story-grid story-grid--4-8">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>05</span> {t("home.widgets.chapter")}</p>
+        <h2 class="h-story">{t("home.widgets.title")}</h2>
+        <p class="body-lg">{t("home.widgets.body")}</p>
+        <p class="detail">{t("home.widgets.detail")}</p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="widgets">
+          <div class="wrow">
+            <figure class="widget widget--s"><Image src={wRaagLight} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt={t("home.widgets.raagLightAlt")} /></figure>
+            <figure class="widget widget--m"><Image src={wHukam} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt={t("home.widgets.hukamAlt")} /></figure>
+          </div>
+          <div class="wrow wrow--rev">
+            <figure class="widget widget--m"><Image src={wNitnem} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt={t("home.widgets.nitnemAlt")} /></figure>
+            <figure class="widget widget--s"><Image src={wRaagDark} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt={t("home.widgets.raagDarkAlt")} /></figure>
+          </div>
+          <figure class="la">
+            <div class="la-card"><Image src={laCard} widths={[450, 900]} sizes="(min-width: 980px) 740px, 92vw" loading="lazy" decoding="async" alt={t("home.widgets.liveActivityAlt")} /></div>
+            <figcaption>{t("home.widgets.liveActivityCaption")}</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · EXPLORE — the 1.4.9 ways in, counted from the data (exploreTiles fill with app shots) -->
+  <section class="sec surface-warm" id="story-explore" data-chapter="explore">
+    <div class="wrap">
+      <div class="story-head reveal">
+        <p class="chapter-no"><span>06</span> {t("home.explore.chapter")}</p>
+        <h2 class="h-story">{t("home.explore.title")}</h2>
+        <p class="body-lg">{t("home.explore.body", { vaars: String(FACTS.vaars), themes: String(FACTS.themes), voices: String(FACTS.voices), centuries: VOICE_CENTURIES, ...CENTURY_VALUES })}</p>
+        <p class="cta-row"><a class="link-more" href={L("/features#vaars")} data-astro-prefetch>{t("home.explore.cta")}</a></p>
+      </div>
+      {exploreTiles.length > 0
+        ? <div class="mosaic mosaic--3 reveal" data-delay="1">
+            {exploreTiles.map((t, i) => (
+              <figure class:list={["tile", { "tile--tall": i === 0 }]}>
+                <div class="tile-img"><Image src={t.src} widths={[400, 800]} sizes={i === 0 ? "(min-width: 980px) 380px, 92vw" : "(min-width: 980px) 380px, 46vw"} loading="lazy" decoding="async" alt={t.alt} /></div>
+                <figcaption><strong>{t.name}</strong>{t.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
+        : <div class="reveal" data-delay="1"><Figures label={t("home.explore.figuresLabel")} items={[
+            { n: fmt(FACTS.raags), l: t("home.explore.figures.raags") },
+            { n: fmt(FACTS.vaars), l: t("home.explore.figures.vaars") },
+            { n: fmt(FACTS.themes), l: t("home.explore.figures.themes") },
+            { n: fmt(FACTS.voices), l: t("home.explore.figures.voices") },
+          ]} /></div>}
+    </div>
+  </section>
+
+  <!-- 11 · VERBATIM BY CONSTRUCTION (dark) -->
+  <section class="sec surface-ink" id="story-verbatim" data-theme="dark" data-chapter="verbatim">
+    <div class="wrap story-grid">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>07</span> {t("home.verbatim.chapter")}</p>
+        <h2 class="h-statement">{t("home.verbatim.statement")}</h2>
+        <p class="body-lg">{t("home.verbatim.body")}</p>
+        <p class="never">{t("home.verbatim.never")}</p>
+      </div>
+      <div class="story-media">
+        <ol class="steps">
+          <li class="reveal"><span class="n" aria-hidden="true">1</span><h3>{t("home.verbatim.reconciledTitle")}</h3><p>{t("home.verbatim.reconciledBody", { characters: fmt(FACTS.characters) })}</p></li>
+          <li class="reveal" data-delay="1"><span class="n" aria-hidden="true">2</span><h3>{t("home.verbatim.sealedTitle")}</h3><p>{t("home.verbatim.sealedBody")}</p></li>
+          <li class="reveal" data-delay="2"><span class="n" aria-hidden="true">3</span><h3>{t("home.verbatim.checkedTitle")}</h3><p>{t("home.verbatim.checkedBody")}</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 · PRIVATE BY DESIGN -->
+  <section class="sec surface-paper" id="story-private" data-chapter="private">
+    <div class="wrap story-grid story-grid--7-5">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>08</span> {t("home.private.chapter")}</p>
+        <h2 class="h-statement">{t("home.private.statement")}</h2>
+        <p class="body-lg">{t("home.private.body")}</p>
+        <ul class="factrail detail-row">
+          <li>{t("home.private.facts.accounts")}</li><li>{t("home.private.facts.network")}</li><li>{t("home.private.facts.tracking")}</li><li>{t("home.private.facts.dataNotCollected")}</li>
+        </ul>
+        <p class="cta-row"><a class="link-more" href={L("/privacy")}>{t("home.private.cta")}</a></p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="stage">
+          <DeviceFrame src={aboutShot} alt={t("home.private.alt")} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 · LEARN + KNOWLEDGE BASE BRIDGE -->
+  <section class="sec surface-paper hair-top" id="story-learn">
+    <div class="wrap">
+      <div class="story-head reveal">
+        <p class="eyebrow">{t("home.learn.eyebrow")}</p>
+        <h2 class="h-story">{t("home.learn.title")}</h2>
+        <p class="body-lg">{t("home.learn.body")}</p>
+      </div>
+      <ul class="cards">
+        {learnTop.map((a, i) => (
+          <li class="card reveal" data-delay={String(i)}>
+            <a href={learnHref(lang, a.id)} hreflang={articleLangFor(lang, a.id) !== lang ? "en" : undefined}>
+              <div class="cover">
+                <Image src={LEARN_COVERS[a.id].src} width={800} widths={[480, 800]} sizes="(min-width: 760px) 380px, 92vw"
+                  quality={60} loading="lazy" decoding="async" alt={LEARN_COVERS[a.id].alt} />
+              </div>
+              <div class="card-body" lang={articleLangFor(lang, a.id) !== lang ? "en" : undefined}>
+                {articleLangFor(lang, a.id) !== lang && <span class="card-lang" lang={LOCALES[lang].htmlLang}>{t("learnArticle.inEnglish")}</span>}
+                <h3>{a.data.title}</h3>
+                <p class="card-desc">{a.data.description}</p>
+                <span class="card-more" aria-hidden="true">{t("home.learn.readMore")}</span>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="all-link reveal"><a class="link-more" href={L("/learn")} data-astro-prefetch>{t("home.learn.allArticles")}</a></p>
+
+      <div class="kb-bridge story-grid story-grid--6-6">
+        <div class="story-text reveal">
+          <h3 class="kb-h">{t("home.learn.kbTitle")}</h3>
+          <p class="body-lg">{t("home.learn.kbBody")}</p>
+          <p class="cta-row"><a class="btn ghost" href="/search">{t("home.learn.kbCta")}</a></p>
+        </div>
+        <div class="story-media reveal" data-delay="1">
+          <div class="kbmock" aria-hidden="true">
+            <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="addr">gurbanisoul.com/search</span></div>
+            <div class="body">
+              <div class="search"><span class="q">{t("home.learn.kbMockSearch")}</span><span class="go">{t("home.learn.kbMockGo")}</span></div>
+              <div class="rows"><div class="r"></div><div class="r mid"></div><div class="r short"></div><div class="r"></div><div class="r mid"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13b · KEEP IT FREE — quiet invitation to /contribute (renders nothing when contributions are off) -->
+  <ContributeBand />
+
+  <!-- 14 · DOWNLOAD BAND (dark) — the artwork again, faint, behind a warm-ink scrim -->
+  <section class="dl-band surface-ink" id="download" data-theme="dark">
+    <div class="dl-art" aria-hidden="true">
+      <Picture src={heroImg} formats={['avif','webp']} widths={HERO_WIDTHS} sizes="100vw"
+        quality={HERO_QUALITY} loading="lazy" decoding="async"
+        alt={t("home.download.imageAlt")} />
+    </div>
+    <div class="wrap dl-in reveal">
+      <hr class="gold-rule draw" aria-hidden="true" />
+      <h2 class="h-statement">{t("home.download.statement")}</h2>
+      <p class="body-lg dl-body">{t("home.download.body")}</p>
+      <div class="cta-row dl-cta">
+        {APP_STORE_LIVE
+          ? <a class="btn" href={APP_STORE_URL} aria-label={t("nav.getAppLabel")}>{t("home.download.store")}</a>
+          : <span class="pill soon dl-soon" data-app-store="coming-soon-foot">{t("home.download.comingSoon")}</span>}
+        <a class="btn ghost" href={L("/features")} data-astro-prefetch>{t("home.download.features")}</a>
+      </div>
+      <p class="dl-fine">{t("home.download.fine")}</p>
+    </div>
+  </section>
+
+  <!-- Launch notice — env-gated; renders nothing unless PUBLIC_NEWSLETTER_FORM_URL is set -->
+  <Newsletter />
+
+  <MarketingFooter />
+
+  <style>
+    #top { scroll-margin-top: 76px; }
+    [data-chapter] { scroll-margin-top: 72px; }
+
+    /* 1 · Hero */
+    .hero { position: relative; min-height: min(94svh, 880px); display: flex; align-items: center;
+      overflow: clip; margin-top: calc(-1 * var(--mnav-h)); background: #17110a; }
+    .hero-media, .hero-media :global(.hero-pic), .hero-media :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .hero-media { background: #17110a; }
+    .hero-media :global(img) { object-fit: cover; object-position: center 46%; }
+    /* The copy must read at 4.5:1 over the brightest sky and the lit dome behind it (measured on the
+       rendered page, not assumed): a stronger pool behind the text column, and below 980px — where
+       the copy spans the full width — an even veil. */
+    .hero-scrim { position: absolute; inset: 0;
+      background:
+        radial-gradient(110% 85% at 20% 50%, rgba(15,10,5,.70) 0%, rgba(15,10,5,.42) 44%, transparent 76%),
+        linear-gradient(180deg, rgba(15,10,5,.50) 0%, rgba(15,10,5,.30) 34%, rgba(15,10,5,.74) 100%); }
+    @media (max-width: 979px) {
+      .hero-scrim { background: linear-gradient(180deg, rgba(15,10,5,.64) 0%, rgba(15,10,5,.60) 55%, rgba(15,10,5,.80) 100%); }
+    }
+    .hero-in { position: relative; width: 100%; padding-top: calc(var(--mnav-h) + 56px); padding-bottom: 96px; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; }
+    .hero-copy { color: #fff; min-width: 0; }
+    .hero-copy .eyebrow { color: #f4d38a; }
+    .hero-copy h1 { font-size: clamp(46px, 7.2vw, 112px); margin: 0 0 18px; color: #fff; line-height: 1; letter-spacing: -.025em; }
+    .hero-lede { font-family: var(--serif-display); font-size: clamp(18px, 2.2vw, 26px); line-height: 1.4;
+      max-width: 30ch; margin: 0 0 30px; color: #f3ead9; text-wrap: balance; }
+    .hero-cta { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; }
+    .hero-cta .pill { height: 48px; padding: 0 24px; font-size: 16px; }
+    .hero-cta .pill .apple { width: 18px; height: 18px; margin-top: -2px; }
+    .hero-cta .pill.soon { color: #fff; border-color: rgba(255,255,255,.6); }
+    .hero-cta a.hero-ghost { color: #fff; text-decoration: underline; text-decoration-color: rgba(255,255,255,.5); text-underline-offset: 6px;
+      font-weight: 600; font-size: 15.5px; display: inline-flex; align-items: center; min-height: 44px; }
+    .hero-cta a.hero-ghost:hover { text-decoration-color: #fff; }
+    .hero-chips { list-style: none; margin: 26px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+    .hero-chips li { font-size: 13.5px; line-height: 1; color: #efe5d2; padding: 7px 12px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.24); background: rgba(255,255,255,.07); }
+    /* The Reader phone: beside the copy from 980px; on phones it peeks up from the hero's foot,
+       cropped by the hero (its image is eager either way, so this costs nothing). */
+    .hero-device { display: flex; justify-content: center; position: relative; }
+    .hero-device::before { content: ""; position: absolute; inset: -8% -6%; z-index: 0; pointer-events: none;
+      background: radial-gradient(60% 55% at 50% 42%, rgba(255,188,13,.14), transparent 70%); }
+    .hero-device :global(.device-fig) { position: relative; z-index: 1; }
+    .hero-device :global(.device) { transform: rotate(-3deg); }
+    @media (max-width: 979px) {
+      .hero { align-items: flex-start; }
+      .hero-in { padding-bottom: 0; }
+      .hero-device { margin: 12px 0 calc(min(240px, 62vw) * -1.05); }
+      .hero-device :global(.device-fig) { width: min(240px, 62vw); }
+      .hero-device :global(.device) { max-width: none; }
+    }
+    @media (min-width: 980px) {
+      .hero-grid { grid-template-columns: 1.05fr 0.95fr; gap: 56px; }
+      .hero-device :global(.device) { width: min(340px, 90%); margin: 0 auto; }
+    }
+    @media (min-width: 1200px) { .hero-device :global(.device) { width: 368px; } }
+    @media (min-width: 1800px) { .hero-device :global(.device) { width: 400px; max-width: 400px; } }
+    /* Entrance (motion-safe): the copy rises 12px in a stagger with opacity held at 1 (so the LCP is
+       never delayed); the phone settles from -8° and 40px lower, then one sheen crosses the glass. */
+    @media (prefers-reduced-motion: no-preference) {
+      .hero-rise { animation: gs-hero-rise .7s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 80ms); }
+      .hero-device :global(.device-fig) { animation: gs-phone-in .9s cubic-bezier(.16,1,.3,1) .15s both; }
+      .hero-device :global(.screen)::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+        background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.32) 50%, transparent 65%);
+        transform: translateX(-120%); animation: gs-sheen 1.4s ease 1s 1 both; }
+    }
+    /* The photo drifts slower than the page (up to 8% of the viewport) — a scroll-driven animation,
+       so it runs on the compositor from the first paint (no script, no late re-raster). Browsers
+       without scroll timelines, and reduced motion, keep it still. */
+    @supports (animation-timeline: scroll()) {
+      @media (prefers-reduced-motion: no-preference) {
+        .hero-media :global(img) { animation: gs-hero-photo linear both; animation-timeline: scroll(root block); animation-range: 0 100vh; }
+      }
+    }
+    @keyframes gs-hero-photo { from { transform: scale(1.06); } to { transform: translateY(8vh) scale(1.06); } }
+    @keyframes gs-hero-rise { from { transform: translateY(12px); } }
+    @keyframes gs-phone-in { from { opacity: 0; transform: translateY(40px) rotate(-5deg); } }
+    @keyframes gs-sheen { to { transform: translateX(120%); } }
+
+    /* 2 · Proof strip */
+    .proof-sec { padding-bottom: 0; }
+
+    /* 3 · Verse */
+    .verse-band { margin-top: var(--sec-thin); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--paper-2); }
+    .verse-in { padding: clamp(56px, 8vw, 96px) 20px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+    .gold-rule { margin: 0 0 28px; }
+    .verse { font-size: clamp(21px, 3.2vw, 31px); line-height: 1.95; color: var(--ink); margin: 0; max-width: 24ch; }
+    .cite { margin: 20px 0 0; color: var(--accent-text); font-weight: 600; font-size: 14px; letter-spacing: .01em; }
+    .verse-note { margin: 10px auto 0; max-width: 58ch; color: var(--ink-soft); font-size: 14.5px; }
+
+    /* 6 · Photo divider */
+    .pb-sub { margin: 0 auto; max-width: 46ch; color: var(--ink-soft); font-size: clamp(16px, 1.8vw, 19px); line-height: 1.55; }
+    :global(.photo-band) .h-statement { margin-bottom: 14px; }
+
+    /* 11 · Verbatim */
+    .never { margin: 22px 0 0; font-family: var(--serif-display); font-size: clamp(20px, 2.2vw, 24px); font-weight: 600; color: var(--accent-text); }
+
+    /* 12 · Private */
+    #story-private .stage :global(.device) { max-width: 280px; }
+
+    /* 13 · Learn + KB */
+    .all-link { margin: 18px 0 0; }
+    .kb-bridge { margin-top: clamp(48px, 7vw, 88px); padding-top: clamp(40px, 6vw, 72px); border-top: 1px solid var(--line); }
+    .kb-h { font-size: clamp(24px, 3vw, 34px); margin: 0 0 12px; color: var(--ink); }
+
+    /* 14 · Download band */
+    .dl-band { position: relative; overflow: clip; text-align: center; padding: var(--sec) 0; }
+    .dl-art, .dl-art :global(picture), .dl-art :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .dl-art :global(img) { object-fit: cover; object-position: center 46%; opacity: .18; }
+    /* warm-ink scrim over the faint artwork: keeps the centred statement ≥4.5:1 over the sun */
+    .dl-art::after { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 80% at 50% 50%, rgba(23,20,18,.6), rgba(23,20,18,.15) 80%); }
+    .dl-in { position: relative; display: flex; flex-direction: column; align-items: center; }
+    .dl-in .h-statement { max-width: 18ch; }
+    .dl-body { margin-left: auto; margin-right: auto; max-width: 48ch; }
+    .dl-cta { justify-content: center; }
+    .dl-soon { color: var(--ink); border-color: var(--line); min-height: 44px; }
+    .dl-fine { margin: 20px 0 0; color: var(--ink-soft); font-size: 14px; }
+  </style>
+</Marketing>

@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 // place and the image is lazy; and the footer credits on every marketing page name each Unsplash
 // photographer with a link to their https://unsplash.com/@<handle> profile — read from the page
 // itself, so the check follows IMAGE_CREDITS without duplicating it here.
-const PAGES = ['/', '/features', '/watch', '/learn'];
+const PAGES = ['/en', '/en/features', '/en/watch', '/en/learn'];
 
 for (const path of PAGES) {
   test(`photo bands on ${path} have alt text, load lazily and are credited`, async ({ page }) => {

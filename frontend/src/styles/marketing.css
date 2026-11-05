@@ -552,3 +552,53 @@ html.js-motion .reveal.in .draw { transform: none; transition: transform .6s cub
 
 /* KB mock: the decorative query field is a span (no form control, nothing to label). */
 .kbmock .search .q { flex: 1; font-size: 15px; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft); }
+
+/* "In English": an article that is not yet translated, linked from another language's page. */
+.card-lang { display: inline-block; margin: 0 0 8px; padding: 2px 9px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0; color: var(--ink-soft); }
+
+/* Language switcher (components/LanguageSwitcher.astro): drawn only while two or more languages are
+   enabled. Each name is in its own script; no flags. */
+.lang-sw { position: relative; }
+.lang-btn { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border-radius: 999px;
+  border: 1px solid var(--nav-edge, var(--line)); background: transparent; color: inherit; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.lang-btn svg { width: 12px; height: 12px; }
+.lang-btn:hover { background: var(--nav-tint, transparent); }
+.lang-btn:focus-visible, .lang-list a:focus-visible, .lang-row a:focus-visible, .lang-foot a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lang-list { position: absolute; right: 0; top: calc(100% + 8px); min-width: 168px; margin: 0; padding: 6px; list-style: none;
+  background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 18px 40px -18px rgba(20,14,6,.35); z-index: 60; }
+.lang-list a { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; color: var(--ink); text-decoration: none; font-size: 15px; }
+.lang-list a:hover { background: var(--paper-2); }
+.lang-list a[aria-current]::after, .lang-foot a[aria-current]::after { content: "✓"; margin-left: auto; padding-left: 12px; color: var(--accent-text); }
+.lang-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; padding: 4px; margin: 12px 0; border: 1px solid var(--line); border-radius: 999px; }
+.lang-row a { display: grid; place-items: center; min-height: 44px; border-radius: 999px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 15px; }
+.lang-row a[aria-current] { background: var(--paper-2); box-shadow: inset 0 0 0 1px var(--accent); }
+.lang-foot { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.lang-foot a { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent-text); text-decoration: none; font-size: 14px; }
+@media (max-width: 1023px) { .mnav .mnav-right .lang-sw { display: none; } }   /* phones: the menu sheet's row */
+.lang-code { display: none; }
+@media (max-width: 1279px) {
+  /* Small laptops: the switcher shows its code (its accessible name still reads the language), and
+     the longer French labels sit a little tighter — measured at 1024–1279 px (no overlap). */
+  .lang-btn .lang-name { display: none; }
+  .lang-btn .lang-code { display: inline; letter-spacing: .04em; }
+  .lang-btn { padding: 0 10px; }
+  :lang(fr) .mnav nav.mnav-links a { padding: 0 7px; font-size: 13.5px; }
+}
+
+/* Punjabi interface text (docs/website/translation-style-guide.md). Interface Gurmukhi is set in the
+   reader's system Gurmukhi face — never in Sant Lipi, which is kept for scripture (.gm / .verse), so
+   interface words can never be mistaken for Gurbani. Gurmukhi needs room above and below the line,
+   has no italics (emphasis is weight), and spacing letters apart breaks the headline bar. */
+:root:lang(pa) {
+  --gm-ui: "Noto Sans Gurmukhi", "Gurmukhi MN", "Mukta Mahee", "Raavi", "Nirmala UI", sans-serif;
+}
+:lang(pa) body { font-family: var(--sans), var(--gm-ui); line-height: 1.7; }
+:lang(pa) :is(h1, h2, h3, .h-story, .h-statement, .eyebrow, .chapter-no, .mfoot-tag, .lede, .hero-lede) {
+  font-family: var(--serif-display), var(--gm-ui); letter-spacing: 0; text-transform: none; line-height: 1.35;
+}
+/* Spacing letters apart breaks the headline bar (and conjuncts) of Gurmukhi, so it is never applied
+   on a Punjabi page — the only !important here: page-scoped styles must not win this one. */
+:lang(pa) * { letter-spacing: 0 !important; }
+:lang(pa) :is(em, i) { font-style: normal; font-weight: 600; }
+:lang(pa) * { font-synthesis: none; }
+:lang(pa) :is(.gm, .verse) { font-family: var(--gm); }        /* scripture keeps Sant Lipi */

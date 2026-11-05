@@ -18,7 +18,7 @@ test.describe('desktop bar', () => {
   for (const w of [1024, 1280, 1440, 2000]) {
     test(`every item shares one centre line and the row never overflows at ${w}px`, async ({ page }) => {
       await page.setViewportSize({ width: w, height: 900 });
-      await page.goto('/');
+      await page.goto('/en');
       const items = await centres(page);
       expect(items.length).toBeGreaterThanOrEqual(7);
       const ys = items.map((i) => i.y);
@@ -32,7 +32,7 @@ test.describe('desktop bar', () => {
 
   test('scrolling turns on the capsule without moving or resizing anything', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto('/');
+    await page.goto('/en');
     const box = () => page.locator('#mnav .mnav-in').boundingBox();
     const navH = () => page.locator('#mnav').evaluate((el) => el.getBoundingClientRect().height);
     const before = { bar: await box(), h: await navH() };
@@ -45,7 +45,7 @@ test.describe('desktop bar', () => {
 
   test('the theme icon reflects theme.ts state and still cycles', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto('/');
+    await page.goto('/en');
     const btn = page.locator('#themeBtn');
     await expect(btn).toHaveAttribute('aria-label', /^Theme: light/);
     await btn.click();
@@ -57,7 +57,7 @@ test.describe('menu sheet', () => {
   test.skip(({ isMobile }) => !isMobile, 'the menu button shows under 1024px');
 
   test('traps focus, locks scroll, and restores both on close', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en');
     await page.evaluate(() => window.scrollTo(0, 900));
     await page.waitForTimeout(100);
     const y = await page.evaluate(() => window.scrollY);
@@ -85,16 +85,16 @@ test.describe('menu sheet', () => {
   });
 
   test('a tap outside the sheet closes it; Privacy is in the sheet', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en');
     await page.locator('#mnav .burger').click();
-    await expect(page.locator('#mobileMenu a[href="/privacy"]')).toBeVisible();
+    await expect(page.locator('#mobileMenu a[href="/en/privacy"]')).toBeVisible();
     const vh = page.viewportSize()!.height;
     await page.mouse.click(20, vh - 20);
     await expect(page.locator('dialog#mobileMenu[open]')).toHaveCount(0);
   });
 
   test('the sheet theme button drives the page theme', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en');
     await page.locator('#mnav .burger').click();
     const proxy = page.locator('#mobileMenu [data-theme-proxy]');
     await expect(proxy).toHaveAttribute('aria-label', /^Theme: light/);
@@ -107,7 +107,7 @@ test.describe('menu sheet', () => {
 test('reduced motion: no hero entrance, no parallax, proof numbers final', async ({ browser }) => {
   const ctx = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
-  await page.goto('/');
+  await page.goto('/en');
   expect(await page.locator('h1.hero-rise').evaluate((el) => getComputedStyle(el).animationName)).toBe('none');
   await page.evaluate(() => window.scrollTo(0, 400));
   await page.waitForTimeout(100);

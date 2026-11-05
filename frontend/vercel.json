@@ -2,6 +2,93 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "trailingSlash": false,
   "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/en",
+      "statusCode": 302
+    },
+    {
+      "source": "/features",
+      "destination": "/en/features",
+      "permanent": true
+    },
+    {
+      "source": "/features/:rest+",
+      "destination": "/en/features/:rest+",
+      "permanent": true
+    },
+    {
+      "source": "/watch",
+      "destination": "/en/watch",
+      "permanent": true
+    },
+    {
+      "source": "/watch/:rest+",
+      "destination": "/en/watch/:rest+",
+      "permanent": true
+    },
+    {
+      "source": "/learn",
+      "destination": "/en/learn",
+      "permanent": true
+    },
+    {
+      "source": "/learn/:rest+",
+      "destination": "/en/learn/:rest+",
+      "permanent": true
+    },
+    {
+      "source": "/support",
+      "destination": "/en/support",
+      "permanent": true
+    },
+    {
+      "source": "/support/:rest+",
+      "destination": "/en/support/:rest+",
+      "permanent": true
+    },
+    {
+      "source": "/privacy",
+      "destination": "/en/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/privacy/:rest+",
+      "destination": "/en/privacy/:rest+",
+      "permanent": true
+    },
+    {
+      "source": "/contribute",
+      "destination": "/en/contribute",
+      "permanent": true
+    },
+    {
+      "source": "/contribute/:rest+",
+      "destination": "/en/contribute/:rest+",
+      "permanent": true
+    },
+    {
+      "source": "/pa",
+      "destination": "/en",
+      "statusCode": 302
+    },
+    {
+      "source": "/pa/:rest+",
+      "destination": "/en/:rest+",
+      "statusCode": 302
+    },
+    {
+      "source": "/fr",
+      "destination": "/en",
+      "statusCode": 302
+    },
+    {
+      "source": "/fr/:rest+",
+      "destination": "/en/:rest+",
+      "statusCode": 302
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/analytics(/.*)?",

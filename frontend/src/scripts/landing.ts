@@ -4,6 +4,7 @@
 // core.ts (the Knowledge Base's DOM/API layer) — only the self-contained theme + pahar helpers.
 import { initTheme, applyTheme, setDefaultTheme } from "./theme";
 import { paharFixed, paharLabel, paharRange } from "./pahar.js";
+import { clientStrings } from "./i18n-client";
 import { wireNewsletter } from "./newsletter";
 
 type Theme = "light" | "dark" | "system";
@@ -130,6 +131,48 @@ function wireNavScrolled() {
   cleanups.push(() => sentinel.remove());
 }
 
+// The reader's language choice, kept in this browser only (named on the privacy page).
+const LANG_KEY = "gs_lang";
+
+/** The language switcher (components/LanguageSwitcher.astro): the nav list opens from its button
+    and closes on Escape (focus back on the button), an outside click or a choice. Every choice
+    keeps the #section and is remembered, so a later visit to gurbanisoul.com/ opens in it. */
+function wireLanguageSwitcher() {
+  const box = document.querySelector<HTMLElement>("[data-lang-switcher]");
+  const btn = box?.querySelector<HTMLButtonElement>(".lang-btn");
+  const list = box?.querySelector<HTMLElement>(".lang-list");
+  const set = (open: boolean) => {
+    if (!btn || !list) return;
+    btn.setAttribute("aria-expanded", String(open));
+    list.hidden = !open;
+  };
+  const onBtn = () => {
+    const open = btn?.getAttribute("aria-expanded") !== "true";
+    set(open);
+    if (open) list?.querySelector<HTMLAnchorElement>("a")?.focus();
+  };
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === "Escape" && btn?.getAttribute("aria-expanded") === "true") { set(false); btn.focus(); }
+  };
+  const onDoc = (e: MouseEvent) => { if (box && !box.contains(e.target as Node)) set(false); };
+  const onChoice = (e: Event) => {
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[data-lang-choice]");
+    if (!a) return;
+    try { localStorage.setItem(LANG_KEY, a.dataset.langChoice || ""); } catch {}
+    if (location.hash && !a.hash) a.hash = location.hash;
+  };
+  btn?.addEventListener("click", onBtn);
+  document.addEventListener("keydown", onKey);
+  document.addEventListener("click", onDoc);
+  document.addEventListener("click", onChoice, true);
+  cleanups.push(() => {
+    btn?.removeEventListener("click", onBtn);
+    document.removeEventListener("keydown", onKey);
+    document.removeEventListener("click", onDoc);
+    document.removeEventListener("click", onChoice, true);
+  });
+}
+
 /** aria-current="page" on the primary/mobile nav link whose route matches the current pathname.
     The server renders this correctly per page; this re-asserts it after each ClientRouter swap. */
 function wireNavActive() {
@@ -172,6 +215,7 @@ function wireRaagClock() {
   // /watch's eight-pahar timeline cells (data-p, deliberately NOT data-pahar: they are never hidden).
   const cells = document.querySelectorAll<HTMLElement>(".pcell[data-p]");
   if (!svg && !caption && !lis.length && !cells.length) return;
+  const strings = clientStrings<{ dialNow?: string[] }>();
 
   const render = () => {
     const p = paharFixed(new Date());
@@ -180,7 +224,7 @@ function wireRaagClock() {
     });
     const hand = document.getElementById("arcHand");
     if (hand) hand.style.transform = `rotate(${(p - 1) * 45 + 22.5}deg)`;
-    if (caption) caption.textContent = `It is the ${paharLabel(p)} — ${paharRange(p)}.`;
+    if (caption) caption.textContent = strings?.dialNow?.[p - 1] ?? `It is the ${paharLabel(p)} — ${paharRange(p)}.`;
     lis.forEach((li) => {
       li.hidden = Number(li.dataset.pahar) !== p;
     });
@@ -276,7 +320,9 @@ function wireHeroDrift() {
 function wireCountUp() {
   const els = Array.from(document.querySelectorAll<HTMLElement>("[data-count]"));
   if (!els.length || !motionOK()) return;
-  const fmt = new Intl.NumberFormat("en-US");
+  // The page's own language formats the figures as they count ("1,430" / "1 430"); the server
+  // rendered the final figure the same way.
+  const fmt = new Intl.NumberFormat(document.documentElement.lang === "en" ? "en-GB" : document.documentElement.lang || "en-GB");
   const raf: number[] = [];
   const run = (el: HTMLElement) => {
     const to = Number(el.dataset.count);
@@ -315,6 +361,7 @@ function init() {
   wireThemeProxies();
   wireNavScrolled();
   wireNavActive();
+  wireLanguageSwitcher();
   wireReveal();
   wireRaagClock();
   wireTocActive();
@@ -324,11 +371,12 @@ function init() {
   if (nl) cleanups.push(nl);
 }
 
-// Forward legacy /?q= bookmarks to /search after a client-side swap lands on `/`.
+// Forward legacy /?q= bookmarks to /search after a client-side swap lands on a home page. The bare
+// root redirects to a language's home with its query kept (vercel.json), so check every home.
 function forwardLegacyQuery() {
   try {
     const p = new URLSearchParams(location.search);
-    if (p.has("q") && location.pathname === "/") location.replace("/search" + location.search);
+    if (p.has("q") && /^\/(?:en|pa|fr)?\/?$/.test(location.pathname)) location.replace("/search" + location.search);
   } catch {}
 }
 // Re-assert the resolved theme after a swap (the fresh document starts from the pre-paint value).

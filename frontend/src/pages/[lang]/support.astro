@@ -1,0 +1,148 @@
+---
+// support.astro — the public Support page for the Gurbani Soul iOS app (org.sggs.app) and this site.
+// Linked from the App Store listing (Support URL). Answers must match the shipped app: the
+// public (Gurmukhi-only) profile has no English layer; location is optional; nothing is sent.
+// Rendered in the marketing shell (LegalPage) since v1.3.5; /support must keep working: it 308s to /en/support
+// (App Store Connect + the app's AppLinks). The FAQ stays fully visible (no accordion).
+import Marketing from '../../layouts/Marketing.astro';
+import LegalPage from '../../components/LegalPage.astro';
+import JsonLd from '../../components/JsonLd.astro';
+import { SITE_URL } from '../../site.ts';
+import { CONTRIBUTE_MODE } from '../../contribute.ts';
+import { FACTS } from '../../facts.ts';
+import { localeStaticPaths, type Locale } from "../../i18n/locales";
+import { localizeHref } from "../../i18n/paths";
+import { fmtNumber } from "../../i18n/format";
+import { useT, richMap, richHtml, richText, type MessageKey } from "../../i18n/t";
+
+export const getStaticPaths = localeStaticPaths;
+const lang = Astro.params.lang as Locale;
+const L = (href: string) => localizeHref(href, lang);
+// Figures in the page's language: "1,430" (en), "1 430" (fr).
+const fmt = (n: number) => fmtNumber(lang, n);
+const { t, rich } = useT(lang);
+
+// Single source for the "Frequently asked" block: it renders BOTH the visible <h3>+<p> HTML and the
+// FAQPage JSON-LD below, so the two can never diverge (the FAQPage `name`s are exactly these
+// questions — enforced by the JsonLdInvariants gate). Answers may carry the same inline HTML the
+// visible copy uses; JsonLd.astro escapes "<" so the payload is always well-formed.
+// The FAQ, in the page's language. Each entry keeps a fixed anchor (its English slug), so a link to
+// #faq-… works in every language. Answers are rich messages: the same parts give the visible HTML
+// (every word escaped; only the renderers below write markup) and the FAQPage JSON-LD text. The
+// Gurmukhi sample ੍ਯ੍ਯ lives here, never in a message file.
+const FAQ_IDS = [
+  "faq-does-the-app-need-an-internet-connection",
+  "faq-why-is-there-no-english-translation-in-the-app",
+  "faq-what-does-the-traditional-saroop-toggle-do",
+  "faq-why-does-the-app-ask-for-my-location",
+  "faq-how-do-nitnem-reminders-work",
+  "faq-what-is-the-live-activity-while-reading",
+  "faq-where-do-the-nitnem-banis-come-from",
+  "faq-what-is-the-hukam-of-the-day",
+  "faq-the-widgets-are-empty",
+  "faq-what-is-the-integrity-section-in-about",
+  "faq-how-do-i-save-share-or-find-a-verse-later",
+  "faq-siri-and-shortcuts",
+  "faq-why-does-a-voice-s-page-say-context-pending-scholarly-review",
+  "faq-accessibility",
+  "faq-ipad"
+];
+const faqHtml = {
+  em: (x: string) => `<em>${x}</em>`,
+  code: (x: string) => `<code>${x}</code>`,
+  privacy: (x: string) => `<a href="${L("/privacy")}">${x}</a>`,
+  yayya: () => `<span class="gm" lang="pa">੍ਯ੍ਯ</span>`,
+};
+const faqs = FAQ_IDS.map((id, i) => {
+  const parts = rich(`supportFaq.q${i + 1}.a` as MessageKey, { themes: String(FACTS.themes) });
+  return { id, q: t(`supportFaq.q${i + 1}.q` as MessageKey), a: richHtml(parts, faqHtml), text: richText(parts, { yayya: () => "੍ਯ੍ਯ" }) };
+});
+
+// Stable, readable anchors for each question (jump list + deep links from the app or email).
+const toc = [
+  { id: "contact", label: t("support.contact2") },
+  { id: "faq", label: t("support.frequentlyAsked2") },
+  { id: "about-the-text", label: t("support.aboutTheText2") },
+  { id: "this-website", label: t("support.thisWebsite2") },
+];
+const desc = t("support.helpWithTheGurbani2");
+
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": `${new URL(L("/support"), SITE_URL).href}#faq`,
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptableAnswer: { "@type": "Answer", text: f.text },
+  })),
+};
+---
+<Marketing title={t("support.supportGurbaniSoul")} description={desc} path={L("/support")}>
+  <JsonLd slot="head" data={faqLd} />
+  <LegalPage
+    eyebrow={t("support.support")}
+    title={t("support.helpWithTheGurbani")}
+    lede={t("support.lede", { angs: fmt(FACTS.angs) })}
+    id="v-support"
+    toc={toc}
+  >
+    <section id="contact">
+      <h2>{t("support.contact")}</h2>
+      <div class="contact-card">
+        <hr class="gold-hair" aria-hidden="true" />
+        <p>{richMap(rich("support.emailSupportGurbanisoulCom", {}), { link1: (x: string) => <a href="mailto:support@gurbanisoul.com?subject=Gurbani%20Soul%20support">{x}</a>, em1: (x: string) => <em>{x}</em> })}</p>
+        <p class="contact-cta">{richMap(rich("support.emailSupport", {}), { link1: (x: string) => <a class="btn" href="mailto:support@gurbanisoul.com?subject=Gurbani%20Soul%20support">{x}</a> })}</p>
+      </div>
+      <p>{richMap(rich("support.ifSomethingInThe", {}), { strong1: (x: string) => <strong>{x}</strong> })}</p>
+    </section>
+
+    <section id="faq">
+      <h2>{t("support.frequentlyAsked")}</h2>
+      <nav class="faq-jump" aria-label={t("support.questions")}>
+        <ul>
+          {faqs.map((f) => <li><a href={`#${f.id}`}>{f.q}</a></li>)}
+        </ul>
+      </nav>
+      {faqs.map((f) => (
+        <div class="faq-item">
+          <h3 id={f.id}>{f.q}</h3>
+          <p set:html={f.a} />
+        </div>
+      ))}
+    </section>
+
+    <section id="about-the-text">
+      <h2>{t("support.aboutTheText")}</h2>
+      <p>{richMap(rich("support.theGurmukhiIsReproduced", {}), { link1: (x: string) => <a href="/fonts/OFL.txt">{x}</a> })}</p>
+    </section>
+
+    <section id="this-website">
+      <h2>{t("support.thisWebsite")}</h2>
+      <p>{richMap(rich("support.theSiteOffersThe", {}), { link1: (x: string) => <a href={L("/privacy")}>{x}</a> })}</p>
+      {CONTRIBUTE_MODE !== "off" ? (
+        <div class="contact-card give-card">
+          <h3>{t("support.helpKeepItFree")}</h3>
+          <p>{t("support.gurbaniSoulIsFree2")}</p>
+          <p class="contact-cta">{richMap(rich("support.contribute", {}), { link1: (x: string) => <a class="btn" href={L("/contribute")}>{x}</a> })}</p>
+        </div>
+      ) : (
+        <p>{richMap(rich("support.gurbaniSoulIsFree", {}), { link1: (x: string) => <a href={L("/contribute")}>{x}</a> })}</p>
+      )}
+    </section>
+  </LegalPage>
+
+  <style>
+    .contact-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px 20px; margin: 0 0 22px; }
+    .contact-card .gold-hair { margin: 0 0 16px; }
+    .contact-card .contact-cta { margin: 4px 0 0; }
+    .give-card { margin-top: 18px; }
+    .give-card h3 { margin-top: 0; }
+    :global(.legal) .contact-card a.btn { color: var(--on-accent); text-decoration: none; min-height: 44px; }
+    .faq-jump ul { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 2px; }
+    .faq-jump a { display: inline-block; padding: 6px 0; font-size: 15.5px; }
+    .faq-item { padding: 18px 0 4px; border-top: 1px solid var(--line); scroll-margin-top: 92px; }
+    .faq-item h3 { scroll-margin-top: 92px; margin-top: 0; }
+    :global(.legal code) { font-size: .85em; padding: 1px 6px; border-radius: 6px; background: var(--paper-2); border: 1px solid var(--line); }
+  </style>
+</Marketing>

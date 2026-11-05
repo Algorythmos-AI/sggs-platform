@@ -21,7 +21,8 @@ const cspHeader = vercel.headers[0].headers.find((h: { key: string }) =>
 const ENFORCED_CSP: string = cspHeader.value;
 
 // Every route in the manifest already includes /learn and every /learn/<slug>.
-const paths = routes.map((r) => r.path);
+// Plus the bare root: the language chooser, whose inline script picks a language before paint.
+const paths = ['/', ...routes.map((r) => r.path)];
 
 declare global {
   interface Window { __csp?: string[]; }

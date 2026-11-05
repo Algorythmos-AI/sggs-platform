@@ -1,17 +1,20 @@
 ---
 // Seo.astro — the shared <head> SEO/social/PWA block for both the marketing shell and the
 // Knowledge Base (Base.astro). Emits an absolute canonical + Open Graph/Twitter (with the card's size, type and alt)/theme-color/
-// manifest set. Does NOT emit <title> (the layout owns it). No hreflang here — locale alternates
-// live only in sitemap.xml until the `pa` pages exist.
+// manifest set, plus hreflang alternates for the marketing pages (i18n/content.ts alternates()).
+// Does NOT emit <title> (the layout owns it).
 import { SITE_URL, APP_STORE_ID, APP_STORE_LIVE } from "../site";
 import { ogForPath, ogImagePath } from "../routes";
 import { SHARE } from "../share";
 import kbThemes from "../generated/kb-themes.json";
+import { LOCALES } from "../i18n/locales";
+import { localeOf } from "../i18n/paths";
+import { alternates as altsFor } from "../i18n/content";
 
 export interface Props {
   title: string;
   description: string;
-  path: string;          // root-relative, e.g. "/" or "/search"
+  path: string;          // root-relative, e.g. "/en" or "/search" (marketing paths carry their language)
   ogImage?: string;      // root-relative or absolute; defaults to the path's OG card
   imageAlt?: string;     // the card's alt text when ogImage is a page's own card
   type?: string;         // og:type, default "website"
@@ -26,6 +29,10 @@ export interface Props {
 const { title, description, path, ogImage, imageAlt: ownAlt, type = "website", themeColor = "page" } = Astro.props;
 
 const canonical = new URL(path, SITE_URL).href;
+const ogLocale = LOCALES[localeOf(path)].ogLocale;
+// The page's language versions (none outside the marketing site), and their og:locale values.
+const alternates = altsFor(path).map((a) => ({ ...a, href: new URL(a.href, SITE_URL).href }));
+const ogAlternates = alternates.filter((a) => a.lang && LOCALES[a.lang].ogLocale !== ogLocale).map((a) => LOCALES[a.lang!].ogLocale);
 const slug = ogForPath(path);
 const ogPath = ogImage ?? ogImagePath(slug);
 const ogAbsolute = new URL(ogPath, SITE_URL).href;
@@ -40,11 +47,13 @@ const imageAlt = ownAlt ?? (share ? [share.eyebrow, share.title].filter(Boolean)
 const kbChrome = kbThemes.themes.find((t) => t.id === kbThemes.default)!.chrome.light;
 ---
 <link rel="canonical" href={canonical} />
+{alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
 <meta name="description" content={description} />
 
 <meta property="og:type" content={type} />
 <meta property="og:site_name" content="Gurbani Soul" />
-<meta property="og:locale" content="en_GB" />
+<meta property="og:locale" content={ogLocale} />
+{ogAlternates.map((l) => <meta property="og:locale:alternate" content={l} />)}
 <meta property="og:title" content={socialTitle} />
 <meta property="og:description" content={social} />
 <meta property="og:url" content={canonical} />

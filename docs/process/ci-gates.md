@@ -4,8 +4,8 @@ description: "What each GitHub Actions workflow and job proves before a change c
 sidebar:
   order: 3
 verified:
-  commit: 1560d987
-  date: "2026-09-26"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # CI Gates — what each check proves
 
@@ -13,7 +13,7 @@ verified:
 
 | Workflow · job | Proves | Needs |
 |---|---|---|
-| `web-ci · python` | ruff clean; server + repo-gate unit tests; the **golden contract replayed over HTTP** (`tools/contract_http.py`); `contract/openapi.json` is current and covers every dispatcher route; `/api/health` all-true; the **shabad-heading regression** (`api_superset_check`); search harnesses; **contract does not drift** | pinned DB |
+| `web-ci · python` | ruff clean; server + repo-gate unit tests; the **contributors roster** (`frontend/public/contributors.json`) proven against the pinned corpus — names, pen-names, Banis and cited sources (`tools/check_contributors.py`); the **golden contract replayed over HTTP** (`tools/contract_http.py`); `contract/openapi.json` is current and covers every dispatcher route; `/api/health` all-true; the **shabad-heading regression** (`api_superset_check`); search harnesses; **contract does not drift** | pinned DB |
 | `web-ci · frontend` | Astro builds; `pahar` vectors pass; **report-only:** the committed `webapp/static` equals the build's text assets byte for byte (`scripts/ci/check_static_fresh.py` — a warning, not yet a gate) | Node 22 |
 | `scripture-integrity` | dataset pin: `dataset.lock.json` ↔ `contract/_meta.json`, and sggs-data publishes that object at the pinned commit; the installed DB passes `quick_check` with 60,658 lines over Angs 1–1430 (the scripture gates themselves run in sggs-data) | pinned DB |
 | `version-consistency` | all 5 platform version strings unified (the dataset versions in sggs-data; the iOS app keeps its own match); `main` PRs come from `integration`/`hotfix` | — |

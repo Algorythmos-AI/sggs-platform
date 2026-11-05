@@ -23,6 +23,7 @@ TABLES = frozenset({
     'sections',
     'timing_sources',
     'translations',
+    'translation_spans',
 })
 
 

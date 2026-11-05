@@ -1,0 +1,163 @@
+---
+// contribute.astro — optional support for Gurbani Soul (Stripe-hosted Payment Links, web only).
+// Links and mode come from src/contribute.ts (PUBLIC_CONTRIBUTE_MODE off|test|live). No script
+// runs on this page: amounts are plain links, and the thank-you note is the #thank-you section,
+// revealed by CSS :target when Stripe redirects back to /contribute#thank-you after payment.
+// Separate from /support (the App Store help page, path frozen). Never linked from the iOS app
+// (App Store guideline 3.1.1); the app gets its own in-app tip jar.
+import Marketing from "../../layouts/Marketing.astro";
+import LegalPage from "../../components/LegalPage.astro";
+import { SUPPORT_EMAIL } from "../../site.ts";
+import { CONTRIBUTE_MODE, LINKS, type Tier } from "../../contribute.ts";
+import { localeStaticPaths, type Locale } from "../../i18n/locales";
+import { localizeHref } from "../../i18n/paths";
+import { fmtAud } from "../../i18n/format";
+import { useT, richMap, type MessageKey } from "../../i18n/t";
+
+export const getStaticPaths = localeStaticPaths;
+const lang = Astro.params.lang as Locale;
+const L = (href: string) => localizeHref(href, lang);
+const { t, rich } = useT(lang);
+
+const on = LINKS !== null;
+// A tier's amount and note in the page's language, from its key in contribute.ts ("monthly-11").
+const tierAmount = (tier: Tier) => {
+  const [kind, n] = tier.key.split("-");
+  return t(kind === "monthly" ? "contributeTiers.monthly" : "contributeTiers.once", { amount: fmtAud(lang, Number(n)) });
+};
+const tierNote = (tier: Tier) => t(`contributeTiers.notes.${tier.key}` as MessageKey);
+const toc = [
+  { id: "why", label: t("contribute.whySupport2") },
+  ...(on ? [{ id: "contribute", label: t("contribute.contribute5") }] : []),
+  { id: "where-it-goes", label: t("contribute.whereItGoes2") },
+  { id: "questions", label: t("contribute.questions2") },
+];
+const desc = t("contribute.gurbaniSoulIsFree");
+const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Gurbani Soul contribution")}`;
+---
+<Marketing title={t("contribute.contributeGurbaniSoul")} description={desc} path={L("/contribute")}>
+  <LegalPage
+    eyebrow={t("contribute.contribute")}
+    title={t("contribute.keepGurbaniSoulFree")}
+    lede={t("contribute.lede")}
+    id="v-contribute"
+    toc={toc}
+  >
+    <section id="thank-you" class="thanks" tabindex="-1" aria-labelledby="thanks-h">
+      <span class="thanks-mark" aria-hidden="true">✓</span>
+      <h2 id="thanks-h">{t("contribute.thankYou")}</h2>
+      <p>{t("contribute.ifYourPaymentWent")}</p>
+    </section>
+
+    <section id="why">
+      <h2>{t("contribute.whySupport")}</h2>
+      <p>{t("contribute.gurbaniSoulHasNo")}</p>
+    </section>
+
+    {on && LINKS && (
+      <section id="contribute">
+        <h2>{t("contribute.contribute2")}</h2>
+        {CONTRIBUTE_MODE === "test" && (
+          <p class="test-note" role="note">{richMap(rich("contribute.testModeTheseLinks", {}), { strong1: (x: string) => <strong>{x}</strong> })}</p>
+        )}
+        {LINKS.custom
+          ? <p class="custom-row custom-top"><a class="custom" href={LINKS.custom} rel="noopener"><span>{t("contribute.chooseYourOwnAmount")} <span class="custom-min">{t("contributeTiers.customMin", { amount: fmtAud(lang, 0.5) })}</span></span><span class="arr" aria-hidden="true">→</span></a></p>
+          : <p class="pending">{t("contribute.chooseYourOwnAmount2")}</p>}
+        <h3>{t("contribute.once")}</h3>
+        <ul class="tiers tiers-4">
+          {LINKS.once.map((tier: Tier) => <li>{tier.url
+            ? <a class="tier" href={tier.url} rel="noopener"><span class="tier-amt">{tierAmount(tier)}</span><span class="tier-note">{tierNote(tier)}</span><span class="tier-go" aria-hidden="true">{t("contribute.contribute3")} <span class="arr">→</span></span></a>
+            : <span class="tier" aria-disabled="true"><span class="tier-amt">{tierAmount(tier)}</span><span class="tier-note">{t("contribute.linkNotConnectedYet")}</span></span>}</li>)}
+        </ul>
+        <h3>{t("contribute.monthly")}</h3>
+        <ul class="tiers tiers-3">
+          {LINKS.monthly.map((tier: Tier) => <li>{tier.url
+            ? <a class="tier" href={tier.url} rel="noopener"><span class="tier-amt">{tierAmount(tier)}</span><span class="tier-note">{tierNote(tier)}</span><span class="tier-go" aria-hidden="true">{t("contribute.contribute4")} <span class="arr">→</span></span></a>
+            : <span class="tier" aria-disabled="true"><span class="tier-amt">{tierAmount(tier)}</span><span class="tier-note">{t("contribute.linkNotConnectedYet2")}</span></span>}</li>)}
+        </ul>
+        <p class="detail">{t("contribute.paymentsAreHandledOn")}</p>
+      </section>
+    )}
+
+    {!on && (
+      <p class="pending" id="opening-soon">{t("contribute.contributionsAreOpeningSoon")}</p>
+    )}
+
+    <section id="where-it-goes">
+      <h2>{t("contribute.whereItGoes")}</h2>
+      <ul>
+        <li>{richMap(rich("contribute.hostingForTheWebsite", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("contribute.scholarlyReviewOfThe", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("contribute.licensingIncludingALicence", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+        <li>{richMap(rich("contribute.feesTheAppleDeveloper", {}), { strong1: (x: string) => <strong>{x}</strong> })}</li>
+      </ul>
+    </section>
+
+    <section id="questions">
+      <h2>{t("contribute.questions")}</h2>
+      <h3>{t("contribute.isMyContributionTax")}</h3>
+      <p>{t("contribute.noGurbaniSoulIs")}</p>
+      <h3>{t("contribute.doesContributingUnlockAnything")}</h3>
+      <p>{t("contribute.noEverythingStaysFree")}</p>
+      <h3 id="refunds">{t("contribute.canIGetA")}</h3>
+      <p>{richMap(rich("contribute.yesEmailWithin30", {}), { link1: () => <a href={mailto}>{SUPPORT_EMAIL}</a> })}</p>
+      <h3>{t("contribute.howDoIStop")}</h3>
+      {on && LINKS?.portal
+        ? <p>{richMap(rich("contribute.anyTimeYourselfFrom", {}), { link1: (x: string) => <a href={LINKS.portal} rel="noopener">{x}</a> })}</p>
+        : <p>{richMap(rich("contribute.anyTimeUseThe", {}), { link1: () => <a href={mailto}>{SUPPORT_EMAIL}</a> })}</p>}
+      <h3>{t("contribute.whatDoYouKeep")}</h3>
+      <p>{richMap(rich("contribute.stripeProcessesThePayment", {}), { link1: (x: string) => <a href={L("/privacy")}>{x}</a> })}</p>
+    </section>
+  </LegalPage>
+
+  <style>
+    /* Brand rules (docs/brand): #FFBC0D is a FILL only, always with a 1px --accent border; text on it
+       is --on-accent. Gold text uses --accent-text. Washes are literal rgba (never color-mix: Lightning
+       CSS would fall back to a solid --accent behind ink text on old Safari). */
+    :global(.legal) { --tier-wash: rgba(255,188,13,.10); --tier-wash-hi: rgba(255,188,13,.18); --tier-edge: rgba(168,121,0,.35); }
+    :global(:root[data-theme="dark"] .legal) { --tier-wash: rgba(255,188,13,.07); --tier-wash-hi: rgba(255,188,13,.13); --tier-edge: rgba(255,188,13,.30); }
+
+    :global(.legal) section.thanks { display: none; position: relative; background: var(--tier-wash); border: 1px solid var(--accent); border-radius: 18px; padding: 20px 22px 18px 72px; margin: 0 0 28px; }
+    :global(.legal) section.thanks:target { display: block; }
+    .thanks:focus { outline: none; }
+    .thanks h2 { margin: 0 0 6px; }
+    .thanks p { margin: 0; }
+    .thanks-mark { position: absolute; left: 22px; top: 22px; width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center; background: var(--accent-fill); color: var(--on-accent); border: 1px solid var(--accent); font-weight: 700; }
+
+    :global(.legal) ul.tiers { list-style: none; padding: 0; margin: 0 0 18px; display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    :global(.legal) ul.tiers-3 { grid-template-columns: minmax(0, 1fr); }
+    @media (min-width: 560px) { :global(.legal) ul.tiers-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (min-width: 1100px) { :global(.legal) ul.tiers-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    :global(.legal) ul.tiers li { display: flex; margin: 0; padding: 0; }
+    :global(.legal) ul.tiers li::before { content: none; }
+
+    :global(.legal) .tier { position: relative; overflow: hidden; flex: 1; display: flex; flex-direction: column; gap: 6px; min-height: 44px; padding: 20px 18px 16px; border: 1px solid var(--tier-edge); border-radius: 16px; background: var(--tier-wash); color: var(--ink); text-decoration: none; transition: transform .18s ease, border-color .18s ease, background-color .18s ease, box-shadow .18s ease; }
+    :global(.legal) .tier::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--accent-fill); }
+    :global(.legal) a.tier:hover, :global(.legal) a.tier:focus-visible { border-color: var(--accent); background: var(--tier-wash-hi); transform: translateY(-2px); box-shadow: 0 10px 24px -14px rgba(43,26,5,.45); }
+    :global(.legal) a.tier:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    :global(.legal) .tier-amt { font-family: var(--serif-display); font-size: clamp(22px, 2.6vw, 27px); font-weight: 600; line-height: 1.15; }
+    :global(.legal) .tier-note { font-size: 14.5px; line-height: 1.45; color: var(--ink-soft); flex: 1; }
+    :global(.legal) .tier-go { align-self: flex-start; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; background: var(--accent-fill); color: var(--on-accent); border: 1px solid var(--accent); font-size: 13.5px; font-weight: 650; }
+    :global(.legal) .arr { display: inline-block; transition: transform .18s ease; }
+    :global(.legal) a.tier:hover .arr, :global(.legal) a.custom:hover .arr { transform: translateX(3px); }
+    :global(.legal) .tier[aria-disabled="true"] { opacity: .6; border-style: dashed; }
+    :global(.legal) .tier[aria-disabled="true"]::before { display: none; }
+
+    .custom-row { margin: 0 0 30px; }
+    .custom-row.custom-top { margin: 6px 0 28px; }
+    :global(.legal) .custom-top a.custom { border-style: solid; border-width: 1.5px; background: var(--tier-wash); min-height: 60px; font-size: 17px; }
+    :global(.legal) .custom-top a.custom:hover, :global(.legal) .custom-top a.custom:focus-visible { background: var(--tier-wash-hi); }
+    :global(.legal) a.custom { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 12px 18px; border: 1px dashed var(--accent); border-radius: 16px; color: var(--ink); text-decoration: none; font-weight: 600; transition: background-color .18s ease; }
+    :global(.legal) a.custom:hover, :global(.legal) a.custom:focus-visible { background: var(--tier-wash); }
+    :global(.legal) .custom-min { font-weight: 400; color: var(--ink-soft); margin-left: 6px; }
+    :global(.legal) a.custom .arr { color: var(--accent-text); font-size: 18px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      :global(.legal) .tier, :global(.legal) .arr { transition: none; }
+      :global(.legal) a.tier:hover, :global(.legal) a.tier:focus-visible { transform: none; }
+    }
+    .pending { color: var(--ink-soft); font-style: italic; }
+    .test-note { padding: 10px 14px; border: 1px dashed var(--line); border-radius: 10px; }
+  </style>
+</Marketing>
+

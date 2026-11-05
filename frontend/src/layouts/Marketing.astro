@@ -8,16 +8,22 @@ import { ClientRouter } from "astro:transitions";
 import Seo from "../components/Seo.astro";
 import Analytics from "../components/Analytics.astro";
 import "../styles/marketing.css";
+import { LOCALES } from "../i18n/locales";
+import { localeOf } from "../i18n/paths";
+import { useT } from "../i18n/t";
 export interface Props {
   title: string;
   description: string;
-  path?: string;      // e.g. "/" — for canonical + og:url
+  path?: string;      // the page's own localized path, e.g. "/en/features" — for canonical + og:url
   ogImage?: string;   // absolute or root-relative; defaults to the path's OG card
 }
 const { title, description, path = "/", ogImage } = Astro.props;
+const lang = localeOf(Astro.url.pathname);
+const locale = LOCALES[lang];
+const { t } = useT(lang);
 ---
 <!DOCTYPE html>
-<html lang="en">
+<html lang={locale.htmlLang}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -47,7 +53,7 @@ const { title, description, path = "/", ogImage } = Astro.props;
   <slot name="head" />
 </head>
 <body>
-  <a href="#main" class="lp-skip">Skip to content</a>
+  <a href="#main" class="lp-skip">{t("shell.skipToContent")}</a>
   <main id="main"><slot /></main>
   <Analytics />
   <script>

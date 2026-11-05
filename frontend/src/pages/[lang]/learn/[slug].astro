@@ -1,0 +1,113 @@
+---
+import { getCollection, render } from "astro:content";
+import Marketing from "../../../layouts/Marketing.astro";
+import MarketingNav from "../../../components/MarketingNav.astro";
+import MarketingFooter from "../../../components/MarketingFooter.astro";
+import Breadcrumbs from "../../../components/Breadcrumbs.astro";
+import JsonLd from "../../../components/JsonLd.astro";
+import Verse from "../../../components/Verse.astro";
+import Explanation from "../../../components/Explanation.astro";
+import { SITE_URL } from "../../../site";
+import { LEARN_SLUGS, ogImagePath } from "../../../routes";
+import { ENABLED_LOCALES, type Locale } from "../../../i18n/locales";
+import { LOCALES } from "../../../i18n/locales";
+import { localizeHref } from "../../../i18n/paths";
+import { articleLocales, learnHref } from "../../../i18n/content";
+import { useT } from "../../../i18n/t";
+import { fmtDate as fmtDateIn } from "../../../i18n/format";
+
+export async function getStaticPaths() {
+  const entries = (await getCollection("learn")).filter((e) => !e.data.draft);
+  const order = new Map(LEARN_SLUGS.map((s, i) => [s, i]));
+  const ordered = [...entries].sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+  // An article has a page only in the languages it is published in (i18n/content.ts).
+  return ENABLED_LOCALES.flatMap((lang) => ordered.filter((entry) => articleLocales(entry.id).includes(lang)).map((entry, i, list) => ({
+    params: { lang, slug: entry.id },
+    props: {
+      entry,
+      prev: list[i - 1] ?? null,        // neighbours among this language's articles
+      next: list[i + 1] ?? null,
+    },
+  })));
+}
+
+const lang = Astro.params.lang as Locale;
+const L = (href: string) => localizeHref(href, lang);
+const { t } = useT(lang);
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const { title, description, pubDate, updatedDate, tags } = entry.data;
+
+const fmtDate = (d: Date) => fmtDateIn(lang, d);
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+const canonical = new URL(L(`/learn/${entry.id}`), SITE_URL).href;
+const ogImage = ogImagePath(`learn-${entry.id}`);
+
+const articleJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: title,
+  description,
+  datePublished: iso(pubDate),
+  dateModified: iso(updatedDate ?? pubDate),
+  author: { "@type": "Organization", name: "Algorythmos" },
+  publisher: { "@type": "Organization", name: "Algorythmos" },
+  inLanguage: LOCALES[lang].htmlLang,
+  isAccessibleForFree: true,
+  image: new URL(ogImage, SITE_URL).href,
+  mainEntityOfPage: canonical,
+};
+---
+<Marketing title={t("learnArticle.titleSuffix", { title })} description={description} path={L(`/learn/${entry.id}`)} ogImage={ogImage}>
+  <JsonLd slot="head" data={articleJsonLd} />
+  <MarketingNav overHero={false} />
+
+  <article class="learn-article">
+    <div class="wrap col">
+      <Breadcrumbs title={title} slug={entry.id} />
+
+      <header class="art-head">
+        <h1>{title}</h1>
+        <p class="art-meta">
+          <time datetime={iso(pubDate)}>{fmtDate(pubDate)}</time>
+          {updatedDate && <span>{t("learnArticle.updated", { date: fmtDate(updatedDate) })}</span>}
+          <span class="tags">{tags.map((tag) => <span class="tag">{tag}</span>)}</span>
+        </p>
+      </header>
+
+      <div class="prose">
+        <Content components={{ Verse, Explanation }} />
+      </div>
+
+      <nav class="art-nav" aria-label={t("learnArticle.moreArticles")}>
+        <a class="back" href={L("/learn")}>{t("learnArticle.backToLearn")}</a>
+        <div class="prevnext">
+          {prev && <a href={learnHref(lang, prev.id)} rel="prev">← {prev.data.title}</a>}
+          {next && <a href={learnHref(lang, next.id)} rel="next">{next.data.title} →</a>}
+        </div>
+      </nav>
+    </div>
+  </article>
+
+  <MarketingFooter />
+
+  <style>
+    .learn-article { padding: clamp(88px, 11vw, 128px) 0 0; }
+    .col { max-width: 720px; }
+    .art-head { margin: 22px 0 8px; }
+    .art-head h1 { font-size: clamp(30px, 5vw, 46px); margin: 0 0 14px; }
+    .art-meta { margin: 0; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 13.5px; color: var(--ink-soft); }
+    .art-meta .tags { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+    .art-meta .tag { border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; font-size: 12px; color: var(--accent-text); }
+    .prose { margin: 28px 0 0; font-size: 17px; color: var(--ink); }
+    .prose :global(p) { margin: 0 0 18px; color: var(--ink); }
+    .prose :global(h2) { font-size: clamp(22px, 3vw, 28px); margin: 40px 0 14px; }
+    .prose :global(ul) { margin: 0 0 18px; padding-left: 22px; }
+    .prose :global(li) { margin: 0 0 8px; }
+    .prose :global(a) { color: var(--accent-text); }
+    .art-nav { margin: 48px 0; padding: 24px 0 0; border-top: 1px solid var(--line); display: grid; gap: 18px; }
+    .art-nav .back { font-weight: 650; text-decoration: none; }
+    .art-nav .prevnext { display: flex; flex-wrap: wrap; gap: 12px 28px; justify-content: space-between; font-size: 15px; }
+    .art-nav .prevnext a { text-decoration: none; }
+  </style>
+</Marketing>

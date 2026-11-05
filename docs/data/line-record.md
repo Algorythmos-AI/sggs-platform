@@ -4,8 +4,8 @@ description: "One display line of the Granth is one row of the lines table. What
 sidebar:
   order: 1
 verified:
-  commit: fe1ff7df
-  date: "2026-09-25"
+  commit: 49c71652
+  date: "2026-11-05"
 ---
 # Anatomy of a line record
 
@@ -22,8 +22,8 @@ On the rendered wiki this is a live explorer: choose an [[Ang]] and every line r
 verbatim from `/api/ang/{n}`, with the placement and heading columns beside it and a definition of
 each column on hover. On GitHub, open [Ang 1 in the website's reader](https://gurbanisoul.com/reader?ang=1) instead.
 
-Try the quick picks. Ang 1 opens with a heading and then Japji, whose author is `null` because the
-print has no ਮਹਲਾ line. Ang 151 shows a raag title and its invocation sharing one heading run. Ang
+Try the quick picks. Ang 1 opens with a heading and then Japji, attributed to Guru Nanak Dev Ji in
+the database although the print has no ਮਹਲਾ line for it. Ang 151 shows a raag title and its invocation sharing one heading run. Ang
 462 is where Asa Ki Vaar begins, saloks and pauris interleaving. Ang 712's first composition
 began on Ang 711 (`continued_from`). Ang 1256 prints one refrain twice — a legitimate repeat that
 the pipeline must never de-duplicate.
@@ -41,7 +41,7 @@ The table is created by `build_db.py` in sggs-data; the platform reads it read-o
 | | `line_no` | Position inside the composition, 1..N, contiguous. |
 | From the heading | `raag` | The musical mode; `null` after Ang 1353, where the Granth leaves the raag framework. |
 | | `section` | The bani or section, header-detected. |
-| | `author` | From the ਮਹਲਾ or Bhagat label; `null` where the print has none (all of Japji). |
+| | `author` | From the ਮਹਲਾ or Bhagat label. Japji, which has none in the print, is attributed to Guru Nanak Dev Ji; two lines carry `null`. |
 | | `ghar` | The musical "house" (`ਘਰੁ`) of the composition. |
 | | `comp_type` | The form word on the heading; known to be mislabelled in places, suppressed at the display layer — prefer `comp_id` and `section`. |
 | | `is_header` | 1 on a heading line: a title, the ੴ invocation, a `ਮਃ` label. |
@@ -70,7 +70,7 @@ A heading is detected by `detect_header` from the unit's text — a raag title, 
 heading lines opens one composition together with the body that follows** (post-pass 1b in
 `build_corpus.py`), so `/api/shabad/{comp_id}` returns the printed title. The run adopts its
 *last* heading's id, so no body line ever changes `comp_id` and vacated ids become permanent gaps:
-4,527 distinct compositions and `max(comp_id)` 5,376 in the pinned dataset, `comp_id` 1 a gap because the Mool Mantar folds
+4,531 distinct compositions and `max(comp_id)` 5,384 in the pinned dataset, `comp_id` 1 a gap because the Mool Mantar folds
 into Japji (`comp_id` 2). The full model, the before/after diagram and the invariants are in the
 canonical [database schema](https://github.com/Algorythmos-AI/sggs-data/blob/main/docs/architecture/database-schema.md).
 
@@ -89,6 +89,9 @@ also carries a trigram index, `fts_tri`, which no route reads. How the tiers cas
 
 The English translations (Dr. Sant Singh Khalsa via ShabadOS) are a **separate table**, attached to
 a line as `en` by the API and labelled as a translation everywhere; they are never blended into the
-Gurmukhi.
+Gurmukhi. Since dataset 1.4.0 one English record can cover two to four printed lines (the
+`translation_spans` table, 73 spans): every member line then carries `en_span` (`{first, last}`
+line ids) and the English sits once, on the last member present in the response
+(`attach_translations` in `webapp/sggs/core.py`).
 
 Read next: [Corpus pipeline and gates](pipeline.md).

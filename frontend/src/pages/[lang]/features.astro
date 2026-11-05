@@ -1,0 +1,436 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import Marketing from "../../layouts/Marketing.astro";
+import MarketingNav from "../../components/MarketingNav.astro";
+import MarketingFooter from "../../components/MarketingFooter.astro";
+import ContributeBand from '../../components/ContributeBand.astro';
+import DeviceFrame from "../../components/DeviceFrame.astro";
+import FeatureChapter from "../../components/FeatureChapter.astro";
+import PhotoBand from "../../components/PhotoBand.astro";
+import JsonLd from "../../components/JsonLd.astro";
+import { SITE_URL } from "../../site.ts";
+import { FACTS, ordinal, spell, VOICE_CENTURIES, CENTURY_VALUES } from "../../facts.ts";
+import widePhoto from "../../assets/landing/unsplash-reubx-harmandir-sahib-wide.jpg";
+import ipadReader from "../../assets/app/ipad-reader-landscape-light.png";
+import saroopOff from "../../assets/app/iphone-saroop-off-light.png";
+import saroopOn from "../../assets/app/iphone-saroop-on-light.png";
+import searchRoman from "../../assets/app/iphone-search-roman-light.png";
+import verifyShot from "../../assets/app/iphone-verify-verdict-light.png";
+import hukamShot from "../../assets/app/iphone-hukam-light.png";
+import ipadNitnem from "../../assets/app/ipad-nitnem-landscape-light.png";
+import journeyShot from "../../assets/app/iphone-nitnem-journey-light.png";
+import clockDark from "../../assets/app/iphone-clock-dark.png";
+import clockSolar from "../../assets/app/iphone-clock-solar-dark.png";
+import wRaag from "../../assets/app/widget-raagnow-small-light.png";
+import wHukamDark from "../../assets/app/widget-hukam-medium-dark.png";
+import wNitnemDark from "../../assets/app/widget-nitnem-medium-dark.png";
+import wNitnemSmall from "../../assets/app/widget-nitnem-small-light.png";
+import laCard from "../../assets/app/iphone-live-activity-card.png";
+import accentSoul from "../../assets/app/accent-soul.png";
+import accentSaffron from "../../assets/app/accent-saffron.png";
+import accentGold from "../../assets/app/accent-gold.png";
+import accentIndigo from "../../assets/app/accent-indigo.png";
+import accentTeal from "../../assets/app/accent-teal.png";
+import vaarWeave from "../../assets/app/iphone-vaar-weave-light.png";
+import vaarReader from "../../assets/app/iphone-vaar-reader-light.png";
+import indexShot from "../../assets/app/iphone-index-light.png";
+import raagGauri from "../../assets/app/iphone-raag-gauri-light.png";
+import voiceM9 from "../../assets/app/iphone-voice-m9-light.png";
+import compareShot from "../../assets/app/iphone-compare-light.png";
+import { localeStaticPaths, type Locale } from "../../i18n/locales";
+import { useT } from "../../i18n/t";
+import { LOCALES, siteLanguages } from "../../i18n/locales";
+import { localizeHref } from "../../i18n/paths";
+import { fmtNumber } from "../../i18n/format";
+
+export const getStaticPaths = localeStaticPaths;
+const lang = Astro.params.lang as Locale;
+const L = (href: string) => localizeHref(href, lang);
+// Figures in the page's language: "1,430" (en), "1 430" (fr).
+const fmt = (n: number) => fmtNumber(lang, n);
+const { t } = useT(lang);
+
+const desc =
+  t("features.everythingGurbaniSoulDoes");
+
+const ANGS = fmt(FACTS.angs);
+
+// The 1.4.9 surfaces. Each list fills with the app's own screenshots (src/assets/app, provenance in
+// SHOTS.md); while one is empty its chapter shows its copy and figures alone. Themes and Explore
+// (Constellation) have no verified 1.4.9 shot yet.
+const vaarShots: { src: ImageMetadata; alt: string; label?: string }[] = [
+  { src: vaarWeave, label: t("features.theWeave"),
+    alt: t("features.maajhKiVaarOn") },
+  { src: vaarReader, label: t("features.theReader"),
+    alt: t("features.maajhKiVaarOpen") },
+];
+const indexShots: { src: ImageMetadata; alt: string; label?: string }[] = [
+  { src: indexShot, label: t("features.theSaroop"),
+    alt: t("features.theIndexOnIphone") },
+  { src: raagGauri, label: t("features.aRaagSPage"),
+    alt: t("features.raagGauriSPage") },
+];
+const themeShots: { src: ImageMetadata; alt: string; label?: string }[] = [];
+const voiceShots: { src: ImageMetadata; alt: string; label?: string }[] = [
+  { src: voiceM9, label: t("features.aVoiceSPage"),
+    alt: t("features.thePageForGuru") },
+  { src: compareShot, label: t("features.compare"),
+    alt: t("features.compareOnIphoneGuru") },
+];
+const exploreShots: { src: ImageMetadata; alt: string; label?: string }[] = [];
+
+// At a glance — nine rows, each linking to its chapter below (a hairline 3×3 grid).
+const glance = [
+  { id: "reader", t: t("features.readTheWholeGranth"), d: t("features.allAngsInSant2", { angs: String(ANGS) }) },
+  { id: "search", t: t("features.searchHowYouRemember"), d: t("features.byWordBySound") },
+  { id: "hukam", t: t("features.theHukamOfThe4"), d: t("features.oneCompleteHukamFor") },
+  { id: "nitnem", t: t("features.nitnemWithYourPlace2"), d: t("features.theDailyBanisBy2") },
+  { id: "raag-clock", t: t("features.theRaagClock"), d: t("features.whichRaagsBelongTo") },
+  { id: "vaars", t: t("features.theVaarsAsPrinted"), d: t("features.allVaarsPauriBy", { vaars: String(FACTS.vaars) }) },
+  { id: "index", t: t("features.anIndexInSaroop"), d: t("features.theGranthFromAng", { angs: String(ANGS), raags: String(FACTS.raags) }) },
+  { id: "themes", t: t("features.themes2", { themes: String(FACTS.themes) }), d: t("features.aPageForEvery") },
+  { id: "voices", t: t("features.theVoicesOfThe2"), d: t("features.allVoicesAPage", { voices: String(FACTS.voices) }) },
+];
+
+const accents = [
+  { src: accentSoul, name: t("features.soul") },
+  { src: accentSaffron, name: t("features.saffron") },
+  { src: accentGold, name: t("features.gold") },
+  { src: accentIndigo, name: t("features.indigo") },
+  { src: accentTeal, name: t("features.teal") },
+];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL, inLanguage: siteLanguages() },
+    {
+      "@type": "WebPage",
+      name: t("features.featuresGurbaniSoul2"),
+      description: desc,
+      url: new URL(L("/features"), SITE_URL).href,
+      inLanguage: LOCALES[lang].htmlLang,
+      isPartOf: { "@type": "WebSite", name: "Gurbani Soul", url: SITE_URL },
+    },
+  ],
+};
+---
+<Marketing title={t("features.featuresGurbaniSoul")} description={desc} path={L("/features")}>
+  <JsonLd slot="head" data={jsonLd} />
+  <MarketingNav overHero={false} />
+
+  <header class="page-hero">
+    <div class="wrap">
+      <p class="eyebrow">{t("features.everythingOnYourDevice")}</p>
+      <h1>{t("features.madeForReadingNot")}</h1>
+      <span class="gold-hair" aria-hidden="true"></span>
+      <p class="lede">{t("features.theWholeGranthThe")}</p>
+    </div>
+  </header>
+
+  <!-- At a glance: nine capabilities, each anchoring its chapter -->
+  <section class="sec-thin glance-sec" aria-labelledby="glance-h">
+    <div class="wrap">
+      <h2 id="glance-h" class="glance-h">{t("features.atAGlance")}</h2>
+      <dl class="feat-list">
+        {glance.map((f) => (
+          <div class="feat-row reveal">
+            <dt><a href={`#${f.id}`}>{f.t}</a></dt>
+            <dd>{f.d}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <!-- 1 · READER — full-width iPad, editorial -->
+  <section class="sec surface-paper hair-top" id="reader" data-chapter="reader">
+    <div class="wrap">
+      <div class="story-head reveal">
+        <p class="chapter-no"><span>01</span> {t("features.read")}</p>
+        <h2 class="h-story">{t("features.theWholeGranthSet")}</h2>
+        <p class="body-lg">{t("features.allAngsInSant", { angs: String(ANGS) })}</p>
+      </div>
+      <div class="reader-wide reveal" data-delay="1">
+        <DeviceFrame kind="ipad" frame={false} src={ipadReader} sizes="(min-width: 1240px) 1160px, 94vw"
+          alt={t("features.readerOnIpadIn")} />
+      </div>
+    </div>
+  </section>
+
+  <!-- Saroop strip — before / after -->
+  <section class="sec surface-warm" id="saroop" data-chapter="saroop">
+    <div class="wrap story-grid story-grid--6-6">
+      <div class="story-text reveal">
+        <p class="eyebrow">{t("features.traditionalSaroop")}</p>
+        <h2 class="h-story">{t("features.twoWaysToDraw")}</h2>
+        <p class="body-lg">{t("features.traditionalSaroopDrawsThe")}</p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="pair pair--shots">
+          <DeviceFrame frame={false} src={saroopOff} label={t("features.saroopOff")} alt={t("features.readerOnIphoneAt")} />
+          <DeviceFrame frame={false} src={saroopOn} label={t("features.saroopOnDefault")} alt={t("features.readerOnIphoneAt2")} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · SEARCH -->
+  <section class="sec surface-paper" id="search" data-chapter="search">
+    <div class="wrap story-grid">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>02</span> {t("features.search")}</p>
+        <h2 class="h-story">{t("features.searchTheWayYou")}</h2>
+        <p class="body-lg">{t("features.aWordInGurmukhi")}</p>
+        <p class="body-lg">{t("features.verifyChecksALine")}</p>
+        <ul class="factrail detail-row">
+          <li>{t("features.auto")}</li><li>{t("features.gurmukhi")}</li><li>{t("features.roman")}</li><li>{t("features.firstLetters")}</li><li>{t("features.theme")}</li><li>{t("features.verify")}</li>
+        </ul>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="pair">
+          <DeviceFrame src={searchRoman} alt={t("features.searchOnIphoneThe")} />
+          <DeviceFrame src={verifyShot} alt={t("features.verifyOnIphoneA")} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · HUKAM -->
+  <section class="sec surface-paper hair-top" id="hukam" data-chapter="hukam">
+    <div class="wrap story-grid story-grid--6-6 story--flip">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>03</span> {t("features.hukam")}</p>
+        <h2 class="h-story">{t("features.theHukamOfThe")}</h2>
+        <p class="body-lg">{t("features.theHukamOfThe2")}</p>
+        <p class="body-lg">{t("features.eitherWayItIs")}</p>
+        <p class="detail">{t("features.theHukamOfThe3")}</p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="stage">
+          <DeviceFrame src={hukamShot} alt={t("features.aHukamOpenOn")} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · NITNEM -->
+  <section class="sec surface-warm" id="nitnem" data-chapter="nitnem">
+    <div class="wrap story-grid">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>04</span> {t("features.nitnem")}</p>
+        <h2 class="h-story">{t("features.nitnemWithYourPlace")}</h2>
+        <p class="body-lg">{t("features.theDailyBanisBy")}</p>
+        <p class="body-lg">{t("features.shortLineBanisSuch")}</p>
+        <p class="detail">{t("features.banisFromSriGuru")}</p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="stage stage--ipad">
+          <DeviceFrame kind="ipad" src={ipadNitnem} alt={t("features.nitnemOnIpadIn")} />
+          <div class="overlap media-secondary">
+            <DeviceFrame src={journeyShot} sizes="200px" alt={t("features.nitnemReadingJourneyOn")} />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · RAAG CLOCK (dark) -->
+  <section class="sec surface-ink" id="raag-clock" data-theme="dark" data-chapter="raag-clock">
+    <div class="wrap story-grid story--flip">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>05</span> {t("features.theWatch")}</p>
+        <h2 class="h-story">{t("features.eightWatchesRaagsOne", { raags: String(spell(FACTS.raags)), raagsN: String(FACTS.raags) })}</h2>
+        <p class="body-lg">{t("features.theDayIsDivided")}</p>
+        <p class="cta-row"><a class="btn ghost" href={L("/watch")} data-astro-prefetch>{t("features.moreAboutTheWatch")}</a></p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="pair wash">
+          <DeviceFrame src={clockDark} label={t("features.fixedHours")} alt={t("features.raagClockOnIphone")} />
+          <DeviceFrame src={clockSolar} label={t("features.sunriseAndSunset")} alt={t("features.raagClockOnIphone2")} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · VAARS -->
+  <FeatureChapter id="vaars" no="06" label={t("features.vaars")} title={t("features.theVaarsWovenAs")} shots={vaarShots}
+    figures={[
+      { n: fmt(FACTS.vaars), l: t("features.vaars2") },
+      { n: fmt(FACTS.vaar_pauris), l: t("features.pauris") },
+      { n: fmt(FACTS.vaar_saloks), l: t("features.saloksSetBesideThem") },
+    ]}
+    figuresLabel={t("features.theVaarsCountedAs")}>
+    <p class="body-lg">{t("features.allVaarsEachWith", { vaars: String(FACTS.vaars) })}</p>
+    <p class="body-lg">{t("features.theReaderCarriesYou")}</p>
+    <p class="detail">{t("features.askSiriToRead")}</p>
+  </FeatureChapter>
+
+  <!-- 7 · INDEX -->
+  <FeatureChapter id="index" no="07" label={t("features.index")} title={t("features.anIndexThatFollows")} surface="warm" flip shots={indexShots}
+    figures={[
+      { n: ANGS, l: t("features.angsFromTheFirst") },
+      { n: fmt(FACTS.raags), l: t("features.raagsEachWithIts") },
+    ]}
+    figuresLabel={t("features.theIndexInNumbers")}>
+    <p class="body-lg">{t("features.theIndexLaysThe", { angs: String(ANGS), raags: String(FACTS.raags) })}</p>
+    <p class="body-lg">{t("features.inThisHourGathers")}</p>
+    <p class="detail">{t("features.aRaagSTraditional")}</p>
+  </FeatureChapter>
+
+  <!-- 8 · THEMES -->
+  <FeatureChapter id="themes" no="08" label={t("features.themes")} title={t("features.themesAPageFor", { themes: String(FACTS.themes) })} shots={themeShots}
+    figures={[
+      { n: fmt(FACTS.themes), l: t("features.themesEachWithIts") },
+      { n: fmt(FACTS.themed_lines), l: t("features.linesOfTheGranth") },
+    ]}
+    figuresLabel={t("features.themesInNumbers")}>
+    <p class="body-lg">{t("features.themesTracesIdeasAcross")}</p>
+    <p class="body-lg">{t("features.yourThemesShowsWhich")}</p>
+    <p class="detail">{t("features.aThemeSNumber")}</p>
+  </FeatureChapter>
+
+  <!-- 9 · VOICES -->
+  <FeatureChapter id="voices" no="09" label={t("features.voices")} title={t("features.voicesOneGranth", { voices: String(FACTS.voices) })} surface="warm" flip shots={voiceShots}
+    figures={[
+      { n: fmt(FACTS.voices), l: t("features.voicesWithBaniIn") },
+      { n: fmt(FACTS.voice_traditions), l: t("features.traditionsGurusBhagatsBhatts") },
+      { n: t("features.centuriesSpan", { firstOrdinal: ordinal(FACTS.voices_first_century), lastOrdinal: ordinal(FACTS.voices_last_century), ...CENTURY_VALUES }), l: t("features.centuriesTheirDatedLives") },
+    ]}
+    figuresLabel={t("features.theVoicesOfThe")}>
+    <p class="body-lg">{t("features.lineageFollowsEveryVoice", { voiceCenturies: String(VOICE_CENTURIES), ...CENTURY_VALUES })}</p>
+    <p class="body-lg">{t("features.inInsightsTheGranth")}</p>
+    <p class="detail">{t("features.whoWroteEachLine")}</p>
+  </FeatureChapter>
+
+  <!-- 10 · WIDGETS, SIRI AND SPOTLIGHT -->
+  <section class="sec surface-paper" id="widgets" data-chapter="widgets">
+    <div class="wrap story-grid story-grid--4-8">
+      <div class="story-text reveal">
+        <p class="chapter-no"><span>10</span> {t("features.atAGlance2")}</p>
+        <h2 class="h-story">{t("features.onYourHomeScreen")}</h2>
+        <p class="body-lg">{t("features.threeWidgetsTheRaag")}</p>
+        <p class="detail">{t("features.siriTodaySHukam", { themes: String(FACTS.themes) })}</p>
+      </div>
+      <div class="story-media reveal" data-delay="1">
+        <div class="widgets">
+          <div class="wrow wrow--rev">
+            <figure class="widget widget--m"><Image src={wHukamDark} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt={t("features.hukamOfTheDay")} /></figure>
+            <figure class="widget widget--s"><Image src={wRaag} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt={t("features.raagNowWidgetSmall")} /></figure>
+          </div>
+          <div class="wrow">
+            <figure class="widget widget--s"><Image src={wNitnemSmall} widths={[240, 480]} sizes="(min-width: 980px) 230px, 30vw" loading="lazy" decoding="async" alt={t("features.nitnemWidgetSmallThe")} /></figure>
+            <figure class="widget widget--m"><Image src={wNitnemDark} widths={[500, 1000]} sizes="(min-width: 980px) 500px, 64vw" loading="lazy" decoding="async" alt={t("features.nitnemWidgetMediumIn")} /></figure>
+          </div>
+          <figure class="la">
+            <div class="la-card"><Image src={laCard} widths={[450, 900]} sizes="(min-width: 980px) 740px, 92vw" loading="lazy" decoding="async" alt={t("features.liveActivityOnThe")} /></div>
+            <figcaption>{t("features.liveActivityOnThe2")}</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · EXPLORE -->
+  <FeatureChapter id="explore" no="11" label={t("features.explore")} title={t("features.sevenWaysIntoThe")} surface="warm" shots={exploreShots}>
+    <p class="body-lg">{t("features.exploreGathersThemIn")}</p>
+    <p class="body-lg">{t("features.constellationShowsWhichThemes", { themes: String(FACTS.themes) })}</p>
+  </FeatureChapter>
+
+  <!-- Photo band (dark scope) — between two light chapters, never beside Gurmukhi text -->
+  <PhotoBand src={widePhoto} position="center 55%"
+    alt={t("features.sriHarmandirSahibAcross")}>
+    <p class="h-statement">{t("features.quietEnoughToHear")}</p>
+    <p class="pb-sub">{t("features.aPlaceToRead")}</p>
+  </PhotoBand>
+
+  <!-- Display: the accent strip -->
+  <section class="sec surface-warm" id="accents" data-chapter="accents">
+    <div class="wrap">
+      <div class="story-head reveal">
+        <p class="eyebrow">{t("features.display")}</p>
+        <h2 class="h-story">{t("features.fiveAccentsGoldLeads")}</h2>
+        <p class="body-lg">{t("features.soulGoldByDefault")}</p>
+      </div>
+      <div class="accent-box reveal" data-delay="1" tabindex="0" role="region" aria-label={t("features.theFiveAccents")}>
+      <ul class="accent-strip">
+        {accents.map((a) => (
+          <li>
+            <figure class="shot">
+              <div class="shot-in"><Image src={a.src} widths={[240, 480]} sizes="(min-width: 980px) 220px, 44vw" loading="lazy" decoding="async" alt={t("features.readerOnIphoneAt3", { name: String(a.name) })} /></div>
+              <figcaption>{a.name}</figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 · CLOSING (dark) -->
+  <section class="sec surface-ink closing" id="verbatim" data-theme="dark" data-chapter="verbatim">
+    <div class="wrap closing-in reveal">
+      <span class="gold-hair" aria-hidden="true"></span>
+      <h2 class="h-statement">{t("features.nothingCorrectedNothingInvented")}</h2>
+      <p class="body-lg">{t("features.theTextIsReproduced")}</p>
+      <div class="cta-row">
+        <a class="btn" href={L("/privacy")}>{t("features.readThePrivacyPolicy")}</a>
+        <a class="btn ghost" href={L("/support")}>{t("features.getSupport")}</a>
+      </div>
+    </div>
+  </section>
+
+  <ContributeBand surface="paper" />
+
+  <MarketingFooter />
+
+  <style>
+    [data-chapter] { scroll-margin-top: 72px; }
+    .page-hero { padding: clamp(96px, 12vw, 150px) 0 clamp(16px, 3vw, 32px); }
+    .page-hero h1 { font-size: clamp(34px, 5.6vw, 60px); margin: 0 0 18px; max-width: 18ch; }
+    .page-hero .gold-hair { margin: 0 0 22px; }
+    .page-hero .lede { max-width: 56ch; color: var(--ink-soft); font-size: clamp(17px, 2vw, 20px); margin: 0; }
+
+    /* At a glance — hairline 3×3 grid */
+    .glance-h { font-family: var(--sans); font-size: 12.5px; font-weight: 700; letter-spacing: .14em; color: var(--accent-text); margin: 0 0 14px; }
+    .feat-list { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--line); }
+    .feat-row { padding: 20px 0; border-bottom: 1px solid var(--line); }
+    .feat-row dt { font-family: var(--serif-display); font-size: 19px; font-weight: 600; margin: 0 0 6px; }
+    .feat-row dt a { color: var(--ink); text-decoration: none; display: inline-flex; min-height: 32px; align-items: center; }
+    .feat-row dt a::after { content: "↓"; margin-left: 8px; color: var(--accent-text); font-family: var(--sans); font-size: 15px; }
+    .feat-row dt a:hover { text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 4px; }
+    .feat-row dd { margin: 0; color: var(--ink-soft); font-size: 15.5px; max-width: 46ch; }
+    @media (min-width: 720px) { .feat-list { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; } }
+    @media (min-width: 980px) { .feat-list { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 48px; } .feat-row { padding: 24px 0; } }
+
+    /* Reader — full-width editorial iPad */
+    .reader-wide :global(.shot--ipad) { max-width: 100%; }
+
+    /* Saroop pair — frame-less shots */
+    .pair--shots > :global(*) { flex-basis: 280px; }
+
+
+    /* Photo band sub-line */
+    .pb-sub { margin: 0 auto; max-width: 46ch; color: var(--ink-soft); font-size: clamp(16px, 1.8vw, 19px); }
+    :global(.photo-band) .h-statement { margin-bottom: 14px; }
+
+    /* Accent strip — 5-up; a snap row inside its own box on small screens */
+    .accent-strip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(12px, 2vw, 22px); }
+    .accent-strip :global(.shot-in) { box-shadow: none; aspect-ratio: 900 / 620; }
+    .accent-strip :global(.shot-in img) { height: 100%; object-fit: cover; object-position: top center; }
+    .accent-strip figcaption { text-align: center; margin-top: 10px; font-size: 14px; font-weight: 600; color: var(--ink-soft); }
+    .accent-box:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
+    @media (max-width: 979px) {
+      .accent-box { overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+      .accent-strip { display: flex; gap: 12px; }
+      .accent-strip li { flex: 0 0 min(62%, 240px); scroll-snap-align: start; }
+    }
+
+    /* Closing */
+    .closing-in { text-align: center; display: flex; flex-direction: column; align-items: center; }
+    .closing-in .h-statement { max-width: 18ch; }
+    .closing-in .body-lg { margin-left: auto; margin-right: auto; }
+    .closing-in .cta-row { justify-content: center; }
+  </style>
+</Marketing>
