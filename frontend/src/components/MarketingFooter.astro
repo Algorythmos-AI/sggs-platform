@@ -16,7 +16,7 @@ import LanguageSwitcher from "./LanguageSwitcher.astro";
 
 const lang = localeOf(Astro.url.pathname);
 const L = (href: string) => localizeHref(href, lang);
-const { t, rich } = useT(lang);
+const { t, rich, num } = useT(lang);
 
 // The first three Learn articles, in the curated LEARN_SLUGS order (drafts excluded).
 const order = new Map(LEARN_SLUGS.map((s, i) => [s, i]));
@@ -100,7 +100,7 @@ const columns: { title: string; links: { href: string; label: string; lang?: str
     </nav>
   </div>
   <div class="wrap mfoot-bottom">
-    <p class="mfoot-copy">{t("footer.copyright", { year: String(year) })}</p>
+    <p class="mfoot-copy">{t("footer.copyright", { year: num(year, { useGrouping: false }) })}</p>
   <div class="credits">
     {artwork.map((c) => (
       <p>{t("footer.artwork", { what: c.what, who: c.who })}</p>

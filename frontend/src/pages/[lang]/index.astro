@@ -49,6 +49,7 @@ const lang = Astro.params.lang as Locale;
 const L = (href: string) => localizeHref(href, lang);
 // Figures in the page's language: "1,430" (en), "1 430" (fr).
 const fmt = (n: number) => fmtNumber(lang, n);
+const chapterNo = (n: number) => fmtNumber(lang, n, { minimumIntegerDigits: 2 }); // "01" / "੦੧"
 const { t } = useT(lang);
 
 // Explore tiles: the app's own 1.4.9 screenshots (src/assets/app, provenance in SHOTS.md). The first
@@ -88,7 +89,7 @@ const proof: { n: string; l: string; count?: number }[] = [
   { n: fmt(FACTS.angs), l: t("home.proof.angs"), count: FACTS.angs },
   { n: fmt(FACTS.lines), l: t("home.proof.lines"), count: FACTS.lines },
   { n: fmt(FACTS.characters), l: t("home.proof.characters"), count: FACTS.characters },
-  { n: "0", l: t("home.proof.networkCalls") },
+  { n: fmt(0), l: t("home.proof.networkCalls") },
   { n: t("home.proof.none"), l: t("home.proof.dataCollected") },
 ];
 
@@ -231,7 +232,7 @@ const softwareApplication = {
   <section class="sec surface-paper" id="story-read" data-chapter="read">
     <div class="wrap story-grid">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>01</span> {t("home.read.chapter")}</p>
+        <p class="chapter-no"><span>{chapterNo(1)}</span> {t("home.read.chapter")}</p>
         <h2 class="h-story">{t("home.read.title")}</h2>
         <p class="body-lg">{t("home.read.body", { angs: fmt(FACTS.angs) })}</p>
         <ul class="factrail detail-row">
@@ -253,7 +254,7 @@ const softwareApplication = {
   <section class="sec surface-paper hair-top" id="story-search" data-chapter="search">
     <div class="wrap story-grid story-grid--6-6 story--flip">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>02</span> {t("home.search.chapter")}</p>
+        <p class="chapter-no"><span>{chapterNo(2)}</span> {t("home.search.chapter")}</p>
         <h2 class="h-story">{t("home.search.title")}</h2>
         <p class="body-lg">{t("home.search.body")}</p>
         <ul class="factrail detail-row">
@@ -280,7 +281,7 @@ const softwareApplication = {
   <section class="sec surface-warm" id="story-nitnem" data-chapter="nitnem">
     <div class="wrap story-grid">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>03</span> {t("home.nitnem.chapter")}</p>
+        <p class="chapter-no"><span>{chapterNo(3)}</span> {t("home.nitnem.chapter")}</p>
         <h2 class="h-story">{t("home.nitnem.title")}</h2>
         <p class="body-lg">{t("home.nitnem.body")}</p>
         <p class="detail">{t("home.nitnem.detail")}</p>
@@ -300,7 +301,7 @@ const softwareApplication = {
   <section class="sec surface-ink" id="story-watch" data-theme="dark" data-chapter="watch">
     <div class="wrap story-grid story-grid--7-5 story--flip">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>04</span> {t("home.watch.chapter")}</p>
+        <p class="chapter-no"><span>{chapterNo(4)}</span> {t("home.watch.chapter")}</p>
         <h2 class="h-story">{t("home.watch.title", { raagsWord: spell(FACTS.raags), raagsN: fmt(FACTS.raags) })}</h2>
         <p class="body-lg">{t("home.watch.body")}</p>
         <p class="cta-row"><a class="btn ghost" href={L("/watch")} data-astro-prefetch>{t("home.watch.cta")}</a></p>
@@ -317,7 +318,7 @@ const softwareApplication = {
   <section class="sec surface-paper" id="story-widgets" data-chapter="widgets">
     <div class="wrap story-grid story-grid--4-8">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>05</span> {t("home.widgets.chapter")}</p>
+        <p class="chapter-no"><span>{chapterNo(5)}</span> {t("home.widgets.chapter")}</p>
         <h2 class="h-story">{t("home.widgets.title")}</h2>
         <p class="body-lg">{t("home.widgets.body")}</p>
         <p class="detail">{t("home.widgets.detail")}</p>
@@ -345,7 +346,7 @@ const softwareApplication = {
   <section class="sec surface-warm" id="story-explore" data-chapter="explore">
     <div class="wrap">
       <div class="story-head reveal">
-        <p class="chapter-no"><span>06</span> {t("home.explore.chapter")}</p>
+        <p class="chapter-no"><span>{chapterNo(6)}</span> {t("home.explore.chapter")}</p>
         <h2 class="h-story">{t("home.explore.title")}</h2>
         <p class="body-lg">{t("home.explore.body", { vaars: fmt(FACTS.vaars), themes: fmt(FACTS.themes), voices: fmt(FACTS.voices), centuries: VOICE_CENTURIES, ...CENTURY_VALUES, first: fmt(FACTS.voices_first_century), last: fmt(FACTS.voices_last_century) })}</p>
         <p class="cta-row"><a class="link-more" href={L("/features#vaars")} data-astro-prefetch>{t("home.explore.cta")}</a></p>
@@ -372,7 +373,7 @@ const softwareApplication = {
   <section class="sec surface-ink" id="story-verbatim" data-theme="dark" data-chapter="verbatim">
     <div class="wrap story-grid">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>07</span> {t("home.verbatim.chapter")}</p>
+        <p class="chapter-no"><span>{chapterNo(7)}</span> {t("home.verbatim.chapter")}</p>
         <h2 class="h-statement">{t("home.verbatim.statement")}</h2>
         <p class="body-lg">{t("home.verbatim.body")}</p>
         <p class="never">{t("home.verbatim.never")}</p>
@@ -391,7 +392,7 @@ const softwareApplication = {
   <section class="sec surface-paper" id="story-private" data-chapter="private">
     <div class="wrap story-grid story-grid--7-5">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>08</span> {t("home.private.chapter")}</p>
+        <p class="chapter-no"><span>{chapterNo(8)}</span> {t("home.private.chapter")}</p>
         <h2 class="h-statement">{t("home.private.statement")}</h2>
         <p class="body-lg">{t("home.private.body")}</p>
         <ul class="factrail detail-row">
