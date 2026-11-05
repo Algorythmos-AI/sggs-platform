@@ -602,3 +602,15 @@ html.js-motion .reveal.in .draw { transform: none; transition: transform .6s cub
 :lang(pa) :is(em, i) { font-style: normal; font-weight: 600; }
 :lang(pa) * { font-synthesis: none; }
 :lang(pa) :is(.gm, .verse) { font-family: var(--gm); }        /* scripture keeps Sant Lipi */
+
+/* French runs ~20–35% longer than English, so on phones body prose may hyphenate (by the browser's
+   French dictionary, from lang="fr"). Headings, navigation, buttons and citations never do. Scripture
+   carries lang="pa", so these rules can never reach it. */
+@media (max-width: 767px) {
+  :lang(fr) :is(p, .lede, .hero-lede) {
+    hyphens: auto; -webkit-hyphens: auto; hyphenate-limit-chars: 8 4 4;   /* only long words, never «Don-nées» */
+  }
+}
+:lang(fr) :is(h1, h2, h3, h4, .h-story, .h-statement, .eyebrow, .cite, nav, nav *, button, button *, .btn, .btn *) {
+  hyphens: manual; -webkit-hyphens: manual;
+}
