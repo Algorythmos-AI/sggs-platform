@@ -3,6 +3,21 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.6.1] — 2026-11-05
+
+gurbanisoul.com now speaks Punjabi. The marketing pages are live at `/pa/…` in Gurmukhi, signed off on the rendered pages, and a browser that asks for Punjabi first is sent there from `gurbanisoul.com/`. English stays the default; French is still off. The scripture is unchanged.
+
+### Added
+- **The Punjabi site** (#349): home, Features, The watch, Learn, Support, Privacy and Contribute at `/pa/…`, with the language switcher (ਪੰਜਾਬੀ · English) in the nav, the mobile menu and the footer. Signed review record `reviews/pa.json` (G-PA, and G4 for Privacy and Contribute) pins the exact catalog. The app, the Knowledge Base, checkout and support replies stay in English, and the pages say so where it matters.
+- **Gurmukhi numerals and wordmark on Punjabi pages** (#349): counts, dates, times, amounts, chapter numbers and the year are written ੧੨੩ (Indian grouping, ੧੬,੪੩,੩੮੫); the wordmark is ਗੁਰਬਾਣੀ ਸੋਲ. Ang citations stay in Western digits in every language (ਅੰਗ 1430), to match the printed index, the app and every link.
+
+### Changed
+- `verify_prod.py` expects the 1.6.0 redirects: `/privacy` and `/support` reach their `/en` page in one permanent hop, `/` in one temporary hop (#348).
+- Repo gates for a multilingual site: a link may leave its language only when its `hreflang` names the target; title and description limits count shown characters, so Gurmukhi combining marks do not count against them (#349).
+
+### Fixed
+- The Raag Clock page's button to the English-only article on the 31 raags now says it is in English and carries `hreflang="en"` (#349).
+
 ## [1.6.0] — 2026-11-05
 
 gurbanisoul.com is ready to speak more than one language. Every marketing page now lives under its language (`/en/…`), with the old addresses redirecting there for good; French and Punjabi translations are complete drafts waiting for fluent reviewers, and are not switched on. English readers see the same pages. Dataset 1.4.0 shows English that covers several printed lines once, under the group. The scripture is unchanged.
