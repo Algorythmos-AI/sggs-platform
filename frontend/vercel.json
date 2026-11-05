@@ -5,6 +5,18 @@
   "redirects": [
     {
       "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": "^\\s*pa(?:[-_,;].*)?$"
+        }
+      ],
+      "destination": "/pa",
+      "statusCode": 302
+    },
+    {
+      "source": "/",
       "destination": "/en",
       "statusCode": 302
     },
@@ -67,16 +79,6 @@
       "source": "/contribute/:rest+",
       "destination": "/en/contribute/:rest+",
       "permanent": true
-    },
-    {
-      "source": "/pa",
-      "destination": "/en",
-      "statusCode": 302
-    },
-    {
-      "source": "/pa/:rest+",
-      "destination": "/en/:rest+",
-      "statusCode": 302
     },
     {
       "source": "/fr",
