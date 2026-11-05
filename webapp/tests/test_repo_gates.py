@@ -821,6 +821,19 @@ class SeoInvariants(unittest.TestCase):
             self.assertEqual(back, got, f"{route}: hreflang is not reciprocal with {href}")
 
 
+
+# Length limits are about what a results page or a card shows. Gurmukhi vowel signs, the addak and
+# tippi are combining marks (Unicode Mn) that sit on a letter and add no width, so they do not count.
+def _shown_len(s):
+    import unicodedata
+    return sum(1 for ch in s if unicodedata.category(ch) != "Mn")
+
+
+# The wordmark in each language (frontend/src/i18n/messages/*.json shell.brandName).
+_BRANDS = tuple(sorted({json.loads(f.read_text(encoding="utf-8")).get("shell", {}).get("brandName", "Gurbani Soul")
+                        for f in (ROOT / "frontend" / "src" / "i18n" / "messages").glob("*.json")
+                        if not f.name.endswith(".lock.json")} | {"Gurbani Soul"}))
+
 class ShareCardMeta(unittest.TestCase):
     """Every built page unfurls as a complete, versioned share card (frontend/src/og, share.ts).
 
@@ -869,10 +882,10 @@ class ShareCardMeta(unittest.TestCase):
             self.assertEqual(one["og:description"], one["twitter:description"], route)
             self.assertEqual(one["og:image:alt"], one["twitter:image:alt"], route)
             self.assertRegex(one["og:image"], r"^https://gurbanisoul\.com/og/v\d+/[a-z0-9-]+\.png$", route)
-            self.assertLessEqual(len(one["og:title"]), 60, f"{route}: og:title over 60 characters")
-            self.assertGreaterEqual(len(one["og:description"]), 40, f"{route}: og:description under 40")
-            self.assertLessEqual(len(one["og:description"]), 125, f"{route}: og:description over 125 characters")
-            self.assertIn("Gurbani Soul", one["og:image:alt"], route)
+            self.assertLessEqual(_shown_len(one["og:title"]), 60, f"{route}: og:title over 60 characters")
+            self.assertGreaterEqual(_shown_len(one["og:description"]), 40, f"{route}: og:description under 40")
+            self.assertLessEqual(_shown_len(one["og:description"]), 125, f"{route}: og:description over 125 characters")
+            self.assertTrue(any(b in one["og:image:alt"] for b in _BRANDS), f"{route}: og:image:alt names no wordmark")
 
     def test_every_card_is_a_1200x630_png_within_budget(self):
         cards = sorted((STATIC / "og" / "v2").glob("*.png"))
@@ -1052,7 +1065,15 @@ class LanguageRouting(unittest.TestCase):
                 html = p.read_text(encoding="utf-8")
                 route = "/" + p.parent.relative_to(STATIC).as_posix()
                 self.assertRegex(html, rf'<html lang="{re.escape(want)}"', f"{route}: wrong <html lang>")
+                # A link may leave this language only when it says where it goes: the switcher's
+                # links and the "in English" links carry hreflang naming the target language.
+                declared = {m.group(1) for m in re.finditer(r'<a\b[^>]*\bhref="([^"]+)"[^>]*\bhreflang="([a-z]+)"', html)
+                            if m.group(1).split("#")[0].split("?")[0].split("/")[1:2] == [m.group(2)]}
+                declared |= {m.group(2) for m in re.finditer(r'<a\b[^>]*\bhreflang="([a-z]+)"[^>]*\bhref="([^"]+)"', html)
+                             if m.group(2).split("#")[0].split("?")[0].split("/")[1:2] == [m.group(1)]}
                 for href in _HREF.findall(html):
+                    if href in declared:
+                        continue
                     path = href.split("#")[0].split("?")[0]
                     if not path.startswith("/") or path.startswith("//"):
                         continue

@@ -18,6 +18,7 @@ articles themselves). Stdlib only.
 from __future__ import annotations
 
 import fnmatch
+import json
 import re
 import sys
 from html.parser import HTMLParser
@@ -55,7 +56,10 @@ PAGES = {
                               ("figcaption", "class", "cite"), ("p", "class", "art-meta"), ("title", None, None)],
 }
 ATTRS = ("aria-label", "alt", "title", "placeholder")
-ALLOWED = {"Gurbani Soul"}
+# Never translated: the wordmark, and each language's own name and code as the language switcher
+# shows it ("English" / "EN", "Français" / "FR") — a language is always named in itself.
+_LOCALES = json.loads((Path(__file__).resolve().parents[2] / "frontend/src/i18n/locales.json").read_text(encoding="utf-8"))["locales"]
+ALLOWED = {"Gurbani Soul"} | {v["name"] for v in _LOCALES.values()} | {code.upper() for code in _LOCALES}
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
 # A date formatted per language by i18n/format.ts (fmtDate): "22 September 2026".
 DATE = re.compile(r"\d{1,2} \w+ \d{4}")

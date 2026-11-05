@@ -11,6 +11,7 @@ import "../styles/marketing.css";
 import { LOCALES } from "../i18n/locales";
 import { localeOf } from "../i18n/paths";
 import { useT } from "../i18n/t";
+import { intlTag } from "../i18n/format";
 export interface Props {
   title: string;
   description: string;
@@ -23,7 +24,7 @@ const locale = LOCALES[lang];
 const { t } = useT(lang);
 ---
 <!DOCTYPE html>
-<html lang={locale.htmlLang}>
+<html lang={locale.htmlLang} data-intl={intlTag(lang)}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />

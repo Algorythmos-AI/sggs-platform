@@ -1,0 +1,16 @@
+{
+  "lang": "pa",
+  "reviewer": "Sam Kalaliya (owner, Algorythmos Pty Ltd)",
+  "date": "2026-11-05",
+  "catalogSha256": "0d8a30bcbd1791a412bee26ae7174e57f01a717ccd5276ca19173ebe38290e49",
+  "gates": {
+    "G-PA": "signed: read on the rendered /pa pages (phone and desktop) from the review pack",
+    "G4": "Privacy and Contribute approved by the owner for Algorythmos Pty Ltd; no external counsel review"
+  },
+  "decisions": {
+    "wordmark": "ਗੁਰਬਾਣੀ ਸੋਲ (Gurmukhi); the App Store name stays Gurbani Soul",
+    "numerals": "Gurmukhi (੧੨੩) for interface numbers; Ang numbers stay Western",
+    "default": "English stays the site default; Punjabi is enabled first"
+  },
+  "notes": "English governs the legal pages. The app, Knowledge Base, newsletter, Stripe checkout and support replies are in English, and the pages say so."
+}
