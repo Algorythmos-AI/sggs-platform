@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Verify SGGS production: API identity + health + heading regression + web domain."""
-import argparse, json, subprocess, sys, urllib.error, urllib.request
+import argparse, json, subprocess, sys, urllib.error, urllib.parse, urllib.request
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, *a, **k): return None
@@ -44,19 +44,27 @@ def main():
         s, _ = get(base + "/api/shabad/2844")
         check(f"{label} gap comp 2844 → 404", s == 404, f"HTTP {s}")
 
-    # Directional guard: the canonical host must serve /privacy and /support 200 WITHOUT a
-    # redirect hop (App Store URLs should not bounce). Catches a flipped Vercel redirect.
+    # Directional guard (since 1.6.0 the marketing pages live under /<lang>): the App Store
+    # URLs /privacy and /support must reach their /en page in exactly ONE permanent hop, and
+    # the bare / in one temporary (negotiated) hop; each target must be 200 with no further
+    # hop. Catches a flipped, missing or looping Vercel redirect.
     if a.web.rstrip("/").endswith("gurbanisoul.com"):
         print(f"[canonical] {a.web}")
         opener = urllib.request.build_opener(_NoRedirect)
-        for path in ("/privacy", "/support", "/"):
+        def hop(path):
             try:
-                code = opener.open(urllib.request.Request(a.web + path, headers={"User-Agent": "sggs-verify"}), timeout=60).status
+                r = opener.open(urllib.request.Request(a.web + path, headers={"User-Agent": "sggs-verify"}), timeout=60)
+                return r.status, None
             except urllib.error.HTTPError as e:
-                code = e.code
+                loc = e.headers.get("Location") or ""
+                return e.code, urllib.parse.urlsplit(loc).path or None
             except Exception as e:
-                code = str(e)
-            check(f"canonical {path} is 200 (no redirect)", code == 200, f"HTTP {code}")
+                return str(e), None
+        for path, want_code, want_to in (("/privacy", 308, "/en/privacy"), ("/support", 308, "/en/support"), ("/", 302, "/en")):
+            code, to = hop(path)
+            check(f"canonical {path} → {want_code} {want_to}", code == want_code and to == want_to, f"HTTP {code} → {to}")
+            code, to = hop(want_to)
+            check(f"canonical {want_to} is 200 (no further redirect)", code == 200, f"HTTP {code}" + (f" → {to}" if to else ""))
 
     try:
         out = subprocess.run(["vercel", "inspect", a.web.replace("https://", ""), "--scope", "skalaliyas-projects"],
