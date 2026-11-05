@@ -10,6 +10,7 @@ import kbThemes from "../generated/kb-themes.json";
 import { LOCALES } from "../i18n/locales";
 import { localeOf } from "../i18n/paths";
 import { alternates as altsFor } from "../i18n/content";
+import { useT } from "../i18n/t";
 
 export interface Props {
   title: string;
@@ -30,6 +31,7 @@ const { title, description, path, ogImage, imageAlt: ownAlt, type = "website", t
 
 const canonical = new URL(path, SITE_URL).href;
 const ogLocale = LOCALES[localeOf(path)].ogLocale;
+const brand = useT(localeOf(path)).t("shell.brandName"); // the wordmark in the page's language
 // The page's language versions (none outside the marketing site), and their og:locale values.
 const alternates = altsFor(path).map((a) => ({ ...a, href: new URL(a.href, SITE_URL).href }));
 const ogAlternates = alternates.filter((a) => a.lang && LOCALES[a.lang].ogLocale !== ogLocale).map((a) => LOCALES[a.lang!].ogLocale);
@@ -43,7 +45,7 @@ const share = SHARE[slug] && !ogImage ? SHARE[slug] : undefined;
 const socialTitle = share?.ogTitle ?? title;
 const social = share?.social ?? description;
 // Alt text for the card: what the image says, for screen readers in every client that reads it.
-const imageAlt = ownAlt ?? (share ? [share.eyebrow, share.title].filter(Boolean).join(": ") + " (Gurbani Soul)" : `${socialTitle} (Gurbani Soul)`);
+const imageAlt = ownAlt ?? (share ? [share.eyebrow, share.title].filter(Boolean).join(": ") + ` (${brand})` : `${socialTitle} (${brand})`);
 const kbChrome = kbThemes.themes.find((t) => t.id === kbThemes.default)!.chrome.light;
 ---
 <link rel="canonical" href={canonical} />
@@ -51,7 +53,7 @@ const kbChrome = kbThemes.themes.find((t) => t.id === kbThemes.default)!.chrome.
 <meta name="description" content={description} />
 
 <meta property="og:type" content={type} />
-<meta property="og:site_name" content="Gurbani Soul" />
+<meta property="og:site_name" content={brand} />
 <meta property="og:locale" content={ogLocale} />
 {ogAlternates.map((l) => <meta property="og:locale:alternate" content={l} />)}
 <meta property="og:title" content={socialTitle} />
@@ -76,5 +78,5 @@ const kbChrome = kbThemes.themes.find((t) => t.id === kbThemes.default)!.chrome.
 
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="Gurbani Soul" />
+<meta name="apple-mobile-web-app-title" content={brand} />
 {APP_STORE_LIVE && <meta name="apple-itunes-app" content={`app-id=${APP_STORE_ID}`} />}

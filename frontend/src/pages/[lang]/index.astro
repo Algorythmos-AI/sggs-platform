@@ -39,7 +39,7 @@ import voiceShot from '../../assets/app/iphone-voice-m9-light.png';
 import compareShot from '../../assets/app/iphone-compare-light.png';
 import { localeStaticPaths, type Locale } from "../../i18n/locales";
 import { localizeHref } from "../../i18n/paths";
-import { fmtNumber } from "../../i18n/format";
+import { fmtAng, fmtNumber } from "../../i18n/format";
 import { ENABLED_LOCALES, LOCALES } from "../../i18n/locales";
 import { learnHref, articleLangFor } from "../../i18n/content";
 import { useT } from "../../i18n/t";
@@ -55,10 +55,10 @@ const { t } = useT(lang);
 // is drawn tall. Themes and Constellation have no verified 1.4.9 shot yet, so they stay copy only.
 const exploreTiles: { src: ImageMetadata; alt: string; name: string; caption: string }[] = [
   { src: vaarsShot, name: t("home.explore.tiles.vaars.name"),
-    caption: t("home.explore.tiles.vaars.caption", { vaars: String(FACTS.vaars) }),
+    caption: t("home.explore.tiles.vaars.caption", { vaars: fmt(FACTS.vaars) }),
     alt: t("home.explore.tiles.vaars.alt") },
   { src: indexShot, name: t("home.explore.tiles.index.name"),
-    caption: t("home.explore.tiles.index.caption", { angs: fmt(FACTS.angs) }),
+    caption: t("home.explore.tiles.index.caption", { angs: fmtAng(lang, FACTS.angs) }),
     alt: t("home.explore.tiles.index.alt") },
   { src: formsShot, name: t("home.explore.tiles.forms.name"),
     caption: t("home.explore.tiles.forms.caption"),
@@ -188,7 +188,7 @@ const softwareApplication = {
       <div class="hero-grid">
         <div class="hero-copy">
           <p class="eyebrow hero-rise" style="--i:0">{t("home.hero.eyebrow")}</p>
-          <h1 class="hero-rise" style="--i:1">Gurbani Soul</h1>
+          <h1 class="hero-rise" style="--i:1">{t("shell.brandName")}</h1>
           <p class="hero-lede hero-rise" style="--i:2">{t("home.hero.lede")}</p>
           <div class="hero-cta hero-rise" style="--i:3">
             {APP_STORE_LIVE
@@ -301,7 +301,7 @@ const softwareApplication = {
     <div class="wrap story-grid story-grid--7-5 story--flip">
       <div class="story-text reveal">
         <p class="chapter-no"><span>04</span> {t("home.watch.chapter")}</p>
-        <h2 class="h-story">{t("home.watch.title", { raagsWord: spell(FACTS.raags), raagsN: String(FACTS.raags) })}</h2>
+        <h2 class="h-story">{t("home.watch.title", { raagsWord: spell(FACTS.raags), raagsN: fmt(FACTS.raags) })}</h2>
         <p class="body-lg">{t("home.watch.body")}</p>
         <p class="cta-row"><a class="btn ghost" href={L("/watch")} data-astro-prefetch>{t("home.watch.cta")}</a></p>
       </div>
@@ -347,7 +347,7 @@ const softwareApplication = {
       <div class="story-head reveal">
         <p class="chapter-no"><span>06</span> {t("home.explore.chapter")}</p>
         <h2 class="h-story">{t("home.explore.title")}</h2>
-        <p class="body-lg">{t("home.explore.body", { vaars: String(FACTS.vaars), themes: String(FACTS.themes), voices: String(FACTS.voices), centuries: VOICE_CENTURIES, ...CENTURY_VALUES })}</p>
+        <p class="body-lg">{t("home.explore.body", { vaars: fmt(FACTS.vaars), themes: fmt(FACTS.themes), voices: fmt(FACTS.voices), centuries: VOICE_CENTURIES, ...CENTURY_VALUES, first: fmt(FACTS.voices_first_century), last: fmt(FACTS.voices_last_century) })}</p>
         <p class="cta-row"><a class="link-more" href={L("/features#vaars")} data-astro-prefetch>{t("home.explore.cta")}</a></p>
       </div>
       {exploreTiles.length > 0
@@ -379,9 +379,9 @@ const softwareApplication = {
       </div>
       <div class="story-media">
         <ol class="steps">
-          <li class="reveal"><span class="n" aria-hidden="true">1</span><h3>{t("home.verbatim.reconciledTitle")}</h3><p>{t("home.verbatim.reconciledBody", { characters: fmt(FACTS.characters) })}</p></li>
-          <li class="reveal" data-delay="1"><span class="n" aria-hidden="true">2</span><h3>{t("home.verbatim.sealedTitle")}</h3><p>{t("home.verbatim.sealedBody")}</p></li>
-          <li class="reveal" data-delay="2"><span class="n" aria-hidden="true">3</span><h3>{t("home.verbatim.checkedTitle")}</h3><p>{t("home.verbatim.checkedBody")}</p></li>
+          <li class="reveal"><span class="n" aria-hidden="true">{fmt(1)}</span><h3>{t("home.verbatim.reconciledTitle")}</h3><p>{t("home.verbatim.reconciledBody", { characters: fmt(FACTS.characters) })}</p></li>
+          <li class="reveal" data-delay="1"><span class="n" aria-hidden="true">{fmt(2)}</span><h3>{t("home.verbatim.sealedTitle")}</h3><p>{t("home.verbatim.sealedBody")}</p></li>
+          <li class="reveal" data-delay="2"><span class="n" aria-hidden="true">{fmt(3)}</span><h3>{t("home.verbatim.checkedTitle")}</h3><p>{t("home.verbatim.checkedBody")}</p></li>
         </ol>
       </div>
     </div>

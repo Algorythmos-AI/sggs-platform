@@ -4,7 +4,7 @@
   "enabled": ["en"],
   "locales": {
     "en": { "htmlLang": "en", "intl": "en-GB", "ogLocale": "en_GB", "name": "English" },
-    "pa": { "htmlLang": "pa", "intl": "pa-IN", "ogLocale": "pa_IN", "name": "ਪੰਜਾਬੀ" },
+    "pa": { "htmlLang": "pa", "intl": "pa-IN", "numbering": "guru", "ogLocale": "pa_IN", "name": "ਪੰਜਾਬੀ" },
     "fr": { "htmlLang": "fr", "intl": "fr-FR", "ogLocale": "fr_FR", "name": "Français" }
   },
   "localizedPages": ["/", "/features", "/watch", "/learn", "/support", "/privacy", "/contribute"]

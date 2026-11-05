@@ -1,6 +1,7 @@
 {
   "shell": {
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "brandName": "Gurbani Soul"
   },
   "nav": {
     "primaryLabel": "Primary",

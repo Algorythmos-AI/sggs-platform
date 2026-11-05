@@ -9,7 +9,7 @@ import JsonLd from "../../components/JsonLd.astro";
 import { SITE_URL } from "../../site.ts";
 import { FACTS, spell } from "../../facts.ts";
 import raagData from "../../generated/landing-raags.json";
-import { fmtPaharRange } from "../../i18n/format";
+import { fmtNumber, fmtPaharRange } from "../../i18n/format";
 import ClientStrings from "../../components/ClientStrings.astro";
 import { ordinal } from "../../facts.ts";
 import clockDark from "../../assets/app/iphone-clock-dark.png";
@@ -70,7 +70,7 @@ const jsonLd = {
         <p class="eyebrow">{t("watch.theRaagClock")}</p>
         <h1>{t("watch.theWatchOfThe")}</h1>
         <span class="gold-hair" aria-hidden="true"></span>
-        <p class="lead">{t("watch.eightPaharsRaagsThe", { raags: String(spell(FACTS.raags)), raagsN: String(FACTS.raags) })}</p>
+        <p class="lead">{t("watch.eightPaharsRaagsThe", { raags: String(spell(FACTS.raags)), raagsN: fmtNumber(lang, FACTS.raags) })}</p>
       </div>
       <div class="story-media">
         <div class="stage wash">
@@ -123,7 +123,7 @@ const jsonLd = {
         <ol class="pline">
           {timeline.map((cell) => (
             <li class:list={["pcell", { night: cell.night, silent: cell.raags.length === 0 }]} data-p={cell.p}>
-              <p class="pc-no">{cell.p}</p>
+              <p class="pc-no">{fmtNumber(lang, cell.p)}</p>
               <p class="pc-label">{cell.label}</p>
               <p class="pc-range">{cell.range}</p>
               {cell.raags.length
