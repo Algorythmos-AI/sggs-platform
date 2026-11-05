@@ -3,6 +3,28 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.6.0] — 2026-11-05
+
+gurbanisoul.com is ready to speak more than one language. Every marketing page now lives under its language (`/en/…`), with the old addresses redirecting there for good; French and Punjabi translations are complete drafts waiting for fluent reviewers, and are not switched on. English readers see the same pages. Dataset 1.4.0 shows English that covers several printed lines once, under the group. The scripture is unchanged.
+
+### Added
+- **Language-prefixed marketing site** (#334): home, Features, The watch, Learn, Support, Privacy and Contribute are served at `/en/…`. Every old URL (including `/privacy` and `/support`, as entered in App Store Connect) answers with a permanent redirect to its English page; the bare `gurbanisoul.com/` sends each visitor to a language from their browser. The Knowledge Base, `/ang/N`, `/rss.xml` and the sitemap keep their addresses.
+- **One message catalog** (#335, #337–#340): every interface string on those pages comes from `frontend/src/i18n/messages/en.json` (ICU messages rendered at build time; no markup in messages; figures, dates and money formatted per language). A pseudo-locale build and a CI detector fail on any English typed into a page instead of the catalog.
+- **hreflang and per-language structured data** (#341): each marketing page names its language versions, matching the sitemap; Learn articles exist only in the languages they are published in.
+- **Translation workflow** (#342): `npm run i18n:status` (missing, stale, mismatched and unreviewed keys), signed review records per language, a gate that no translation contains a line of the Granth, and the wiki's translation guide, style guide and glossary.
+- **French and Punjabi drafts** (#343, #345), complete but **not enabled**: each needs a fluent reviewer's sign-off and the legal review of Privacy and Contribute before its language is switched on. Preview builds (`npm run build:preview`) show them on real pages.
+- **Language switcher** (#344), drawn only once a second language is enabled; the choice is kept in the browser's local storage (never a cookie) and named on the privacy page.
+
+### Changed
+- **Multi-line English (dataset 1.4.0, #333):** English that covers several printed lines shows once under the group, in the Reader, the composition sheet and search.
+- The wiki: 15 stale pages re-verified and a dead external link removed (#336).
+
+### Fixed
+- The Support page's FAQPage structured data pointed at the redirecting `/support` and carried a literal `&amp;` in one answer.
+
+### Data
+- **Dataset 1.4.0** (sggs-data#20): the English layer aligned in source order with multi-line spans. The Gurmukhi is byte-identical.
+
 ## [1.5.2] — 2026-10-29
 
 Shares look like Gurbani Soul everywhere, and gurbanisoul.com gets a calmer navigation and a more polished landing page. It ships on the website, the API and the iPhone app together. The dataset (1.3.0) and the scripture are unchanged.
