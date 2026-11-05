@@ -17,6 +17,18 @@
     },
     {
       "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": "^\\s*fr(?:[-_,;].*)?$"
+        }
+      ],
+      "destination": "/fr",
+      "statusCode": 302
+    },
+    {
+      "source": "/",
       "destination": "/en",
       "statusCode": 302
     },
@@ -79,16 +91,6 @@
       "source": "/contribute/:rest+",
       "destination": "/en/contribute/:rest+",
       "permanent": true
-    },
-    {
-      "source": "/fr",
-      "destination": "/en",
-      "statusCode": 302
-    },
-    {
-      "source": "/fr/:rest+",
-      "destination": "/en/:rest+",
-      "statusCode": 302
     }
   ],
   "rewrites": [

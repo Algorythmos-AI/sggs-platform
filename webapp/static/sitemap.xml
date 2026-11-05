@@ -7,6 +7,7 @@
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -16,6 +17,17 @@
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
+  </url>
+  <url>
+    <loc>https://gurbanisoul.com/fr</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en"/>
+    <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -25,6 +37,7 @@
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/features"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/features"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/features"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -34,6 +47,17 @@
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/features"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/features"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/features"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
+  </url>
+  <url>
+    <loc>https://gurbanisoul.com/fr/features</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/features"/>
+    <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/features"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/features"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -43,6 +67,7 @@
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/watch"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/watch"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/watch"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -52,6 +77,17 @@
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/watch"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/watch"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/watch"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
+  </url>
+  <url>
+    <loc>https://gurbanisoul.com/fr/watch</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/watch"/>
+    <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/watch"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/watch"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -145,6 +181,7 @@
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/privacy"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/privacy"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/privacy"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -154,6 +191,17 @@
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/privacy"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/privacy"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
+  </url>
+  <url>
+    <loc>https://gurbanisoul.com/fr/privacy</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/privacy"/>
+    <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/privacy"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/privacy"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -163,6 +211,7 @@
     <priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/support"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/support"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/support"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -172,6 +221,17 @@
     <priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/support"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/support"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/support"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
+  </url>
+  <url>
+    <loc>https://gurbanisoul.com/fr/support</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/support"/>
+    <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/support"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/support"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -181,6 +241,7 @@
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/contribute"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/contribute"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/contribute"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -190,6 +251,17 @@
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/contribute"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/contribute"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/contribute"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
+  </url>
+  <url>
+    <loc>https://gurbanisoul.com/fr/contribute</loc>
+    <lastmod>2026-10-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/contribute"/>
+    <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/contribute"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/contribute"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -199,6 +271,7 @@
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/learn"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/learn"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/learn"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>
@@ -208,6 +281,17 @@
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/learn"/>
     <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/learn"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/learn"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
+  </url>
+  <url>
+    <loc>https://gurbanisoul.com/fr/learn</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gurbanisoul.com/en/learn"/>
+    <xhtml:link rel="alternate" hreflang="pa" href="https://gurbanisoul.com/pa/learn"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://gurbanisoul.com/fr/learn"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gurbanisoul.com/"/>
   </url>
   <url>

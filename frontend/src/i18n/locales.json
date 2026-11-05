@@ -1,7 +1,7 @@
 {
   "_comment": "The site's languages. `enabled` is the list that builds and ships: a language joins it only when every marketing string is translated and its review record is signed (docs/i18n). The redirects in frontend/vercel.json are generated from this file: node scripts/gen-i18n-redirects.mjs (CI runs it with --check).",
   "default": "en",
-  "enabled": ["en", "pa"],
+  "enabled": ["en", "pa", "fr"],
   "locales": {
     "en": { "htmlLang": "en", "intl": "en-GB", "ogLocale": "en_GB", "name": "English" },
     "pa": { "htmlLang": "pa", "intl": "pa-IN", "numbering": "guru", "ogLocale": "pa_IN", "name": "ਪੰਜਾਬੀ" },
