@@ -54,7 +54,7 @@ const faqHtml = {
   yayya: () => `<span class="gm" lang="pa">੍ਯ੍ਯ</span>`,
 };
 const faqs = FAQ_IDS.map((id, i) => {
-  const parts = rich(`supportFaq.q${i + 1}.a` as MessageKey, { themes: String(FACTS.themes) });
+  const parts = rich(`supportFaq.q${i + 1}.a` as MessageKey, { themes: fmt(FACTS.themes) });
   return { id, q: t(`supportFaq.q${i + 1}.q` as MessageKey), a: richHtml(parts, faqHtml), text: richText(parts, { yayya: () => "੍ਯ੍ਯ" }) };
 });
 

@@ -25,10 +25,16 @@ const PSEUDO = import.meta.env.PUBLIC_I18N_PSEUDO === "1";
 export const useT = (locale: Locale) => {
   const catalog = CATALOGS[locale];
   if (!catalog) throw new Error(`i18n: no catalog for "${locale}"`);
-  const f = createFormatter(catalog, LOCALES[locale].intl, { pseudo: PSEUDO, fallback: locale === "en" ? undefined : en });
+  // The language's numbering system rides on the Intl tag (pa → "pa-IN-u-nu-guru", ੧੨੩), so ICU
+  // {n, number} and num() write the page's numerals; plural rules are unaffected. (format.ts holds
+  // the same rule for the page-level formatters, and fmtAng for Western Ang numbers.)
+  const { intl, numbering } = LOCALES[locale];
+  const tag = numbering ? `${intl}-u-nu-${numbering}` : intl;
+  const f = createFormatter(catalog, tag, { pseudo: PSEUDO, fallback: locale === "en" ? undefined : en });
   return {
     t: (key: MessageKey, values?: Record<string, unknown>): string => f.t(key, values),
     rich: (key: MessageKey, values?: Record<string, unknown>): RichPart[] => f.rich(key, values),
+    num: (n: number, opts: Intl.NumberFormatOptions = {}): string => new Intl.NumberFormat(tag, opts).format(n),
   };
 };
 

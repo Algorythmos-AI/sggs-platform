@@ -42,19 +42,21 @@ import { localeStaticPaths, type Locale } from "../../i18n/locales";
 import { useT } from "../../i18n/t";
 import { LOCALES, siteLanguages } from "../../i18n/locales";
 import { localizeHref } from "../../i18n/paths";
-import { fmtNumber } from "../../i18n/format";
+import { fmtAng, fmtNumber } from "../../i18n/format";
 
 export const getStaticPaths = localeStaticPaths;
 const lang = Astro.params.lang as Locale;
 const L = (href: string) => localizeHref(href, lang);
 // Figures in the page's language: "1,430" (en), "1 430" (fr).
 const fmt = (n: number) => fmtNumber(lang, n);
+const chapterNo = (n: number) => fmtNumber(lang, n, { minimumIntegerDigits: 2 }); // "01" / "੦੧"
 const { t } = useT(lang);
 
 const desc =
   t("features.everythingGurbaniSoulDoes");
 
 const ANGS = fmt(FACTS.angs);
+const LAST_ANG = fmtAng(lang, FACTS.angs); // "Ang 1 to Ang 1430": a citation, Western digits
 
 // The 1.4.9 surfaces. Each list fills with the app's own screenshots (src/assets/app, provenance in
 // SHOTS.md); while one is empty its chapter shows its copy and figures alone. Themes and Explore
@@ -87,10 +89,10 @@ const glance = [
   { id: "hukam", t: t("features.theHukamOfThe4"), d: t("features.oneCompleteHukamFor") },
   { id: "nitnem", t: t("features.nitnemWithYourPlace2"), d: t("features.theDailyBanisBy2") },
   { id: "raag-clock", t: t("features.theRaagClock"), d: t("features.whichRaagsBelongTo") },
-  { id: "vaars", t: t("features.theVaarsAsPrinted"), d: t("features.allVaarsPauriBy", { vaars: String(FACTS.vaars) }) },
-  { id: "index", t: t("features.anIndexInSaroop"), d: t("features.theGranthFromAng", { angs: String(ANGS), raags: String(FACTS.raags) }) },
-  { id: "themes", t: t("features.themes2", { themes: String(FACTS.themes) }), d: t("features.aPageForEvery") },
-  { id: "voices", t: t("features.theVoicesOfThe2"), d: t("features.allVoicesAPage", { voices: String(FACTS.voices) }) },
+  { id: "vaars", t: t("features.theVaarsAsPrinted"), d: t("features.allVaarsPauriBy", { vaars: fmt(FACTS.vaars) }) },
+  { id: "index", t: t("features.anIndexInSaroop"), d: t("features.theGranthFromAng", { angs: LAST_ANG, raags: fmt(FACTS.raags) }) },
+  { id: "themes", t: t("features.themes2", { themes: fmt(FACTS.themes) }), d: t("features.aPageForEvery") },
+  { id: "voices", t: t("features.theVoicesOfThe2"), d: t("features.allVoicesAPage", { voices: fmt(FACTS.voices) }) },
 ];
 
 const accents = [
@@ -148,7 +150,7 @@ const jsonLd = {
   <section class="sec surface-paper hair-top" id="reader" data-chapter="reader">
     <div class="wrap">
       <div class="story-head reveal">
-        <p class="chapter-no"><span>01</span> {t("features.read")}</p>
+        <p class="chapter-no"><span>{chapterNo(1)}</span> {t("features.read")}</p>
         <h2 class="h-story">{t("features.theWholeGranthSet")}</h2>
         <p class="body-lg">{t("features.allAngsInSant", { angs: String(ANGS) })}</p>
       </div>
@@ -180,7 +182,7 @@ const jsonLd = {
   <section class="sec surface-paper" id="search" data-chapter="search">
     <div class="wrap story-grid">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>02</span> {t("features.search")}</p>
+        <p class="chapter-no"><span>{chapterNo(2)}</span> {t("features.search")}</p>
         <h2 class="h-story">{t("features.searchTheWayYou")}</h2>
         <p class="body-lg">{t("features.aWordInGurmukhi")}</p>
         <p class="body-lg">{t("features.verifyChecksALine")}</p>
@@ -201,7 +203,7 @@ const jsonLd = {
   <section class="sec surface-paper hair-top" id="hukam" data-chapter="hukam">
     <div class="wrap story-grid story-grid--6-6 story--flip">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>03</span> {t("features.hukam")}</p>
+        <p class="chapter-no"><span>{chapterNo(3)}</span> {t("features.hukam")}</p>
         <h2 class="h-story">{t("features.theHukamOfThe")}</h2>
         <p class="body-lg">{t("features.theHukamOfThe2")}</p>
         <p class="body-lg">{t("features.eitherWayItIs")}</p>
@@ -219,7 +221,7 @@ const jsonLd = {
   <section class="sec surface-warm" id="nitnem" data-chapter="nitnem">
     <div class="wrap story-grid">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>04</span> {t("features.nitnem")}</p>
+        <p class="chapter-no"><span>{chapterNo(4)}</span> {t("features.nitnem")}</p>
         <h2 class="h-story">{t("features.nitnemWithYourPlace")}</h2>
         <p class="body-lg">{t("features.theDailyBanisBy")}</p>
         <p class="body-lg">{t("features.shortLineBanisSuch")}</p>
@@ -240,8 +242,8 @@ const jsonLd = {
   <section class="sec surface-ink" id="raag-clock" data-theme="dark" data-chapter="raag-clock">
     <div class="wrap story-grid story--flip">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>05</span> {t("features.theWatch")}</p>
-        <h2 class="h-story">{t("features.eightWatchesRaagsOne", { raags: String(spell(FACTS.raags)), raagsN: String(FACTS.raags) })}</h2>
+        <p class="chapter-no"><span>{chapterNo(5)}</span> {t("features.theWatch")}</p>
+        <h2 class="h-story">{t("features.eightWatchesRaagsOne", { raags: String(spell(FACTS.raags)), raagsN: fmt(FACTS.raags) })}</h2>
         <p class="body-lg">{t("features.theDayIsDivided")}</p>
         <p class="cta-row"><a class="btn ghost" href={L("/watch")} data-astro-prefetch>{t("features.moreAboutTheWatch")}</a></p>
       </div>
@@ -255,32 +257,32 @@ const jsonLd = {
   </section>
 
   <!-- 6 · VAARS -->
-  <FeatureChapter id="vaars" no="06" label={t("features.vaars")} title={t("features.theVaarsWovenAs")} shots={vaarShots}
+  <FeatureChapter id="vaars" no={chapterNo(6)} label={t("features.vaars")} title={t("features.theVaarsWovenAs")} shots={vaarShots}
     figures={[
       { n: fmt(FACTS.vaars), l: t("features.vaars2") },
       { n: fmt(FACTS.vaar_pauris), l: t("features.pauris") },
       { n: fmt(FACTS.vaar_saloks), l: t("features.saloksSetBesideThem") },
     ]}
     figuresLabel={t("features.theVaarsCountedAs")}>
-    <p class="body-lg">{t("features.allVaarsEachWith", { vaars: String(FACTS.vaars) })}</p>
+    <p class="body-lg">{t("features.allVaarsEachWith", { vaars: fmt(FACTS.vaars) })}</p>
     <p class="body-lg">{t("features.theReaderCarriesYou")}</p>
     <p class="detail">{t("features.askSiriToRead")}</p>
   </FeatureChapter>
 
   <!-- 7 · INDEX -->
-  <FeatureChapter id="index" no="07" label={t("features.index")} title={t("features.anIndexThatFollows")} surface="warm" flip shots={indexShots}
+  <FeatureChapter id="index" no={chapterNo(7)} label={t("features.index")} title={t("features.anIndexThatFollows")} surface="warm" flip shots={indexShots}
     figures={[
       { n: ANGS, l: t("features.angsFromTheFirst") },
       { n: fmt(FACTS.raags), l: t("features.raagsEachWithIts") },
     ]}
     figuresLabel={t("features.theIndexInNumbers")}>
-    <p class="body-lg">{t("features.theIndexLaysThe", { angs: String(ANGS), raags: String(FACTS.raags) })}</p>
+    <p class="body-lg">{t("features.theIndexLaysThe", { angs: LAST_ANG, raags: fmt(FACTS.raags) })}</p>
     <p class="body-lg">{t("features.inThisHourGathers")}</p>
     <p class="detail">{t("features.aRaagSTraditional")}</p>
   </FeatureChapter>
 
   <!-- 8 · THEMES -->
-  <FeatureChapter id="themes" no="08" label={t("features.themes")} title={t("features.themesAPageFor", { themes: String(FACTS.themes) })} shots={themeShots}
+  <FeatureChapter id="themes" no={chapterNo(8)} label={t("features.themes")} title={t("features.themesAPageFor", { themes: fmt(FACTS.themes) })} shots={themeShots}
     figures={[
       { n: fmt(FACTS.themes), l: t("features.themesEachWithIts") },
       { n: fmt(FACTS.themed_lines), l: t("features.linesOfTheGranth") },
@@ -292,14 +294,14 @@ const jsonLd = {
   </FeatureChapter>
 
   <!-- 9 · VOICES -->
-  <FeatureChapter id="voices" no="09" label={t("features.voices")} title={t("features.voicesOneGranth", { voices: String(FACTS.voices) })} surface="warm" flip shots={voiceShots}
+  <FeatureChapter id="voices" no={chapterNo(9)} label={t("features.voices")} title={t("features.voicesOneGranth", { voices: fmt(FACTS.voices) })} surface="warm" flip shots={voiceShots}
     figures={[
       { n: fmt(FACTS.voices), l: t("features.voicesWithBaniIn") },
       { n: fmt(FACTS.voice_traditions), l: t("features.traditionsGurusBhagatsBhatts") },
-      { n: t("features.centuriesSpan", { firstOrdinal: ordinal(FACTS.voices_first_century), lastOrdinal: ordinal(FACTS.voices_last_century), ...CENTURY_VALUES }), l: t("features.centuriesTheirDatedLives") },
+      { n: t("features.centuriesSpan", { firstOrdinal: ordinal(FACTS.voices_first_century), lastOrdinal: ordinal(FACTS.voices_last_century), ...CENTURY_VALUES, first: fmt(FACTS.voices_first_century), last: fmt(FACTS.voices_last_century) }), l: t("features.centuriesTheirDatedLives") },
     ]}
     figuresLabel={t("features.theVoicesOfThe")}>
-    <p class="body-lg">{t("features.lineageFollowsEveryVoice", { voiceCenturies: String(VOICE_CENTURIES), ...CENTURY_VALUES })}</p>
+    <p class="body-lg">{t("features.lineageFollowsEveryVoice", { voiceCenturies: String(VOICE_CENTURIES), ...CENTURY_VALUES, first: fmt(FACTS.voices_first_century), last: fmt(FACTS.voices_last_century) })}</p>
     <p class="body-lg">{t("features.inInsightsTheGranth")}</p>
     <p class="detail">{t("features.whoWroteEachLine")}</p>
   </FeatureChapter>
@@ -308,10 +310,10 @@ const jsonLd = {
   <section class="sec surface-paper" id="widgets" data-chapter="widgets">
     <div class="wrap story-grid story-grid--4-8">
       <div class="story-text reveal">
-        <p class="chapter-no"><span>10</span> {t("features.atAGlance2")}</p>
+        <p class="chapter-no"><span>{chapterNo(10)}</span> {t("features.atAGlance2")}</p>
         <h2 class="h-story">{t("features.onYourHomeScreen")}</h2>
         <p class="body-lg">{t("features.threeWidgetsTheRaag")}</p>
-        <p class="detail">{t("features.siriTodaySHukam", { themes: String(FACTS.themes) })}</p>
+        <p class="detail">{t("features.siriTodaySHukam", { themes: fmt(FACTS.themes) })}</p>
       </div>
       <div class="story-media reveal" data-delay="1">
         <div class="widgets">
@@ -333,9 +335,9 @@ const jsonLd = {
   </section>
 
   <!-- 11 · EXPLORE -->
-  <FeatureChapter id="explore" no="11" label={t("features.explore")} title={t("features.sevenWaysIntoThe")} surface="warm" shots={exploreShots}>
+  <FeatureChapter id="explore" no={chapterNo(11)} label={t("features.explore")} title={t("features.sevenWaysIntoThe")} surface="warm" shots={exploreShots}>
     <p class="body-lg">{t("features.exploreGathersThemIn")}</p>
-    <p class="body-lg">{t("features.constellationShowsWhichThemes", { themes: String(FACTS.themes) })}</p>
+    <p class="body-lg">{t("features.constellationShowsWhichThemes", { themes: fmt(FACTS.themes) })}</p>
   </FeatureChapter>
 
   <!-- Photo band (dark scope) — between two light chapters, never beside Gurmukhi text -->
