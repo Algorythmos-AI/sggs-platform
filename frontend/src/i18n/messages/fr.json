@@ -32,7 +32,7 @@
     "rss": "RSS",
     "support": "Assistance",
     "reportError": "Signaler une erreur de texte",
-    "legal": "Mentions",
+    "legal": "Informations légales",
     "fontLicences": "Licences des polices",
     "santLipiLicence": "Sant Lipi (SIL OFL)",
     "serifLicence": "Source Serif 4 (SIL OFL)",
@@ -45,7 +45,7 @@
   "contributeBand": {
     "eyebrow": "Gratuit pour tous",
     "title": "Maintenu gratuit par la sangat.",
-    "body": "Pas de publicité, pas d’offre payante, rien derrière un paywall. Si Gurbani Soul accompagne votre étude, vous pouvez aider à couvrir l’hébergement, la relecture savante et les licences. C’est facultatif et cela ne débloque rien.",
+    "body": "Pas de publicité, pas d’offre payante, rien de verrouillé. Si Gurbani Soul accompagne votre étude, vous pouvez aider à couvrir l’hébergement, la relecture par des spécialistes et les licences. C’est facultatif et cela ne débloque rien.",
     "cta": "Contribuer",
     "fine": "À partir de {amount} · ponctuellement ou chaque mois"
   },
@@ -92,7 +92,7 @@
     "read": {
       "chapter": "Lire",
       "title": "Le Granth entier, mis en page pour être lu",
-      "body": "Les {angs} Angs en Sant Lipi, sur papier chaud ou dans un mode nuit qui n’est jamais d’un noir pur. Tournez les pages, allez à n’importe quel Ang, reprenez là où vous vous étiez arrêté. Chaque composition s’ouvre sur son titre imprimé.",
+      "body": "Les {angs} Angs en Sant Lipi, sur papier chaud ou dans un mode nuit qui n’est jamais d’un noir pur. Tournez les pages, allez à n’importe quel Ang, reprenez là où vous en étiez. Chaque composition s’ouvre sur son titre imprimé.",
       "facts": {
         "santLipi": "Sant Lipi",
         "saroop": "Saroop traditionnel",
@@ -121,7 +121,7 @@
     },
     "photoBand": {
       "alt": "Sri Harmandir Sahib la nuit, illuminé d’or et reflété dans le sarovar",
-      "statement": "Fait pour chaque jour, pas pour défiler.",
+      "statement": "Fait pour chaque jour, pas pour faire défiler.",
       "sub": "Pas de fil. Pas de notification que vous n’avez pas demandée. Le texte, et votre place dans le texte."
     },
     "nitnem": {
@@ -135,19 +135,19 @@
     "watch": {
       "chapter": "Les veilles",
       "title": "Huit veilles. {raagsN} raags. Un seul cadran.",
-      "body": "La journée se divise en huit pahars, et chaque raag appartient à une veille. L’Horloge des raags montre lesquels appartiennent à celle-ci — selon des heures fixes, ou selon le lever et le coucher du soleil chez vous. La nuit profonde est laissée au silence.",
-      "cta": "Découvrir l’Horloge des raags",
+      "body": "La journée se divise en huit pahars, et chaque veille a ses raags. L’Horloge des raags montre ceux de la veille en cours — selon des heures fixes, ou selon le lever et le coucher du soleil chez vous. La nuit profonde est laissée au silence.",
+      "cta": "Voir l’Horloge des raags",
       "alt": "L’Horloge des raags sur iPhone en mode sombre : le 2ᵉ pahar du jour et les raags chantés pendant cette veille"
     },
     "widgets": {
       "chapter": "D’un coup d’œil",
       "title": "Sur votre écran d’accueil et votre écran verrouillé",
       "body": "Trois widgets : le raag du moment, le Hukam du jour avec son Ang, et le Nitnem du jour — en tailles petite à grande, avec des accessoires d’écran verrouillé pour le raag et le Nitnem. Le Hukam du jour est un Hukam complet pour toute la journée, choisi d’après la date : le même dans l’app et avec Siri, avec son premier vers sur le widget. Une Activité en direct facultative montre où vous en êtes dans une bani. Elle n’affiche jamais de vers.",
-      "detail": "Demandez à Siri « Today’s Hukam », « What raag is it now », « Read a Vaar », « Open a theme » ou « Open a voice ». Spotlight retrouve vos vers enregistrés et chaque thème.",
-      "raagLightAlt": "Widget Raag du moment, petit format : le cadran de 24 heures à 16 h 40, le 4ᵉ pahar du jour",
+      "detail": "Demandez à Siri, en anglais, « Today’s Hukam », « What raag is it now », « Read a Vaar », « Open a theme » ou « Open a voice ». Spotlight retrouve vos vers enregistrés et chaque thème.",
+      "raagLightAlt": "Widget Raag now, petit format : le cadran de 24 heures à 16 h 40, le 4ᵉ pahar du jour",
       "hukamAlt": "Widget Hukam du jour, format moyen : un premier vers avec sa translittération, cité Sri Guru Granth Sahib Ji, Ang 13",
       "nitnemAlt": "Widget Nitnem, format moyen : les banis du matin, avec Jaap Sahib à suivre et un anneau de progression",
-      "raagDarkAlt": "Widget Raag du moment, petit format, en mode sombre : le cadran de 24 heures à 16 h 40, le 4ᵉ pahar du jour",
+      "raagDarkAlt": "Widget Raag now, petit format, en mode sombre : le cadran de 24 heures à 16 h 40, le 4ᵉ pahar du jour",
       "liveActivityAlt": "Activité en direct sur l’écran verrouillé : lecture de Japji Sahib, un anneau de progression à 1 %",
       "liveActivityCaption": "Activité en direct sur l’écran verrouillé — la progression seulement, jamais un vers."
     },
@@ -171,7 +171,7 @@
         "forms": {
           "name": "Formes",
           "caption": "Les formes poétiques que nomment les titres imprimés, et où chacune se trouve.",
-          "alt": "L’Index sur iPhone, onglet Formes : chaque forme poétique nommée dans les titres imprimés, avec le raag et l’Ang de chaque occurrence"
+          "alt": "L’Index sur iPhone, onglet Forms : chaque forme poétique nommée dans les titres imprimés, avec le raag et l’Ang de chaque occurrence"
         },
         "voice": {
           "name": "La page d’une voix",
@@ -187,7 +187,7 @@
       "figuresLabel": "Le Granth, en chiffres",
       "figures": {
         "raags": "raags, une page pour chacun",
-        "vaars": "vaars, tissées comme imprimées",
+        "vaars": "vaars, tissées telles qu’imprimées",
         "themes": "thèmes, une page pour chacun",
         "voices": "voix, une page pour chacune"
       }
@@ -197,7 +197,7 @@
       "statement": "Rien de corrigé. Rien d’inventé.",
       "body": "Le texte est reproduit caractère par caractère d’après l’édition source. Rien n’est normalisé, modernisé ni amélioré.",
       "never": "Jamais généré par IA.",
-      "reconciledTitle": "Rapproché",
+      "reconciledTitle": "Collationné",
       "reconciledBody": "Les {characters} caractères sont vérifiés par rapport à l’édition source, caractère par caractère — sans aucune perte.",
       "sealedTitle": "Scellé",
       "sealedBody": "Le texte embarqué porte une empreinte SHA-256, fixée à la création de l’app.",
@@ -215,7 +215,7 @@
         "dataNotCollected": "Données non collectées"
       },
       "cta": "Lire la politique de confidentialité",
-      "alt": "L’écran À propos sur iPhone, version 1.4.9 : les quatre contrôles d’intégrité de l’Écriture, tous réussis"
+      "alt": "L’écran About sur iPhone, version 1.4.9 : les quatre contrôles d’intégrité du texte, tous réussis"
     },
     "learn": {
       "eyebrow": "Comprendre",
@@ -242,13 +242,13 @@
   "features": {
     "featuresGurbaniSoul": "Fonctionnalités — Gurbani Soul",
     "everythingOnYourDevice": "Tout, sur votre appareil",
-    "madeForReadingNot": "Fait pour lire, pas pour défiler",
+    "madeForReadingNot": "Fait pour lire, pas pour faire défiler",
     "theWholeGranthThe": "Le Granth entier, les banis quotidiennes et les outils d’étude — calmes, exacts et entièrement sur votre appareil. Pas de fil, pas de compte, rien qui réclame votre attention.",
     "atAGlance": "D’un coup d’œil",
     "readerOnIpadIn": "Le Lecteur sur iPad à l’horizontale, ouvert à l’Ang 705 — le gurmukhi en Sant Lipi avec la translittération sous chaque ligne",
     "read": "Lire",
     "theWholeGranthSet": "Le Granth entier, mis en page pour être lu",
-    "allAngsInSant": "Les {angs} Angs en Sant Lipi, sur papier chaud ou dans un mode nuit qui n’est jamais d’un noir pur. Tournez les pages, allez à n’importe quel Ang, reprenez là où vous vous étiez arrêté. Chaque composition s’ouvre sur son titre imprimé, et la translittération peut se placer discrètement sous chaque ligne. Le mode Sehaj ne laisse que le gurmukhi, avec de l’espace pour respirer.",
+    "allAngsInSant": "Les {angs} Angs en Sant Lipi, sur papier chaud ou dans un mode nuit qui n’est jamais d’un noir pur. Tournez les pages, allez à n’importe quel Ang, reprenez là où vous en étiez. Chaque composition s’ouvre sur son titre imprimé, et la translittération peut se placer discrètement sous chaque ligne. Le mode Sehaj ne laisse que le gurmukhi, avec de l’espace pour respirer.",
     "saroopOff": "Saroop désactivé",
     "readerOnIphoneAt": "Le Lecteur sur iPhone à l’Ang 1400, saroop traditionnel désactivé",
     "saroopOnDefault": "Saroop activé (par défaut)",
@@ -257,7 +257,7 @@
     "twoWaysToDraw": "Deux façons de tracer les mêmes caractères",
     "traditionalSaroopDrawsThe": "Le saroop traditionnel trace le ya souscrit doublé sous la forme unique et repliée de la Bir imprimée ; désactivez-le pour voir les caractères exacts de la source. Seul le tracé change — le texte enregistré, la recherche et la copie restent toujours les caractères d’origine.",
     "searchOnIphoneThe": "La recherche sur iPhone : le mot latin naam, en mode Auto, trouve les lignes correspondantes avec leur Ang et leur voix",
-    "verifyOnIphoneA": "Vérifier sur iPhone : une ligne tapée en lettres latines, confirmée comme Écriture et présentée sous sa forme canonique, Ang 8",
+    "verifyOnIphoneA": "Vérifier sur iPhone : une ligne tapée en lettres latines, confirmée comme Gurbani et présentée sous sa forme canonique, Ang 8",
     "search": "Rechercher",
     "searchTheWayYou": "Cherchez comme vous vous en souvenez",
     "aWordInGurmukhi": "Un mot en gurmukhi, un mot tel qu’il se prononce en lettres latines, ou seulement les premières lettres de chaque mot — comme une ligne vous revient en mémoire. Le mode Auto devine ce que vous vouliez dire.",
@@ -273,7 +273,7 @@
     "theHukamOfThe": "Le Hukam du jour, ou un nouveau",
     "theHukamOfThe2": "Le Hukam du jour est un Hukam complet pour toute la journée, choisi d’après la date — le même dans l’app et lorsque vous le demandez à Siri, et le widget Hukam du jour en affiche le premier vers avec son Ang. Si vous en souhaitez un autre, tirez-en un nouveau.",
     "eitherWayItIs": "Dans les deux cas, c’est une unité complète — un shabad entier, ou une pauri de vaar précédée de ses saloks — jamais un fragment, lu à la lettre et cité par son Ang. Un toucher vous mène à cet Ang dans le Lecteur.",
-    "theHukamOfThe3": "Le Hukam du jour est choisi sur votre appareil d’après la date. Ce n’est pas le Hukamnama émis depuis Sri Harmandir Sahib.",
+    "theHukamOfThe3": "Le Hukam du jour est choisi sur votre appareil d’après la date. Ce n’est pas le Hukamnama de Sri Harmandir Sahib.",
     "nitnemOnIpadIn": "Le Nitnem sur iPad à l’horizontale : les banis du matin avec leurs anneaux de progression, et la liste complète selon le moment du jour",
     "nitnemReadingJourneyOn": "Le parcours de lecture du Nitnem sur iPhone : le calendrier qui garde les jours où vous avez lu",
     "nitnem": "Nitnem",
@@ -287,7 +287,7 @@
     "raagClockOnIphone2": "L’Horloge des raags sur iPhone, mode solaire : la veille calculée d’après le lever et le coucher du soleil",
     "theWatch": "Les veilles",
     "eightWatchesRaagsOne": "Huit veilles. {raagsN} raags. Un seul cadran.",
-    "theDayIsDivided": "La journée se divise en huit pahars, et chaque raag appartient à une veille. L’Horloge des raags montre lesquels appartiennent à celle-ci — selon des heures fixes, ou selon le lever et le coucher du soleil chez vous, calculés sur l’appareil. La nuit profonde est laissée au silence.",
+    "theDayIsDivided": "La journée se divise en huit pahars, et chaque veille a ses raags. L’Horloge des raags montre ceux de la veille en cours — selon des heures fixes, ou selon le lever et le coucher du soleil chez vous, calculés sur l’appareil. La nuit profonde est laissée au silence.",
     "moreAboutTheWatch": "En savoir plus sur les veilles",
     "vaars": "Vaars",
     "theVaarsWovenAs": "Les vaars, tissées comme elles sont imprimées",
@@ -299,22 +299,22 @@
     "anIndexThatFollows": "Un Index qui suit le saroop",
     "theIndexInNumbers": "L’Index en chiffres",
     "theIndexLaysThe": "L’Index présente le Granth dans l’ordre du saroop : un ruban de l’Ang 1 à l’Ang {angs}, les grandes compositions avec votre place gardée, et les {raags} raags. Chaque raag a sa propre page — sa place dans le Granth, les voix qu’il porte, les formes que nomment ses titres, et l’heure que lui donne la tradition.",
-    "inThisHourGathers": "« À cette heure » rassemble les raags de la veille en cours. Chercher dans l’Index mène directement à un raag, une bani, une composition ou une voix, et Formes liste les formes poétiques que nomment les titres imprimés.",
-    "aRaagSTraditional": "L’heure traditionnelle d’un raag relève de la tradition, non de l’Écriture — l’app le dit, et nomme la source de chaque affirmation.",
+    "inThisHourGathers": "« In this hour » rassemble les raags de la veille en cours. « Find in Index » mène directement à un raag, une bani, une composition ou une voix, et « Forms » liste les formes poétiques que nomment les titres imprimés.",
+    "aRaagSTraditional": "L’heure traditionnelle d’un raag relève de la tradition, et non du Granth — l’app le dit, et nomme la source de chaque affirmation.",
     "themes": "Thèmes",
     "themesAPageFor": "{themes} thèmes, une page pour chacun",
     "themesInNumbers": "Les thèmes en chiffres",
     "themesTracesIdeasAcross": "Thèmes suit des idées à travers tout le Granth grâce aux mots qui les portent, avec un thème du jour en tête. Chaque thème a sa page : les lignes Rahao qui le portent, sa présence par raag et par voix, les formes de ses mots, et les thèmes avec lesquels il apparaît souvent — ainsi qu’une liste de vers que vous pouvez restreindre à une seule forme de mot.",
-    "yourThemesShowsWhich": "Vos thèmes montre quels thèmes portent vos vers enregistrés. C’est calculé sur votre appareil, jamais envoyé, et vous pouvez le désactiver.",
+    "yourThemesShowsWhich": "Your themes montre quels thèmes portent vos vers enregistrés. C’est calculé sur votre appareil, jamais envoyé, et vous pouvez le désactiver.",
     "aThemeSNumber": "Le nombre d’un thème compte les vers qui portent ses mots — jamais une mesure d’importance. Les thèmes sont aussi dans Spotlight, et Siri peut « Open a theme ».",
     "voices": "Voix",
     "voicesOneGranth": "{voices} voix, un seul Granth",
     "theVoicesOfThe": "Les voix du Granth",
-    "lineageFollowsEveryVoice": "Lignée suit chaque voix dont la Bani figure dans le Granth — les Gurus, les Bhagats, les Bhatts de la cour et les compagnons gursikhs — du {firstRoman}ᵉ au {lastRoman}ᵉ siècle, en liste ou en rivière à travers le temps, avec une voix du jour. Chaque voix a sa page : sa Bani dans le Granth et ses raags, ses Banis notables, sa façon de signer ses vers, qui elle nomme et qui la nomme, ses mots distinctifs, et les voix dont elle se fait l’écho. Comparer en place deux côte à côte.",
+    "lineageFollowsEveryVoice": "Lignée suit chaque voix dont la Bani figure dans le Granth — les Gurus, les Bhagats, les Bhatts de la cour et les compagnons gursikhs — du {firstRoman}ᵉ au {lastRoman}ᵉ siècle, en liste ou en rivière à travers le temps, avec une voix du jour. Chaque voix a sa page : sa Bani dans le Granth et ses raags, ses Banis notables, sa façon de signer ses vers, qui elle nomme et qui la nomme, ses mots distinctifs, et les voix dont elle se fait l’écho. Comparer en affiche deux côte à côte.",
     "inInsightsTheGranth": "Dans Analyses, le Granth devient un champ de points, un pour environ 50 lignes, colorés selon la tradition, et un ruban montre où chante chaque voix.",
-    "whoWroteEachLine": "L’attribution de chaque ligne suit ce qu’imprime le Granth : le titre d’une composition, ou le nom de plume de son dernier vers. Les dates sont approximatives et sourcées ; les notes plus complètes sur chaque vie attendent une relecture savante et sont signalées comme telles.",
+    "whoWroteEachLine": "L’attribution de chaque ligne suit ce qu’imprime le Granth : le titre d’une composition, ou le nom de plume de son dernier vers. Les dates sont approximatives et sourcées ; les notes plus complètes sur chaque vie attendent la relecture de spécialistes et sont signalées comme telles.",
     "hukamOfTheDay": "Widget Hukam du jour, format moyen, en mode sombre : un premier vers avec sa translittération, cité Sri Guru Granth Sahib Ji, Ang 13",
-    "raagNowWidgetSmall": "Widget Raag du moment, petit format : le cadran de 24 heures à 16 h 40, le 4ᵉ pahar du jour",
+    "raagNowWidgetSmall": "Widget Raag now, petit format : le cadran de 24 heures à 16 h 40, le 4ᵉ pahar du jour",
     "nitnemWidgetSmallThe": "Widget Nitnem, petit format : les banis du matin, avec Jaap Sahib à suivre",
     "nitnemWidgetMediumIn": "Widget Nitnem, format moyen, en mode sombre : les banis du matin, avec Jaap Sahib à suivre et un anneau de progression",
     "liveActivityOnThe": "Activité en direct sur l’écran verrouillé : lecture de Japji Sahib, un anneau de progression à 1 %",
@@ -326,7 +326,7 @@
     "explore": "Explorer",
     "sevenWaysIntoThe": "Sept entrées dans le Granth",
     "exploreGathersThemIn": "Explorer les réunit en un seul lieu : l’Index, Thèmes, Lignée, Analyses, Constellation, les vaars et l’Horloge des raags. Sur iPad, tout à la fois.",
-    "constellationShowsWhichThemes": "Constellation montre quels thèmes voyagent ensemble dans les mêmes vers — reliés par un mot commun, non par le sens — avec un thème mis en avant, des filtres par voix, par raag et par heure, et le Ciel des {themes} thèmes. Analyses compte et compare, expliqué simplement.",
+    "constellationShowsWhichThemes": "Constellation montre quels thèmes voyagent ensemble dans les mêmes vers — reliés par un mot commun, non par le sens — avec un thème mis en avant, des filtres par voix, par raag et par heure, et le Ciel des {themes} thèmes. Analyses compte et compare, en termes simples.",
     "sriHarmandirSahibAcross": "Sri Harmandir Sahib de l’autre côté du sarovar, la chaussée et la parikrama de marbre",
     "quietEnoughToHear": "Assez calme pour entendre.",
     "aPlaceToRead": "Un lieu pour lire, et rien d’autre.",
@@ -363,7 +363,7 @@
     "compareOnIphoneGuru": "Comparer sur iPhone : Guru Tegh Bahadur Ji à côté de Guru Nanak Dev Ji, les Angs où chacun apparaît et la force avec laquelle chacun porte un thème",
     "readTheWholeGranth": "Lire le Granth entier",
     "allAngsInSant2": "Les {angs} Angs en Sant Lipi. Tournez les pages, allez à n’importe quel Ang, reprenez où vous en étiez.",
-    "searchHowYouRemember": "Chercher comme on se souvient",
+    "searchHowYouRemember": "Chercher comme vous vous en souvenez",
     "byWordBySound": "Par mot, par son en lettres latines, par premières lettres ou par thème — et vérifier une ligne qu’on vous a envoyée.",
     "theHukamOfThe4": "Le Hukam du jour",
     "oneCompleteHukamFor": "Un Hukam complet pour toute la journée, dans l’app et avec Siri, avec son premier vers sur un widget — ou tirez-en un nouveau.",
@@ -371,7 +371,7 @@
     "theDailyBanisBy2": "Les banis quotidiennes selon le moment du jour, votre place gardée dans chacune, et une trace discrète des jours où vous avez lu.",
     "theRaagClock": "L’Horloge des raags",
     "whichRaagsBelongTo": "Quels raags appartiennent à cette veille du jour — selon des heures fixes ou selon le lever et le coucher du soleil chez vous.",
-    "theVaarsAsPrinted": "Les vaars, comme imprimées",
+    "theVaarsAsPrinted": "Les vaars, telles qu’imprimées",
     "allVaarsPauriBy": "Les {vaars} vaars, pauri par pauri et salok par salok, avec un lecteur qui garde votre place.",
     "anIndexInSaroop": "Un Index dans l’ordre du saroop",
     "theGranthFromAng": "Le Granth de l’Ang 1 à l’Ang {angs}, et une page pour chacun des {raags} raags.",
@@ -394,7 +394,7 @@
     "theRaagClock": "L’Horloge des raags",
     "theWatchOfThe": "La veille du jour",
     "eightPaharsRaagsThe": "Huit pahars. {raagsN} raags. L’horloge qui sait lesquels appartiennent à l’instant.",
-    "theDayIsDivided": "La journée se divise en huit pahars — les veilles du jour — et chaque raag appartient à une veille.",
+    "theDayIsDivided": "La journée se divise en huit pahars — les veilles du jour — et chaque veille a ses raags.",
     "theDialFollowsThe": "Le cadran suit la veille en cours : quand le pahar tourne, les raags qui l’accompagnent changent avec lui. La nuit profonde, de minuit aux petites heures, est laissée au silence et ne porte aucun raag.",
     "timesFollowYourDevice": "Les heures suivent l’horloge de votre appareil ; l’app peut aussi suivre le lever et le coucher du soleil.",
     "theDialFollowsThe2": "Le cadran suit les huit pahars — les veilles du jour.",
@@ -420,14 +420,14 @@
     "sources": "Sources",
     "whereTraditionsDisagree": "Là où les traditions divergent",
     "notEverySourcePlaces": "Toutes les sources ne placent pas un raag dans la même veille. Là où elles diffèrent, chaque affirmation est conservée avec sa référence — principale, variante ou contestée — pour que vous voyiez le désaccord plutôt qu’une seule réponse muette.",
-    "inTheAppEvery": "Dans l’app, chaque raag a sa propre page dans l’Index, avec son heure traditionnelle et la source de chaque affirmation, et « À cette heure » rassemble les raags de la veille en cours.",
+    "inTheAppEvery": "Dans l’app, chaque raag a sa propre page dans l’Index, avec son heure traditionnelle et la source de chaque affirmation, et « In this hour » rassemble les raags de la veille en cours.",
     "seeEveryDisagreement": "Voir chaque divergence",
-    "raagNowWidgetSmall": "Widget Raag du moment, petit format : le cadran de 24 heures à 16 h 40, le 4ᵉ pahar du jour",
-    "raagNowWidgetSmall2": "Widget Raag du moment, petit format, en mode sombre : le cadran de 24 heures à 16 h 40, le 4ᵉ pahar du jour",
+    "raagNowWidgetSmall": "Widget Raag now, petit format : le cadran de 24 heures à 16 h 40, le 4ᵉ pahar du jour",
+    "raagNowWidgetSmall2": "Widget Raag now, petit format, en mode sombre : le cadran de 24 heures à 16 h 40, le 4ᵉ pahar du jour",
     "onYourHomeScreen": "Sur votre écran d’accueil",
     "theWatchAtA": "La veille, d’un coup d’œil",
-    "theRaagNowWidget": "Le widget Raag du moment affiche la veille en cours sur son cadran, sur votre écran d’accueil, en clair ou en sombre ; les formats moyen et grand nomment ses raags — jamais de fil, jamais de notification que vous n’avez pas demandée.",
-    "siriWhatRaagIs": "Siri : « What raag is it now ».",
+    "theRaagNowWidget": "Le widget Raag now affiche la veille en cours sur son cadran, sur votre écran d’accueil, en clair ou en sombre ; les formats moyen et grand nomment ses raags — jamais de fil, jamais de notification que vous n’avez pas demandée.",
+    "siriWhatRaagIs": "Siri (en anglais) : « What raag is it now ».",
     "seeTheWatchNow": "Voir la veille en cours",
     "openTheRaagClock": "Ouvrir l’Horloge des raags",
     "the31RaagsAnd": "Les 31 raags et les veilles du jour",
@@ -445,10 +445,10 @@
     "theAppCollectsNothing": "L’app ne collecte rien. Voici exactement ce que cela signifie.",
     "appliesToTheGurbani": "S’applique à l’app <strong1>Gurbani Soul</strong1> pour iPhone et iPad (bundle <code1>org.sggs.app</code1>, y compris ses widgets et son Activité en direct) et à ce site web.",
     "theAppMakesNo": "L’app n’établit <strong1>aucune connexion réseau</strong1>. Elle fonctionne entièrement en mode Avion.",
-    "noAnalyticsNoAdvertising": "Pas de statistiques, pas de publicité, pas de pistage, pas de SDK tiers dans l’app. Ce site compte les pages vues de façon anonyme, sans cookies ; voir <link1>Ce site web</link1>.",
+    "noAnalyticsNoAdvertising": "Pas de mesure d’audience, pas de publicité, pas de pistage, pas de SDK tiers dans l’app. Ce site compte les pages vues de façon anonyme, sans cookies ; voir <link1>Ce site web</link1>.",
     "savedVersesAreStored": "Les <strong1>vers enregistrés</strong1> sont stockés dans la base de données propre à l’app, sur votre appareil. Lorsque vous enregistrez un vers, il est aussi ajouté à l’index Spotlight de votre appareil pour que vous le retrouviez depuis la recherche de l’écran d’accueil ; le retirer l’en supprime. Les données Spotlight restent sur votre appareil.",
     "themesInSpotlightThe": "<strong1>Thèmes dans Spotlight</strong1> : l’app ajoute aussi à Spotlight les noms des {themes} thèmes, avec leurs mots en gurmukhi et leur nombre de vers, pour qu’un thème puisse s’ouvrir depuis la recherche de l’écran d’accueil. Ces entrées ne contiennent rien à votre sujet.",
-    "yourThemesOnThe": "<strong1>Vos thèmes</strong1>, sur la page Thèmes, est calculé sur votre appareil à partir de vos vers enregistrés. Rien n’est jamais envoyé, et vous pouvez le désactiver dans More (« Show Your themes »).",
+    "yourThemesOnThe": "<strong1>Your themes</strong1>, sur la page Thèmes, est calculé sur votre appareil à partir de vos vers enregistrés. Rien n’est jamais envoyé, et vous pouvez le désactiver dans More (« Show Your themes »).",
     "settingsAccentColourTransliteration": "Les <strong1>réglages</strong1> (teinte, translittération, tracé traditionnel, dernier Ang lu) sont stockés dans les préférences locales de l’app.",
     "vaarsWhereYouAre": "<strong1>Vaars</strong1> : l’endroit où vous en êtes dans une vaar est stocké dans un petit fichier du conteneur App Group propre à l’app, sur votre appareil. Il n’est jamais transmis.",
     "nitnemProgressWhereYou": "La progression du <strong1>Nitnem</strong1> (où vous en êtes dans chaque bani, les jours où vous l’avez terminée, vos propres ensembles et votre parcours) est stockée dans de petits fichiers du conteneur App Group propre à l’app, sur votre appareil, afin que le widget Nitnem puisse l’afficher. Elle n’est jamais transmise.",
@@ -456,13 +456,13 @@
     "liveActivityIsOptional": "L’<strong1>Activité en direct</strong1> est facultative et désactivée par défaut. Lorsque vous l’activez, une séance de lecture affiche sa progression sur votre écran verrouillé et dans la Dynamic Island. Elle fonctionne entièrement sur votre appareil (sans mise à jour push) et n’affiche jamais de vers.",
     "widgetsReadASmall": "Les <strong1>widgets</strong1> lisent un petit instantané que l’app écrit dans son propre conteneur App Group, sur votre appareil : la veille du raag, le Hukam du jour pour les deux semaines à venir avec leurs Angs, la progression du Nitnem du jour et — si vous utilisez le mode solaire — votre choix de mode d’horloge et les mêmes coordonnées arrondies à environ 1 km. Rien ne quitte l’appareil.",
     "locationIsUsedOnly": "La <strong1>localisation</strong1> sert uniquement au mode solaire facultatif de l’Horloge des raags, pour calculer le lever et le coucher du soleil chez vous. Elle n’est demandée que lorsque vous touchez « Use my location » en mode solaire. La position est arrondie à deux décimales (environ 1 km) avant d’être stockée dans le conteneur App Group propre à l’app — partagé uniquement avec les widgets de l’app sur le même appareil — et la position brute n’est jamais conservée. Vous pouvez aussi saisir un lieu vous-même ou refuser l’autorisation ; l’horloge fonctionne quand même.",
-    "integrityChecksReadThe": "Les <strong1>contrôles d’intégrité</strong1> lisent la taille et la date de modification de la base de données de l’Écriture embarquée, pour savoir si son empreinte doit être revérifiée. C’est pourquoi le manifeste de confidentialité de l’app déclare les motifs d’API « file timestamp » et « user defaults ». Rien n’est affiché ni transmis.",
+    "integrityChecksReadThe": "Les <strong1>contrôles d’intégrité</strong1> lisent la taille et la date de modification de la base de données embarquée qui contient le texte du Granth, pour savoir si son empreinte doit être revérifiée. C’est pourquoi le manifeste de confidentialité de l’app déclare les motifs d’API « file timestamp » et « user defaults ». Rien n’est affiché ni transmis.",
     "diagnosticsIfTheApp": "<strong1>Diagnostics</strong1> : si l’app plante ou se fige, iOS peut lui remettre un rapport de diagnostic. L’app écrit ce rapport dans son propre dossier local ; il n’est jamais téléversé. Vous pouvez voir combien il y en a, les partager via la feuille de partage du système vers la destination de votre choix, ou les supprimer dans More → About & credits → Integrity — rien ne quitte l’appareil à moins que vous ne l’envoyiez. Par ailleurs, Apple peut nous transmettre des rapports de plantage via App Store Connect <em1>uniquement</em1> si vous avez activé « Partager avec les développeurs d’apps » dans Réglages iOS → Confidentialité et sécurité → Analyse et améliorations. Ces rapports relèvent de la politique de confidentialité d’Apple et ne contiennent aucune information de compte ni d’identité.",
     "becauseTheAppCollects": "Comme l’app ne collecte aucune donnée, son étiquette de confidentialité dans l’App Store est <strong1>« Données non collectées »</strong1>.",
     "theGurbaniSoulPages": "Les pages Gurbani Soul (l’accueil, Fonctionnalités, Les veilles, Comprendre, Assistance, Contribuer et cette politique) comptent les pages vues avec <strong1>Vercel Web Analytics</strong1>, et seulement lorsqu’elles sont servies depuis gurbanisoul.com. Cet outil n’utilise aucun cookie et ne vous suit pas sur d’autres sites. Il enregistre la page, le site d’origine, ainsi que votre pays, votre navigateur, votre système d’exploitation et votre type d’appareil, sous forme de totaux anonymes ; les visiteurs sont comptés à l’aide d’une empreinte éphémère effacée au bout d’un jour. Nous n’en tirons aucun profil et ne le partageons pas.",
     "ifYouAskTo": "Si vous demandez à être prévenu de l’arrivée de l’app sur l’App Store, l’adresse e-mail que vous saisissez est envoyée à <strong1>Buttondown</strong1>, qui envoie ce seul e-mail (en anglais). Rien d’autre n’est envoyé avec elle, et vous pouvez vous désabonner depuis l’e-mail lui-même.",
     "locationIsUsedOn": "La <strong1>localisation</strong1> n’est utilisée sur ce site que si vous passez l’Horloge des raags en mode solaire, pour calculer le lever et le coucher du soleil chez vous. Activer ce mode ne demande rien : votre navigateur ne demande votre autorisation que lorsque vous appuyez sur « Use my location », ou vous pouvez saisir vous-même des coordonnées. La position est arrondie à deux décimales (environ 1 km) et conservée dans le stockage local de votre navigateur ; elle n’est jamais envoyée, ni à nous ni à personne, et « Forget location » la supprime. Sans position, l’horloge reste sur les heures fixes.",
-    "ifYouChooseTo": "Si vous choisissez de contribuer sur <link1>gurbanisoul.com/contribute</link1>, vous quittez ce site pour une page de paiement gérée par <strong1>Stripe</strong1>, qui traite le paiement selon sa propre <link2>politique de confidentialité</link2> (en anglais). Nos pages ne chargent aucun code Stripe avant votre clic. Nous ne voyons ni ne stockons jamais les données de votre carte. Stripe nous transmet votre adresse e-mail, votre nom, le montant et la date, que nous utilisons uniquement pour les reçus, les remboursements et notre comptabilité (conservés aussi longtemps que l’exige le droit fiscal australien), et que nous ne partageons jamais ni n’utilisons à des fins commerciales.",
+    "ifYouChooseTo": "Si vous choisissez de contribuer sur <link1>gurbanisoul.com/contribute</link1>, vous quittez ce site pour une page de paiement gérée par <strong1>Stripe</strong1>, qui traite le paiement selon sa propre <link2>politique de confidentialité</link2> (en anglais). Nos pages ne chargent aucun code Stripe avant votre clic. Nous ne voyons ni ne stockons jamais les données de votre carte. Stripe nous transmet votre adresse e-mail, votre nom, le montant et la date, que nous utilisons uniquement pour les reçus, les remboursements et nos registres commerciaux (conservés aussi longtemps que l’exige le droit fiscal australien), et que nous ne partageons jamais ni n’utilisons à des fins de marketing.",
     "questionsAboutPrivacySupport": "Questions sur la confidentialité : <link1>support@gurbanisoul.com</link1>. Pour de l’aide avec l’app, voir <link2>Assistance</link2>.",
     "theShortVersion": "En bref",
     "noAccountsNothingTo": "Pas de compte. Rien à créer, rien à quoi se connecter.",
@@ -472,7 +472,7 @@
     "theAppBundlesThe": "L’app embarque le texte complet de Sri Guru Granth Sahib Ji, ainsi que les banis du Nitnem dans une couche distincte et signalée, et y effectue ses recherches localement. Elle n’envoie jamais de requête à un serveur ; nous ne pouvons donc pas voir ce que vous lisez, recherchez ou enregistrez. Plus précisément :",
     "thisWebsite": "Ce site web",
     "theSiteIsStatic": "Le site est statique, ne contient aucune publicité et ne dépose aucun cookie.",
-    "theKnowledgeBasePages": "Les pages de la Base de connaissances (recherche, lecteur et outils d’étude) ne chargent aucune statistique.",
+    "theKnowledgeBasePages": "Les pages de la Base de connaissances (recherche, lecteur et outils d’étude) ne chargent aucun outil de mesure d’audience.",
     "yourBrowserKeepsYour": "Votre navigateur conserve vos réglages pour ce site dans son stockage local : le thème (clair ou sombre, thème de couleur et teinte du papier), la taille du texte, la translittération, le bouton de tracé traditionnel, l’étiquette d’horaire des raags et le mode concentration. Il conserve aussi l’Ang que vous avez lu en dernier dans le Lecteur, vos positions de lecture du Nitnem et votre choix de Rehras, les vers que vous épinglez au Parcours d’étude, votre réglage de l’Horloge des raags, et la langue que vous avez choisie pour ce site, si vous en avez choisi une. Pendant votre navigation, le stockage de session garde le chemin que vous suivez dans le Parcours sémantique, et l’onglet l’efface quand vous le fermez. Tout cela réside dans votre navigateur ; effacer les données du site le supprime.",
     "theEngineeringWikiAt": "Le wiki technique docs.gurbanisoul.com propose des liens qui ouvrent ChatGPT ou Claude avec l’adresse de la page que vous lisez. Les suivre vous mène à ce service, selon sa propre politique de confidentialité ; le wiki n’enregistre rien.",
     "searchesAndPageRequests": "Les recherches et les demandes de pages sont traitées par notre API. Les hébergeurs que nous utilisons (Vercel pour le site, Render pour l’API) conservent des journaux de serveur standard — adresse IP, agent utilisateur, chemin de la requête et heure — pour la sécurité et l’exploitation, selon leurs propres règles de conservation. Nous n’ajoutons aucun pistage à ces journaux, n’en tirons aucun profil et ne les partageons pas.",
@@ -492,16 +492,16 @@
     "yourDataYourControl2": "Vos données, votre contrôle",
     "changes2": "Modifications",
     "contact2": "Contact",
-    "theGurbaniSoulApp": "L’app Gurbani Soul ne collecte rien : pas de compte, aucune connexion réseau, aucune statistique. Exactement ce qui reste sur votre appareil, et ce que fait ce site web."
+    "theGurbaniSoulApp": "L’app Gurbani Soul ne collecte rien : pas de compte, aucune connexion réseau, aucune mesure d’audience. Exactement ce qui reste sur votre appareil, et ce que fait ce site web."
   },
   "contributeTiers": {
     "once": "{amount}",
     "monthly": "{amount} / mois",
     "notes": {
-      "once-5": "Une petite offrande",
-      "once-11": "Aide à garder la lumière allumée",
+      "once-5": "Un petit geste",
+      "once-11": "Aide à couvrir les frais courants",
       "once-21": "Aide à couvrir un mois d’hébergement",
-      "once-51": "Aide à financer la relecture savante",
+      "once-51": "Aide à financer la relecture par des spécialistes",
       "monthly-5": "Une seva régulière",
       "monthly-11": "Une seva régulière",
       "monthly-21": "Une seva régulière"
@@ -514,7 +514,7 @@
     "keepGurbaniSoulFree": "Gardez Gurbani Soul gratuit, hors ligne et sans publicité",
     "testModeTheseLinks": "<strong1>Mode test.</strong1> Ces liens utilisent l’environnement de test de Stripe ; aucun paiement réel n’est effectué.",
     "hostingForTheWebsite": "L’<strong1>hébergement</strong1> du site, de la recherche et de la Base de connaissances.",
-    "scholarlyReviewOfThe": "La <strong1>relecture savante</strong1> du texte et de sa présentation.",
+    "scholarlyReviewOfThe": "La <strong1>relecture par des spécialistes</strong1> du texte et de sa présentation.",
     "licensingIncludingALicence": "Les <strong1>licences</strong1>, dont celle d’une couche de traduction anglaise, et les polices de caractères.",
     "feesTheAppleDeveloper": "Les <strong1>frais</strong1> : l’Apple Developer Program et le nom de domaine.",
     "yesEmailWithin30": "Oui. Écrivez à <link1></link1> dans les 30 jours et nous vous rembourserons intégralement.",
@@ -524,7 +524,7 @@
     "thankYou": "Merci",
     "ifYourPaymentWent": "Si votre paiement a abouti, Stripe vous a envoyé votre reçu par e-mail (en anglais). Merci d’aider à garder Gurbani Soul gratuit pour tous.",
     "whySupport": "Pourquoi soutenir",
-    "gurbaniSoulHasNo": "Gurbani Soul n’a aucune publicité, ne vend aucune donnée et n’a pas d’offre payante. L’Écriture ne sera jamais derrière un paywall. Les contributions financent le travail qui garde le texte exact et l’app disponible : l’hébergement, la relecture savante, les licences et les frais annuels de développeur.",
+    "gurbaniSoulHasNo": "Gurbani Soul n’a aucune publicité, ne vend aucune donnée et n’a pas d’offre payante. Le texte du Granth ne sera jamais payant. Les contributions financent le travail qui garde le texte exact et l’app disponible : l’hébergement, la relecture par des spécialistes, les licences et les frais annuels de développeur.",
     "contribute2": "Contribuer",
     "chooseYourOwnAmount": "Choisissez votre montant",
     "chooseYourOwnAmount2": "Choisissez votre montant — lien pas encore connecté.",
@@ -539,10 +539,10 @@
     "whereItGoes": "À quoi elles servent",
     "questions": "Questions",
     "isMyContributionTax": "Ma contribution est-elle déductible des impôts ?",
-    "noGurbaniSoulIs": "Non. Gurbani Soul est conçu par Algorythmos Pty Ltd (ABN 22 701 006 626), une société australienne, et non un organisme de bienfaisance enregistré. Une contribution est un paiement à la société pour soutenir le projet, et non un don caritatif.",
+    "noGurbaniSoulIs": "Non. Gurbani Soul est conçu par Algorythmos Pty Ltd (ABN 22 701 006 626), une société australienne, et non un organisme de bienfaisance enregistré. Une contribution est un paiement à la société pour soutenir le projet ; ce n’est pas un acte de bienfaisance.",
     "doesContributingUnlockAnything": "Contribuer débloque-t-il quelque chose ?",
     "noEverythingStaysFree": "Non. Tout reste gratuit pour tous, qu’ils contribuent ou non.",
-    "canIGetA": "Puis-je être remboursé ?",
+    "canIGetA": "Puis-je obtenir un remboursement ?",
     "howDoIStop": "Comment arrêter une contribution mensuelle ?",
     "whatDoYouKeep": "Que conservez-vous à mon sujet ?",
     "whySupport2": "Pourquoi soutenir",
@@ -559,11 +559,11 @@
     },
     "q2": {
       "q": "Pourquoi l’app n’a-t-elle pas de traduction anglaise ?",
-      "a": "La traduction anglaise que nous aimerions inclure est sous licence pour un usage d’étude personnelle seulement, et sa diffusion via l’App Store exige une licence écrite que nous n’avons pas encore. Plutôt que de la publier sans autorisation, l’app est uniquement en gurmukhi, avec translittération. Si une licence est accordée, la traduction arrivera dans une mise à jour, en couche distincte et clairement signalée, jamais mêlée à l’Écriture."
+      "a": "La traduction anglaise que nous aimerions inclure est sous licence pour un usage d’étude personnelle seulement, et sa diffusion via l’App Store exige une licence écrite que nous n’avons pas encore. Plutôt que de la publier sans autorisation, l’app est uniquement en gurmukhi, avec translittération. Si une licence est accordée, la traduction arrivera dans une mise à jour, en couche distincte et clairement signalée, jamais mêlée au texte du Granth."
     },
     "q3": {
-      "q": "Que fait le bouton « saroop traditionnel » ?",
-      "a": "Il ne change que la façon dont le texte est <em>tracé</em> : le ya souscrit doublé (<yayya></yayya>) s’affiche sous la forme unique et repliée de la Bir imprimée. Le texte enregistré, la recherche et la copie restent toujours les caractères d’origine. Désactivez-le dans <em>More → Display</em> pour voir les caractères exacts de la source."
+      "q": "Que fait l’option « Traditional saroop » ?",
+      "a": "Elle ne change que la façon dont le texte est <em>tracé</em> : le ya souscrit doublé (<yayya></yayya>) s’affiche sous la forme unique et repliée de la Bir imprimée. Le texte enregistré, la recherche et la copie restent toujours les caractères d’origine. Désactivez-la dans <em>More → Display</em> pour voir les caractères exacts de la source."
     },
     "q4": {
       "q": "Pourquoi l’app demande-t-elle ma position ?",
@@ -583,7 +583,7 @@
     },
     "q8": {
       "q": "Qu’est-ce que le Hukam du jour ?",
-      "a": "Un Hukam complet pour toute la journée, choisi sur votre appareil d’après la date : la même unité dans l’app et lorsque vous demandez à Siri « Today’s Hukam », et le widget Hukam du jour en affiche le premier vers avec son Ang. Ce n’est pas le Hukamnama émis depuis Sri Harmandir Sahib. Pour en lire un autre, tirez un nouveau Hukam ; le Hukam du jour reste le même jusqu’au changement de date."
+      "a": "Un Hukam complet pour toute la journée, choisi sur votre appareil d’après la date : la même unité dans l’app et lorsque vous demandez à Siri « Today’s Hukam », et le widget Hukam du jour en affiche le premier vers avec son Ang. Ce n’est pas le Hukamnama de Sri Harmandir Sahib. Pour en lire un autre, tirez un nouveau Hukam ; le Hukam du jour reste le même jusqu’au changement de date."
     },
     "q9": {
       "q": "Les widgets sont vides.",
@@ -591,11 +591,11 @@
     },
     "q10": {
       "q": "Qu’est-ce que la section Integrity dans About ?",
-      "a": "À l’installation ou à la mise à jour, l’app vérifie que la base de données de l’Écriture embarquée est bit pour bit celle qui a été certifiée (une empreinte SHA-256). Ensuite, chaque lancement revérifie que le fichier n’a pas changé et relance les contrôles de structure. Si une vérification échoue, l’app refuse d’afficher l’Écriture plutôt que de risquer de montrer un texte altéré. Réinstaller depuis l’App Store répare un téléchargement corrompu."
+      "a": "À l’installation ou à la mise à jour, l’app vérifie que la base de données embarquée du texte du Granth est bit pour bit celle qui a été certifiée (une empreinte SHA-256). Ensuite, chaque lancement revérifie que le fichier n’a pas changé et relance les contrôles de structure. Si une vérification échoue, l’app refuse d’afficher le texte plutôt que de risquer de montrer un texte altéré. Réinstaller depuis l’App Store répare un téléchargement corrompu."
     },
     "q11": {
       "q": "Comment enregistrer, partager ou retrouver un vers ?",
-      "a": "Appuyez longuement sur un vers (ou utilisez les actions d’une carte de vers) pour Save, Copy, Share ou Explore les vers liés. Les vers enregistrés apparaissent dans <em>More → Saved verses</em> et dans la recherche Spotlight de votre appareil. Les cartes de partage portent toujours la référence de l’Ang."
+      "a": "Appuyez longuement sur un vers (ou utilisez les actions d’une carte de vers) et choisissez Save, Copy, Share ou Explore related. Les vers enregistrés apparaissent dans <em>More → Saved verses</em> et dans la recherche Spotlight de votre appareil. Les cartes de partage portent toujours la référence de l’Ang."
     },
     "q12": {
       "q": "Siri et Raccourcis",
@@ -622,7 +622,7 @@
     "emailSupportGurbanisoulCom": "Écrivez à <link1>support@gurbanisoul.com</link1>. Indiquez le modèle de votre appareil, la version d’iOS et la version de l’app affichée dans <em1>More → About</em1>. Nous répondons en anglais et nous efforçons de le faire sous quelques jours.",
     "emailSupport": "<link1>Écrire à l’assistance</link1>",
     "ifSomethingInThe": "<strong1>Si quelque chose vous semble faux dans le gurmukhi</strong1>, indiquez-nous l’Ang et la ligne, et une photo de la page imprimée si vous en avez une. Nous ne « corrigeons » jamais le texte nous-mêmes : l’app reproduit l’édition source caractère par caractère, donc chaque signalement est vérifié par une personne d’après la Bir imprimée avant tout changement.",
-    "theGurmukhiIsReproduced": "Le gurmukhi est reproduit à la lettre d’après l’édition source et cité par Ang partout. La translittération est une aide mécanique à la lecture, et non l’Écriture. La police gurmukhi est Sant Lipi, © Shabad OS, utilisée selon la SIL Open Font License 1.1 (<link1>licence</link1>).",
+    "theGurmukhiIsReproduced": "Le gurmukhi est reproduit à la lettre d’après l’édition source et cité par Ang partout. La translittération est une aide mécanique à la lecture, et non la Gurbani. La police gurmukhi est Sant Lipi, © Shabad OS, utilisée selon la SIL Open Font License 1.1 (<link1>licence</link1>).",
     "theSiteOffersThe": "Le site propose le même texte et la même recherche dans un navigateur, en anglais, ainsi que des outils d’étude (thèmes, lignée, analyses, constellation, Horloge des raags). Il conserve vos réglages, vos vers épinglés et votre position de lecture uniquement dans votre navigateur. Voir la <link1>politique de confidentialité</link1>.",
     "contribute": "<link1>Contribuer</link1>",
     "gurbaniSoulIsFree": "Gurbani Soul est gratuit et sans publicité. Si vous souhaitez aider à couvrir ses frais, voir <link1>Contribuer</link1>.",
@@ -631,7 +631,7 @@
     "aboutTheText": "À propos du texte",
     "thisWebsite": "Ce site web",
     "helpKeepItFree": "Aidez à le garder gratuit",
-    "gurbaniSoulIsFree2": "Gurbani Soul est gratuit et sans publicité, sans offre payante. Si vous souhaitez aider à couvrir l’hébergement, la relecture savante et les licences, vous pouvez contribuer une fois ou chaque mois. C’est facultatif et cela ne débloque rien.",
+    "gurbaniSoulIsFree2": "Gurbani Soul est gratuit et sans publicité, sans offre payante. Si vous souhaitez aider à couvrir l’hébergement, la relecture par des spécialistes et les licences, vous pouvez contribuer une fois ou chaque mois. C’est facultatif et cela ne débloque rien.",
     "contact2": "Contact",
     "frequentlyAsked2": "Questions fréquentes",
     "aboutTheText2": "À propos du texte",
@@ -642,14 +642,14 @@
   "learnIndex": {
     "learnGurbaniSoul": "Comprendre — Gurbani Soul",
     "learn": "Comprendre",
-    "learnAboutSriGuru": "Comprendre Sri Guru Granth Sahib Ji",
+    "learnAboutSriGuru": "Découvrir Sri Guru Granth Sahib Ji",
     "shortPlainExplanationsOf": "Des explications brèves et simples sur la lecture du Granth et sur la manière dont Gurbani Soul lui reste fidèle. Chaque citation est reproduite à la lettre et citée par son Ang ; tout ce qui relève de l’interprétation est clairement signalé comme tel.",
     "learnSriGuruGranth": "Comprendre — Sri Guru Granth Sahib Ji",
     "plainSourcedExplanationsOf": "Des explications simples et sourcées sur Sri Guru Granth Sahib Ji, par Gurbani Soul : ce qu’est un Hukamnama, comment lire le Nitnem, les raags et les veilles du jour, et comment le texte est vérifié."
   },
   "scripture": {
     "cite": "Sri Guru Granth Sahib Ji · Ang {ang}",
-    "explanationLabel": "Explication (interprétation, et non l’Écriture)"
+    "explanationLabel": "Explication (interprétation, et non la Gurbani)"
   },
   "learnArticle": {
     "updated": "· mis à jour le {date}",
