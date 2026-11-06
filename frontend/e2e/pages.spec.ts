@@ -76,6 +76,7 @@ test('nav active state marks the current route @smoke', async ({ page }, testInf
 
 test('theme button works on a sub-page', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === 'mobile', 'theme button is in the collapsed nav on mobile');
+  await page.setViewportSize({ width: 1440, height: 900 }); // the full bar shows from 1440px
   await page.goto('/en/features');
   const html = page.locator('html');
   const btn = page.locator('#themeBtn');

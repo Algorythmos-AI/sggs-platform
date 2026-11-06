@@ -59,6 +59,7 @@ test.describe('language switcher', () => {
 
   test('it opens, closes on Escape, and keeps focus', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'mobile', 'phones use the menu sheet');
+    await page.setViewportSize({ width: 1440, height: 900 }); // the full bar shows from 1440px
     await page.goto(`/${second}/features`);
     const btn = page.locator('.lang-btn');
     await btn.click();
@@ -70,6 +71,7 @@ test.describe('language switcher', () => {
 
   test('a choice opens the same page in that language, keeps the section and is remembered', async ({ page, context }, testInfo) => {
     test.skip(testInfo.project.name === 'mobile', 'phones use the menu sheet');
+    await page.setViewportSize({ width: 1440, height: 900 }); // the full bar shows from 1440px
     await page.goto(`/${second}/features#vaars`);
     await page.locator('.lang-btn').click();
     await page.locator(`#langList a[data-lang-choice="${config.default}"]`).click();
