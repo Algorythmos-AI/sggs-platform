@@ -3,6 +3,21 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.6.2] — 2026-11-06
+
+gurbanisoul.com now speaks French. The marketing pages are live at `/fr/…`, signed off on the rendered pages, and a browser that asks for French first is sent there from `gurbanisoul.com/`. English stays the default. The scripture is unchanged.
+
+### Added
+- **The French site** (#352, #353): home, Features, The watch, Learn, Support, Privacy and Contribute at `/fr/…`, with Français in the language switcher. The signed review record `reviews/fr.json` (G-FR, and G4 for Privacy and Contribute) pins the exact catalogue. The app, the Knowledge Base, checkout and support replies stay in English, and the pages say so where it matters.
+
+### Changed
+- French pages name the app's controls as the app shows them, in English (Reader, Verify, Lineage, Fixed, Solar…), so a reader can find them on screen. Headings and ordinary words stay French; the glossary records the rule (#353).
+- French copy, after an independent review of all 545 keys: « l’Écriture » (which reads as the Bible in French) is replaced; Siri phrases are marked as English; the Privacy and Contribute wording matches the English promises exactly (#352).
+- On phones, French paragraphs may hyphenate long words; headings, navigation, buttons and citations never do (#352).
+
+### Fixed
+- The heading serif carries the French narrow no-break space (U+202F), U+2009, Ÿ, ı and the ordinals ʳ ᵉ, which until now fell back to another font (#352).
+
 ## [1.6.1] — 2026-11-05
 
 gurbanisoul.com now speaks Punjabi. The marketing pages are live at `/pa/…` in Gurmukhi, signed off on the rendered pages, and a browser that asks for Punjabi first is sent there from `gurbanisoul.com/`. English stays the default; French is still off. The scripture is unchanged.

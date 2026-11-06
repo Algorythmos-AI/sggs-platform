@@ -17,7 +17,7 @@ uvx --from fonttools --with brotli fonttools varLib.instancer \
 
 # 2) Subset to the Latin glyphs the marketing copy needs and flavour as woff2.
 uvx --from fonttools --with brotli pyftsubset /tmp/ss4.ttf \
-  --unicodes="U+0020-007E,U+00A0-00FF,U+0152-0153,U+2010-2015,U+2018-201D,U+2022,U+2026,U+2039-203A,U+00B7" \
+  --unicodes="U+0020-007E,U+00A0-00FF,U+0131,U+0152-0153,U+0178,U+02B3,U+1D49,U+2009,U+2010-2015,U+2018-201D,U+2022,U+2026,U+2039-203A,U+00B7,U+202F" \
   --layout-features="kern,liga" \
   --flavor=woff2 --no-hinting \
   --output-file=frontend/public/fonts/SourceSerif4-latin.woff2

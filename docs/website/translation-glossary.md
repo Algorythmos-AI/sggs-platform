@@ -30,7 +30,7 @@ language's reviewer confirms it; the review record notes any change.
 | saroop (the printed form) | saroop | `ਸਰੂਪ` | keep |
 | Bir | Bir | `ਬੀੜ` | keep |
 | gutka | gutka | `ਗੁਟਕਾ` | keep |
-| Sehaj focus | mode Sehaj | `ਸਹਿਜ` | keep Sehaj |
+| Sehaj focus | mode Sehaj (prose); « Sehaj focus » where it names the toggle | `ਸਹਿਜ` | keep Sehaj |
 | Gurmukhi | gurmukhi | `ਗੁਰਮੁਖੀ` | keep |
 | Sant Lipi | Sant Lipi | `ਸੰਤ ਲਿਪੀ` | keep (font name) |
 | transliteration | translittération | `ਲਿਪੀਅੰਤਰ` | translate |
@@ -46,4 +46,5 @@ language's reviewer confirms it; the review record notes any change.
 | Algorythmos | Algorythmos | Algorythmos | keep |
 | App Store · iPhone · iPad · Siri · Spotlight · Live Activity | as in Apple's French | as in Apple's Punjabi, else keep | follow Apple's own localisation |
 | widget | widget | `ਵਿਜਿਟ` | keep |
+| app screens, tabs, modes and buttons — Reader, Verify, the search modes Roman · First letters · Theme, Index, Forms, Themes, Your themes, Lineage, Compare, Insights, Constellation, Explore, Display, More, the Raag Clock modes Fixed · Solar, the accents Soul Gold · Saffron · Gold · Indigo · Teal, Traditional saroop, Sehaj focus, « See the whole sky », the widget « Raag now »; the Knowledge Base's Reader, Study Trail, Semantic Trail | as the app shows them, in English, **only where the text names a control the reader will find on screen** (owner decision 2026-11-06). They take le / l’ (« le Reader », « l’Index »); a name that reads as a French verb is introduced by its kind: « l’onglet Explore », « l’écran Compare », « la section Display ». Headings, eyebrows and ordinary words stay French (« Affichage », « Explorer le Granth », « la recherche », « le mode Sehaj » in prose) | as in the signed Punjabi catalogue | the app is English-only, so a reader must be able to find the name on screen. The Raag Clock and the Hukam of the day keep their French rows above |
 | Data Not Collected (App Store label) | « Données non collectées » | as Apple renders it | use Apple's official label text |
