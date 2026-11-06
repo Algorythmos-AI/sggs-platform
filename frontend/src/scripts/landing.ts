@@ -77,7 +77,7 @@ function wireMobileMenu() {
     const next = e.shiftKey ? f[i <= 0 ? f.length - 1 : i - 1] : f[i === -1 || i === f.length - 1 ? 0 : i + 1];
     next.focus();
   };
-  const wide = matchMedia("(min-width: 1024px)");
+  const wide = matchMedia("(min-width: 1440px)");
   const onWide = () => { if (wide.matches) shut(); };
 
   burger.addEventListener("click", open);

@@ -7,6 +7,7 @@ import { test, expect } from '@playwright/test';
 
 test('landing → Knowledge Base is a working navigation and theme persists', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === 'mobile', 'uses the desktop theme button');
+  await page.setViewportSize({ width: 1440, height: 900 }); // the full bar shows from 1440px
   // Start from "no stored choice": clear once, then reload (not addInitScript, which would re-run
   // on the Knowledge Base navigation below and wipe the choice under test).
   await page.goto('/en');

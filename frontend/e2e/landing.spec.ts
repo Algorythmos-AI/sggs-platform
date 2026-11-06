@@ -93,6 +93,7 @@ test('legacy /?q= bookmark forwards to /search @smoke', async ({ page }) => {
 
 test('theme button toggles the document theme', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === 'mobile', 'theme button is in the collapsed nav on mobile');
+  await page.setViewportSize({ width: 1440, height: 900 }); // the full bar shows from 1440px
   await page.goto('/en');
   const html = page.locator('html');
   const btn = page.locator('#themeBtn');
@@ -129,6 +130,7 @@ test.describe('light-first default', () => {
 
   test('an explicit dark choice still wins on the marketing site', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'mobile', 'theme button is in the collapsed nav on mobile');
+    await page.setViewportSize({ width: 1440, height: 900 }); // the full bar shows from 1440px
     await page.goto('/en/features');
     await page.evaluate(() => { try { localStorage.setItem('theme', 'dark'); } catch (e) {} });
     await page.reload();

@@ -1,12 +1,12 @@
 ---
 // MarketingNav.astro — sticky top bar for every Gurbani Soul marketing page. Three zones on one
 // centre line: brand · primary links · actions (theme, Contribute, the one gold "Get the app").
-// White text over the dark hero before scroll; once scrolled the bar becomes a frosted capsule
-// (a ::before layer that fades and settles — the header's height never changes, so nothing on the
-// page shifts) with a gold reading-progress hairline (CSS scroll timeline where supported).
-// ≥1280 full row · 1024–1279 Contribute collapses to its heart (the label stays as its accessible
-// name) · <1024 links/theme/Contribute move into the <dialog> sheet · <420 only brand + menu (the
-// hero's own App Store button is on screen). Styles in marketing.css, behaviour in landing.ts.
+// One capsule in every language (dark glass with white text over the hero, paper glass once
+// scrolled or on solid pages — the header's height never changes, so nothing shifts) with a gold
+// reading-progress hairline. Type is large for older readers: 18px Latin, Gurmukhi optically matched,
+// 44px targets. ≥1600 full row · 1440–1599 Contribute shows its heart and the switcher its code ·
+// <1440 links/theme/Contribute/languages move into the <dialog> sheet (same breakpoint for every
+// language, so French never crowds) · <420 only brand + menu (the hero's App Store button is on screen). Styles in marketing.css, behaviour in landing.ts.
 // The CTA is a real App Store link only when APP_STORE_LIVE; otherwise a "Coming soon" chip, tagged
 // data-app-store="coming-soon-nav" so the page's single canonical "coming soon" stays the hero one.
 // Contribute: an outlined button with a small heart — the heart's fill is the site's one use of

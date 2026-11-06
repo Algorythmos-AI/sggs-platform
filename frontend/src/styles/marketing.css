@@ -27,7 +27,7 @@
 :root {
   /* The marketing nav's exact height. Heroes that sit under the transparent nav pull up by
      this much, so it must match the nav at every width (see .mnav and the 767px breakpoint). */
-  --mnav-h: 72px;
+  --mnav-h: 84px;
   /* Soul Gold + warm surfaces (light legs from tokens.json). */
   --paper: #FBF7F0; --paper-2: #FDF6E3; --card: #FFFFFF;
   --ink: #201A12; --ink-soft: #6B5E4B; --line: rgba(43,26,5,.12);
@@ -104,51 +104,56 @@ html.js-motion .reveal { opacity: 0; transform: translateY(14px); }
 html.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity .6s ease, transform .6s ease; }
 
 /* --- Sticky nav ------------------------------------------------------------------------------
-   The header is a fixed-height sticky row (--mnav-h) holding one 56px bar, `.mnav-in`: a grid of
-   brand · links · actions, every item a 40px box on the same centre line. The scrolled "capsule"
-   is the bar's ::before layer (frost, hairline, soft shadow) fading in and settling from 98.5%
-   scale — opacity/transform only, so scrolling never moves or resizes anything (CLS 0).
+   The header is a fixed-height sticky row (--mnav-h) holding one 64px bar, `.mnav-in`: a grid of
+   brand · links · actions, every item a 44px box (tap target) on the same centre line, in type
+   sized for older readers (18px Latin; interface Gurmukhi optically matched). The capsule (the
+   bar's ::before: frost, hairline, soft shadow) is ALWAYS drawn so every language and page shows
+   the same bar: dark glass over the hero, paper glass once scrolled or on solid pages. Only its
+   colours change on scroll, so nothing moves or resizes (CLS 0). One breakpoint for every
+   language: under 1440px the links collapse into the menu sheet — measured so that the longest
+   (French) row never crowds.
    Tints are explicit per surface (no color-mix under same-coloured text: Lightning CSS falls back
    to the plain var). */
 .mnav {
   position: sticky; top: 0; z-index: 50; height: var(--mnav-h);
   display: flex; align-items: center;
   padding: 0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px));
-  --nav-tint: rgba(255,255,255,.14); --nav-edge: rgba(255,255,255,.34);
-  --nav-glass: rgba(251,247,240,.80);
+  --nav-tint: rgba(255,255,255,.16); --nav-edge: rgba(255,255,255,.40);
+  --nav-glass: rgba(16,11,6,.58); --nav-line: rgba(255,255,255,.22);
   color: #fff;
 }
-:root[data-theme="dark"] .mnav { --nav-glass: rgba(23,20,18,.80); }
-.mnav.scrolled, .mnav--solid { color: var(--ink); --nav-tint: rgba(43,26,5,.07); --nav-edge: var(--line); }
-:root[data-theme="dark"] .mnav.scrolled, :root[data-theme="dark"] .mnav--solid { --nav-tint: rgba(255,255,255,.10); }
+.mnav.scrolled, .mnav--solid { color: var(--ink); --nav-tint: rgba(43,26,5,.08); --nav-edge: var(--line); --nav-glass: rgba(251,247,240,.86); --nav-line: var(--line); }
+:root[data-theme="dark"] .mnav.scrolled, :root[data-theme="dark"] .mnav--solid { --nav-tint: rgba(255,255,255,.11); --nav-glass: rgba(23,20,18,.86); }
 .mnav .mnav-in {
   position: relative; isolation: isolate;
   display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 20px;
-  width: 100%; max-width: var(--maxw); height: 56px; margin: 0 auto; padding: 0 8px 0 16px; border-radius: 999px;
+  width: 100%; max-width: 1440px; height: 64px; margin: 0 auto; padding: 0 10px 0 20px; border-radius: 999px;
 }
 .mnav .mnav-in::before {
   content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
-  background: var(--nav-glass); border: 1px solid var(--line);
+  background: var(--nav-glass); border: 1px solid var(--nav-line);
   box-shadow: 0 14px 34px -22px rgba(20,14,6,.45);
   -webkit-backdrop-filter: blur(18px) saturate(1.2); backdrop-filter: blur(18px) saturate(1.2);
-  opacity: 0; transform: scale(.985);
 }
-.mnav.scrolled .mnav-in::before { opacity: 1; transform: none; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .mnav .mnav-in::before { background: var(--paper); }
+  .mnav .mnav-in::before { background: #1a130b; }
+  .mnav.scrolled .mnav-in::before, .mnav--solid .mnav-in::before { background: var(--paper); }
 }
 @media (prefers-reduced-transparency: reduce) {
-  .mnav .mnav-in::before { background: var(--paper); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .mnav .mnav-in::before { background: #1a130b; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .mnav.scrolled .mnav-in::before, .mnav--solid .mnav-in::before { background: var(--paper); }
 }
-.mnav a.brand { display: inline-flex; align-items: center; gap: 10px; height: 44px; text-decoration: none; color: inherit; font-family: var(--serif-display); font-size: 19px; font-weight: 600; line-height: 1; letter-spacing: -.01em; white-space: nowrap; }
-.mnav .brand .gm, #mobileMenu .brand .gm { font-size: 22px; line-height: 1; transform: translateY(-1px); }
-.mnav nav.mnav-links { display: flex; justify-content: center; gap: 2px; min-width: 0; }
-.mnav nav.mnav-links a { display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 999px; color: inherit; text-decoration: none; font-size: 14.5px; font-weight: 500; white-space: nowrap; opacity: .86; }
-.mnav nav.mnav-links a:hover { opacity: 1; background: var(--nav-tint); }
-.mnav nav.mnav-links a[aria-current] { opacity: 1; background: var(--nav-tint); }
-.mnav .mnav-right { display: flex; align-items: center; gap: 8px; justify-self: end; }
-.mnav-icon { display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 0; border-radius: 999px; border: 1px solid var(--nav-edge, var(--line)); background: transparent; color: inherit; cursor: pointer; }
-.mnav-icon svg { width: 20px; height: 20px; display: block; }
+.mnav a.brand { display: inline-flex; align-items: center; gap: 10px; height: 44px; text-decoration: none; color: inherit; font-family: var(--serif-display); font-size: 22px; font-weight: 600; line-height: 1; letter-spacing: -.01em; white-space: nowrap; }
+.mnav .brand .gm, #mobileMenu .brand .gm { font-size: 26px; line-height: 1; transform: translateY(-1px); }
+.mnav nav.mnav-links { display: flex; justify-content: center; gap: 4px; min-width: 0; }
+.mnav nav.mnav-links a { position: relative; display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 999px; color: inherit; text-decoration: none; font-size: 18px; font-weight: 600; line-height: 1; white-space: nowrap; }
+.mnav nav.mnav-links a:hover { background: var(--nav-tint); }
+/* Active page: a tinted pill plus a gold bar under the label (gold as a fill, never as text). */
+.mnav nav.mnav-links a[aria-current] { background: var(--nav-tint); }
+.mnav nav.mnav-links a[aria-current]::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: 5px; height: 3px; border-radius: 3px; background: var(--accent-fill, #FFBC0D); }
+.mnav .mnav-right { display: flex; align-items: center; gap: 10px; justify-self: end; }
+.mnav-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 999px; border: 1px solid var(--nav-edge, var(--line)); background: transparent; color: inherit; cursor: pointer; }
+.mnav-icon svg { width: 22px; height: 22px; display: block; }
 .mnav-icon:hover { background: var(--nav-tint, transparent); }
 .mnav-icon:focus-visible, .mnav-give:focus-visible, .mnav .brand:focus-visible, .mnav-links a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .mnav:not(.scrolled):not(.mnav--solid) :is(.mnav-icon, .mnav-give, .mnav-links a, .brand):focus-visible { outline-color: #fff; }
@@ -156,7 +161,7 @@ html.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity .6s
    hidden and a line icon drawn from that state, matching the other icons' stroke. */
 #themeBtn, [data-theme-proxy] { position: relative; font-size: 0; }
 #themeBtn::before, [data-theme-proxy]::before {
-  content: ""; position: absolute; inset: 0; margin: auto; width: 18px; height: 18px; background: currentColor;
+  content: ""; position: absolute; inset: 0; margin: auto; width: 20px; height: 20px; background: currentColor;
   -webkit-mask: var(--ico-system) center / contain no-repeat; mask: var(--ico-system) center / contain no-repeat;
 }
 :is(#themeBtn, [data-theme-proxy])[aria-label^="Theme: light"]::before { -webkit-mask-image: var(--ico-sun); mask-image: var(--ico-sun); }
@@ -166,16 +171,17 @@ html.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity .6s
   --ico-moon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z'/%3E%3C/svg%3E");
   --ico-system: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M12 3.5a8.5 8.5 0 0 1 0 17z' fill='black'/%3E%3C/svg%3E");
 }
-.pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 999px; font-weight: 650; font-size: 14.5px; white-space: nowrap; text-decoration: none; background: var(--accent-fill); color: var(--on-accent); border: 1px solid var(--accent); }
+.pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 999px; font-weight: 650; font-size: 17px; white-space: nowrap; text-decoration: none; background: var(--accent-fill); color: var(--on-accent); border: 1px solid var(--accent); }
 .pill.soon { background: transparent; color: inherit; border: 1px solid currentColor; opacity: .9; cursor: default; font-weight: 600; }
-.mnav.scrolled .pill.soon, .mnav--solid .pill.soon { color: var(--ink-soft); border-color: var(--line); }
+.mnav.scrolled .pill.soon, .mnav--solid .pill.soon { color: var(--ink-soft); border-color: var(--nav-edge); }
+.mnav .pill.soon { opacity: 1; border-color: var(--nav-edge); }
 /* Contribute: an outlined button, ink/white label, a 15px heart. Red on the website is allowed ONLY
    as this heart's fill, through the single --contribute-heart token (brand book exception;
    BrandDisciplineInSource strips exactly that declaration). Never text, never beside Gurmukhi. */
 .mnav-give, #mobileMenu a.mm-give { --contribute-heart: #DA291C; }
-.mnav a.mnav-give { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 40px; padding: 0 15px 0 12px; border-radius: 999px; border: 1px solid var(--nav-edge); color: inherit; text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.mnav a.mnav-give { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 18px 0 14px; border-radius: 999px; border: 1px solid var(--nav-edge); color: inherit; text-decoration: none; font-size: 17px; font-weight: 600; white-space: nowrap; }
 .mnav-give:hover, .mnav-give[aria-current] { background: var(--nav-tint); }
-.mnav-give .heart { width: 15px; height: 15px; flex: none; color: var(--contribute-heart); }
+.mnav-give .heart { width: 17px; height: 17px; flex: none; color: var(--contribute-heart); }
 /* Reading progress: a gold hairline along the capsule's foot, driven by the root scroll timeline
    (Chrome/Edge/Safari 26). Elsewhere, and under reduced motion, it simply isn't shown. */
 .mnav-progress { position: absolute; left: 22px; right: 22px; bottom: 0; height: 2px; border-radius: 2px; background: var(--accent); transform-origin: left center; transform: scaleX(0); opacity: 0; pointer-events: none; }
@@ -192,17 +198,17 @@ html.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity .6s
   .mnav-progress { transition: opacity .3s ease; }
 }
 .burger { display: none; }
-@media (max-width: 1279px) {
-  .mnav .mnav-in { gap: 12px; }
-  .mnav nav.mnav-links a { padding: 0 10px; font-size: 14px; }
-  .mnav a.mnav-give { width: 40px; padding: 0; }
+@media (max-width: 1599px) {
+  /* Below 1600 Contribute collapses to its heart (the label stays its accessible name). */
+  .mnav a.mnav-give { width: 44px; padding: 0; }
   .mnav-give .lbl { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 }
-@media (max-width: 1023px) {
+@media (max-width: 1439px) {
   .mnav nav.mnav-links, .mnav a.mnav-give, .mnav #themeBtn { display: none; }
   .mnav .burger { display: inline-grid; }
 }
-@media (max-width: 767px) { :root { --mnav-h: 64px; } .mnav .mnav-in { padding-left: 12px; } }
+@media (max-width: 767px) { :root { --mnav-h: 72px; } .mnav .mnav-in { height: 60px; padding: 0 8px 0 16px; } .mnav a.brand { font-size: 20px; } .mnav .brand .gm { font-size: 24px; } }
+@media (max-width: 359px) { .mnav a.brand { font-size: 18px; gap: 8px; } }
 @media (max-width: 419px) { .mnav .mnav-right .pill { display: none; } }
 
 /* Mobile menu: a rounded sheet dropped from the top over a blurred backdrop. A native modal
@@ -237,7 +243,7 @@ html.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity .6s
 @media (prefers-reduced-motion: reduce) { #mobileMenu[open] .mm-in { animation: mm-fade .16s ease; } }
 @keyframes mm-drop { from { opacity: 0; transform: translateY(-12px) scale(.98); } }
 @keyframes mm-fade { from { opacity: 0; } }
-@media (min-width: 1024px) { #mobileMenu { display: none; } }
+@media (min-width: 1440px) { #mobileMenu { display: none; } }
 
 /* --- Shared section primitives --------------------------------------------------------------- */
 .section { padding: clamp(64px, 9vw, 120px) 0; }
@@ -559,8 +565,8 @@ html.js-motion .reveal.in .draw { transform: none; transition: transform .6s cub
 /* Language switcher (components/LanguageSwitcher.astro): drawn only while two or more languages are
    enabled. Each name is in its own script; no flags. */
 .lang-sw { position: relative; }
-.lang-btn { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border-radius: 999px;
-  border: 1px solid var(--nav-edge, var(--line)); background: transparent; color: inherit; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.lang-btn { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 14px; border-radius: 999px;
+  border: 1px solid var(--nav-edge, var(--line)); background: transparent; color: inherit; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
 .lang-btn svg { width: 12px; height: 12px; }
 .lang-btn:hover { background: var(--nav-tint, transparent); }
 .lang-btn:focus-visible, .lang-list a:focus-visible, .lang-row a:focus-visible, .lang-foot a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -574,16 +580,19 @@ html.js-motion .reveal.in .draw { transform: none; transition: transform .6s cub
 .lang-row a[aria-current] { background: var(--paper-2); box-shadow: inset 0 0 0 1px var(--accent); }
 .lang-foot { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .lang-foot a { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent-text); text-decoration: none; font-size: 14px; }
-@media (max-width: 1023px) { .mnav .mnav-right .lang-sw { display: none; } }   /* phones: the menu sheet's row */
+@media (max-width: 1439px) { .mnav .mnav-right .lang-sw { display: none; } }   /* phones: the menu sheet's row */
 .lang-code { display: none; }
-@media (max-width: 1279px) {
-  /* Small laptops: the switcher shows its code (its accessible name still reads the language), and
-     the longer French labels sit a little tighter — measured at 1024–1279 px (no overlap). */
-  .lang-btn .lang-name { display: none; }
-  .lang-btn .lang-code { display: inline; letter-spacing: .04em; }
-  .lang-btn { padding: 0 10px; }
-  :lang(fr) .mnav nav.mnav-links a { padding: 0 7px; font-size: 13.5px; }
+@media (max-width: 1599px) {
+  /* The switcher shows its code (its accessible name still reads the language). Every language keeps
+     the same type size: the bar collapses into the menu instead of shrinking French. */
+  .mnav .lang-btn .lang-name { display: none; }
+  .mnav .lang-btn .lang-code { display: inline; letter-spacing: .04em; }
 }
+/* Interface Gurmukhi (system face) sits smaller and lighter than Latin at the same px: one step up
+   and a heavier weight matches its optical size to the 18px Latin labels. */
+:lang(pa) .mnav nav.mnav-links a { font-size: 19.5px; font-weight: 700; }
+:lang(pa) :is(.mnav a.mnav-give, .mnav .pill, #mobileMenu .mm-sub a) { font-size: 18px; }
+:lang(pa) #mobileMenu .mm-links a { font-family: var(--gm-ui); font-size: 25px; }
 
 /* Punjabi interface text (docs/website/translation-style-guide.md). Interface Gurmukhi is set in the
    reader's system Gurmukhi face — never in Sant Lipi, which is kept for scripture (.gm / .verse), so
