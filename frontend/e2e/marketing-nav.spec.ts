@@ -15,7 +15,7 @@ const centres = (page: Page) =>
 test.describe('desktop bar', () => {
   test.skip(({ isMobile }) => !!isMobile, 'desktop widths only');
 
-  for (const w of [1024, 1280, 1440, 2000]) {
+  for (const w of [1440, 1600, 2000]) {
     test(`every item shares one centre line and the row never overflows at ${w}px`, async ({ page }) => {
       await page.setViewportSize({ width: w, height: 900 });
       await page.goto('/en');
@@ -54,7 +54,7 @@ test.describe('desktop bar', () => {
 });
 
 test.describe('menu sheet', () => {
-  test.skip(({ isMobile }) => !isMobile, 'the menu button shows under 1024px');
+  test.skip(({ isMobile }) => !isMobile, 'the menu button shows under 1440px');
 
   test('traps focus, locks scroll, and restores both on close', async ({ page }) => {
     await page.goto('/en');
