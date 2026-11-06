@@ -1,16 +1,18 @@
 {
   "lang": "pa",
   "reviewer": "Sam Kalaliya (owner, Algorythmos Pty Ltd)",
-  "date": "2026-11-05",
-  "catalogSha256": "0d8a30bcbd1791a412bee26ae7174e57f01a717ccd5276ca19173ebe38290e49",
+  "date": "2026-11-06",
+  "catalogSha256": "9fd695933485ca2ef4e7e6855ec531b4e36473176931a4da7406bee8e5a96d6f",
   "gates": {
-    "G-PA": "signed: read on the rendered /pa pages (phone and desktop) from the review pack",
-    "G4": "Privacy and Contribute approved by the owner for Algorythmos Pty Ltd; no external counsel review"
+    "G-PA": "signed 2026-11-06: native-speaker polish (PR #356) read and approved by the owner; first signed 2026-11-05 on the rendered /pa pages",
+    "G4": "Privacy and Contribute approved by the owner for Algorythmos Pty Ltd (Privacy wording re-read 2026-11-06); no external counsel review"
   },
   "decisions": {
     "wordmark": "ਗੁਰਬਾਣੀ ਸੋਲ (Gurmukhi); the App Store name stays Gurbani Soul",
     "numerals": "Gurmukhi (੧੨੩) for interface numbers; Ang numbers stay Western",
-    "default": "English stays the site default; Punjabi is enabled first"
+    "default": "English stays the site default; Punjabi is enabled first",
+    "exact": "ਸ਼ੁੱਧ for \"exact\" (ਸਟੀਕ means with commentary in Sikh publishing); open for a Granthi's confirmation",
+    "widget": "ਵਿਜੇਟ"
   },
   "notes": "English governs the legal pages. The app, Knowledge Base, newsletter, Stripe checkout and support replies are in English, and the pages say so."
 }
