@@ -591,11 +591,26 @@ html.js-motion .reveal.in .draw { transform: none; transition: transform .6s cub
    has no italics (emphasis is weight), and spacing letters apart breaks the headline bar. */
 :root:lang(pa) {
   --gm-ui: "Noto Sans Gurmukhi", "Gurmukhi MN", "Mukta Mahee", "Raavi", "Nirmala UI", sans-serif;
+  /* Every interface stack ends in the same Gurmukhi face. A component that sets its own
+     font-family (the hero lede) used to drop --gm-ui and take whatever face the system picked —
+     Mukta Mahee beside Gurmukhi MN on one screen. The Latin part of each stack is unchanged. */
+  --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, var(--gm-ui);
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, var(--gm-ui);
+  --serif-display: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, var(--gm-ui);
 }
-:lang(pa) body { font-family: var(--sans), var(--gm-ui); line-height: 1.7; }
+:lang(pa) body { font-family: var(--sans); line-height: 1.7; }
 :lang(pa) :is(h1, h2, h3, .h-story, .h-statement, .eyebrow, .chapter-no, .mfoot-tag, .lede, .hero-lede) {
-  font-family: var(--serif-display), var(--gm-ui); letter-spacing: 0; text-transform: none; line-height: 1.35;
+  font-family: var(--serif-display); letter-spacing: 0; text-transform: none; line-height: 1.35;
 }
+/* A Gurmukhi line ends on a phrase, not one stranded word; headings break evenly. */
+:lang(pa) :is(p, li, dd, figcaption) { text-wrap: pretty; }
+:lang(pa) :is(h1, h2, h3, .h-story, .h-statement) { text-wrap: balance; }
+/* Headings set solid (line-height ≈ 1) for Latin collide when Gurmukhi wraps: a vowel sign above
+   meets an ਔਂਕੜ / ਦੁਲੈਂਕੜ below. html:root outranks the pages' scoped heading rules. */
+html:root:lang(pa) h1 { line-height: 1.25; }
+/* Small labels: in English they are spaced capitals; Gurmukhi has neither, so at the same 12.5px it
+   reads a size smaller. */
+html:root:lang(pa) :is(.eyebrow, .chapter-no, .mfoot-h) { font-size: 14px; }
 /* Spacing letters apart breaks the headline bar (and conjuncts) of Gurmukhi, so it is never applied
    on a Punjabi page — the only !important here: page-scoped styles must not win this one. */
 :lang(pa) * { letter-spacing: 0 !important; }
