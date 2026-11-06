@@ -3,6 +3,15 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.6.3] — 2026-11-06
+
+The Punjabi site reads as written in Punjabi, and the top bar is larger and the same in every language. The scripture is unchanged.
+
+### Changed
+- **Punjabi copy, after a native-speaker review** (#356): ਸਟੀਕ (which in Sikh publishing means *with commentary*) becomes ਸ਼ੁੱਧ; the Gurus take respectful plural verbs; the Granth is read Ang by Ang, never by "pages"; mistranslations fixed (ਸਥਿਰ for *static*, ਤਤਕਰਾ for a page's contents, ਵਿਜਿਟ → ਵਿਜੇਟ); the English-only note says exactly what is English (the app's menus and buttons). The owner re-signed `reviews/pa.json` (G-PA, and G4 for Privacy).
+- **Punjabi typography** (#356): one Gurmukhi interface face on every element, no stranded last words, more room for vowel signs in headings, larger small labels, and pahar windows told as spoken time ("ਸਵੇਰੇ ੬ ਤੋਂ ੯ ਵਜੇ"). Scripture keeps Sant Lipi.
+- **The marketing navbar** (#357): one capsule in every language, 18px links and 44px targets, Gurmukhi one step larger so it reads the same size as the Latin, a clear active state, and one breakpoint for all languages (the full row from 1440px, the menu below). A new e2e spec checks every page in en/pa/fr from 320 to 1920px for overflow and equal bar size.
+
 ## [1.6.2] — 2026-11-06
 
 gurbanisoul.com now speaks French. The marketing pages are live at `/fr/…`, signed off on the rendered pages, and a browser that asks for French first is sent there from `gurbanisoul.com/`. English stays the default. The scripture is unchanged.
