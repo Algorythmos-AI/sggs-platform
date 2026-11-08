@@ -596,6 +596,39 @@ def check_contract_counts(files: list[Path] | None = None) -> list[Problem]:
     return P
 
 
+ROUTES_RE = re.compile(r"\b(\d{2})\s+(?:read-only\s+|GET\s+|public\s+)?(?:API\s+)?routes\b")
+
+
+def api_route_count() -> int | None:
+    """How many routes the API serves: the paths of the OpenAPI description, which
+    tools/gen_openapi.py generates from webapp/serve.py ROUTES (and checks in CI)."""
+    spec = ROOT / "contract" / "openapi.json"
+    return len(json.loads(spec.read_text(encoding="utf-8"))["paths"]) if spec.exists() else None
+
+
+def check_route_counts(files: list[Path] | None = None) -> list[Problem]:
+    """A page or poster that says how many routes the API has must say today's number. Not
+    checked: ADRs and the API changelog (they record the number of their day), a figure marked
+    "at the time", and a count for one context or service ("the insights service: 11 routes")."""
+    P: list[Problem] = []
+    want = api_route_count()
+    if want is None:
+        return P
+    if files is None:
+        files = [p for p in published_pages() if "adr" not in p.relative_to(ROOT).parts and p != DOCS / "api" / "changelog.md"]
+        files += sorted((DOCS / "diagrams" / "posters").glob("*.steps.json"))
+    for f in files:
+        text = f.read_text(encoding="utf-8")
+        for m in ROUTES_RE.finditer(text):
+            before = text[max(0, m.start() - 60): m.start()].lower()
+            after = text[m.end(): m.end() + 40].lower()
+            if "context" in before or "service" in before or "at the time" in after or int(m.group(1)) == want:
+                continue
+            line = text.count("\n", 0, m.start()) + 1
+            P.append(Problem(f, line, f"says the API has {m.group(1)} routes; it has {want} today (contract/openapi.json)"))
+    return P
+
+
 def check_drift() -> list[Problem]:
     """The pages and posters that describe the engines must name what the code names."""
     P: list[Problem] = []
@@ -807,6 +840,7 @@ def run(db_path: Path | None = None) -> list[Problem]:
     problems += check_posters(tokens_hex)
     problems += check_drift()
     problems += check_contract_counts()
+    problems += check_route_counts()
     problems += check_site_config()
     problems += check_theme()
     return problems

@@ -62,7 +62,7 @@ comes from — press *Next* on the site to build it up step by step:
 - [Architecture](architecture/README.md) — three repositories, one read-only API in five contexts, a pinned database: the system and how its parts fit.
 - [Data](data/README.md) — a line record, the corpus pipeline and its gates, the dataset pin, the editorial ledger, the integrity chain.
 - [Search & verification](search/README.md) — the search waterfall, the Roman fold, the verification engine and the harnesses that hold them.
-- [The API](api/README.md) — 26 read-only routes, the contract that pins them, versioning and caching, and a reference to try.
+- [The API](api/README.md) — 29 read-only routes, the contract that pins them, versioning and caching, and a reference to try.
 - [The iOS app](ios/README.md) — Gurbani Soul: how it takes a release, its parity with the API, its launch-integrity check, Nitnem.
 - [Ship & operate](process/README.md) — branching, environments, the CI gates, releases and the runbooks for when something goes wrong.
 - [Decisions](adr/README.md) — why the system is the way it is, one decision record at a time.

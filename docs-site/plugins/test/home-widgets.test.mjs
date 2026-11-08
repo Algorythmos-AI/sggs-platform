@@ -53,3 +53,22 @@ test('releases: limit keeps the newest N and marks the element (no filter box)',
   assert.equal((html.match(/class="release"/g) ?? []).length, 3);
   assert.equal((releasesHtml(rel).match(/class="release"/g) ?? []).length, rel.length);
 });
+
+test('every release in CHANGELOG.md has a title for "Latest changes" and the Releases page', () => {
+  const releases = parseChangelog(readFileSync(path.join(REPO_ROOT, 'CHANGELOG.md'), 'utf8'));
+  assert.ok(releases.length > 10);
+  const empty = releases.filter((r) => !r.title).map((r) => r.version);
+  assert.deepEqual(empty, [], `releases with no title (the block would show an empty dash): ${empty.join(', ')}`);
+});
+
+test('a release without a heading title takes its summary paragraph, or else its first bold lead', () => {
+  const md = [
+    '## [9.9.2] — 2026-12-02', '', 'One **line** that goes on', 'over two lines. And a second sentence.', '', '### Added', '- **x** y',
+    '## [9.9.1] — 2026-12-01', '', '### Fixed', '- **The fix.** detail',
+    '## [9.9.0] — 2026-11-30 — Titled in the heading', '', 'Paragraph ignored.',
+  ].join('\n');
+  const [a, b, c] = parseChangelog(md);
+  assert.equal(a.title, 'One line that goes on over two lines');
+  assert.equal(b.title, 'The fix');
+  assert.equal(c.title, 'Titled in the heading');
+});

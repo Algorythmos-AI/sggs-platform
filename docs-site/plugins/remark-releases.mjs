@@ -21,10 +21,35 @@ export function parseChangelog(text) {
     if (!cur) continue;
     const k = /^### (\w+)/.exec(line);
     if (k) { cur._kind = k[1]; cur.kinds[k[1]] ??= 0; continue; }
-    if (/^- /.test(line) && cur._kind) cur.kinds[cur._kind]++;
+    if (/^- /.test(line) && cur._kind) {
+      cur.kinds[cur._kind]++;
+      // no intro paragraph: the first entry's bold lead names the release
+      if (!cur.title && !cur._lead) cur._lead = /^- \*\*(.+?)\*\*/.exec(line)?.[1] ?? '';
+      continue;
+    }
+    // Since 1.4.1 a release's summary is the paragraph under its heading, not the heading's third
+    // part: collect it (hard-wrapped lines included) until the first blank line or ### heading.
+    if (!cur.title && !cur._kind && !cur._paraDone) {
+      if (line.trim()) cur._para = `${cur._para ?? ''} ${line.trim()}`;
+      else if (cur._para) cur._paraDone = true;
+    }
   }
-  for (const r of out) delete r._kind;
+  for (const r of out) {
+    if (!r.title) r.title = firstSentence(plain(r._para ?? '')) || plain(r._lead ?? '').replace(/[.:]$/, '');
+    delete r._kind; delete r._para; delete r._paraDone; delete r._lead;
+  }
   return out;
+}
+
+/** Markdown inline marks out: `**x**`, `*x*`, `` `x` ``, `[x](y)` -> x. */
+function plain(s) {
+  return s.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/\*\*?([^*]+)\*\*?/g, '$1').replace(/`([^`]+)`/g, '$1').replace(/\s+/g, ' ').trim();
+}
+
+/** The paragraph's first sentence: up to the first full stop that ends a sentence. */
+function firstSentence(s) {
+  const m = /^(.+?[.!?])(?:\s|$)/.exec(s);
+  return (m ? m[1] : s).replace(/[.]$/, '');
 }
 
 export function releasesHtml(releases, limit = 0) {
