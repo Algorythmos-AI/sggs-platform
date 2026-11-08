@@ -4,13 +4,14 @@ description: "The releases that explain today's invariants, in order, with what 
 sidebar:
   order: 5
 verified:
-  commit: d2f2e415
-  date: "2026-09-27"
+  commit: 26d86be7
+  date: "2026-11-08"
 ---
 # Release timeline & known issues
 
 `CHANGELOG.md` is the authoritative release history. This page keeps the releases that explain an
-invariant you will meet in the code, and the items that are still open. The 2026-06 static audit
+invariant you will meet in the code, and the items that are still open. A release that changed
+copy, layout or tooling but left no new rule (1.4.1, 1.4.2, 1.4.5–1.4.7) is only in the changelog. The 2026-06 static audit
 and live verification passes live under [reports](../reports/README.md).
 
 ## Timeline
@@ -30,7 +31,16 @@ and live verification passes live under [reports](../reports/README.md).
 | **v1.3.8** | 2026-09-24 | Three repositories: data, platform, app ([ADR-0007](../adr/0007-three-repositories.md)); the database arrives by pin ([ADR-0008](../adr/0008-dataset-by-pin.md)). | `dataset.lock.json` is the only way a dataset changes here; the editorial ledger is 4 rules, 11 applications. |
 | **v1.3.9** | 2026-09-25 | Every bounded context runs as its own service on staging behind a gateway generated from the route table ([ADR-0010](../adr/0010-services-behind-a-generated-gateway.md)); `/api/v1/*` with strict errors beside a byte-identical legacy `/api/*`; request ids; continuous production verification. | Routing is generated, never hand-written; legacy `/api/*` stays byte-identical (the golden contract pins it). |
 | **v1.3.10** | 2026-09-25 | The API runs as Python functions inside the Vercel web project in production ([ADR-0011](../adr/0011-api-as-functions-in-the-web-project.md)), replayed against the golden contract before it goes live; the Render API keeps deploying as the rollback; this wiki launches at docs.gurbanisoul.com. | The website and the API deploy — and roll back — together. |
-| **v1.4.0** | 2026-10-14 | The Knowledge Base is redressed (thirteen themes, a new shell) and gains the app's Reader, Nitnem, Search and Raag Clock; the wiki gains its page menu, Markdown and PDF. The API is unchanged and production keeps the single `all` function. | A web release ships first and the app follows as iOS `1.4.0 (1)` from the tag; until that update is approved the site reports 1.4.0 and the App Store binary 1.3.10. |
+| **v1.4.0** | 2026-10-14 | The Knowledge Base is redressed (thirteen themes, a new shell) and gains the app's Reader, Nitnem, Search and Raag Clock; the wiki gains its page menu, Markdown and PDF. The API is unchanged and production keeps the single `all` function. | A web release ships first and the app follows as an App Store candidate from the same tag; the store version can lag the site until that candidate is released ([release status](../ios/release-status.md)). |
+| **v1.4.3** | 2026-10-17 | The traditional saroop draws each doubled subjoined ya as the yakash sign (U+0A75), as the printed Bir does. | Display only: a test checks on every build that the corpus has no U+0A75 of its own and stores every subjoined ya as one doubled pair; a copied selection is mapped back to the stored characters. |
+| **v1.4.4** | 2026-10-18 | `/contribute`: optional support through Stripe-hosted Payment Links, behind the build-time `PUBLIC_CONTRIBUTE_MODE` switch. | A link that does not match the mode fails the build; the page loads no Stripe script; they are contributions, never donations, and never linked from the app ([Contribute and Stripe](../website/contribute.md)). |
+| **v1.4.8** | 2026-10-23 | Constellation v2 on the web and in the app; three new analytics routes (29 in all) and a 31-vector `golden_constellation` suite. | The website and the app must give the same numbers: the suite is replayed over HTTP and by the app's `ConstellationParityTests`. |
+| **v1.4.9** | 2026-10-25 | Dataset 1.1.0: 1,045 author tags corrected from the evidence printed in the Granth; the contributors roster v2 (`contributors.json`) becomes the one source for web and app. | Attribution changes only `author`, proven byte-identical scripture (`verify_attribution.py`); life facts are cited only from The Encyclopaedia of Sikhism and Sahib Singh's Darpan; `check_contributors.py --channel appstore` refuses entries not yet approved. |
+| **v1.5.0** | 2026-10-27 | Dataset 1.2.0 reads each Vaar from the print (`vaar_units` 1,426 → 1,443); the site's counts are generated from the database and the roster. | No number on a marketing page is typed by hand (`landing-facts.json`, checked by the `LandingPage` gate). |
+| **v1.5.1** | 2026-10-28 | Dataset 1.3.0 applies the scholar's G3 rulings on attribution and grouping (Angs 1253, 1363–1384, 695, 524 and 323). | A ruling moves metadata and grouping only; it is recorded as relayed, with the owner's signature (sggs-data `validation/attribution-g3-review/SIGN-OFF.md`). |
+| **v1.5.2** | 2026-10-29 | Share cards drawn with HarfBuzz and resvg; a share page for every Ang at `/ang/N`; shared verses from the app link to it. | A card's verse is read from the database, never typed (`AngSharePages`); the share pages are `noindex` and stay out of `routes.ts`. |
+| **v1.6.0** | 2026-11-05 | Marketing pages move under a language prefix with permanent redirects from the old URLs; one message catalog; dataset 1.4.0 aligns the English in source order with multi-line spans. | No interface English outside the catalog (pseudo-locale build in CI); the redirects are generated, never hand-edited; a span's English sits once, on its last line ([translation layer](../data/translation-layer.md)). |
+| **v1.6.1 – v1.6.3** | 2026-11-05 – 11-06 | The Punjabi (1.6.1) and French (1.6.2) sites are switched on; the Punjabi copy is revised after a native-speaker review (1.6.3). | A language ships whole or not at all: every key translated and current, and a signed review record that pins the catalog's sha256 (`i18n-status.mjs` in CI); Ang numbers stay in Western digits in every language ([internationalisation](../architecture/i18n.md)). |
 
 ## Still open
 
@@ -41,13 +51,23 @@ and live verification passes live under [reports](../reports/README.md).
 | 21 source-faithful lines with a vowel sign that has no base consonant (Angs 214, 342, 695, 698, 699, 897, 1203, 1205) | flagged for scholarly review; never silently changed (the Ang 1354/1358/1387 rows were resolved by the editorial corrections approved in the scholar review of 2026-09-24) | scholar review |
 | Eight web-only colour themes (`review` in `docs/brand/web-themes.json`) and the rule that Gurmukhi is ink in every theme: scholar review | shipped in 1.4.0 labelled `review`; the review was waived for the release by the owner on 2026-10-13 and runs after it | brand |
 | Five-person task check of the redressed Knowledge Base | waived for the 1.4.0 release by the owner on 2026-10-13; runs after it | web |
-| The site reports 1.4.0 while the App Store binary is 1.3.10 | planned gap; closes when iOS 1.4.0 (1) is approved and released | release |
+| The scholar's direction on the segmentation of the closing word on Angs 323, 517, 524 and 654 (his Q6 in the G3 review) | recorded in 1.5.1 and not applied: changing a record's boundary changes its `gurmukhi` field, so it needs its own sggs-data change with a logged entry, the reconcile proof and a scholar's review | data, scholar review |
+| Biographical entries in the contributors roster | all 36 entries in `frontend/public/contributors.json` carry review status `draft`; four ask the scholar to rule (the signed dialogues inside Bhagat Kabir Ji's saloks, one birthplace); `check_contributors.py --channel appstore` refuses entries not yet approved | scholar review |
+| English still missing after dataset 1.4.0 | 41 verse lines and 33 headings have no English; line 47530 waits for a structure review of line 47529 (sggs-data `validation/translation-alignment-reviewed.json`) | data |
+| Learn articles in Punjabi and French | none is translated yet; the translated pages link to the English article (`frontend/src/i18n/content.ts`) | web |
+| The app's Sufficient Contrast and Larger Text accessibility labels | not declared in App Store Connect until gurbani-soul-ios issue #23 is done | iOS |
+| The Jaap pauris 79 and 80 display repair (iOS 1.4.7) | draws without a dotted circle; the stored text is unchanged; flagged for scholar review | scholar review |
+| The yakash display of the subjoined ya (1.4.3) | accepted by the owner for that release on 2026-10-17; the scholar's review continues, and a requested change ships in the next release | brand |
 | Japji `author = null`: author filters for Guru Nanak miss it | known, deferred | data |
 | `comp_type` mislabelled in places | suppressed at the display layer; prefer `comp_id`/`section` | data |
 
 What each of these means for the text is on [the editorial ledger](../data/editorial-ledger.md) page.
 
-Closed since the last list: the traditional saroop rendering was accepted as the app's default at the
+Closed since the last list: the gap between the site's version and the App Store's closed when 1.3.10
+was released on 2026-10-13 and 1.4.0 followed it; the app's store version can still trail the site
+between releases, which [release status](../ios/release-status.md) explains. The 1.4.0 entry for
+the eight web-only colour themes and the five-person task check is kept until their reviews are
+recorded. Earlier: the traditional saroop rendering was accepted as the app's default at the
 brand sensitivity gate on 2026-09-26. The deep-subscript ya that acceptance said would need another font
 was in Sant Lipi all along, as the yakash sign U+0A75: since 2026-10-16 the saroop draws it, matching the
 printed Bir, and goes back to the scholar with icon v2; `Validation-Report.md` is archived.

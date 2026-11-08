@@ -1,6 +1,6 @@
 ---
 title: "The website — gurbanisoul.com"
-description: "The public website gurbanisoul.com: DNS, SEO, Open Graph images, security headers, imagery policy, screenshots and its gates."
+description: "The public website gurbanisoul.com: domains, languages and redirects, SEO, Open Graph images, security headers, imagery, screenshots, Contribute and the gates."
 sidebar:
   order: 4
 ---
@@ -10,18 +10,23 @@ The public web property is one Astro static site (`frontend/`) served on the pro
 **`gurbanisoul.com`**. It carries two distinct things, deliberately kept separate (see
 [Brand & domains](../engineering/brand.md)):
 
-- **The Gurbani Soul pages** — `/`, `/features`, `/watch`, `/learn` and its articles, `/privacy`
-  and `/support` — use the marketing layout (`Marketing.astro`): the product's home, its policy
-  pages and the Learn articles.
+- **The Gurbani Soul pages** — home, Features, The watch, Learn and its articles, Support, Privacy
+  and Contribute — use the marketing layout (`Marketing.astro`): the product's home, its policy
+  pages and the Learn articles. Since 1.6.0 each lives under its language: `/en`, `/en/features`,
+  `/en/watch`, `/en/learn/…`, `/en/support`, `/en/privacy`, `/en/contribute`, and the same paths
+  under `/pa` (from 1.6.1) and `/fr` (from 1.6.2). See **Languages** below.
 - **The Knowledge Base** — `/library` (its home), `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`,
   `/trail`, `/analytics` (Insights), `/constellation`, `/raag-clock`, `/divergence` — uses
   `Base.astro`: the **Sri Guru Granth Sahib Ji Knowledge Base**, the scholarly study site, with
-  its own name, header and theme.
+  its own name, header and theme. It is English only and keeps its unprefixed paths, as do
+  `/ang/N`, `/og/*`, `/rss.xml` and `/sitemap.xml`.
 
 Both are built by `astro build` into `frontend/dist/`, synced to `webapp/static/`, and served by
 the stdlib Python server locally and by Vercel in production. There is no second site and no
-second copy of the policy pages — `/privacy` and `/support` are Astro pages under
-`frontend/src/pages/`, and they are the single source of truth for the App Store URLs.
+second copy of the policy pages: each marketing page is one Astro page under
+`frontend/src/pages/[lang]/`, built once per enabled language. The App Store URLs (`/privacy` and
+`/support`, as entered in App Store Connect) still work: they answer with a permanent redirect to
+`/en/privacy` and `/en/support`.
 
 ---
 
@@ -44,8 +49,39 @@ second copy of the policy pages — `/privacy` and `/support` are Astro pages un
 **Canonical rule.** The apex is canonical. `<link rel="canonical">`, `og:url` and the sitemap all
 use bare `https://gurbanisoul.com/…`. `www` and the old `*.vercel.app` alias 308-redirect to it, so
 there is exactly one indexable host. This is asserted at release time by
-`sggs-verify-prod` (a no-redirect guard on `/`, `/privacy`, `/support`) and continuously by
+`sggs-verify-prod` (the apex answers on its own host: `/privacy` and `/support` reach their
+`/en` page in one hop, and that page answers 200 with no further redirect) and continuously by
 `uptime.yml`.
+
+## Languages
+
+The marketing site is built in every **enabled** language of `frontend/src/i18n/locales.json`:
+English (the default and the source), Punjabi since 1.6.1 and French since 1.6.2. How the pieces
+fit (the message catalogs, the redirects generator, the numerals, the checks) is on
+[internationalisation](../architecture/i18n.md); how a language is translated, reviewed and switched
+on is [Translating gurbanisoul.com](translation.md).
+
+The redirects in `frontend/vercel.json` are generated from `locales.json` by
+`frontend/scripts/gen-i18n-redirects.mjs` (CI runs it with `--check`) and were introduced with the
+language prefixes in 1.6.0 (PR #334):
+
+| Request | Answer |
+|---|---|
+| `/` | **302** to the browser's first preferred language when that language is enabled, otherwise to `/en` |
+| a pre-1.6.0 marketing URL (`/features`, `/privacy`, `/support`, `/contribute`, `/learn/…`) | **308** to the same page under `/en` |
+| a known language that is not enabled | **302** to the same path under `/en` |
+
+The root redirect is temporary on purpose (it is a per-visitor answer), and a disabled language's
+redirect is temporary so that switching it on later is not blocked by caches. Under `serve.py`,
+which does not read `vercel.json`, the bare root is a `noindex` language chooser that makes the
+same choice in the browser, and each old URL is a small `noindex` page that forwards to its English
+page (`LegacyRedirect.astro`).
+
+A reader who picks a language in the switcher has the choice remembered in the browser's local
+storage under `gs_lang` (never a cookie). It is read only on the bare root and right after the
+root's redirect, so a link or the back button is never redirected. The privacy policy names it.
+The app, the Knowledge Base, Stripe checkout and support replies stay in English, and the
+translated pages say so where it matters.
 
 ### Email
 Mail for `gurbanisoul.com` is hosted by **Zoho Mail** (since 2026-09-26). `support@gurbanisoul.com` is an
@@ -83,7 +119,11 @@ is now **generated** (see **Routes, sitemap & RSS**). `Base.astro` derives its c
 `Astro.url.pathname` so every Knowledge Base page is self-consistent without per-page props.
 
 The `SeoInvariants` gate checks every built page's canonical/description/`og:image`(exists on disk)/
-`theme-color`, and that any `hreflang` alternate is `en`/`x-default` and self-referential (no `/pa/`).
+`theme-color`. On a marketing page it also checks the `hreflang` set: one alternate for each enabled
+language the page is built in plus `x-default` (the bare root), its own entry equal to its
+canonical, every target built, and the set reciprocal between the language versions. Knowledge Base
+pages carry no `hreflang`. A Learn article has alternates only in the languages it is published in
+(`frontend/src/i18n/content.ts`; none is translated yet).
 
 ### Routes, sitemap & RSS
 
@@ -91,8 +131,10 @@ The `SeoInvariants` gate checks every built page's canonical/description/`og:ima
   changefreq, priority, og }`). It must list **exactly** the pages that build to HTML — the
   `SitemapInvariants` gate compares the sitemap's `<loc>` set to the built HTML route set. `lastmod`
   is a **fixed** ISO date (never `Date.now()`) so the sitemap is byte-deterministic.
-- **`frontend/src/pages/sitemap.xml.ts`** emits `/sitemap.xml` over the manifest, each URL
-  self-referencing its `en` + `x-default` hreflang alternates (no `pa` pages ship yet).
+- **`frontend/src/pages/sitemap.xml.ts`** emits `/sitemap.xml` over the manifest. Marketing pages
+  are listed once in `routes.ts` (unprefixed) and expand to one URL per enabled language; each lists
+  the same language alternates and `x-default` its page's `<head>` carries. Knowledge Base URLs name
+  only themselves (`en`). The bare `/` is not in the sitemap: it is a language chooser.
 - **`frontend/src/pages/rss.xml.ts`** emits `/rss.xml` ("Gurbani Soul — Learn"): every
   non-draft Learn article, newest first. `RssInvariants` checks it parses and links to the site.
 - The old `frontend/public/sitemap.xml` was deleted (Astro forbids a public file colliding with a
@@ -165,14 +207,15 @@ is always behind the hostname guard.
 Emitted through **`frontend/src/components/JsonLd.astro`**, which serialises the object and escapes
 `<` so the payload can never break out of its `<script type="application/ld+json">`.
 
-- **Landing (`/`)** carries three nodes (`src/pages/index.astro` frontmatter): an **Organization**
+- **Each language's home (`/en`, `/pa`, `/fr`)** carries three nodes (`src/pages/[lang]/index.astro` frontmatter): an **Organization**
   ("Algorythmos Pty Ltd", logo `/icons/icon-512.png`, a customer-support `contactPoint`), a
   **WebSite** ("Gurbani Soul") with a `SearchAction` targeting `/search?q={search_term_string}` on
   the canonical host, and a **SoftwareApplication** ("Gurbani Soul", iOS, `ReferenceApplication`,
-  `offers.price "0"`, publisher → the Organization by `@id`). There is deliberately **no
+  `offers.price "0"`, publisher → the Organization by `@id`; its `inLanguage` stays `en` on every
+  language's page, because the app is English). There is deliberately **no
   `aggregateRating`** (we have no ratings). `installUrl`/`url` are added only once the app is live
   (`APP_STORE_LIVE`).
-- **`/support`** carries a **FAQPage** generated from the same `faqs` array that renders the visible
+- **Each Support page** carries a **FAQPage** generated from the same `faqs` array that renders the visible
   `<h4>` question / `<p>` answer block, so the structured data can never drift from the page. The
   `JsonLdInvariants` gate parses every block, checks the landing's three types (and the
   SearchAction host), and checks that every FAQPage `name` is a visible `<h4>`.
@@ -226,7 +269,7 @@ Vercel Production + Preview envs — see [runbook: newsletter](../process/runboo
 
 ---
 
-## The landing page (`/`)
+## The landing page (`/en`, `/pa`, `/fr`)
 
 - **Layout:** `frontend/src/layouts/Marketing.astro` (renamed from `Landing.astro` in the PR1
   web-foundations pass) — its own shell, brand tokens as CSS variables in
@@ -235,8 +278,9 @@ Vercel Production + Preview envs — see [runbook: newsletter](../process/runboo
   theme script (no stored choice → light, whatever the OS; an explicit choice is shared with the
   Knowledge Base, which keeps its `system` default), the shared `MarketingFooter`, `<Seo>`, `<Analytics>`, Sant Lipi + a serif heading stack, a skip link, `lang="pa"` on
   Gurmukhi, and `prefers-reduced-motion` respected.
-- **Page:** `frontend/src/pages/index.astro` — hero, the verse band, six feature cards,
-  "Private by design", a Knowledge Base card, and the App Store slot.
+- **Page:** `frontend/src/pages/[lang]/index.astro` — hero, the verse band, six feature cards,
+  "Private by design", a Knowledge Base card, and the App Store slot. Every interface string comes
+  from the message catalog; the verse and the counts never do (below).
 - **Brand rules are law** (`docs/brand/gurbani-soul-brand-book.md`): gold leads on warm paper/ink;
   `#FFBC0D` only as a **bordered** fill in light mode (free in dark); gold *text* only via
   `accentText` (`#8A6100`); **red never** on the landing; Gurmukhi always ink-coloured Sant Lipi;
@@ -344,8 +388,16 @@ device, iOS version, commit, deep link, environment).
    `clock`, `theme/naam`) — and **`sggs://shabad/<compId>` for a deterministic Hukam**, never the
    random `sggs://hukam`. Widgets come from the snapshot unit tests (`SGGS_WIDGET_SNAPSHOT_DIR`).
 5. Honest state only: a sparse reading-journey grid is fine; fabricated progress never is.
-6. Processing via `frontend/scripts/prep-shots.mjs` (sharp, lanczos3, palette PNG, metadata
-   stripped, idempotent): iPhone → 900 w, iPad landscape → 1600 w, widgets 2×, accent crops 900×420.
+6. Processing with sharp, as recorded in `SHOTS.md`: iPhone shots resized to 900 px wide, widgets
+   kept at native size, every PNG re-encoded as a palette PNG; the pages then serve Astro's
+   responsive WebP (AVIF and WebP for iPad). There is no processing script in this repository.
+
+Since the 1.4.9 set, the capture itself runs in the app repository's manual `ios-site-shots`
+workflow (`gh workflow run ios-site-shots.yml --repo Algorythmos-AI/gurbani-soul-ios -f ref=vX.Y.Z`):
+fresh simulators, the public database, and the PNGs uploaded with `SHA256SUMS` and provenance, which
+`SHOTS.md` records before a file is placed. `npm run shots` (`frontend/scripts/shots.mjs`) is a
+different tool: a full-page screenshot matrix of the Knowledge Base for visual review, never part
+of CI.
 
 ---
 
@@ -376,17 +428,36 @@ later, self-host the official SVG unmodified per Apple's App Store marketing gui
 ---
 
 ## Adding a page
-Create `frontend/src/pages/<name>.astro` using `Base.astro` (Knowledge Base) or `Marketing.astro`
-(Gurbani Soul). Add its route to `frontend/src/routes.ts` (the sitemap and OG default derive from
-it — the `SitemapInvariants` gate fails if the manifest and the built HTML routes disagree). If it
-is a destination, add it to its place in `PLACES` in `Base.astro` (its path, and its entry in the place's `pages` if it
-should appear in the second row), and give it a state in `frontend/e2e/kb-shell.spec.ts`. Build + sync.
+- **A Knowledge Base page:** create `frontend/src/pages/<name>.astro` using `Base.astro`. If it is a
+  destination, add it to its place in `PLACES` in `Base.astro` (its path, and its entry in the place's
+  `pages` if it should appear in the second row), and give it a state in `frontend/e2e/kb-shell.spec.ts`.
+- **A Gurbani Soul page:** create `frontend/src/pages/[lang]/<name>.astro` using `Marketing.astro`,
+  with `getStaticPaths = localeStaticPaths`, every string from the message catalog
+  (`frontend/src/i18n/messages/en.json`, then translated: [the translation workflow](translation.md)),
+  and its path added to `localizedPages` in `locales.json`; then regenerate the redirects
+  (`npm run i18n:redirects`). An enabled language must have every new key translated and
+  re-reviewed before the release, or `i18n-status` fails CI.
+
+Either way, add the route to `frontend/src/routes.ts` (the sitemap and OG default derive from it —
+the `SitemapInvariants` gate fails if the manifest and the built HTML routes disagree). Build + sync.
+
+---
+
+## Contribute
+
+`/en/contribute` (and its Punjabi and French versions) offers optional support for Gurbani Soul
+through Stripe-hosted Payment Links, live in production since 1.4.4. The page loads no Stripe
+script, a build-time switch (`PUBLIC_CONTRIBUTE_MODE`: `off`, `test` or `live`) decides which
+links it carries, and the build fails if a link does not match the mode. It is never linked from
+the iOS app. How it works and how to switch modes: [Contribute and Stripe](contribute.md).
 
 ---
 
 ## What protects the site
 - **Repo gates** (`webapp/tests/test_repo_gates.py`, run by the required `python` check):
   `LandingPage` (verse verbatim, honest copy, alt text, SEO head, page-weight budget),
+  `LanguageRouting` (the redirects, the built languages, every page's language and its links),
+  `NoGurbaniInTranslations` (no message file quotes a line of the Granth),
   `SubmissionUrlsAreLive`, and `DocsHygiene` (this doc set is the only
   place the legacy `vercel.app` alias may be named); plus the PR1 web-foundations gates
   `SeoInvariants`, `SitemapInvariants`, `RssInvariants`, `ExternalRequestAllowlist`,
@@ -398,5 +469,8 @@ should appear in the second row), and give it a state in `frontend/e2e/kb-shell.
   `https://gurbanisoul.com`): landing renders, verse present, exactly one App-Store slot, canonical
   host, axe serious/critical = 0.
 - **`uptime.yml`** (every 15 minutes): `/api/health` all-true, `/` ("Gurbani Soul"), `/privacy`
-  ("Data Not Collected") and `/support` (a `mailto:` link) on the canonical host, plus the wiki.
-- **`sggs-verify-prod`**: after each release, proves the running commit and the no-redirect guard.
+  ("Data Not Collected") and `/support` (a `mailto:` link) on the canonical host, following their
+  redirects to the English pages, plus the wiki.
+- **`sggs-verify-prod`** (`scripts/ops/verify_prod.py`): after each release, proves the running
+  commit and the redirects: `/privacy` and `/support` reach their `/en` page in exactly one
+  permanent hop, `/` reaches a language in one temporary hop, and each target answers 200.
