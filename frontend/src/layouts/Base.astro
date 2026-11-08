@@ -6,6 +6,7 @@
 // gets its own <h1> from its title unless it passes `heading`.
 import '../styles/global.css';
 import Seo from '../components/Seo.astro';
+import Analytics from '../components/Analytics.astro';
 import { normPath } from '../routes';
 import { APP_STORE_URL, APP_STORE_LIVE } from '../site';
 import { CONTRIBUTE_MODE } from '../contribute';
@@ -255,5 +256,6 @@ const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri 
     import '../scripts/saroop';
     import '../scripts/display';
   </script>
+  <Analytics />
 </body>
 </html>
