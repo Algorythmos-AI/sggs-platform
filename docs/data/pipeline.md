@@ -27,7 +27,7 @@ the commit this wiki pins, never pasted.
 | 3/8 golden suite | `golden_test.py` | nine groups of canonical checks | any failed check |
 | install corpus | `atomic_install.py` | temp file beside the target, fsync, rename | sha mismatch |
 | 4/8 database | `build_db.py` | `lines` (23 columns), indexes, `raags`/`sections`/`authors`, `fts` (FTS5), `meta` | — |
-| 5/8 enrichment | `load_translations.py`, `build_variants.py`, `enrich_orchestrator.py`, `enrich_v2.py` | concepts, translations as their own table, phonetic variants, structural columns | — |
+| 5/8 enrichment | `load_translations.py` (with `translation_align.py`), `build_variants.py`, `enrich_orchestrator.py`, `enrich_v2.py` | concepts, translations as their own table aligned in source order (with `translation_spans` since dataset 1.4.0), phonetic variants, structural columns | — (the English alignment is checked by `translation_alignment_gate.py`, below) |
 | 6/8 auxiliary indexes | inline SQL | `fts_en`, `fts_shabad`, `fts_tri`, `canon_tokens` | an SQLite without the trigram tokenizer (a search-tier contract) |
 | 7/8 Insight Engine | `ml_analytics_builder.py`, `build_semantic_vectors_lite.py`, `build_resonance.py`, `build_vaars.py` | analytics, semantic neighbours, resonance, the 22 Vaars — additive tables | — |
 | 7b · 7c layers | `pipeline/timing/*`, `pipeline/banis/*` | raag-timing knowledge layer, Nitnem bani registry; `guard_banis.py` | the bani guard |
@@ -81,7 +81,10 @@ Source: [`pipeline/atomic_install.py` · `install`](https://github.com/Algorythm
   the committed database alone.
 - **On every pull request** the data repository's `data-ci.yml` re-proves the committed data:
   `sggs_integrity.py` against `audit/dataset-fingerprint.json`, `data_quality.py` against its
-  reviewed baseline, `verify_regroup.py --invariants`, `guard_scripture.py` (pre-existing tables
+  reviewed baseline, `translation_alignment_gate.py` (the English layer's spans are well formed and
+  each group has one English; with the private sources present, every row also equals its source
+  record, in order — [the translation layer](translation-layer.md#how-a-translation-finds-its-line)),
+  `verify_regroup.py --invariants`, `guard_scripture.py` (pre-existing tables
   byte-identical), `guard_banis.py`, the timing-layer tests and `ledger_check.py`.
 - **Reproducibility.** Every date the build writes derives from `SOURCE_DATE_EPOCH` (the commit
   time), so the same commit, PDF and pinned toolchain produce the same bytes; `line_neighbors`
