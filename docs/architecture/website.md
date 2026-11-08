@@ -4,8 +4,8 @@ description: "How gurbanisoul.com is built: a static Astro site with no framewor
 sidebar:
   order: 7
 verified:
-  commit: 49c71652
-  date: "2026-11-05"
+  commit: 26d86be7
+  date: "2026-11-08"
 ---
 # The website
 
@@ -38,10 +38,16 @@ The build holds two properties that are deliberately kept apart
 
 | | Layout | Pages | Scripts it loads |
 |---|---|---|---|
-| **Gurbani Soul** (the app's home) | `Marketing.astro` | `/`, `/features`, `/watch`, `/learn/*`, `/contribute`, `/privacy`, `/support` | `landing.ts` only (it never imports the Knowledge Base code), Vercel Web Analytics on `gurbanisoul.com` |
+| **Gurbani Soul** (the app's home) | `Marketing.astro` | under each enabled language: `/en`, `/en/features`, `/en/watch`, `/en/learn/*`, `/en/contribute`, `/en/privacy`, `/en/support`, and the same under `/pa` and `/fr` | `landing.ts` only (it never imports the Knowledge Base code), Vercel Web Analytics on `gurbanisoul.com` |
 | **Sri Guru Granth Sahib Ji Knowledge Base** | `Base.astro` | `/library` (its home), `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`, `/trail`, `/analytics`, `/constellation`, `/raag-clock`, `/divergence`, `/404` | `core`, `panel`, `studytrail`, `saroop` on every page, plus the page's own controller; no analytics |
 
-`frontend/src/routes.ts` is the single list of public routes; the sitemap is built from it, and a
+The marketing pages are `frontend/src/pages/[lang]/*.astro`, built once per enabled language; the
+bare `/` is a `noindex` language chooser, and the pre-1.6.0 URLs (`/privacy`, `/support`, …)
+redirect permanently to their English pages. How the languages are wired is on
+[internationalisation](i18n.md). The Knowledge Base is English only and is not prefixed.
+
+`frontend/src/routes.ts` is the single list of public routes (a marketing page is listed once and
+expands to one route per language); the sitemap is built from it, and a
 repository gate fails if the sitemap and the built pages disagree. The share pages `/ang/N` (one
 per Ang, `src/pages/ang/[n].astro`) are deliberately outside it: they carry Ang N's own Open Graph
 card for link previews, send a person straight on to the Reader, and are `noindex`.
@@ -105,9 +111,11 @@ The Gurbani Soul pages make no API calls.
 - **The pinned verse is read from the API model.** The Study Trail pins verbatim text from the
   API (`data-gm`), never from the rendered glyphs, which saroop may have changed.
 - **State stays in the browser.** Preferences (theme, colour theme, paper tone, transliteration, text size, saroop, raag
-  clock mode), reading positions and pinned verses (at most 500) live in `localStorage`; the
+  clock mode), reading positions and pinned verses (at most 500) live in `localStorage`, as does
+  the marketing site's language choice (`gs_lang`, written by the language switcher in
+  `landing.ts`); the
   `meta` and timing responses and the Semantic Trail path live in `sessionStorage`. There are no
-  cookies and no accounts; the [privacy policy](../../frontend/src/pages/privacy.astro) describes
+  cookies and no accounts; the [privacy policy](../../frontend/src/pages/[lang]/privacy.astro) describes
   the same set.
 
 ## Build, test and deploy
@@ -116,7 +124,7 @@ The Gurbani Soul pages make no API calls.
 |---|---|---|
 | Build | `npm run build` | `astro build` into `frontend/dist/` |
 | Local serving | `npm run sync` | copies `dist/` into `webapp/static/` for `serve.py` (a backup goes to `static.bak/`) |
-| Checks | `web-ci` (`frontend` job) | build, `astro check` (advisory), the pahar vectors |
+| Checks | `web-ci` (`frontend` job) | build, `astro check` (advisory), the pahar vectors, the language rules and redirects, the translation status, the pseudo-locale coverage check and the preview build ([CI gates](../process/ci-gates.md)) |
 | Repository gates | `web-ci` (`python` job) | SEO, sitemap, RSS, the external-request allowlist, no secrets in the source, theme tokens, page-weight budgets for the Gurbani Soul pages |
 | Browser tests | `e2e` (`playwright` job) | the Playwright specs in `frontend/e2e/` against `serve.py`: the CSP with zero violations on every route, axe on the main pages, the reader and search smoke |
 | Staging | `deploy-staging.yml` | build the API functions, `vercel build`, deploy, alias `sggs-staging.vercel.app`, purge the CDN, then `@smoke`, the gateway probes and the golden contract |
