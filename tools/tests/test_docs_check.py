@@ -361,3 +361,17 @@ class Freshness(unittest.TestCase):
         rows = dc.freshness()
         self.assertTrue(any(r["page"] == "docs/process/ci-gates.md" for r in rows))
         self.assertTrue(all(isinstance(r["behind"], int) for r in rows))
+
+
+class RouteCounts(unittest.TestCase):
+    def test_a_stale_route_count_is_caught_and_context_counts_are_not(self):
+        want = dc.api_route_count()
+        self.assertIsNotNone(want)
+        with tempfile.TemporaryDirectory() as d:
+            good = Path(d, "good.md"); good.write_text(f"The API: {want} read-only routes.\n", encoding="utf-8")
+            stale = Path(d, "stale.md"); stale.write_text(f"The API — {want - 3} read-only routes.\n", encoding="utf-8")
+            ctx = Path(d, "ctx.md"); ctx.write_text("the insights service:<br/>11 read-only routes\n", encoding="utf-8")
+            dated = Path(d, "dated.md"); dated.write_text("26 routes at the time of 1.3.7\n", encoding="utf-8")
+            msgs = [p.msg for p in dc.check_route_counts([good, stale, ctx, dated])]
+        self.assertEqual(len(msgs), 1)
+        self.assertIn(f"{want - 3} routes", msgs[0])
