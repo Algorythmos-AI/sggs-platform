@@ -30,8 +30,8 @@ REPO=Algorythmos-AI/sggs-platform bash scripts/gh/apply_rulesets.sh
 
 ### The pin bot's token (`DOCS_BOT_TOKEN`)
 
-`docs-pins` opens its pull request with a fine-grained personal access token, so the required checks
-run on it (a pull request opened with the workflow's own token would trigger none). At
+`docs-pins` and `docs-freshness` open their pull requests with a fine-grained personal access
+token, so the required checks run on them (a pull request opened with the workflow's own token would trigger none). At
 <https://github.com/settings/personal-access-tokens/new>:
 
 | Field | Value |
@@ -48,7 +48,8 @@ tokens → Pending requests. Then `gh secret set DOCS_BOT_TOKEN --repo Algorythm
 Before it writes anything, the workflow checks the token with a dry-run push. A token that
 authenticates but cannot push — a personal resource owner, pending approval, read-only Contents —
 does not fail silently: the bump arrives as the issue *docs: the sibling docs changed — bump the
-pins*, which names the cause. An expired or removed token does the same.
+pins* (and the weekly refresh as *docs: wiki pages to re-verify*), which names the cause. An expired
+or removed token does the same.
 
 ## 2. Staging walkthrough (before the first promotion)
 
@@ -161,15 +162,53 @@ request).
 
 | When | What |
 |---|---|
+| every pull request | `scripture-diff-guard`: fails a bot's pull request that adds or removes a Gurmukhi code point, reports for everyone else (below) |
 | every pull request | the `docs` check (required on `integration` and `main`): gates, build, links, budgets, CSP, e2e, axe on every page, the visual baseline, Lighthouse on five pages (all twenty nightly and on `main`) — about nine minutes |
 | a dataset bump lands | nothing to do: the docs job installs the pinned database and re-verifies the cited lines |
 | every 15 minutes | `uptime` probes the wiki's landing page and `/api/health` through its rewrite; issue *uptime: docs site probe failing* |
 | every 6 hours | `docs-watch`: the domain serves the last deployed commit, the smoke and the live suite pass; issue *docs-watch: production wiki check failing* (after a manual rollback it stays open until the next release — expected) |
 | every night | the `docs` job re-runs on `integration`; issue *docs: nightly wiki build failing* while red |
-| Mondays | `docs-links` checks every external link (issue *docs: broken external links*); `security` scans the history; `docs-pins` opens *docs(wiki): bump the sibling docs pins* when a sibling changed a published file (or issue *docs: the sibling docs changed — bump the pins* until `DOCS_BOT_TOKEN` exists); `docs-freshness` rewrites issue *docs: wiki pages to re-verify* |
-| a page is in *wiki pages to re-verify* | re-read it against the code it cites, fix what drifted, move its `verified` stamp; the issue closes itself when every page is fresh |
+| every day, and right after every release | `docs-pins` opens *docs(wiki): bump the sibling docs pins* when a sibling changed a published file (or issue *docs: the sibling docs changed — bump the pins* until `DOCS_BOT_TOKEN` exists); `deploy-production`'s `release` job dispatches it as its last step |
+| Mondays | `docs-links` checks every external link (issue *docs: broken external links*); `security` scans the history; `docs-freshness` opens or refreshes the pull request *docs(wiki): weekly refresh — N pages to re-read* (below), or rewrites issue *docs: wiki pages to re-verify* when it cannot |
+| a page is in the weekly refresh | re-read it against the code it cites, fix what drifted, move its `verified` stamp — in commits pushed to `bot/docs-refresh`; merge the pull request with `--merge`. The bot closes it itself when every page is fresh and nothing was regenerated |
 | a scholar review is due | `make review-pack` writes one PDF — Scripture 101, the glossary's scripture and script sections, the contributors — with a sign-off sheet |
 | a new page | frontmatter, links, the scripture rule and the fallback rule are gated; a poster or a widget follows [the contributing guides](../../contributing/README.md) |
+
+### The weekly refresh pull request
+
+`docs-freshness` (Mondays, or by hand: `gh workflow run docs-freshness.yml --ref integration`)
+installs the sibling docs and the pinned database as the `docs` job does, runs every
+`tools/gen_*.py` that accepts `--write` (a new generator joins by accepting it; the others are
+listed as skipped), and runs `python3 tools/docs_check.py --freshness`. When a generator changed a
+file or a page is stale, it makes **one** commit on `integration` — empty when only pages are
+stale — force-pushes `bot/docs-refresh` and opens or refreshes one pull request into `integration`:
+the regenerated files, the generators run, and the pages to re-read.
+
+What the bot will not do:
+
+- **Move a stamp.** A commit that changes a `verified:` block is refused, and the list arrives as
+  the issue instead. Re-reading a page and moving its stamp is a person's work, done on the same
+  branch.
+- **Overwrite a person's work.** Every bot commit carries the trailer `Refreshed-by: docs-freshness`;
+  when `bot/docs-refresh` holds any other commit, the branch is left alone and only the pull
+  request's title and body are refreshed.
+- **Touch scripture.** Before pushing, the commit must pass `tools/gurmukhi_diff.py` (next section),
+  and the pull request is checked again by `scripture-diff-guard`.
+
+Without `DOCS_BOT_TOKEN`, with a token that cannot push, or when a step refuses the commit, the list
+is written to the issue *docs: wiki pages to re-verify* with the reason, as before; the issue is
+closed once a pull request carries the list.
+
+### The scripture diff guard
+
+`tools/gurmukhi_diff.py [BASE...HEAD]` (default `origin/integration...HEAD`) lists every changed line
+that adds or removes a character in U+0A00–U+0A7F (Gurmukhi), U+0964–U+0965 (dandas) or
+U+200C–U+200D (joiners), as `file:line` with the code points written `U+XXXX` — never the characters
+— and exits 1. `scripture-diff-guard.yml` runs it on every pull request: it **fails** when the head
+branch starts with `bot/` or `docs/auto-` or the pull request has the label `automated`, and only
+writes the list to the job summary otherwise (a person's scripture edit is reviewed by people and
+proven by sggs-data's gates). A bot pull request it fails is never merged: close it and find the
+generator that wrote the text.
 
 ## 6. Sibling README links
 

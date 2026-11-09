@@ -1,8 +1,9 @@
 name: docs-pins
-# Weekly: when sggs-data or gurbani-soul-ios changes documentation (or a source file a code excerpt
-# reads) that the wiki publishes, move its pin in docs-site/sources.lock.json — by pull request, so
-# the change is reviewed and the `docs` check proves it (ADR-0012). A commit that touched nothing
-# published moves no pin (tools/docs_pins.py).
+# Daily, and right after every production release (deploy-production's release job dispatches it):
+# when sggs-data or gurbani-soul-ios changes documentation (or a source file a code excerpt reads)
+# that the wiki publishes, move its pin in docs-site/sources.lock.json — by pull request, so the
+# change is reviewed and the `docs` check proves it (ADR-0012). A commit that touched nothing
+# published moves no pin (tools/docs_pins.py); a day with nothing to move opens nothing.
 #
 # The pull request is opened with DOCS_BOT_TOKEN (a fine-grained token on this repository only:
 # contents + pull requests, write), so every required check runs on it — a pull request opened with
@@ -10,7 +11,7 @@ name: docs-pins
 # with the same list and the exact command instead. Runbook: docs/process/runbooks/docs-site.md.
 on:
   schedule:
-    - cron: "41 6 * * 1"   # Monday 06:41 UTC
+    - cron: "41 6 * * *"   # daily, 06:41 UTC
   workflow_dispatch:
 
 permissions:
