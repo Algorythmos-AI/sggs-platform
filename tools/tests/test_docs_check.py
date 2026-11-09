@@ -348,18 +348,40 @@ class Freshness(unittest.TestCase):
         self.assertTrue(len(files) > 2)                          # the poster's source-of-truth files come in
 
     def test_the_report_orders_moved_pages_first_and_is_empty_when_fresh(self):
+        today = dc.dt.date(2026, 11, 9)
         rows = [{"page": "docs/a.md", "commit": "aaaaaaa", "date": "2026-09-25", "behind": 3, "cited": ["x.py"], "changed": []},
                 {"page": "docs/b.md", "commit": "bbbbbbb", "date": "2026-09-25", "behind": 9, "cited": ["y.py"], "changed": ["y.py"]},
-                {"page": "docs/c.md", "commit": "ccccccc", "date": "2026-09-01", "behind": 400, "cited": [], "changed": []},
-                {"page": "docs/d.md", "commit": "ddddddd", "date": "2026-09-01", "behind": 900, "cited": ["z.py"], "changed": []},
-                {"page": "docs/e.md", "commit": "eeeeeee", "date": "2026-09-01", "behind": 80, "cited": [], "changed": []}]
-        md = dc.freshness_markdown(rows)
+                {"page": "docs/c.md", "commit": "ccccccc", "date": "2026-08-01", "behind": 40, "cited": [], "changed": []},
+                {"page": "docs/d.md", "commit": "ddddddd", "date": "2026-01-01", "behind": 900, "cited": ["z.py"], "changed": []},
+                {"page": "docs/e.md", "commit": "eeeeeee", "date": "2026-10-01", "behind": 800, "cited": [], "changed": []}]
+        md = dc.freshness_markdown(rows, today=today)
         self.assertLess(md.index("docs/b.md"), md.index("docs/c.md"))
         self.assertNotIn("docs/a.md", md)
         self.assertNotIn("docs/d.md", md)      # its cited code did not change: fresh however old
-        self.assertNotIn("docs/e.md", md)      # cites no code, but not old enough to nag
+        self.assertNotIn("docs/e.md", md)      # cites no code and 39 days old: the date rule, not commit distance
+        self.assertIn("| `docs/c.md` | `ccccccc` 2026-08-01 | 100 |", md)
         self.assertIn("| `docs/b.md` | `bbbbbbb` 2026-09-25 | 9 | `y.py` |", md)
-        self.assertEqual(dc.freshness_markdown([rows[0]]), "")
+        self.assertEqual(dc.freshness_markdown([rows[0]], today=today), "")
+        self.assertEqual([dc.stale_reason(r, today=today) for r in rows], ["", "code-changed", "old-no-code", "", ""])
+
+    def test_a_page_citing_no_code_goes_stale_by_date(self):
+        page = dc.DOCS / "process" / "README.md"
+        head = dc.subprocess.run(["git", "rev-parse", "HEAD"], cwd=dc.ROOT, capture_output=True, text=True).stdout.strip()
+        today = dc.dt.date(2026, 11, 9)
+        old = dc.check_verified_commit(page, head, "No code cited.\n", "2026-09-01", today)
+        self.assertEqual([p.kind for p in old], ["stamp"])
+        self.assertIn("69 days ago", old[0].msg)
+        self.assertEqual(dc.check_verified_commit(page, head, "No code cited.\n", "2026-10-01", today), [])
+
+    def test_stamp_findings_print_as_one_notice(self):
+        f = Path("x.md")
+        probs = [dc.Problem(f, 1, "code this page cites changed since its stamp", "warning", "stamp"),
+                 dc.Problem(f, 1, "verified on 2026-01-01 (300 days ago) and it cites no code", "warning", "stamp"),
+                 dc.Problem(f, 1, "a real problem")]
+        line = dc.stamp_summary(probs)
+        self.assertTrue(line.startswith("::notice::2 stamped page(s)"))
+        self.assertIn("1 cite code that changed", line)
+        self.assertIsNone(dc.stamp_summary(probs[2:]))
 
     def test_the_stamp_warning_follows_the_cited_code(self):
         page = dc.DOCS / "architecture" / "request-lifecycle.md"
@@ -374,6 +396,51 @@ class Freshness(unittest.TestCase):
         rows = dc.freshness()
         self.assertTrue(any(r["page"] == "docs/process/ci-gates.md" for r in rows))
         self.assertTrue(all(isinstance(r["behind"], int) for r in rows))
+
+
+class Covers(Fixture):
+    def test_globs_and_symbols_are_checked(self):
+        self.assertEqual(dc.check_covers("webapp/serve.py#api, .github/workflows/*.yml, scripts/release/**"), [])
+        self.assertEqual(dc.check_covers("frontend/src/pages/[lang]/contribute.astro"), [])   # brackets are literal
+        errs = dc.check_covers("webapp/serve.py#no_such_symbol, nowhere/*.py, webapp/nope.py#x, docs/README.md#x")
+        self.assertEqual(len(errs), 4)
+        self.assertTrue(any("no top-level 'no_such_symbol'" in e for e in errs))
+        self.assertTrue(any("matches no tracked file" in e for e in errs))
+        self.assertEqual(len(dc.check_covers("")), 1)
+
+    def test_covers_is_validated_on_the_page(self):
+        bad = FM.replace("---\n# A", 'covers: "nowhere/**"\n---\n# A', 1)
+        self.assertTrue(any("matches no tracked file" in e for e in self.errors(bad + "Body.\n")))
+        good = FM.replace("---\n# A", 'covers: "webapp/serve.py#api"\n---\n# A', 1)
+        self.assertEqual(self.errors(good + "Body.\n"), [])
+
+    def test_glob_semantics(self):
+        files = ["a/b.py", "a/c/d.py", "a/c/e.js", "x.py"]
+        self.assertEqual(dc.glob_files("a/*.py", files), ["a/b.py"])
+        self.assertEqual(dc.glob_files("a/**/*.py", files), ["a/b.py", "a/c/d.py"])
+        self.assertEqual(dc.glob_files("a/c", files), ["a/c/d.py", "a/c/e.js"])
+        self.assertEqual(dc.glob_files("a/**", files), ["a/b.py", "a/c/d.py", "a/c/e.js"])
+
+    def test_symbol_range_ends_at_the_next_top_level_line(self):
+        src = "X = 1\n\n\ndef f(a):\n    return a\n\n# about g\ndef g():\n    pass\n"
+        self.assertEqual(dc.symbol_range(src, ".py", "f"), (4, 5))
+        self.assertEqual(dc.symbol_range(src, ".py", "X"), (1, 1))
+        js = "export function h() {\n  return 1;\n}\nconst k = 2;\n"
+        self.assertEqual(dc.symbol_range(js, ".mjs", "h"), (1, 3))
+        self.assertIsNone(dc.symbol_range(src, ".py", "missing"))
+
+
+class Health(unittest.TestCase):
+    def test_the_health_report_has_its_shape(self):
+        h = dc.health()
+        for key in ("generated", "commit", "window_days", "pages", "stamped", "fresh", "fresh_pct", "stale_by_reason",
+                    "median_stamp_age_days", "coupling_debt", "code_commits_with_docs"):
+            self.assertIn(key, h)
+        self.assertLessEqual(h["fresh"], h["stamped"])
+        self.assertLessEqual(h["stamped"], h["pages"])
+        self.assertEqual(sum(h["stale_by_reason"].values()), h["stamped"] - h["fresh"])
+        self.assertTrue(set(h["coupling_debt"]) >= {"merges", "merges_with_debt", "page_flags"})
+        json.dumps(h)
 
 
 class RouteCounts(unittest.TestCase):

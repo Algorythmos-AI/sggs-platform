@@ -199,6 +199,30 @@ Without `DOCS_BOT_TOKEN`, with a token that cannot push, or when a step refuses 
 is written to the issue *docs: wiki pages to re-verify* with the reason, as before; the issue is
 closed once a pull request carries the list.
 
+### The docs-impact check
+
+The `docs-coupling` job in `deploy-docs.yml` runs `python3 tools/docs_coupling.py BASE..HEAD` on
+every pull request. It writes the pages the change should touch to the job summary and to one
+comment on the pull request, which is found by its hidden marker `<!-- docs-coupling-report -->`
+and updated on each push. A pull request from a fork gets only the summary, because its token
+cannot comment. To see the list locally, run
+`python3 tools/docs_coupling.py origin/integration..HEAD`. The rules are in
+[Writing a page](../../contributing/writing-docs.md#docs-impact).
+
+The check reports only and the job is always green. To make it a gate:
+
+1. Wait out at least two weeks of report-only. Read the comments it posted and the coupling debt
+   on [Docs health](../../reference/docs-health.md). Fix any `covers:` that flags changes the page
+   does not describe. The owner decides when the noise is low enough.
+2. In `.github/workflows/deploy-docs.yml`, set `COUPLING_ENFORCE: "1"` in the `docs-coupling`
+   job's `env`. From then on, a page that declares `covers:` and was neither updated, re-stamped
+   nor excused by a `Docs-impact: none — <reason>` line fails the job. Pages covered only through
+   the files they cite are still just reported.
+3. To make the check block merges, add `docs-coupling` to the required checks of `integration`.
+   That is a ruleset change for the owner.
+
+To turn it off again, set the value back to `"0"`.
+
 ### The scripture diff guard
 
 `tools/gurmukhi_diff.py [BASE...HEAD]` (default `origin/integration...HEAD`) lists every changed line

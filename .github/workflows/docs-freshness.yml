@@ -69,7 +69,9 @@ jobs:
             echo "::endgroup::"
           done
       - name: The pages to re-read
-        run: python3 tools/docs_check.py --freshness "$RUNNER_TEMP/fresh.md"
+        run: |
+          python3 tools/docs_check.py --freshness "$RUNNER_TEMP/fresh.md"
+          python3 tools/docs_check.py --health "$RUNNER_TEMP/health.json"
       - name: What changed
         id: state
         run: |
@@ -78,6 +80,7 @@ jobs:
           changed=false; [ -n "$(git status --porcelain)" ] && changed=true
           pages="$(grep -c '^| `' "$RUNNER_TEMP/fresh.md" || true)"
           stale=false; [ -s "$RUNNER_TEMP/fresh.md" ] && stale=true
+          fresh="$(python3 -c 'import json,sys; v=json.load(open(sys.argv[1])).get("fresh_pct"); print("" if v is None else v)' "$RUNNER_TEMP/health.json" || true)"
           # a branch with a commit the bot did not make (a person re-verified pages on it) is kept
           human=false
           if git rev-parse -q --verify "refs/remotes/origin/$BRANCH" >/dev/null; then
@@ -88,7 +91,7 @@ jobs:
             echo "remote $BRANCH: $total commit(s), $mine by the bot"
           fi
           {
-            echo "changed=$changed"; echo "stale=$stale"; echo "pages=${pages:-0}"; echo "human=$human"
+            echo "changed=$changed"; echo "stale=$stale"; echo "pages=${pages:-0}"; echo "human=$human"; echo "fresh=$fresh"
             echo "work=$([ "$changed" = true ] || [ "$stale" = true ] && echo true || echo false)"
           } | tee -a "$GITHUB_OUTPUT"
       - name: Nothing to do — close the pull request and the issue
@@ -162,9 +165,10 @@ jobs:
           BOT: ${{ secrets.DOCS_BOT_TOKEN }}
           HUMAN: ${{ steps.state.outputs.human }}
           PAGES: ${{ steps.state.outputs.pages }}
+          FRESH: ${{ steps.state.outputs.fresh }}
         run: |
           set -euo pipefail
-          title="docs(wiki): weekly refresh — ${PAGES} pages to re-read"
+          title="docs(wiki): weekly refresh — ${PAGES} pages to re-read${FRESH:+ (${FRESH}% fresh)}"
           if [ "$HUMAN" = "true" ]; then
             echo "::notice::$BRANCH carries commits the bot did not make; it is kept as is and only the pull request is refreshed"
             printf '\n> The branch carries commits the bot did not make, so this week'"'"'s regeneration was not pushed. Merge or close this pull request and the next run starts afresh.\n' >> "$RUNNER_TEMP/body.md"

@@ -56,6 +56,7 @@ build/
 
 # The wiki's generated trees (docs-site/.gitignore lists them too; kept here for tools that walk the repo)
 docs-site/.sources/
+docs-site/.health.json
 docs-site/dist/
 docs-site/public/fonts/
 docs-site/public/posters/

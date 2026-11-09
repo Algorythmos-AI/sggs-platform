@@ -141,6 +141,8 @@ sggs-quiz { display: block; margin: 1.25rem 0 2rem; }
 
 /* ── learning paths, releases, ADR timeline, repo map ────────────────────────────────────── */
 sggs-progress { display: block; margin: 0.5rem 0; }
+sggs-docs-health { display: block; margin: 1rem 0 1.5rem; }
+.docs-health caption { caption-side: bottom; text-align: start; font-size: 0.85rem; color: var(--sl-color-gray-3); padding-top: 0.4rem; }
 .progress__bar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; font-size: 0.9rem; color: var(--sl-color-gray-2); }
 .progress__list .progress__item { list-style: none; margin-left: -1.25rem; }
 .progress__item.is-done { color: var(--sl-color-gray-3); text-decoration: line-through; }

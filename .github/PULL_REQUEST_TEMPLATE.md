@@ -12,3 +12,10 @@
 - [ ] CHANGELOG entry added under the unreleased/next version.
 - [ ] Docs updated (`docs/`, `docs/engineering/`) if behaviour or invariants changed.
 - [ ] Verified on staging (attach a note/screenshot) before the release PR to `main`.
+
+## Docs impact
+<!-- The docs-coupling check comments on this pull request with the wiki pages whose code it changes
+     (their `covers:` or the files they cite). Update each listed page, or move its `verified` stamp
+     after re-reading it against the code. If no page needs changing, keep one line below, starting
+     at the beginning of the line, with a reason of ten characters or more. Delete it otherwise. -->
+Docs-impact: none — <reason>

@@ -1,6 +1,7 @@
 ---
 title: "Contribute and Stripe"
 description: "The Contribute page on gurbanisoul.com: Stripe-hosted Payment Links, the off/test/live build switch, how the amounts are set, its history and a runbook for changing mode or an amount."
+covers: "frontend/src/contribute.ts, frontend/src/pages/contribute.astro, frontend/src/pages/[lang]/contribute.astro"
 sidebar:
   order: 4
 ---

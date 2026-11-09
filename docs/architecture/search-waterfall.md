@@ -1,6 +1,7 @@
 ---
 title: "Search waterfall"
 description: "How /api/search decides, tier by tier, in the order do_search runs them — with a simulator that runs your query against the real API and lights the tier that answered."
+covers: "webapp/sggs/search.py"
 sidebar:
   order: 2
 verified:

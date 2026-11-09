@@ -1,6 +1,7 @@
 ---
 title: "Request lifecycle"
 description: "One request, GET /api/ang/712, followed from the browser through the host rewrite, the request handler, the dispatcher and the bounded context to SQLite and back, in the order the code does it."
+covers: "webapp/serve.py#api"
 sidebar:
   order: 4
 verified:
