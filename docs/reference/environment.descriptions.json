@@ -1,8 +1,9 @@
 {
+  "COUPLING_ENFORCE": "Turns the docs-impact check (tools/docs_coupling.py) from report-only into a gate: when 1/true/on, a page that declares `covers:` and was not updated fails the run. Off by default.",
   "DOCS_API": "Where the wiki's visual review script sends `/api` requests so live widgets show real data (default: production).",
   "DOCS_PAGE_ACTIONS": "`0` builds the wiki without the page menu (copy, view as Markdown, assistant links, print), should it misbehave in production.",
   "DOCS_PDF": "`1` also builds a PDF of every page; CI sets it for every build it tests or deploys, a local build is quicker without.",
-  "GH_TOKEN": "A GitHub token for reading the private sibling repositories and their releases: the dataset download, the pinned sibling docs, the repository-map check and the release-complete check. Preferred over `GITHUB_TOKEN`.",
+  "GH_TOKEN": "A GitHub token for reading the private sibling repositories and their releases: the dataset download, the pinned sibling docs, the repository-map check, the release-complete check and the sibling pin lag on the docs-health page. Preferred over `GITHUB_TOKEN`.",
   "GITHUB_TOKEN": "The fallback GitHub token when `GH_TOKEN` is not set (the token GitHub Actions provides); read by the same scripts.",
   "HUKAMNAMA_DB": "The scripture database the Hukamnama service reads (default `db/sggs.sqlite`); the same as its `--db` option.",
   "HUKAMNAMA_STATE": "The Hukamnama service's own state database: each day's fetched Hukamnama, the gate's decision and the audit trail (default `hukamnama-state.sqlite`); the same as its `--state` option.",

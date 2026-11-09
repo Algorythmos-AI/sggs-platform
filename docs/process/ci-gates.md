@@ -1,6 +1,7 @@
 ---
 title: "CI Gates — what each check proves"
 description: "What each GitHub Actions workflow and job proves before a change can merge or deploy."
+covers: ".github/workflows/*.yml"
 sidebar:
   order: 3
 verified:

@@ -3,6 +3,8 @@
 
     python3 tools/docs_check.py            # check docs/ (+ pinned sibling docs when installed)
     python3 tools/docs_check.py --db PATH  # also verify cited scripture against the pinned database
+    python3 tools/docs_check.py --freshness [OUT]   # the full list of stamps to re-read (report only)
+    python3 tools/docs_check.py --health OUT.json   # the numbers on docs/reference/docs-health.md
 
 Every published page (docs/**/*.md except docs/reports/archive and docs/design) must:
   1. carry frontmatter: `title` (8–120 chars, equal to the body's first H1 read as text) and
@@ -17,7 +19,9 @@ Every published page (docs/**/*.md except docs/reports/archive and docs/design) 
      outside code appears only inside a blockquote whose last line cites
      `— Sri Guru Granth Sahib Ji · Ang N`; with --db, each quoted line must equal a line of that Ang
      byte for byte. Names and titles of up to three words may be written in prose;
-  6. carry a valid `verified` stamp where one is required (REQUIRE_VERIFIED, filled per phase);
+  6. carry a valid `verified` stamp where one is required (REQUIRE_VERIFIED, filled per phase), and
+     a valid `covers:` when it declares one (each glob matches a tracked file, each `file#symbol`
+     names a top-level definition — see covers_entries);
   7b. drift vs the code: every search `mode` literal in webapp/sggs/search.py:do_search is named on
      docs/architecture/search-waterfall.md and in poster 05's steps; the verify thresholds in
      webapp/verify.py appear in poster 07's steps; a generated page still carries its header.
@@ -32,7 +36,9 @@ Stdlib only. Output uses GitHub annotations; exit 1 on any error.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
+import os
 import re
 import sqlite3
 import subprocess
@@ -49,7 +55,7 @@ NOT_PUBLISHED = ("docs/reports/archive/", "docs/design/")
 # pages the site generates rather than reads from docs/ (starlight-openapi): a link to one is valid
 VIRTUAL_PAGES = {"docs/api/reference": "/api/reference/"}
 REQUIRE_VERIFIED: tuple[str, ...] = ("docs/process/", "docs/engineering/", "docs/architecture/")
-STALE_UNTRACKED_AFTER = 300   # commits: a stamp on a page that cites no code is only as good as its age
+STALE_UNTRACKED_DAYS = 60     # a stamp on a page that cites no code is only as good as its date
 TITLE_LEN, DESC_LEN = (8, 120), (40, 200)
 CITATION_RE = re.compile(r"^—\s*Sri Guru Granth Sahib Ji\s*·\s*Ang\s+(\d{1,4})\s*$")
 GURMUKHI_RUN = re.compile(r"[਀-੿][਀-੿‌‍ ]*[਀-੿]|[਀-੿]")
@@ -82,6 +88,7 @@ class Problem:
     line: int
     msg: str
     level: str = "error"
+    kind: str = ""          # "stamp": a stamp-age finding, summarised as one notice by main()
 
     def __str__(self):
         return f"::{self.level} file={_rel(self.file)},line={self.line}::{self.msg}"
@@ -251,9 +258,11 @@ def check_page(path: Path, tokens_hex: set[str], widgets: dict, db: sqlite3.Conn
         if not re.fullmatch(r"[0-9a-f]{7,40}", str(v.get("commit", ""))) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(v.get("date", ""))):
             P.append(Problem(path, 1, "verified needs commit (7–40 hex) and date (YYYY-MM-DD)"))
         else:
-            P.extend(check_verified_commit(path, str(v["commit"]), text))
+            P.extend(check_verified_commit(path, str(v["commit"]), text, str(v["date"])))
     elif any(rel.startswith(d) for d in REQUIRE_VERIFIED):
         P.append(Problem(path, 1, "this page must carry `verified: {commit, date}` (last read against the code)"))
+    if "covers" in fm:
+        P.extend(Problem(path, 1, msg) for msg in check_covers(fm["covers"]))
 
     # 2. links  3. widgets  4. mermaid  5. scripture
     quote_block: list[tuple[int, str]] = []
@@ -434,23 +443,34 @@ def check_quote(path: Path, block: list[tuple[int, str]], db: sqlite3.Connection
     return P
 
 
-def check_verified_commit(path: Path, commit: str, text: str = "") -> list[Problem]:
+def stamp_age(date: str, today: dt.date | None = None) -> int | None:
+    """Days since a `verified.date` (YYYY-MM-DD); None when it does not parse."""
+    try:
+        return ((today or dt.date.today()) - dt.date.fromisoformat(date)).days
+    except ValueError:
+        return None
+
+
+def check_verified_commit(path: Path, commit: str, text: str = "", date: str = "",
+                          today: dt.date | None = None) -> list[Problem]:
     """A stamp is stale when code the page cites changed since it (the precise signal), or — for a
-    page that cites no code — when it is very old. Raw commit distance alone is noise: merging a
-    stack of pull requests adds dozens of commits that touch nothing a page describes."""
+    page that cites no code — when its date is more than STALE_UNTRACKED_DAYS old. Commit distance
+    is not used: merging a stack of pull requests adds dozens of commits that touch nothing a page
+    describes. Both findings are `kind="stamp"`: main() prints them as one summary notice."""
     if subprocess.run(["git", "cat-file", "-e", f"{commit}^{{commit}}"], cwd=ROOT, capture_output=True).returncode != 0:
         return [Problem(path, 1, f"verified commit {commit[:7]} is not in this repository's history", level="warning")]
-    files = cited_files(path, text) if text else []
+    files = covered_files(path, text) if text else []
     if files:
         changed = changed_since(commit, files)
         if changed:
             return [Problem(path, 1, f"code this page cites changed since its stamp {commit[:7]} ({', '.join(changed[:4])}"
-                                     f"{' …' if len(changed) > 4 else ''}) — re-read it against the code and move the stamp", level="warning")]
+                                     f"{' …' if len(changed) > 4 else ''}) — re-read it against the code and move the stamp",
+                            level="warning", kind="stamp")]
         return []
-    behind = subprocess.run(["git", "rev-list", "--count", f"{commit}..HEAD"], cwd=ROOT, capture_output=True, text=True)
-    n = int(behind.stdout.strip() or 0) if behind.returncode == 0 else 0
-    if n > STALE_UNTRACKED_AFTER:
-        return [Problem(path, 1, f"verified against {commit[:7]}, {n} commits ago, and it cites no code to track — re-read it", level="warning")]
+    age = stamp_age(date, today)
+    if age is not None and age > STALE_UNTRACKED_DAYS:
+        return [Problem(path, 1, f"verified on {date} ({age} days ago) and it cites no code to track — re-read it",
+                        level="warning", kind="stamp")]
     return []
 
 
@@ -792,6 +812,109 @@ def cited_files(page: Path, text: str) -> list[str]:
     return sorted(f for f in out if (ROOT / f).is_file() and not f.startswith("docs/"))
 
 
+# ── covers: the code a page describes, declared in frontmatter ─────────────────────────────────
+# `covers: "webapp/serve.py#api, webapp/sggs/search.py, .github/workflows/*.yml"` — one quoted,
+# comma-separated string (the frontmatter parser has no lists). An entry is a glob over tracked
+# files (`*` within a directory, `**` across directories) or `file#symbol`, where the symbol is a
+# top-level definition found with SYMBOL_RE. Without `covers:`, a page covers cited_files().
+_TRACKED: list[str] | None = None
+
+
+def tracked_files() -> list[str]:
+    global _TRACKED
+    if _TRACKED is None:
+        out = subprocess.run(["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, text=True).stdout
+        _TRACKED = [f for f in out.split("\0") if f]
+    return _TRACKED
+
+
+def covers_entries(value) -> list[str]:
+    return [e.strip() for e in str(value or "").split(",") if e.strip()]
+
+
+def glob_regex(pattern: str) -> re.Pattern:
+    """`**` any depth, `*` and `?` within one path segment; everything else (brackets too) literal.
+    A plain directory path covers everything under it."""
+    out, i = [], 0
+    while i < len(pattern):
+        if pattern.startswith("**/", i):
+            out.append("(?:.*/)?"); i += 3
+        elif pattern.startswith("**", i):
+            out.append(".*"); i += 2
+        elif pattern[i] == "*":
+            out.append("[^/]*"); i += 1
+        elif pattern[i] == "?":
+            out.append("[^/]"); i += 1
+        else:
+            out.append(re.escape(pattern[i])); i += 1
+    return re.compile("".join(out) + "(?:/.*)?$")
+
+
+def glob_files(pattern: str, files: list[str] | None = None) -> list[str]:
+    rx = glob_regex(pattern.strip("/"))
+    return [f for f in (tracked_files() if files is None else files) if rx.match(f)]
+
+
+def symbol_range(src: str, suffix: str, symbol: str) -> tuple[int, int] | None:
+    """1-based inclusive line range of a top-level definition: from its line to the line before the
+    next line that starts at column 0 (not blank or a closing bracket; a column-0 comment belongs
+    to what follows it), trailing blank lines dropped."""
+    pat = SYMBOL_RE.get(suffix)
+    if pat is None:
+        return None
+    rx = re.compile(pat.format(n=re.escape(symbol)))
+    lines = src.splitlines()
+    start = next((i for i, l in enumerate(lines) if not l[:1].isspace() and rx.match(l)), None)
+    if start is None:
+        return None
+    end = len(lines)
+    for j in range(start + 1, len(lines)):
+        l = lines[j]
+        if l and not l[0].isspace() and not l.startswith(("}", ")", "]")):
+            end = j
+            break
+    while end - 1 > start and not lines[end - 1].strip():
+        end -= 1
+    return start + 1, end
+
+
+def covered_files(page: Path, text: str) -> list[str]:
+    """The repository files a page describes: its `covers:` entries expanded (a `file#symbol` counts
+    as the whole file here), or cited_files() when it declares none."""
+    fm, _ = parse_frontmatter(text)
+    if isinstance(fm, dict) and isinstance(fm.get("covers"), str):
+        out: set[str] = set()
+        for e in covers_entries(fm["covers"]):
+            path, _, sym = e.partition("#")
+            out.update([path] if sym else glob_files(path))
+        return sorted(f for f in out if (ROOT / f).is_file())
+    return cited_files(page, text)
+
+
+def check_covers(value) -> list[str]:
+    """The problems of a `covers:` value: an empty list, a glob matching no tracked file, an unknown
+    file or symbol."""
+    entries = covers_entries(value)
+    if not entries:
+        return ["covers: give a comma-separated list of globs or file#symbol entries"]
+    out = []
+    for e in entries:
+        path, _, sym = e.partition("#")
+        if ".." in path.split("/") or path.startswith("/"):
+            out.append(f"covers: bad path {e!r}")
+        elif sym:
+            disk = ROOT / path
+            if not disk.is_file():
+                out.append(f"covers: {path} does not exist (in {e!r})")
+            elif disk.suffix not in SYMBOL_RE:
+                out.append(f"covers: symbols are not supported for {disk.suffix} files ({e!r}); cover the whole file")
+            elif symbol_range(disk.read_text(encoding="utf-8", errors="replace"), disk.suffix, sym) is None:
+                out.append(f"covers: no top-level {sym!r} in {path}")
+        elif not glob_files(path):
+            out.append(f"covers: {e!r} matches no tracked file")
+    return out
+
+
 def freshness() -> list[dict]:
     """Every page with a `verified` stamp: commits since the stamp, and the cited files changed since."""
     rows = []
@@ -807,20 +930,32 @@ def freshness() -> list[dict]:
         known = subprocess.run(["git", "cat-file", "-e", f"{commit}^{{commit}}"], cwd=ROOT, capture_output=True).returncode == 0
         behind = int(subprocess.run(["git", "rev-list", "--count", f"{commit}..HEAD"], cwd=ROOT, capture_output=True,
                                     text=True).stdout.strip() or 0) if known else -1
-        files = cited_files(page, text)
+        files = covered_files(page, text)
         changed = changed_since(commit, files) if known and files else []
         rows.append({"page": _rel(page), "commit": commit[:7], "date": str(v.get("date", "")), "behind": behind,
-                     "cited": files, "changed": changed})
+                     "age": stamp_age(str(v.get("date", ""))), "cited": files, "changed": changed})
     return rows
 
 
-def freshness_markdown(rows: list[dict], stale_after: int = STALE_UNTRACKED_AFTER) -> str:
-    """The issue body: pages whose cited code changed, then pages that cite no code and are very old
-    (or whose stamp is not in history); empty when all fresh. A page whose cited code did not change
-    is fresh however many commits have passed."""
+def stale_reason(r: dict, stale_days: int = STALE_UNTRACKED_DAYS, today: dt.date | None = None) -> str:
+    """Why a freshness row is stale: "code-changed", "not-in-history", "old-no-code", or "" (fresh).
+    A page whose cited code did not change is fresh however old its stamp."""
+    if r["changed"]:
+        return "code-changed"
+    if r["behind"] < 0:
+        return "not-in-history"
+    age = stamp_age(r["date"], today)
+    if not r["cited"] and age is not None and age > stale_days:
+        return "old-no-code"
+    return ""
+
+
+def freshness_markdown(rows: list[dict], stale_days: int = STALE_UNTRACKED_DAYS, today: dt.date | None = None) -> str:
+    """The issue body: pages whose cited code changed, then pages that cite no code and whose stamp
+    is more than `stale_days` old (or not in history); empty when all fresh."""
     moved = sorted((r for r in rows if r["changed"]), key=lambda r: (-len(r["changed"]), -r["behind"]))
-    old = sorted((r for r in rows if not r["changed"] and (r["behind"] < 0 or (not r["cited"] and r["behind"] > stale_after))),
-                 key=lambda r: -r["behind"])
+    old = sorted((r for r in rows if stale_reason(r, stale_days, today) in ("not-in-history", "old-no-code")),
+                 key=lambda r: r["date"])
     if not moved and not old:
         return ""
     out = ["Pages whose `verified` stamp may no longer hold. Re-read each against the code, fix what drifted,",
@@ -831,10 +966,121 @@ def freshness_markdown(rows: list[dict], stale_after: int = STALE_UNTRACKED_AFTE
                 f"{' …' if len(r['changed']) > 6 else ''} |" for r in moved]
         out.append("")
     if old:
-        out += [f"## Citing no code and more than {stale_after} commits behind (or a stamp not in history)", "", "| Page | Stamp | Commits since |", "|---|---|---|"]
-        out += [f"| `{r['page']}` | `{r['commit']}` {r['date']} | {r['behind'] if r['behind'] >= 0 else 'not in history'} |" for r in old]
+        out += [f"## Citing no code and verified more than {stale_days} days ago (or a stamp not in history)", "",
+                "| Page | Stamp | Days since |", "|---|---|---|"]
+        out += [f"| `{r['page']}` | `{r['commit']}` {r['date']} | "
+                f"{'not in history' if r['behind'] < 0 else stamp_age(r['date'], today)} |" for r in old]
         out.append("")
     return "\n".join(out)
+
+
+# ── docs health (docs/reference/docs-health.md): a few numbers, measured at build time ─────────
+HEALTH_DAYS = 30
+
+
+def _median(xs: list[int]) -> float | None:
+    xs = sorted(xs)
+    if not xs:
+        return None
+    mid = len(xs) // 2
+    return float(xs[mid]) if len(xs) % 2 else (xs[mid - 1] + xs[mid]) / 2
+
+
+def _git(*args: str) -> str:
+    out = subprocess.run(["git", "-c", "core.quotePath=false", *args], cwd=ROOT, capture_output=True, text=True)
+    return out.stdout if out.returncode == 0 else ""
+
+
+def sibling_pin_lag() -> dict | None:
+    """Per sibling: days behind its ref when the lock records dates (`commit_date`/`ref_date`), else
+    commits behind via `gh api …/compare` when a token is set; None when neither is available."""
+    out: dict = {}
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    for name, src in sibling_sources().items():
+        if src.get("commit_date") and src.get("ref_date"):
+            lag = stamp_age(src["commit_date"][:10], dt.date.fromisoformat(src["ref_date"][:10]))
+            if lag is not None:
+                out[name] = {"days": lag}
+                continue
+        if token and src.get("repository") and src.get("commit"):
+            r = subprocess.run(["gh", "api", f"repos/{src['repository']}/compare/{src['commit']}...{src.get('ref', 'main')}",
+                                "--jq", ".ahead_by"], capture_output=True, text=True, timeout=30)
+            if r.returncode == 0 and r.stdout.strip().isdigit():
+                out[name] = {"commits": int(r.stdout.strip())}
+    return out or None
+
+
+def _coupling():
+    """tools/docs_coupling.py (it imports this module, so it is loaded on first use)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import docs_coupling
+    return docs_coupling
+
+
+def code_commit_docs_share(days: int = HEALTH_DAYS) -> dict:
+    """Of the non-merge commits in the last `days` that changed code (not noise, not docs/), the share
+    that also changed docs/."""
+    cpl = _coupling()
+    log = _git("log", "--no-merges", f"--since={days}.days", "--format=@%H", "--name-only", "HEAD")
+    code = with_docs = 0
+    for chunk in log.split("@")[1:]:
+        files = [f for f in chunk.splitlines()[1:] if f.strip()]
+        if any(not cpl.is_noise(f) for f in files):
+            code += 1
+            with_docs += any(f.startswith("docs/") for f in files)
+    return {"code_commits": code, "with_docs": with_docs,
+            "pct": round(100 * with_docs / code, 1) if code else None}
+
+
+def coupling_debt(days: int = HEALTH_DAYS) -> dict:
+    """First-parent merges of the last `days` that changed code a page covers without the page or its
+    stamp (the Docs-impact line is not in history, so this counts it as debt: an upper bound)."""
+    cpl = _coupling()
+    specs = cpl.page_specs()
+    merges = _git("log", "--first-parent", "--merges", f"--since={days}.days", "--format=%H", "HEAD").split()
+    with_debt, pages = 0, 0
+    for m in merges:
+        r = cpl.couple(f"{m}^1", m, "", specs)
+        if r["flagged"]:
+            with_debt += 1
+            pages += len(r["flagged"])
+    return {"merges": len(merges), "merges_with_debt": with_debt, "page_flags": pages}
+
+
+def health(today: dt.date | None = None) -> dict:
+    rows = freshness()
+    reasons = [stale_reason(r, today=today) for r in rows]
+    stale: dict[str, int] = {}
+    for why in reasons:
+        if why:
+            stale[why] = stale.get(why, 0) + 1
+    own = [p for p in published_pages() if not is_sibling(p)]
+    ages = [a for a in (stamp_age(r["date"], today) for r in rows) if a is not None]
+    out = {"generated": (today or dt.date.today()).isoformat(),
+           "commit": _git("rev-parse", "--short=12", "HEAD").strip(),
+           "window_days": HEALTH_DAYS,
+           "pages": len(own), "stamped": len(rows),
+           "fresh": reasons.count(""),
+           "fresh_pct": round(100 * reasons.count("") / len(rows), 1) if rows else None,
+           "stale_by_reason": stale,
+           "median_stamp_age_days": _median(ages),
+           "coupling_debt": coupling_debt(),
+           "code_commits_with_docs": code_commit_docs_share()}
+    lag = sibling_pin_lag()
+    if lag:
+        out["sibling_pin_lag"] = lag
+    return out
+
+
+def stamp_summary(problems: list[Problem]) -> str | None:
+    """One notice for every stamp-age finding (the full list is `--freshness`)."""
+    stamps = [p for p in problems if p.kind == "stamp"]
+    if not stamps:
+        return None
+    moved = sum("cites changed" in p.msg for p in stamps)
+    return (f"::notice::{len(stamps)} stamped page(s) may need re-reading: {moved} cite code that changed since the "
+            f"stamp, {len(stamps) - moved} cite no code and were verified more than {STALE_UNTRACKED_DAYS} days ago. "
+            "The list: python3 tools/docs_check.py --freshness")
 
 
 def run(db_path: Path | None = None) -> list[Problem]:
@@ -860,7 +1106,13 @@ def main(argv=None) -> int:
     ap.add_argument("--db", type=Path, default=ROOT / "db" / "sggs.sqlite", help="pinned database (verifies cited scripture)")
     ap.add_argument("--freshness", type=Path, metavar="OUT", nargs="?", const=Path("-"),
                     help="report (never fail) the stamped pages whose cited code changed since their stamp; OUT or stdout")
+    ap.add_argument("--health", type=Path, metavar="OUT", help="write the docs-health numbers as JSON to OUT and exit 0")
     a = ap.parse_args(argv)
+    if a.health is not None:
+        h = health()
+        a.health.write_text(json.dumps(h, indent=2) + "\n", encoding="utf-8")
+        print(f"health: {h['fresh_pct']}% of {h['stamped']} stamped pages fresh -> {a.health}")
+        return 0
     if a.freshness is not None:
         md = freshness_markdown(freshness())
         if str(a.freshness) == "-":
@@ -871,10 +1123,16 @@ def main(argv=None) -> int:
         return 0
     problems = run(a.db)
     for p in problems:
-        print(p)
+        if p.kind != "stamp":
+            print(p)
+    summary = stamp_summary(problems)
+    if summary:
+        print(summary)
     errors = [p for p in problems if p.level == "error"]
     n_pages = len(published_pages())
-    print(f"docs_check: {n_pages} pages, {len(errors)} error(s), {len(problems) - len(errors)} warning(s)/notice(s)")
+    others = len([p for p in problems if p.level != "error" and p.kind != "stamp"])
+    print(f"docs_check: {n_pages} pages, {len(errors)} error(s), {others} warning(s)/notice(s)"
+          f"{', ' + str(len(problems) - len(errors) - others) + ' stamp(s) to re-read' if summary else ''}")
     return 1 if errors else 0
 
 
