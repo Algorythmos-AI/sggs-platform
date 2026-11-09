@@ -1,0 +1,63 @@
+name: hukamnama-deadman
+
+# The external dead-man check for the Hukamnama service. The service reports its own alerts on
+# /health; this notices when the service itself is down, asleep or wedged. Runs at 06:00, 07:00
+# and 14:15 IST, and opens one issue per Amritsar date (later runs comment on it). It never
+# restarts or redeploys anything. Silent until HUKAMNAMA_STAGING_URL is set.
+
+on:
+  schedule:
+    - cron: "30 0 * * *"    # 06:00 IST: polling must be live
+    - cron: "30 1 * * *"    # 07:00 IST: today's Hukamnama should have resolved
+    - cron: "45 8 * * *"    # 14:15 IST: the window has closed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: hukamnama-deadman
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      URL: ${{ vars.HUKAMNAMA_STAGING_URL }}
+    steps:
+      - uses: actions/checkout@v5
+        if: env.URL != ''
+      - name: Check /health
+        if: env.URL != ''
+        id: check
+        run: |
+          set +e
+          out="$(python3 scripts/ci/hukamnama_watch.py deadman "$URL")"; rc=$?
+          echo "$out"
+          { echo "report<<EOF"; echo "$out"; echo "EOF"; } >> "$GITHUB_OUTPUT"
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+      - name: Open or update today's issue
+        if: env.URL != '' && steps.check.outputs.rc != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT: ${{ steps.check.outputs.report }}
+        run: |
+          day="$(TZ=Asia/Kolkata date +%F)"
+          title="Hukamnama service: problem on $day (Amritsar)"
+          fence='```'
+          body="Dead-man check at $(TZ=Asia/Kolkata date +%H:%M) IST against ${URL}:
+
+          ${fence}
+          ${REPORT}
+          ${fence}
+
+          Runbook: docs/process/runbooks/hukamnama-service.md"
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$title\"" --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          fi
+          exit 1

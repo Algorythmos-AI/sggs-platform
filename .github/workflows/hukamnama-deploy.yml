@@ -1,0 +1,84 @@
+name: hukamnama-deploy
+
+# Deploys the Hukamnama service (services/hukamnama) to its Render staging service, the 14-day
+# soak with sending off. Render auto-deploy is OFF for the service: this workflow is the only way
+# it changes. It runs the service's own tests on the exact commit, asks Render to build that
+# commit (deploy hook, ref=SHA), then waits until /health reports that commit.
+#
+# Deploy freeze: 23:00–04:30 UTC (04:30–10:00 IST), the hours SGPC publishes and the poller
+# decides. A push in that window waits for the next dispatch; override with the input.
+#
+# Setup (owner, once): runbook docs/process/runbooks/hukamnama-service.md.
+#   secret   RENDER_DEPLOY_HOOK_HUKAMNAMA_STAGING   (environment: staging)
+#   variable HUKAMNAMA_STAGING_URL                  (repository)
+
+on:
+  push:
+    branches: [integration]
+    paths:
+      - "services/hukamnama/**"
+      - "dataset.lock.json"
+      - ".github/workflows/hukamnama-deploy.yml"
+  workflow_dispatch:
+    inputs:
+      override_freeze:
+        description: "Deploy even inside the 23:00–04:30 UTC publish window"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hukamnama-deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 40
+    env:
+      HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_HUKAMNAMA_STAGING }}
+      URL: ${{ vars.HUKAMNAMA_STAGING_URL }}
+    steps:
+      - name: Configured?
+        id: cfg
+        run: |
+          if [ -z "$HOOK" ] || [ -z "$URL" ]; then
+            echo "::notice::Hukamnama staging is not set up yet (deploy hook or URL missing); nothing deployed."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Deploy freeze (23:00–04:30 UTC)
+        if: steps.cfg.outputs.ready == 'true'
+        env:
+          OVERRIDE: ${{ inputs.override_freeze || false }}
+        run: |
+          m=$(( 10#$(date -u +%H) * 60 + 10#$(date -u +%M) ))
+          if { [ "$m" -ge 1380 ] || [ "$m" -lt 270 ]; } && [ "$OVERRIDE" != "true" ]; then
+            echo "::error::Inside the Hukamnama publish window (23:00–04:30 UTC). Re-run with override_freeze, or dispatch later."
+            exit 1
+          fi
+      - uses: actions/checkout@v5
+        if: steps.cfg.outputs.ready == 'true'
+      - uses: ./.github/actions/fetch-dataset
+        if: steps.cfg.outputs.ready == 'true'
+        with: { token: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
+      - uses: actions/setup-python@v6
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          python-version-file: ".python-version"
+      - name: Service tests on this commit
+        if: steps.cfg.outputs.ready == 'true'
+        run: cd services/hukamnama && python3 -m unittest discover -s tests -t .
+      - name: Ask Render to build this exact commit
+        if: steps.cfg.outputs.ready == 'true'
+        run: |
+          case "$HOOK" in *\?*) sep='&' ;; *) sep='?' ;; esac
+          curl -fsS -X POST "${HOOK}${sep}ref=${GITHUB_SHA}" -o /dev/null
+          echo "deploy requested for ${GITHUB_SHA::7}"
+      - name: Wait until the service runs this commit
+        if: steps.cfg.outputs.ready == 'true'
+        run: python3 scripts/ci/hukamnama_watch.py wait "$URL" --commit "$GITHUB_SHA" --timeout 1800

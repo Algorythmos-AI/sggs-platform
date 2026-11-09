@@ -1,6 +1,6 @@
 """CLI.
 
-  python -m hukamnama serve   --db DB --state STATE [--port 8080] [--no-poll]
+  python -m hukamnama serve   --db DB --state STATE [--port 8080] [--no-poll] [--archive DIR]
   python -m hukamnama tick    --db DB --state STATE [--force]
   python -m hukamnama approve YYYY-MM-DD --first-line ID --last-line ID --by NAME --reason TEXT
   python -m hukamnama hold    YYYY-MM-DD --by NAME --reason TEXT
@@ -21,8 +21,10 @@ import threading
 
 from . import clock
 from .api import State, day_record, serve, tick_loop
+from .archive import Archive
 from .corpus import open_ro, resolution_for_range, scripture_sha256
 from .engine import Engine
+from .sources import fetch
 from .store import Store
 
 
@@ -35,6 +37,8 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--host", default="0.0.0.0")
     s.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8080")))
     s.add_argument("--no-poll", action="store_true")
+    s.add_argument("--archive", default=os.environ.get("HUKAMNAMA_ARCHIVE") or None,
+                   help="keep every distinct page fetched, gzip, under DIR/<amritsar date>/ (the soak's replay corpus)")
     t = sub.add_parser("tick")
     t.add_argument("--force", action="store_true")
     a = sub.add_parser("approve")
@@ -65,7 +69,9 @@ def main(argv: list[str] | None = None) -> int:
         state = State(store, fingerprint)
         stop = threading.Event()
         if not args.no_poll:
-            threading.Thread(target=tick_loop, args=(state, Engine(store, con, fingerprint), stop), daemon=True).start()
+            fetcher = Archive(args.archive).wrap(fetch) if args.archive else fetch
+            engine = Engine(store, con, fingerprint, fetcher=fetcher)
+            threading.Thread(target=tick_loop, args=(state, engine, stop), daemon=True).start()
         httpd = serve(state, args.host, args.port)
         signal.signal(signal.SIGTERM, lambda *_: (stop.set(), threading.Thread(target=httpd.shutdown).start()))
         logging.info("hukamnama %s serving on %s:%s (scripture %s)", "poll" if not args.no_poll else "read-only",

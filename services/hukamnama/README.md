@@ -61,7 +61,12 @@ python3 -m hukamnama --db ../../db/sggs.sqlite --state /tmp/hk.sqlite tick --for
 python3 -m unittest discover -s tests -t .     # or: make test-hukamnama (repo root)
 ```
 
-Runtime is Python-stdlib only. Environment: `HUKAMNAMA_DB`, `HUKAMNAMA_STATE`, `PORT`.
+Runtime is Python-stdlib only. Environment: `HUKAMNAMA_DB`, `HUKAMNAMA_STATE`, `HUKAMNAMA_ARCHIVE`
+(keep every distinct page fetched, for replay; `hukamnama/archive.py`), `HUKAMNAMA_COMMIT`, `PORT`.
+
+**Deployed** as the Render service `sggs-hukamnama-staging` (Docker, `services/hukamnama/Dockerfile`,
+1 GB disk at `/var/data`) by `.github/workflows/hukamnama-deploy.yml`, watched from outside by
+`hukamnama-deadman.yml`. Setup and operations: `docs/process/runbooks/hukamnama-service.md`.
 
 `serve` refuses to start if the corpus fingerprint differs from the one recorded in the state
 file. Published ranges are pinned to the corpus they were resolved in.
@@ -104,9 +109,6 @@ Both write to the `audit` table. An automatic publish never replaces an owner de
 ## Not in this PR (see the approved plan)
 
 - Device registration and the APNs sender.
-- The Render service definition. It needs an always-on instance and a persistent disk, which is a
-  cost decision for the owner.
-- Litestream backup and the external dead-man check.
-- A 14-day staging soak with the fetch archive, before any push is enabled.
+- Litestream backup of the state to R2, and the R2 copy of the fetch archive.
 - Permission letters to SGPC and to the Khalis Foundation (BaniDB). BaniDB is not used: its terms
   allow personal, non-commercial use only.
