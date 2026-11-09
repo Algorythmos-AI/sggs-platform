@@ -6,7 +6,7 @@ sidebar:
 ---
 # The engineering wiki
 
-Sri Guru Granth Sahib Ji — all 1,430 Angs, 60,658 lines — kept **verbatim**, cited by Ang, and
+Sri Guru Granth Sahib Ji — all <!--fact:angs-->1,430<!--/fact--> Angs, <!--fact:lines-->60,658<!--/fact--> lines — kept **verbatim**, cited by Ang, and
 never altered. This wiki explains how: the pipeline that proves the text against the source Bir,
 the database and the read-only API built from it, the website ([gurbanisoul.com](https://gurbanisoul.com))
 and the Gurbani Soul iOS app that show it, and the checks every change passes before it reaches
@@ -59,10 +59,10 @@ comes from — press *Next* on the site to build it up step by step:
 
 <!-- sggs:cards -->
 - [Scripture 101](scripture/README.md) — what the Granth is, its structure, the script and its Unicode, and how answers about it are given.
-- [Architecture](architecture/README.md) — three repositories, one read-only API in five contexts, a pinned database: the system and how its parts fit.
+- [Architecture](architecture/README.md) — three repositories, one read-only API in <!--fact:contexts:words-->five<!--/fact--> contexts, a pinned database: the system and how its parts fit.
 - [Data](data/README.md) — a line record, the corpus pipeline and its gates, the dataset pin, the editorial ledger, the integrity chain.
 - [Search & verification](search/README.md) — the search waterfall, the Roman fold, the verification engine and the harnesses that hold them.
-- [The API](api/README.md) — 29 read-only routes, the contract that pins them, versioning and caching, and a reference to try.
+- [The API](api/README.md) — <!--fact:routes-->29<!--/fact--> read-only routes, the contract that pins them, versioning and caching, and a reference to try.
 - [The iOS app](ios/README.md) — Gurbani Soul: how it takes a release, its parity with the API, its launch-integrity check, Nitnem.
 - [Ship & operate](process/README.md) — branching, environments, the CI gates, releases and the runbooks for when something goes wrong.
 - [Decisions](adr/README.md) — why the system is the way it is, one decision record at a time.

@@ -18,7 +18,7 @@ In three sentences:
 - **Three repositories, joined by pins.** `sggs-data` builds the database from the source Bir and
   proves it character for character; this repository pins that exact database and serves it; the
   Gurbani Soul app pins the same database and this repository's golden contract.
-- **One read-only API, five bounded contexts.** Reader, search, verify, insights and knowledge — each
+- **One read-only API, <!--fact:contexts:words-->five<!--/fact--> bounded contexts.** Reader, search, verify, insights and knowledge — each
   declares the tables it reads, runs as its own Vercel function (or all together), and opens SQLite
   read-only and immutable. The website and the wiki call it on the same origin.
 - **Every deploy is gated and proven by commit.** Nothing reaches production except through CI, and
