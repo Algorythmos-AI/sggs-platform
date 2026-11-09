@@ -3,6 +3,27 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.6.4] — 2026-11-09
+
+The engineering wiki is brought up to date with 1.6.3 and now keeps itself in step with the code. Web, wiki and tooling only; no scripture, corpus or dataset change.
+
+### Added
+- **The wiki fills its facts from the code** (#369): route and context counts, the app and dataset versions, line and Ang totals and the contract's size are written by `tools/gen_facts.py` between markers, checked on every pull request and moved by the release bump.
+- **A generated environment-variable reference** (#369): every variable the code reads, with a description; a new variable without one fails the check.
+- **A docs-impact check** (#370): each pull request gets one comment naming the wiki pages whose code changed without the page. Report-only for now; enforcement is a single switch (`COUPLING_ENFORCE`), to be turned on after two weeks.
+- **A docs-health page** (#370): how fresh the wiki is, how far the pinned sibling pages lag, and how often code changes carry their docs.
+- **A weekly refresh pull request** (#368) replaces the reminder issue: regenerated pages and the list of pages to re-read, on one bot branch. Sibling pages refresh daily and once more after every release.
+- **A scripture guard for automated changes** (#368): a pull request from a bot or automated branch that adds or removes a Gurmukhi character fails; for everyone else the guard only reports.
+- **New wiki pages** (#366): Contribute and Stripe, and how the site's three languages are wired.
+- **A Hukamnama service, not yet deployed** (#367): `services/hukamnama` locates the Darbar Sahib Hukamnama in the pinned corpus and serves it by line range, every character from the corpus. It is not part of this release's API or website deployments.
+
+### Changed
+- **Eleven wiki pages rewritten for 1.6.3** (#366): the website's locale routes, iOS release status, known issues, the API changelog to 1.6.3, English alignment and spans, CI gates, Insights figures and the app's features since 1.4.7.
+- **Freshness warnings** (#370): one summary line instead of a warning per page; a page that cites no code is stale after 60 days rather than 300 commits.
+
+### Fixed
+- **Latest changes on the wiki's home page** (#365) showed an empty dash for every release since 1.4.1; it now shows each release's summary. The home page said the API has 26 routes; it has 29, and hand-typed route counts are now checked.
+
 ## [1.6.3] — 2026-11-06
 
 The Punjabi site reads as written in Punjabi, and the top bar is larger and the same in every language. The scripture is unchanged.
