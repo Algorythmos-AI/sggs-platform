@@ -4,8 +4,8 @@ description: "What changed in the API, release by release, from a client's point
 sidebar:
   order: 6
 verified:
-  commit: c761e513
-  date: "2026-09-27"
+  commit: 26d86be7
+  date: "2026-11-08"
 ---
 # API changelog
 
@@ -17,8 +17,16 @@ version, `info.version` in the [OpenAPI description](contract-and-openapi.md), i
 
 | Release | Date | What a client sees |
 |---|---|---|
-| 1.4.0 | — | The OpenAPI operations gain short summaries (documentation only). Production still answers every path from `all`. |
-| A later release, after the app is live | — | Production's five contexts each answer from their own function, so `X-Service` names the context (`search`, `reader`, …) instead of `all`. Bodies unchanged. |
+| A later release | — | Production's five contexts each answer from their own function, so `X-Service` names the context (`search`, `reader`, …) instead of `all`. Bodies unchanged. Staging routes by context today; production still answers every path from `all`. |
+| 1.6.1 – 1.6.3 | 2026-11-05 – 11-06 | None. |
+| 1.6.0 | 2026-11-05 | **`en_span`** (`{first, last}` line ids) on every line that belongs to an English record covering two to four printed lines (dataset 1.4.0, `translation_spans`). The English is attached once, as `en` on the last member present in the response, so a list shows it once under the group even when an Ang boundary cuts the span. Additive: a client that ignores `en_span` still finds the English. More lines carry `en` than before, and the English-derived golden vectors moved with the data. |
+| 1.5.2 | 2026-10-29 | None. |
+| 1.5.1 | 2026-10-28 | Bodies follow dataset 1.3.0: `author`, `comp_id` and `section` move where the scholar ruled (Angs 1253, 1363–1384, 695, 524 and 323). No route, parameter or field changed. |
+| 1.5.0 | 2026-10-27 | `mode=auto` finds the same lines for every common spelling of the Name (waheguru, vaheguru, vahiguru, wahiguru, with or without "ji"), and theme search opens the theme whose slug a query folds to. Six golden search vectors added; every existing one unchanged. The Vaar routes follow dataset 1.2.0 (`vaar_units` 1,426 → 1,443). |
+| 1.4.9 | 2026-10-25 | `/api/analytics/author?author=` adds per-voice **`facts`**, **`named_by`** and **`names`** (lines where the voice is named, or names another), and **`dialogues`**; each is omitted when the dataset lacks its table. Bodies follow dataset 1.1.0 (corrected `author` tags). |
+| 1.4.8 | 2026-10-23 | Three routes: **`/api/analytics/sky`**, **`/api/analytics/pair`** and **`/api/analytics/theme`** (29 in all). `/api/analytics/constellation` gains the lens parameters `raags`, `rahao`, `min_themes`, `ang_min` and `ang_max` beside `concept`, `author` and `raag`, and its body gains solo, shared, companions and Ang bins. A `golden_constellation` suite of 31 vectors pins them. |
+| 1.4.1 – 1.4.7 | 2026-10-15 – 10-20 | None. |
+| 1.4.0 | 2026-10-14 | The OpenAPI operations gain short summaries (documentation only). Production still answers every path from `all`. |
 | 1.3.10 | 2026-09-25 | Production's API runs as Vercel functions inside the website's project, on the same origin. Every body is byte-identical to 1.3.9, proven by replaying the golden contract before the switch; `X-Service` is `all`. |
 | 1.3.9 | 2026-09-25 | **`/api/v1/*`**: every route with the same body and strict errors (`404` for an unknown endpoint; `{"error": {"code", "message", "request_id"}}`). **`X-Request-Id`** on every response, reusing a valid incoming id. **`X-Service`** on every response. |
 | 1.3.8 | 2026-09-24 | None. The code moved into three repositories; the database bytes and every response are unchanged. |

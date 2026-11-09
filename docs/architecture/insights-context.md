@@ -4,8 +4,8 @@ description: "What the insights service answers (theme networks, author and raag
 sidebar:
   order: 6
 verified:
-  commit: 364c4520
-  date: "2026-09-27"
+  commit: 26d86be7
+  date: "2026-11-08"
 ---
 # The insights context
 
@@ -30,7 +30,7 @@ flowchart TB
     t[sggs-data: build_db.py<br/>lines and 54 theme tags] --> m[ml_analytics_builder.py<br/>network, fingerprints, statistics]
     t --> s[build_semantic_vectors_lite.py<br/>line neighbours]
     s --> r[build_resonance.py<br/>author resonance]
-    t --> v[build_vaars.py<br/>22 Vaars, 1,426 units]
+    t --> v[build_vaars.py<br/>22 Vaars, 1,443 units]
     m --> d[(The installed database,<br/>sliced for insights)]
     s --> d
     r --> d
@@ -71,11 +71,11 @@ Parameters, limits and response shapes are in the generated [API reference](../a
 | `concepts`, `concept_lines` | `build_db.py` | 54 curated themes; 62,221 tags on 35,060 lines |
 | `theme_network` | `ml_analytics_builder.py` | PPMI and Jaccard over shabad co-occurrence; 2,528 directed edges |
 | `theme_fingerprint` | `ml_analytics_builder.py` | Lift of each theme for an author or raag against the whole Granth |
-| `author_analytics`, `raag_analytics` | `ml_analytics_builder.py` | Counts plus stylometry on the English translation; 29 authors, 31 raags |
-| `shabad_neighbors` | `ml_analytics_builder.py` | IDF-weighted theme-profile cosine; top 10 for each of 4,380 compositions |
-| `line_neighbors` | `build_semantic_vectors_lite.py` | Exact sparse TF-IDF cosine on the English; 532,227 pairs, floor 0.30 |
-| `author_resonance` | `build_resonance.py` | Lift of cross-voice neighbour edges; 533 pairs |
-| `vaars`, `vaar_units` | `build_vaars.py` | Vaars found by their title headers; 22 Vaars, 1,426 units |
+| `author_analytics`, `raag_analytics` | `ml_analytics_builder.py` | Counts plus stylometry on the English translation; 36 authors, 31 raags |
+| `shabad_neighbors` | `ml_analytics_builder.py` | IDF-weighted theme-profile cosine; top 10 for each of 4,384 compositions |
+| `line_neighbors` | `build_semantic_vectors_lite.py` | Exact sparse TF-IDF cosine on the English; 534,107 pairs, floor 0.30 |
+| `author_resonance` | `build_resonance.py` | Lift of cross-voice neighbour edges; 679 pairs |
+| `vaars`, `vaar_units` | `build_vaars.py` | Vaars read from the print, found by their title headers; 22 Vaars, 1,443 units (dataset 1.2.0) |
 
 Why these methods:
 
@@ -85,7 +85,7 @@ Why these methods:
   rate, so a large body of work does not dominate by size alone.
 - **Stylometry reflects the translation.** Measures such as vocabulary richness (`mattr_100`) are
   computed on Dr. Sant Singh Khalsa's English, so they describe the translation as much as the
-  original. Authors with too little text are flagged (`is_reliable = 0`); only 7 of the 29 meet
+  original. Authors with too little text are flagged (`is_reliable = 0`); only 7 of the 36 meet
   the threshold.
 - **Line neighbours are lexical.** The response's `note` still says "embedding cosine", but the
   current build's `source` field is `tfidf-exact-cosine-lite`: sparse TF-IDF over the English,

@@ -4,8 +4,8 @@ description: "The defences at each layer — browser headers, a read-only API wi
 sidebar:
   order: 8
 verified:
-  commit: 49c71652
-  date: "2026-11-05"
+  commit: 26d86be7
+  date: "2026-11-08"
 ---
 # Security and privacy
 
@@ -84,8 +84,10 @@ Both sites send their headers from `vercel.json`:
 
 ## Privacy
 
-What is and is not collected, as the public [privacy policy](../../frontend/src/pages/privacy.astro)
-states it (every statement there is checked against the code):
+What is and is not collected, as the public [privacy policy](../../frontend/src/pages/[lang]/privacy.astro)
+states it (every statement there is checked against the code). The policy is served at
+`/en/privacy`, `/pa/privacy` and `/fr/privacy`; English governs, and `/privacy`, the URL in App
+Store Connect, redirects permanently to `/en/privacy`:
 
 - **The app** collects nothing: no accounts, no network connections, no analytics or third-party
   SDKs. Its App Store label is "Data Not Collected". Location for the raag clock is rounded to
@@ -96,14 +98,18 @@ states it (every statement there is checked against the code):
   "Forget location" removes it.
 - **The Gurbani Soul pages** on `gurbanisoul.com` use Vercel Web Analytics: cookieless totals of
   page, referrer, country, browser, OS and device type, with a visitor hash discarded daily.
+  A language chosen in the language switcher is kept in the browser's local storage as `gs_lang`
+  (never a cookie, never sent anywhere) and read only by the bare root, to open that language
+  again; the policy names it among the browser's stored settings.
 - **The API log** is one JSON line per request with the method, the path, the status, the
   duration and the request id. It never records the query string, the IP address or the user
   agent; a test fails if a query string appears
   ([ADR-0009](../adr/0009-production-verification.md)). Hosting providers keep their own standard
   logs.
-- **Contributions**, when `/contribute` is on (`CONTRIBUTE_MODE` in `frontend/src/contribute.ts`),
+- **Contributions**, when the Contribute page is on (`CONTRIBUTE_MODE` in `frontend/src/contribute.ts`),
   leave the site for a checkout page run by Stripe; no Stripe code loads before the click, and
-  the site never sees card details. The policy's Contributions section appears only in that mode.
+  the site never sees card details. The policy's Contributions section appears only in that mode
+  ([Contribute and Stripe](../website/contribute.md)).
 - **The wiki's "open in ChatGPT / Claude" links** pass only the page's address to that service;
   the wiki records nothing.
 - **The newsletter**, when enabled, sends only an email address to Buttondown, with double

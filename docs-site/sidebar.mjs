@@ -61,6 +61,7 @@ export const LAYOUT = [
     page('diagrams'),
     page('website'),
     page('website/constellation'),
+    page('website/contribute'),
     group('Translating the site', [
       page('website/translation'),
       page('website/translation-style-guide'),
