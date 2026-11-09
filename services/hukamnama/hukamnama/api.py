@@ -10,6 +10,7 @@ A held day is reported as ``pending`` to readers: nothing that failed the gate i
 from __future__ import annotations
 
 import json
+import os
 import threading
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -17,6 +18,9 @@ from urllib.parse import parse_qs, urlsplit
 
 from . import __version__, clock
 from .store import Store
+
+# The source commit, baked into the image (Dockerfile) so a deploy is verified by identity.
+COMMIT = os.environ.get("HUKAMNAMA_COMMIT") or os.environ.get("RENDER_GIT_COMMIT") or "unknown"
 
 SECURITY_HEADERS = {"X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "Referrer-Policy": "no-referrer"}
 SOURCE_CREDIT = "Located by Ang from the Hukamnama published by SGPC (hs.sgpc.net); text from Sri Guru Granth Sahib Ji."
@@ -82,7 +86,7 @@ def make_handler(state: State):
                 with state.lock:
                     last, action = state.last_tick, state.last_tick_action
                 rec = day_record(state.store, today, state.fingerprint, now)
-                self._send(200, {"ok": True, "version": __version__, "amritsar_date": today.isoformat(),
+                self._send(200, {"ok": True, "version": __version__, "commit": COMMIT, "amritsar_date": today.isoformat(),
                                  "status_today": rec["status"],
                                  "decision_today": (state.store.decision(today) or {}).get("status"),
                                  "last_tick": last.isoformat(timespec="seconds") if last else None,

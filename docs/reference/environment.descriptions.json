@@ -5,6 +5,8 @@
   "DOCS_PDF": "`1` also builds a PDF of every page; CI sets it for every build it tests or deploys, a local build is quicker without.",
   "GH_TOKEN": "A GitHub token for reading the private sibling repositories and their releases: the dataset download, the pinned sibling docs, the repository-map check, the release-complete check and the sibling pin lag on the docs-health page. Preferred over `GITHUB_TOKEN`.",
   "GITHUB_TOKEN": "The fallback GitHub token when `GH_TOKEN` is not set (the token GitHub Actions provides); read by the same scripts.",
+  "HUKAMNAMA_ARCHIVE": "Where the Hukamnama service keeps every distinct page it fetched from SGPC, gzip under each Amritsar date with an index of every fetch, kept 60 days (unset: no archive); the same as `serve --archive`. The image sets `/var/data/archive`.",
+  "HUKAMNAMA_COMMIT": "The source commit the Hukamnama service reports on `/health` so a deploy is verified by identity; the image bakes it from Render's `RENDER_GIT_COMMIT` (falls back to that, then `unknown`).",
   "HUKAMNAMA_DB": "The scripture database the Hukamnama service reads (default `db/sggs.sqlite`); the same as its `--db` option.",
   "HUKAMNAMA_STATE": "The Hukamnama service's own state database: each day's fetched Hukamnama, the gate's decision and the audit trail (default `hukamnama-state.sqlite`); the same as its `--state` option.",
   "PORT": "The port to listen on, set by the host (Render, a container platform). The API prefers it to `SGGS_PORT`; the Hukamnama service defaults to 8080 without it.",
