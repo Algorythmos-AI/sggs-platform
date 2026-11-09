@@ -118,7 +118,8 @@ class Repo(unittest.TestCase):
         pages, _ = self.run_range("Summary.\n\nDocs-impact: none — a refactor with no behaviour change\n")
         self.assertEqual(pages["docs/explicit.md"], "docs-impact")
         for body in ("Docs-impact: none — short", "<!-- Docs-impact: none — inside a comment, ignored -->",
-                     "Write `Docs-impact: none — <reason>` when nothing changes"):
+                     "Write `Docs-impact: none — <reason>` when nothing changes",
+                     "Docs-impact: none — <reason>"):                    # the template's placeholder
             pages, _ = self.run_range(body)
             self.assertIsNone(pages["docs/explicit.md"], body)
 
