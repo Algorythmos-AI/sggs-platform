@@ -78,6 +78,22 @@ constant, quote the test. Where that is not possible, name the file and the comm
 check what they can (search modes, verify thresholds, generated pages); the rest is your
 `verified` stamp.
 
+A count or a version written in prose is marked so the code fills it in:
+`<!--fact:routes-->29<!--/fact-->`. The comments are invisible on GitHub and dropped by the wiki,
+so readers see only the number; `python3 tools/gen_facts.py --write` rewrites the value from its
+source, and `--check` (in `make docs-check` and the docs job) fails when a value has drifted or a
+fact name is unknown. `python3 tools/gen_facts.py --list` shows every fact and where it is read.
+Keep a marker on one line, outside code; add a format after a colon for a number in words
+(`fact:contexts:words`) or without a thousands separator (`fact:angs:plain`). A new fact is one
+entry in `FACTS` in that script. Leave ADRs, the changelogs and statements of what was true on a
+given day as they are: they record their day. A release bump (`scripts/release/bump.py`) rewrites
+the version facts with the rest of the release.
+
+[Environment variables](../reference/environment.md) is generated the same way: the generator
+finds every variable the code reads, and each needs one sentence in
+`docs/reference/environment.descriptions.json`. Reading a new variable in the code without
+describing it fails `tools/gen_env_vars.py --check`.
+
 ## Sibling repositories
 
 The data and app repositories' documents are published here by pin

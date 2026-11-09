@@ -46,7 +46,7 @@ rewrites send those paths to the API, which runs as Python functions in the same
 ([ADR-0011](../adr/0011-api-as-functions-in-the-web-project.md)). There is no CORS and the frontend
 carries no API-base configuration. `gateway/routes.json` decides the routing per environment:
 
-- **Staging** routes each of the five bounded contexts (`reader`, `search`, `verify`, `insights`,
+- **Staging** routes each of the <!--fact:contexts:words-->five<!--/fact--> bounded contexts (`reader`, `search`, `verify`, `insights`,
   `knowledge`) to its own function, with `all` — the whole API — as the catch-all.
 - **Production (every release so far, through v1.5.2)** answers every `/api` path with `all`:
   `production.services` in `gateway/routes.json` is empty.
@@ -59,7 +59,7 @@ every release still deploys as the rollback target until it is retired. See
 [Environments](../process/environments.md) and [bounded contexts](bounded-contexts-and-gateway.md).
 
 ## The five layers
-1. **Scripture core** — `lines` (60,658 verbatim rows), raags, sections, authors, vaars.
+1. **Scripture core** — `lines` (<!--fact:lines-->60,658<!--/fact--> verbatim rows), raags, sections, authors, vaars.
 2. **Search indexes** — [[FTS5]] (`fts`, `fts_en`, `fts_shabad`; `fts_tri` is built but no route reads it), `variants`, `word_freq`.
 3. **Translations** — the Khalsa English layer, a separate labelled table (never blended into [[Gurmukhi]]).
 4. **Analytics / Insight Engine** — theme network, stylometry, resonance, semantic neighbours.

@@ -4,7 +4,8 @@ bump.py X.Y.Z — set the single unified version everywhere at once, and open a
 dated CHANGELOG stub. Run check_versions.py afterwards (it is the CI gate).
 
 Updates: webapp/serve.py (APP_VERSION + APP_BUILT), frontend/package.json, README badge +
-"Current release" line, MASTER-INDEX header. It does NOT touch db_sha256/corpus_sha256 (the
+"Current release" line, MASTER-INDEX header, and every wiki value marked as a fact
+(`<!--fact:app_version-->…<!--/fact-->`; tools/gen_facts.py --write), so the docs move with the bump. It does NOT touch db_sha256/corpus_sha256 (the
 dataset is pinned from sggs-data by dataset.lock.json).
 
 The iOS app takes the same number in its own repository, Algorythmos-AI/gurbani-soul-ios:
@@ -13,7 +14,7 @@ release's contract and MARKETING_VERSION is set to X.Y.Z (its CI enforces the ma
 
 Usage: python3 scripts/release/bump.py 1.2.0 [--date 2026-09-20]
 """
-import argparse, json, re, sys, datetime
+import argparse, json, re, subprocess, sys, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -53,6 +54,12 @@ def main():
     edit("README.md", sub1(r"version-\d+\.\d+\.\d+-", f"version-{v}-"))
     edit("README.md", sub1(r"Current release: \*\*v\d+\.\d+\.\d+\*\*", f"Current release: **v{v}**"))
     edit("MASTER-INDEX.md", sub1(r"v\d+\.\d+\.\d+, built \d{4}-\d{2}-\d{2}", f"v{v}, built {d}"))
+
+    # the wiki's marked facts (app_version, app_built, …) follow the constants just written
+    r = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_facts.py"), "--write"], capture_output=True, text=True)
+    print("  " + "\n  ".join(l for l in r.stdout.splitlines() if l.strip()))
+    if r.returncode:
+        print(r.stderr or "gen_facts.py --write failed", file=sys.stderr); return 1
 
     # CHANGELOG stub (only if this version has no entry yet)
     cl = ROOT / "CHANGELOG.md"

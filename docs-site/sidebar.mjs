@@ -58,6 +58,7 @@ export const LAYOUT = [
     page('glossary'),
     page('reference/repo-map'),
     page('reference/releases'),
+    page('reference/environment'),
     page('diagrams'),
     page('website'),
     page('website/constellation'),
