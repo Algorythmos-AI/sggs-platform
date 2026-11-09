@@ -5,6 +5,8 @@ dist/
 .vercel/
 # sibling-repo docs installed by tools/fetch_sibling_docs.py at their pinned commits
 .sources/
+# docs health, written before the build by tools/docs_check.py --health (read by remark-docs-health)
+.health.json
 # copied at build from ../frontend/public/fonts and ../docs/diagrams (scripts/copy-assets.mjs)
 public/fonts/
 public/posters/

@@ -1059,6 +1059,7 @@ def health(today: dt.date | None = None) -> dict:
     out = {"generated": (today or dt.date.today()).isoformat(),
            "commit": _git("rev-parse", "--short=12", "HEAD").strip(),
            "window_days": HEALTH_DAYS,
+           "stale_days": STALE_UNTRACKED_DAYS,
            "pages": len(own), "stamped": len(rows),
            "fresh": reasons.count(""),
            "fresh_pct": round(100 * reasons.count("") / len(rows), 1) if rows else None,

@@ -59,6 +59,7 @@ export const LAYOUT = [
     page('reference/repo-map'),
     page('reference/releases'),
     page('reference/environment'),
+    page('reference/docs-health'),
     page('diagrams'),
     page('website'),
     page('website/constellation'),
