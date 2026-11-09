@@ -364,7 +364,7 @@ Honest about the edges:
 > ### ⚠️ Keep this repository PRIVATE
 > The **English translation layer** (Dr. Sant Singh Khalsa, via the ShabadOS open database) is licensed for **personal, non-commercial use with attribution** and **must not be redistributed publicly**. See **`NOTICE.md`** for the full terms and the source registry.
 >
-> **Current status:** the repository is temporarily public by owner decision D-002 (free Actions compute) and goes private again at the org's go-private step (`Algorythmos-AI/.github-private` → `docs/go-private.md`).
+> **Current status:** the repository is temporarily public by owner decision D-002 (free Actions compute) and goes private again at the org's go-private step (`Algorythmos-AI/algorythmos-handbook` → `docs/go-private.md`).
 
 The Gurmukhi scripture is the eternal Word and belongs to the Panth; it is reproduced here verbatim for study. Code in this repository is the author's own. Before making anything public, read `NOTICE.md`.
 
