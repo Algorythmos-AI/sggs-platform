@@ -4,7 +4,7 @@
     "sggs-data": {
       "repository": "Algorythmos-AI/sggs-data",
       "ref": "main",
-      "commit": "efbf74e4f018a3f95801af3f641feecd2042e348",
+      "commit": "e8953d9859bbba80316ac9aa30c3b740390e5295",
       "alias": "data",
       "include": [
         "docs/architecture/*.md",
@@ -43,12 +43,12 @@
           "sha256": "154fa5fdc56ae2edc3ffeae4eb1b5f234ff7cd1e09db8ec3fdfa444da2744536"
         },
         "docs/architecture/database-schema.md": {
-          "blob": "7f52f44a852dd75a45cfa471f37b29e08514b158",
-          "sha256": "2e3f522905ddad2d0b71054a0ef8be3e0ebcad409c5908e8867616d4c1822c74"
+          "blob": "71338cdc7ee3f064daa851e8c28149ec1fdfbd54",
+          "sha256": "3d14885ae581acb331cb44e55695247a1a4d66c2c44b03aee68a90051db9ac43"
         },
         "docs/architecture/scripture-integrity.md": {
-          "blob": "2a129f181e3bcc721839700e3b88056ba5613bdf",
-          "sha256": "97622e7921b75cf3a043ea22fb17295eede639864cbc78a2875ae278f066c148"
+          "blob": "1955dd9ce9c1b33acf0515a6af7cc271d4df89e1",
+          "sha256": "b72466dd0ba077d593bb16629a9c751a21845f7d2415e23de05e83d28034ae88"
         },
         "docs/process/runbooks/data-restore.md": {
           "blob": "df63b73c4977d1be83cf077ed5f8ce23afa99c6e",
@@ -79,8 +79,8 @@
           "sha256": "327548c596b43d00241766a0766729f9341511be4da080ba954cddf6f9bf84a9"
         },
         "pipeline/rebuild_all.sh": {
-          "blob": "0ca056120d223d846b4bf80621ba10480d5572eb",
-          "sha256": "fa38daf48369b22d0c8d276a559b48e156adc180a90b0830536bb3cb5f109c9b"
+          "blob": "7b626e2a2426eb97bf1197ec0d56023b0cbdbebb",
+          "sha256": "44edf0cb12d9fbdf6f583440816a7a00dd2759fcbdcb390a6bdae69353ccb1b2"
         },
         "pipeline/reconcile.py": {
           "blob": "c01ebecdf4e72749ffb2ced70cf951e8155dc35b",
@@ -99,7 +99,7 @@
     "gurbani-soul-ios": {
       "repository": "Algorythmos-AI/gurbani-soul-ios",
       "ref": "main",
-      "commit": "1558454bf92bea0bd6a0ccb163c21ffee272a79d",
+      "commit": "01fcbd24d31d83e62942e7eb972f2c167425e25a",
       "alias": "ios",
       "include": [
         "docs/ios/*.md",
@@ -135,8 +135,8 @@
           "sha256": "e5cd7a34e20f905a6b4ca95883f15bf541f08e274f4788a2b2e89d407619e875"
         },
         "docs/ios/app-store-listing.md": {
-          "blob": "8a3bafc4f9b559d6a6593b4fccc7824751ee3525",
-          "sha256": "03e96934a7ced579715712c517e982f1688fd7d060139d9966c62e1025740033"
+          "blob": "c4d82f35fe953853d4dc949976c8afac84840014",
+          "sha256": "bc3594dc3bdf6c609b0ce6252dc19299f2bf57117c5085bd7dc64fa801cfee8d"
         },
         "docs/ios/device-checklist-1.4.9.md": {
           "blob": "92ad3f95cdb620257ac9cfde22b60427ccf93b2f",
@@ -183,16 +183,16 @@
           "sha256": "6ee12603431633dee35f4c47e6e64688d607346f8c8a3ff7acc4ca883cbb287a"
         },
         "ios/App/Sources/Data/CorpusActor.swift": {
-          "blob": "e555ad3daa0a169a8c3fef3496df59e69e7b0daa",
-          "sha256": "59e1b55bf376d9bd388776dca581be75487c24ccf6b28f6ab7d17f25a86a4fcd"
+          "blob": "235d2119f86d81fc824f81dc32255f348d4a9f00",
+          "sha256": "adcdf70eaf3d0a49088925344f96ab24fc1ec6344b0cee588f61244b9c31956c"
         },
         "ios/App/Sources/Data/LaunchIntegrity.swift": {
           "blob": "712e9782869e8a889d4c2939b4f31a0d4ec74385",
           "sha256": "cb7cec241228f4776d35b771a62ce40c1eb635d38742b5e80d5a1563a9f2f31d"
         },
         "ios/App/Sources/Navigation/Router.swift": {
-          "blob": "e1abcb749d9c0a598c9d4fe96b54c429bea6b1a9",
-          "sha256": "98e51c634c18c6f937255194803d73d32cfcbf693248bd8eea2dd4704003b453"
+          "blob": "f56658d6c52005bc060ef98963e65c69dbae26dc",
+          "sha256": "58333710e55a86dd09df773991aa2eb117a8424c873d3b30c3a018d21dbe9fe9"
         },
         "ios/App/Sources/Persistence/SavedLine.swift": {
           "blob": "6e9e463fb05e86f63f1dd62795ae9955bcb7f962",
@@ -211,20 +211,20 @@
           "sha256": "cee1944242c0d2575f21967b3d05f31953e239c1b00c465f629f74f572699a28"
         },
         "ios/testflight-builds.json": {
-          "blob": "51f16be00cc2db052fe6cb2527ae00d67559a667",
-          "sha256": "1475e749571ab4a82f44bd07973ad4db2a1c71a49986b2f29c2f46f7f31ca524"
+          "blob": "05eb84690ccafbcae6d8e7eb8ef2075dc28df85c",
+          "sha256": "dd1f6d5b2cb8babcfdf7facdac286ecfd215a72a5d7416497fedac99b1ce8c46"
         },
         "ios/tests/test_ios_gates.py": {
-          "blob": "0f95895fc25a21dc54e2fe6becf6f5cc55c8f318",
-          "sha256": "7f0ef0e1b4565d3f8c80e23026d9a46447a2892efb86531971f0f96401130e51"
+          "blob": "4d16ebaa36e2233653dffba5ed0f4f41681352d5",
+          "sha256": "1e09a49ab90d8eb7112229c2eae8ba2341091f8b5595f808f556af20155341cd"
         },
         "ios/tools/appstore_preflight.py": {
           "blob": "4f703129b9eb0f009031eaf6deb7a34a2e4179d0",
           "sha256": "4674077876e5b7257ded7510a505a802db2407520416827eeacc559e1210488c"
         },
         "ios/tools/testflight_archive.sh": {
-          "blob": "50b9ac8ed439ee229f1624057a7bb9135621c2b5",
-          "sha256": "ef3bff210bcd21123b372d3638d15a493145b17fc3295401280e001afc6fdf4f"
+          "blob": "bbb0c60216d677e11c094ce4a6e14c8585dbff1c",
+          "sha256": "2cfde35cd7048d5f6c1c228cb033c3f2ba4ec05e78e467106c6e09417f72ad2f"
         },
         "ios/tools/testflight_ledger.py": {
           "blob": "7d1d6a6ed45ca73d8b7c9345b7b1b8a16b1281fc",
@@ -243,8 +243,8 @@
           "sha256": "2c059b035782151186942756e80112ea5d942747fed3d582a7ad84d7bc557c68"
         },
         "vendor.lock.json": {
-          "blob": "fd458bbadade48092c9cef758ee74ed9237071e8",
-          "sha256": "9d453b80d1e0e73640a798c647fb72fb8d16256319be2e7deb26bf00c6025768"
+          "blob": "0d37f099476613f8c1232ced2e67df01ab7224b1",
+          "sha256": "b63d62b1ffd08f8a0b32e7c91f0a8b18e634fea4aef5013dd29141c28b81af26"
         }
       }
     }
