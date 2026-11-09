@@ -26,6 +26,9 @@ jobs:
       - name: Unit tests — platform (webapp/tests)
         run: |
           python3 -m unittest discover -s webapp/tests -v
+      - name: Unit tests — Hukamnama service (services/hukamnama; whole-Granth resolver property)
+        run: |
+          cd services/hukamnama && python3 -m unittest discover -s tests -t . -v
       - name: Contributors roster v2 (sources, pen-names and Banis proven against the pinned corpus)
         run: python3 tools/check_contributors.py
       - name: Health + shabad heading regression

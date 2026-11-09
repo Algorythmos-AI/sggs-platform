@@ -25,6 +25,9 @@ check-versions: ## assert the platform version is unified across its 5 locations
 test-web: ## platform tests: API, contract, OpenAPI, web gates (webapp/tests)
 	python3 -m unittest discover -s webapp/tests -v
 
+test-hukamnama: ## Hukamnama service: parsers, fidelity gate (whole-Granth property), engine replay, API
+	cd services/hukamnama && python3 -m unittest discover -s tests -t . -v
+
 test-frontend: ## frontend build + pahar vectors
 	cd frontend && npm ci && npm run build && npm run test:pahar
 
@@ -41,7 +44,7 @@ canary: ## production serves the pinned scripture byte for byte (sample of lines
 slices: ## cut every service's database slice from the pinned DB into build/slices/ (proven equal in content)
 	for m in reader search verify insights knowledge; do python3 tools/slice_db.py --modules $$m --out build/slices/$$m.sqlite || exit 1; done
 
-ci: check-versions dataset-check test-web contract docs-check ## run the gates CI runs
+ci: check-versions dataset-check test-web test-hukamnama contract docs-check ## run the gates CI runs
 	@echo "make ci: PASS"
 
 # ── the wiki (docs-site/ over docs/; docs.gurbanisoul.com) ───────────────────
