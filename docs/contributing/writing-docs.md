@@ -10,9 +10,13 @@ sidebar:
 
 Every page begins with `title` (8–120 characters) and `description` (40–200) and a body whose
 first `# H1` equals the title (GitHub shows it; the site strips it). Pages under `docs/process/`, `docs/engineering/` and `docs/architecture/` must
-carry `verified: {commit, date}` — the commit you last read the page against — and the gate warns
-when code the page cites (a code excerpt, a linked source file, a poster's *Source of truth*)
-changes after that commit; the weekly `docs-freshness` issue lists the same pages.
+carry `verified: {commit, date}`, the commit you last read the page against. A stamp goes stale in
+two ways. The code the page covers can change after that commit: its `covers:` (see
+[Docs impact](#docs-impact)), or else the code it cites (a code excerpt, a linked source file, a
+poster's *Source of truth*). Or the page cites no code and its `date` is more than 60 days old.
+`make docs-check` prints one notice that counts the stale stamps. The list is
+`python3 tools/docs_check.py --freshness`, and the weekly `docs-freshness` pull request carries
+the same list.
 
 **The description is read by people.** It is shown under the page's title as a summary, as well
 as to search engines and in link previews. Write one or two sentences saying what the page covers,
@@ -77,6 +81,54 @@ A number that describes the data or the code should come from it: generate the t
 constant, quote the test. Where that is not possible, name the file and the commit. The gates
 check what they can (search modes, verify thresholds, generated pages); the rest is your
 `verified` stamp.
+
+A count or a version written in prose is marked so the code fills it in:
+`<!--fact:routes-->29<!--/fact-->`. The comments are invisible on GitHub and dropped by the wiki,
+so readers see only the number; `python3 tools/gen_facts.py --write` rewrites the value from its
+source, and `--check` (in `make docs-check` and the docs job) fails when a value has drifted or a
+fact name is unknown. `python3 tools/gen_facts.py --list` shows every fact and where it is read.
+Keep a marker on one line, outside code; add a format after a colon for a number in words
+(`fact:contexts:words`) or without a thousands separator (`fact:angs:plain`). A new fact is one
+entry in `FACTS` in that script. Leave ADRs, the changelogs and statements of what was true on a
+given day as they are: they record their day. A release bump (`scripts/release/bump.py`) rewrites
+the version facts with the rest of the release.
+
+[Environment variables](../reference/environment.md) is generated the same way: the generator
+finds every variable the code reads, and each needs one sentence in
+`docs/reference/environment.descriptions.json`. Reading a new variable in the code without
+describing it fails `tools/gen_env_vars.py --check`.
+
+## Docs impact
+
+A page can name the code it describes in its frontmatter, as one quoted, comma-separated string:
+
+```yaml
+covers: "webapp/serve.py#api, webapp/sggs/search.py, .github/workflows/*.yml"
+```
+
+Each entry is either a glob over tracked files or a `file#symbol`. In a glob, `*` stays within one
+directory, `**` crosses directories, and a directory path covers everything under it. A symbol is
+a top-level `def`, `class`, assignment, function or export. It counts as changed only when a
+changed line falls inside it. `make docs-check` fails on a glob that matches no tracked file and
+on a symbol it cannot find. A page without `covers:` covers the files it cites.
+
+On every pull request the `docs-coupling` job runs
+`python3 tools/docs_coupling.py BASE..HEAD`. It lists the pages whose covered code the change
+touches while neither the page nor its `verified` stamp changes, and posts the list as one comment
+on the pull request (updated on each push). Tests, lockfiles, built output, `CHANGELOG.md` and the
+generators of generated pages are not counted.
+
+For each listed page, re-read it against the code and either update it or move its stamp. When
+no page needs a change, say why in the pull request description, on a line of its own:
+
+```text
+Docs-impact: none — renames a private helper; no behaviour a page describes changed
+```
+
+The reason must be at least ten characters. The check reports only for now; the runbook says how
+it is turned on ([Docs site](../process/runbooks/docs-site.md#the-docs-impact-check)).
+[Docs health](../reference/docs-health.md) shows the same numbers across the whole wiki: fresh
+stamps, coupling debt over 30 days, and how often code changes touch `docs/`.
 
 ## Sibling repositories
 

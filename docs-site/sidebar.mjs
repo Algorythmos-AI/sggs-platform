@@ -58,9 +58,12 @@ export const LAYOUT = [
     page('glossary'),
     page('reference/repo-map'),
     page('reference/releases'),
+    page('reference/environment'),
+    page('reference/docs-health'),
     page('diagrams'),
     page('website'),
     page('website/constellation'),
+    page('website/contribute'),
     group('Translating the site', [
       page('website/translation'),
       page('website/translation-style-guide'),

@@ -59,6 +59,8 @@ jobs:
           python3 tools/gen_data_dictionary.py --check
           python3 tools/gen_api_errors.py --check
           python3 tools/gen_contributors.py --check
+          python3 tools/gen_env_vars.py --check
+          python3 tools/gen_facts.py --check
           GH_TOKEN="${{ secrets.SGGS_READ_TOKEN || github.token }}" python3 tools/gen_repo_map.py --check
           python3 scripts/brand/contrast_report.py --check
       - name: Tool tests
@@ -82,6 +84,9 @@ jobs:
       - name: Types
         working-directory: docs-site
         run: npm run typecheck
+      - name: Docs health (the numbers on reference/docs-health; git-ignored, read by the build)
+        env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
+        run: python3 tools/docs_check.py --health docs-site/.health.json
       - name: Build (every Mermaid fence rendered, every page exported as Markdown and as a PDF)
         working-directory: docs-site
         env: { PUBLIC_DOCS_COMMIT: "${{ github.sha }}", DOCS_PDF: "1" }
@@ -142,6 +147,56 @@ jobs:
             docs-site/playwright-report
             docs-site/.lighthouseci
           retention-days: 7
+
+  docs-coupling:
+    # Report only: the pages whose covered code this pull request changes while neither the page
+    # nor its `verified` stamp does (tools/docs_coupling.py; docs/contributing/writing-docs.md).
+    # Written to the job summary and to one sticky comment on the pull request.
+    name: docs-coupling
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write   # the sticky comment, on this job only
+    env:
+      # Turn on after two weeks of report-only (the owner decides; docs/process/runbooks/docs-site.md).
+      # When "1", a page that declares `covers:` and was not updated fails this job.
+      COUPLING_ENFORCE: "0"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with: { python-version-file: ".python-version" }
+      - name: Which pages this change should touch
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s\n' "$PR_BODY" > "$RUNNER_TEMP/body.md"
+          rc=0
+          python3 tools/docs_coupling.py "$BASE_SHA..$HEAD_SHA" --pr-body "$RUNNER_TEMP/body.md" \
+            --summary "$RUNNER_TEMP/coupling.md" > /dev/null || rc=$?
+          cat "$RUNNER_TEMP/coupling.md" >> "$GITHUB_STEP_SUMMARY"
+          exit "$rc"   # always 0 while COUPLING_ENFORCE is off
+      - name: One sticky comment on the pull request
+        # a fork's pull request gets a read-only token: the summary above is the report there
+        if: always() && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          marker='<!-- docs-coupling-report -->'
+          id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+                --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n1)"
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F "body=@$RUNNER_TEMP/coupling.md" > /dev/null
+            echo "updated comment $id"
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F "body=@$RUNNER_TEMP/coupling.md" > /dev/null
+            echo "posted the comment"
+          fi
 
   nightly-alert:
     name: nightly-alert

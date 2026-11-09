@@ -63,6 +63,11 @@ test('glossary terms become their plain words, by deleting only the brackets', (
   assert.equal(run('Spaces [[ Ang ]] and [[Ang |  shown  ]] end.\n').out, 'Spaces Ang and shown end.\n');
 });
 
+test('a fact marker (tools/gen_facts.py) leaves its value and nothing else', () => {
+  assert.equal(run('Serves <!--fact:routes-->29<!--/fact--> routes in <!--fact:contexts:words-->five<!--/fact--> contexts.\n').out, 'Serves 29 routes in five contexts.\n');
+  assert.equal(run('| v | <!--fact:app_version-->1.6.3<!--/fact--> |\n|---|---|\n').out, '| v | 1.6.3 |\n|---|---|\n');
+});
+
 test('a term in a table cell: the escaped bar is handled and the row keeps its cells', () => {
   const body = '| A | B |\n|---|---|\n| [[comp_id\\|the id]] | [[Ang]] |\n';
   assert.equal(run(body).out, '| A | B |\n|---|---|\n| the id | Ang |\n');

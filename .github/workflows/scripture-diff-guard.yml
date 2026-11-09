@@ -1,0 +1,38 @@
+name: scripture-diff-guard
+# An automated change may never touch scripture. On every pull request, tools/gurmukhi_diff.py lists
+# each changed line that adds or removes a Gurmukhi, danda or joiner code point (written as U+XXXX).
+# It FAILS for a bot's pull request — a head branch `bot/…` or `docs/auto-…`, or the label
+# `automated` — and only reports (job summary, exit 0) for a person's, whose scripture edits are
+# reviewed by people and proven by sggs-data's gates. Runbook: docs/process/runbooks/docs-site.md.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scripture-diff-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      ENFORCE: >-
+        ${{ startsWith(github.head_ref, 'bot/') || startsWith(github.head_ref, 'docs/auto-') ||
+        contains(github.event.pull_request.labels.*.name, 'automated') }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { fetch-depth: 0, persist-credentials: false }
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with: { python-version-file: ".python-version" }
+      - name: No Gurmukhi added or removed (fails for automated pull requests, reports otherwise)
+        run: |
+          if [ "$ENFORCE" = "true" ]; then mode=""; echo "automated pull request: the guard is enforced"
+          else mode="--report-only"; echo "pull request by a person: the guard reports only"; fi
+          python3 tools/gurmukhi_diff.py $mode --summary "$GITHUB_STEP_SUMMARY" "$BASE_SHA...$HEAD_SHA"

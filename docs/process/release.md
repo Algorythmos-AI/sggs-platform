@@ -1,6 +1,7 @@
 ---
 title: "Release Process"
 description: "The steps that take a green integration branch to a tagged production release."
+covers: "scripts/release/**"
 sidebar:
   order: 4
 verified:

@@ -18,6 +18,7 @@ import { toString } from 'mdast-util-to-string';
 import { parseWidget, FALLBACK } from './remark-widgets.mjs';
 import { excerptNodes, resolveTarget } from './remark-code-excerpt.mjs';
 import { rewriteLink } from './remark-repo-links.mjs';
+import { FACT_MARKER } from './remark-facts.mjs';
 
 /** Gurmukhi (U+0A00–0A7F) and the dandas (U+0964, U+0965), joined by spaces and ZWJ/ZWNJ inside a run. */
 const G = '\\u0A00-\\u0A7F\\u0964\\u0965';
@@ -174,6 +175,8 @@ export function planEdits(body, { repoRel, title, origin, pageUrl, sources, glos
       if (node.value.includes('[[') && parent.type !== 'link') terms(node);
       return;
     }
+    // a value filled from the code (tools/gen_facts.py): the export keeps the value, not the comments
+    if (node.type === 'html' && FACT_MARKER.test(node.value.trim())) { add(node.position.start.offset, node.position.end.offset, '', 'fact'); return; }
     if (node.type === 'html') { widget(node, parent, index); return; }
     // code and tables are read too (a runbook is mostly both); a diagram's source is not
     if (node.type === 'code') { if (node.lang !== 'mermaid') words += count(node.value); return; }
@@ -249,7 +252,7 @@ export function planEdits(body, { repoRel, title, origin, pageUrl, sources, glos
 
   tree.children.forEach((c, i) => walk(c, tree, i));
   const first = tree.children.find((n) => n.type === 'paragraph');
-  const lead = first ? toString(first).replace(/\s+/g, ' ').trim() : '';
+  const lead = first ? toString(first, { includeHtml: false }).replace(/\s+/g, ' ').trim() : '';
 
   edits.sort((a, b) => a.start - b.start || a.end - b.end);
   for (let k = 1; k < edits.length; k++) {

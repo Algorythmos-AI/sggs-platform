@@ -285,6 +285,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
+      actions: write   # the last step dispatches docs-pins
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -304,3 +305,8 @@ jobs:
           git tag -a "v$V" -m "v$V" "$GITHUB_SHA"
           git push origin "v$V"
           gh release create "v$V" --title "v$V" --notes-file notes.md --verify-tag
+      - name: Refresh the wiki's sibling pins now (a release often follows sibling doc changes; never fails the release)
+        if: always() && needs.promote.result == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run docs-pins.yml --repo "$GITHUB_REPOSITORY" --ref integration || echo "::warning::could not dispatch docs-pins; it still runs daily"

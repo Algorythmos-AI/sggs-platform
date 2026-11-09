@@ -85,9 +85,9 @@ Three version numbers meet here, and they answer different questions:
 
 | Number | Where it lives | What it names | Today |
 |---|---|---|---|
-| `APP_VERSION` | `webapp/serve.py`; `/api/health` → `version` | the platform release: code, website, API | the release being served |
-| `dataset_version` | `dataset.lock.json` | the sggs-data release the pin points at (`DATASET_VERSION` there) | `1.4.0` |
-| `meta.version` | inside the database; `/api/health` and `/api/meta` → `db_version` | the build that produced the file | `1.3.0` |
+| `APP_VERSION` | `webapp/serve.py`; `/api/health` → `version` | the platform release: code, website, API | <!--fact:app_version-->1.6.4<!--/fact--> on this branch (the release being served) |
+| `dataset_version` | `dataset.lock.json` | the sggs-data release the pin points at (`DATASET_VERSION` there) | <!--fact:dataset_version-->1.4.0<!--/fact--> |
+| `meta.version` | inside the database; `/api/health` and `/api/meta` → `db_version` | the build that produced the file | <!--fact:db_version-->1.3.0<!--/fact--> |
 
 sggs-data's `build_db.py` stamps `DATASET_VERSION` into `meta.version`, so the two are meant to be
 one number ([delivery](../engineering/delivery.md)). They differ today: the object pinned as dataset
