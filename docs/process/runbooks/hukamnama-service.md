@@ -107,7 +107,7 @@ Copy a day's archive off the box for the replay tests with
 |---|---|
 | Issue: the poller is stale / unreachable | Render dashboard → service → Logs and Events. Restart the service; state is on the disk. |
 | Issue: nothing by 07:00 IST | Open hs.sgpc.net. If SGPC is late, nothing to do. If it is up, look at `/health` alerts. |
-| `held_no_match` / `held_veto` | Check the day by hand against the corpus, then `python -m hukamnama approve …` or `hold …` over `render ssh` (both are audited). |
+| `held_no_match` / `held_veto` | Check the day by hand against the corpus, then `python -m hukamnama approve …` or `hold …` over `render ssh` (both are audited). A `held_no_match` alert names the nearest corpus run and the differing words when one run is that close (≤3 words). Confirm the difference is the source's, not ours (the corpus is PDF-proven; compare ShabadOS too), then approve that range, adding the heading line before it if the page printed one: `approve <date> --first-line <first> --last-line <last> --by <you> --reason "SGPC page variant: <word>"`. Example: 2026-11-10, Ang 678, SGPC wrote ਨਾਨਕੁ for the corpus's ਨਾਨਕ (lines 29433-29442). |
 | `hs_layout_changed` / `hs_parse_failing` | SGPC changed its page. Save the archive for that day, fix the parser in a PR, add the page as a fixture. |
 | Service refuses to start: corpus fingerprint changed | A dataset bump changed the corpus. Re-resolve published days before serving; never delete the state file to get past it. |
 

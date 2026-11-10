@@ -48,6 +48,34 @@ class ResolverTests(unittest.TestCase):
         self.assertIsInstance(resolve(self.con, Candidate("hs", c.amritsar_date, c.ang, c.title, tuple(body), "x")),
                               NoMatch)
 
+    def test_the_10_nov_page_is_held_and_names_its_nearest_run(self):
+        """hs.sgpc.net on 10 Nov 2026 wrote ਨਾਨਕੁ where the corpus (and ShabadOS) has ਨਾਨਕ. The day
+        is held, and the hold names the run the owner would approve and the one differing word."""
+        r = resolve(self.con, parse_hs(fixture("hs-2026-11-10.html")))
+        self.assertIsInstance(r, NoMatch)
+        self.assertEqual((r.near.first_line_id, r.near.last_line_id), (29433, 29442))
+        self.assertEqual(r.near.diffs, ((78, "ਨਾਨਕੁ", "ਨਾਨਕ"),))
+        self.assertIn("nearest run lines 29433-29442 differs in 1 word: word 79/81 ਨਾਨਕੁ (source) vs ਨਾਨਕ (corpus)",
+                      r.reason)
+
+    def test_a_near_match_is_still_no_match(self):
+        c = parse_hs(fixture("hs-2026-11-09.html"))
+        body = list(c.body_words); old = body[5]; body[5] = "ਗੁਨ"
+        r = resolve(self.con, Candidate("hs", c.amritsar_date, c.ang, c.title, tuple(body), "x"))
+        self.assertIsInstance(r, NoMatch)                       # diagnosis never becomes a decision
+        self.assertEqual((r.near.first_line_id, r.near.last_line_id), (29238, 29247))
+        self.assertEqual(r.near.diffs, ((5, "ਗੁਨ", old),))
+
+    def test_a_page_far_from_any_run_names_no_nearest(self):
+        c = parse_hs(fixture("hs-2026-11-09.html"))
+        body = list(c.body_words)
+        for k in (1, 4, 9, 14):                                  # four differing words: too far
+            body[k] = "ਗੁਨ"
+        r = resolve(self.con, Candidate("hs", c.amritsar_date, c.ang, c.title, tuple(body), "x"))
+        self.assertIsInstance(r, NoMatch)
+        self.assertIsNone(r.near)
+        self.assertNotIn("nearest", r.reason)
+
     def test_a_page_cut_at_a_verse_boundary_is_no_match(self):
         rng = lines_in_range(self.con, *TODAY)
         half = " ".join(x.gurmukhi for x in rng[1:6])          # ends cleanly on "…॥੧॥ ਰਹਾਉ ॥"
