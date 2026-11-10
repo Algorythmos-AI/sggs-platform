@@ -10,6 +10,7 @@
 !services/hukamnama/litestream.yml
 !services/hukamnama/entrypoint.sh
 !services/hukamnama/fetch_litestream.py
+!services/hukamnama/requirements.txt
 webapp/static.bak/
 webapp/tests/
 **/__pycache__/

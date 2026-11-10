@@ -1,5 +1,6 @@
 # Hukamnama service image (Sri Harmandir Sahib Hukamnama, located in the pinned corpus).
-# Python-stdlib only. Build context is the REPO ROOT, like webapp/Dockerfile, because the
+# Python stdlib, plus the push sender's pinned, hash-locked deps (requirements.txt: httpx[http2]
+# for APNs's HTTP/2, PyJWT[crypto] for its ES256 provider token). Build context is the REPO ROOT, like webapp/Dockerfile, because the
 # scripture DB is installed from the pin in dataset.lock.json:
 #
 #   docker build -f services/hukamnama/Dockerfile -t hukamnama .   # from the repo root
@@ -17,6 +18,8 @@ RUN python scripts/data/fetch_dataset.py --lock dataset.lock.json \
  && python -c "import sys; ok=open('db/sggs.sqlite','rb').read(16)==b'SQLite format 3\x00'; sys.exit(0 if ok else 'ERROR: db/sggs.sqlite is not a SQLite database')" \
  && chmod 0444 db/sggs.sqlite
 
+COPY services/hukamnama/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir --require-hashes -r requirements.txt && rm requirements.txt
 COPY services/hukamnama/hukamnama/ ./hukamnama/
 
 # Litestream (continuous backup of the state DB to R2), pinned by version and sha256 from the

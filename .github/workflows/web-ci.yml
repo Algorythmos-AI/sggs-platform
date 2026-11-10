@@ -26,8 +26,11 @@ jobs:
       - name: Unit tests — platform (webapp/tests)
         run: |
           python3 -m unittest discover -s webapp/tests -v
-      - name: Unit tests — Hukamnama service (services/hukamnama; whole-Granth resolver property)
+      - name: Unit tests — Hukamnama service (services/hukamnama; whole-Granth resolver property, push sender)
+        env:
+          HUKAMNAMA_REQUIRE_PUSH_DEPS: "1"   # the push tests must run here, never skip
         run: |
+          pip install --require-hashes -r services/hukamnama/requirements.txt
           cd services/hukamnama && python3 -m unittest discover -s tests -t . -v
       - name: Contributors roster v2 (sources, pen-names and Banis proven against the pinned corpus)
         run: python3 tools/check_contributors.py
@@ -106,6 +109,13 @@ jobs:
           docker run -d -p 8080:8080 --name hk hukamnama:ci
           for _ in $(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:8080/health && break; sleep 2; done
           python3 scripts/ci/hukamnama_watch.py wait http://127.0.0.1:8080 --commit "$GITHUB_SHA" --timeout 60
+      - name: Sending on without an APNs key refuses to start
+        run: |
+          set +e
+          docker run --rm -e HUKAMNAMA_SEND=on hukamnama:ci python -m hukamnama serve --no-poll
+          test $? -eq 2
+      - name: The push dependencies are in the image
+        run: docker run --rm --entrypoint python hukamnama:ci -c "import httpx, h2, jwt, cryptography; print('push deps OK')"
       - name: Container logs
         if: always()
         run: docker logs hk 2>&1 | tail -20 || true

@@ -4,6 +4,8 @@
   GET /v1/hukamnama/YYYY-MM-DD       one day, within ±400 days of today
   GET /v1/hukamnama?limit=N          the latest published days, N in 1..30 (default 7)
   GET /health                        poller liveness + today's status (for the dead-man check)
+  PUT /v1/devices/<token>            opt a device in (body: devices.parse_registration)
+  DELETE /v1/devices/<token>         opt it out: the row is deleted
 
 A held day is reported as ``pending`` to readers: nothing that failed the gate is ever served.
 """
@@ -17,6 +19,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
 from . import __version__, clock
+from .devices import MAX_BODY, BadRequest, RateLimiter, parse_registration, valid_token
 from .store import Store
 
 # The source commit, baked into the image (Dockerfile) so a deploy is verified by identity.
@@ -47,6 +50,8 @@ class State:
         self.last_tick: datetime | None = None
         self.last_tick_action: str | None = None
         self.lock = threading.Lock()
+        self.limiter = RateLimiter()
+        self.sending = False                 # set by main when HUKAMNAMA_SEND=on and the key loaded
 
 
 def make_handler(state: State):
@@ -91,7 +96,9 @@ def make_handler(state: State):
                                  "decision_today": (state.store.decision(today) or {}).get("status"),
                                  "last_tick": last.isoformat(timespec="seconds") if last else None,
                                  "last_tick_action": action, "alerts_today": state.store.alerts(today),
-                                 "scripture_sha256": state.fingerprint}, cache="no-store")
+                                 "scripture_sha256": state.fingerprint,
+                                 "push": {"sending": state.sending, "devices": state.store.device_count(),
+                                          "today": state.store.send_stats(today)}}, cache="no-store")
                 return
             if u.path == "/v1/hukamnama":
                 q = parse_qs(u.query)
@@ -122,6 +129,70 @@ def make_handler(state: State):
                 self._send(200, day_record(state.store, day, state.fingerprint, now))
                 return
             self._send(404, {"error": "not found"})
+
+        # -- device registration ----------------------------------------------------------------
+        def _client(self) -> str:
+            fwd = self.headers.get("X-Forwarded-For", "")
+            return (fwd.split(",")[0].strip() if fwd else self.client_address[0]) or "?"
+
+        def _device_token(self) -> str | None:
+            u = urlsplit(self.path)
+            if not u.path.startswith("/v1/devices/") or u.query:
+                return None
+            return u.path[len("/v1/devices/"):]
+
+        def do_PUT(self):
+            try:
+                self._put()
+            except Exception:
+                self._send(500, {"error": "internal error"})
+
+        def do_DELETE(self):
+            try:
+                self._delete()
+            except Exception:
+                self._send(500, {"error": "internal error"})
+
+        def do_POST(self):
+            self._send(405, {"error": "method not allowed"})
+
+        def _put(self):
+            token = self._device_token()
+            if token is None:
+                self._send(404, {"error": "not found"})
+                return
+            if not state.limiter.allow(self._client()):
+                self._send(429, {"error": "slow down"})
+                return
+            raw_len = self.headers.get("Content-Length", "")
+            if not raw_len.isdigit() or int(raw_len) > MAX_BODY:
+                self._send(413 if raw_len.isdigit() else 411, {"error": "body required, at most 1024 bytes"})
+                return
+            raw = self.rfile.read(int(raw_len))
+            try:
+                reg = parse_registration(token, raw)
+            except BadRequest as e:
+                self._send(400, {"error": str(e)})
+                return
+            now = state.now()
+            if state.store.device(token) is None and not state.limiter.allow_new():
+                state.store.alert(clock.amritsar_date(now), "device_flood", "new-device cap reached; refusing new rows",
+                                  now)
+                self._send(429, {"error": "slow down"})
+                return
+            state.store.put_device(token, reg.env, reg.mode, reg.schedule, reg.scripture_sha256, now, reg.replaces)
+            self._send(200, {"ok": True}, cache="no-store")
+
+        def _delete(self):
+            token = self._device_token()
+            if token is None or not valid_token(token):
+                self._send(404 if token is None else 400, {"error": "not found" if token is None else "bad token"})
+                return
+            if not state.limiter.allow(self._client()):
+                self._send(429, {"error": "slow down"})
+                return
+            gone = state.store.delete_device(token)
+            self._send(200 if gone else 404, {"ok": gone}, cache="no-store")
 
     return Handler
 
