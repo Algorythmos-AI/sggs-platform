@@ -19,6 +19,16 @@ RUN python scripts/data/fetch_dataset.py --lock dataset.lock.json \
 
 COPY services/hukamnama/hukamnama/ ./hukamnama/
 
+# Litestream (continuous backup of the state DB to R2), pinned by version and sha256 from the
+# release's checksums.txt. The build fails on a mismatch. Bump both lines together.
+ARG LITESTREAM_VERSION=0.5.17
+ARG LITESTREAM_SHA256=cfb371176d164437ae869f8351cfde49bd1804ae71c61923f75c9cba9c9c006d
+COPY services/hukamnama/fetch_litestream.py /tmp/fetch_litestream.py
+RUN python /tmp/fetch_litestream.py && rm /tmp/fetch_litestream.py
+COPY services/hukamnama/litestream.yml /etc/litestream.yml
+COPY services/hukamnama/entrypoint.sh /usr/local/bin/hukamnama-entrypoint
+RUN chmod 0755 /usr/local/bin/hukamnama-entrypoint
+
 # Render passes RENDER_GIT_COMMIT as a build arg; /health reports it so a deploy is verified by
 # the commit it runs, not by its version string.
 ARG RENDER_GIT_COMMIT=""
@@ -36,4 +46,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD python -c "import os,urllib.request as u; u.urlopen(f\"http://127.0.0.1:{os.environ.get('PORT','8080')}/health\").read()" || exit 1
 
-CMD ["python", "-m", "hukamnama", "serve"]
+# Runs under Litestream when the R2 credentials are set (see litestream.yml), plain otherwise.
+CMD ["/usr/local/bin/hukamnama-entrypoint"]

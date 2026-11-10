@@ -81,6 +81,34 @@ jobs:
       - name: Container logs
         if: always()
         run: docker logs sggs 2>&1 | tail -20 || true
+  hukamnama-image:
+    # Builds the Hukamnama image as Render does and proves both start modes: plain (no R2
+    # credentials, as in local runs) and the Litestream wrapper's config and guards.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build the Hukamnama image
+        run: docker build -f services/hukamnama/Dockerfile --build-arg RENDER_GIT_COMMIT="$GITHUB_SHA" -t hukamnama:ci .
+      - name: Litestream is the pinned version and its config parses
+        run: |
+          docker run --rm --entrypoint litestream hukamnama:ci version | tee /dev/stderr | grep -q '0.5.17'
+          docker run --rm --entrypoint litestream \
+            -e HUKAMNAMA_R2_BUCKET=ci-bucket -e HUKAMNAMA_R2_ENDPOINT=https://ci.invalid \
+            hukamnama:ci databases -config /etc/litestream.yml | tee /dev/stderr | grep -q 'hukamnama-state.sqlite'
+      - name: Half-configured backups refuse to start
+        run: |
+          set +e
+          docker run --rm -e LITESTREAM_ACCESS_KEY_ID=x -e LITESTREAM_SECRET_ACCESS_KEY=y hukamnama:ci
+          test $? -eq 1
+      - name: Without R2 credentials it runs plain and reports this commit
+        run: |
+          docker run -d -p 8080:8080 --name hk hukamnama:ci
+          for _ in $(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:8080/health && break; sleep 2; done
+          python3 scripts/ci/hukamnama_watch.py wait http://127.0.0.1:8080 --commit "$GITHUB_SHA" --timeout 60
+      - name: Container logs
+        if: always()
+        run: docker logs hk 2>&1 | tail -20 || true
   frontend:
     runs-on: ubuntu-latest
     steps:

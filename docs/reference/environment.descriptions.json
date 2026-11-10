@@ -9,6 +9,8 @@
   "HUKAMNAMA_COMMIT": "The source commit the Hukamnama service reports on `/health` so a deploy is verified by identity; the image bakes it from Render's `RENDER_GIT_COMMIT` (falls back to that, then `unknown`).",
   "HUKAMNAMA_DB": "The scripture database the Hukamnama service reads (default `db/sggs.sqlite`); the same as its `--db` option.",
   "HUKAMNAMA_STATE": "The Hukamnama service's own state database: each day's fetched Hukamnama, the gate's decision and the audit trail (default `hukamnama-state.sqlite`); the same as its `--state` option.",
+  "LITESTREAM_SHA256": "Build-time only, from the Hukamnama Dockerfile's build arg: the sha256 of that Litestream release archive, copied from the release's `checksums.txt`; the image build fails on a mismatch.",
+  "LITESTREAM_VERSION": "Build-time only, from the Hukamnama Dockerfile's build arg: the Litestream release the image installs for the state backup to R2. Bumped together with `LITESTREAM_SHA256`.",
   "PORT": "The port to listen on, set by the host (Render, a container platform). The API prefers it to `SGGS_PORT`; the Hukamnama service defaults to 8080 without it.",
   "PUBLIC_APP_STORE_LIVE": "`1` once the app is live on the App Store: the pages show the store link, the Smart App Banner and the install URL; otherwise \"Coming soon\". Set in the production project on launch day.",
   "PUBLIC_CONTRIBUTE_MODE": "Which payment links the Contribute page carries: `live`, `test` (Stripe test mode, for staging) or `off` (the default, no links). A link that does not fit the mode fails the build.",
