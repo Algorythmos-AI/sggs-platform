@@ -18,6 +18,7 @@ from .sources import Candidate
 ANG_SLACK_BEFORE = 1    # SGPC's Ang may name the page a shabad ends on…
 ANG_SLACK_AFTER = 1     # …or our pagination may start it a page later
 SPAN_AFTER = 3          # a long shabad or a Vaar unit may run on for pages
+NEAR_MAX_DIFFS = 3      # a hold names the nearest run only when it differs in this few words
 
 
 @dataclass(frozen=True)
@@ -48,8 +49,27 @@ class Resolution:
 
 
 @dataclass(frozen=True)
+class NearMatch:
+    """Diagnosis only, never a decision: the corpus run that comes closest to an unmatched page.
+
+    It has the same number of words as the page and differs at ``diffs`` (word index, page word,
+    corpus word). The owner reads it in the hold alert and decides; nothing publishes from it.
+    """
+    first_line_id: int
+    last_line_id: int
+    diffs: tuple[tuple[int, str, str], ...]
+
+    def describe(self, total: int) -> str:
+        n = len(self.diffs)
+        words_ = "; ".join(f"word {i + 1}/{total} {a} (source) vs {b} (corpus)" for i, a, b in self.diffs)
+        return (f"nearest run lines {self.first_line_id}-{self.last_line_id} "
+                f"differs in {n} word{'s' if n != 1 else ''}: {words_}")
+
+
+@dataclass(frozen=True)
 class NoMatch:
     reason: str
+    near: NearMatch | None = None
 
 
 def open_ro(path: str) -> sqlite3.Connection:
@@ -123,7 +143,9 @@ def resolve(con: sqlite3.Connection, cand: Candidate) -> Resolution | NoMatch:
         if acc == target:
             matches.append((i, j - 1))
     if not matches:
-        return NoMatch(f"no exact run of corpus lines near Ang {cand.ang} equals the source verses")
+        reason = f"no exact run of corpus lines near Ang {cand.ang} equals the source verses"
+        near = _nearest(cand, window, lw, target)
+        return NoMatch(f"{reason}; {near.describe(len(target))}" if near else reason, near)
     if len(matches) > 1:
         return NoMatch(f"{len(matches)} exact runs match (ambiguous)")
     i, j = matches[0]
@@ -138,6 +160,35 @@ def resolve(con: sqlite3.Connection, cand: Candidate) -> Resolution | NoMatch:
             and words(window[i - 1].gurmukhi, keep_numbers=True) == words(cand.title, keep_numbers=True):
         first = window[i - 1].id
     return resolution_for_range(con, first, window[j].id)
+
+
+def _nearest(cand: Candidate, window: list[Line], lw: list[list[str]], target: list[str]) -> NearMatch | None:
+    """The single run of whole corpus lines, starting on a verse in the Ang window, with exactly
+    the page's word count and the fewest differing words (at most ``NEAR_MAX_DIFFS``). A tie, or
+    nothing that close, gives None: a diagnosis must never point at the wrong shabad either."""
+    best: list[tuple[int, int, int, tuple]] = []
+    for i, start in enumerate(window):
+        if start.is_header or not (cand.ang - ANG_SLACK_BEFORE <= start.ang <= cand.ang + ANG_SLACK_AFTER):
+            continue
+        acc: list[str] = []
+        j = i
+        while j < len(window) and len(acc) < len(target):
+            if j > i and window[j].id != window[j - 1].id + 1:
+                break
+            acc.extend(lw[j])
+            j += 1
+        if len(acc) != len(target):
+            continue
+        diffs = tuple((k, a, b) for k, (a, b) in enumerate(zip(target, acc)) if a != b)
+        if len(diffs) <= NEAR_MAX_DIFFS:
+            best.append((len(diffs), window[i].id, window[j - 1].id, diffs))
+    if not best:
+        return None
+    best.sort(key=lambda b: b[0])
+    if len(best) > 1 and best[1][0] == best[0][0]:
+        return None
+    _, first, last, diffs = best[0]
+    return NearMatch(first, last, diffs)
 
 
 def agrees(res: Resolution, veto: Candidate, con: sqlite3.Connection) -> bool:

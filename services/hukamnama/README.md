@@ -99,7 +99,10 @@ Both write to the `audit` table. An automatic publish never replaces an owner de
 - Alerts, one per day and kind, are listed on `/health`:
   - `late`: nothing resolved by 07:00 IST
   - `not_published`: nothing by 14:00 IST
-  - `held_no_match`: a settled page does not match the corpus
+  - `held_no_match`: a settled page does not match the corpus. When one run of corpus lines with
+    the page's word count differs in at most 3 words, the alert names it and the words, e.g.
+    `nearest run lines 29433-29442 differs in 1 word: word 79/81 ਨਾਨਕੁ (source) vs ਨਾਨਕ (corpus)`.
+    That is a diagnosis for the owner, never a decision: the day stays held.
   - `held_veto`
   - `hs_layout_changed`
   - `hs_parse_failing`: 5 unparseable polls in a row
