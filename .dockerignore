@@ -7,6 +7,9 @@
 !scripts/data/fetch_dataset.py
 !tools/slice_db.py
 !services/hukamnama/hukamnama/
+!services/hukamnama/litestream.yml
+!services/hukamnama/entrypoint.sh
+!services/hukamnama/fetch_litestream.py
 webapp/static.bak/
 webapp/tests/
 **/__pycache__/

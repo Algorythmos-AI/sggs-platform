@@ -28,7 +28,7 @@ least 13 of 14 mornings resolve automatically and correctly against a manual che
 | Disk | 1 GB mounted at `/var/data` (state SQLite + fetch archive) |
 | Health check path | `/health` |
 | Auto-deploy | **Off**. Deploys come only from `hukamnama-deploy.yml`. |
-| Environment | none needed. The image sets `HUKAMNAMA_DB`, `HUKAMNAMA_STATE`, `HUKAMNAMA_ARCHIVE`. |
+| Environment | The image sets `HUKAMNAMA_DB`, `HUKAMNAMA_STATE`, `HUKAMNAMA_ARCHIVE`. For the R2 backup, set the four values in [State backup](#state-backup-litestream-to-r2); without them the service runs unbacked. |
 
 A service with a disk runs **one instance** and restarts on deploy (a few seconds of downtime).
 The freeze in `hukamnama-deploy.yml` keeps deploys out of 23:00–04:30 UTC (04:30–10:00 IST).
@@ -46,8 +46,41 @@ Cost: Starter plus the 1 GB disk, about US$7–8 a month.
    `gh variable set HUKAMNAMA_STAGING_URL --repo Algorythmos-AI/sggs-platform --body https://sggs-hukamnama-staging.onrender.com`
 5. Dispatch `hukamnama-deploy` (Actions → hukamnama-deploy → Run) outside the freeze. It
    finishes when `/health.commit` equals the deployed SHA.
-6. Later: point `api-staging.gurbanisoul.com` (Cloudflare CNAME → the onrender host, then add it
-   as a custom domain in Render). TestFlight builds read the Hukamnama from that name.
+6. `api-staging.gurbanisoul.com` is a custom domain on the service (Render → Custom Domains) with a
+   Cloudflare CNAME to `sggs-hukamnama-staging.onrender.com`, **DNS only** (grey cloud) so Render
+   issues and renews the certificate. TestFlight builds read the Hukamnama from that name. Done
+   2026-11-10.
+7. Turn on the state backup (next section).
+
+## State backup: Litestream to R2
+
+The decision and audit state (`/var/data/hukamnama-state.sqlite`) is replicated continuously to
+the R2 bucket `sggs-hukamnama-staging` (account *Company-Domains*, Asia-Pacific) by
+[Litestream](https://litestream.io), pinned in the Dockerfile by version and sha256. The
+scripture DB is not backed up (it comes from the dataset pin), and neither is the fetch archive.
+
+`entrypoint.sh` runs the service under `litestream replicate` (`litestream.yml`) when R2
+credentials are present, and plainly when they are not. Credentials without the other two values
+stop the service at start, so a typo cannot leave it running unbacked.
+
+Render → service → Environment (values typed there only; never in chat, a file or a PR):
+
+| Variable | Value |
+|---|---|
+| `LITESTREAM_ACCESS_KEY_ID` | Access Key ID of the R2 Account API token `hukamnama-staging-litestream` (Object Read & Write, this bucket only) |
+| `LITESTREAM_SECRET_ACCESS_KEY` | its Secret Access Key |
+| `HUKAMNAMA_R2_ENDPOINT` | the token page's S3 endpoint, `https://<account id>.r2.cloudflarestorage.com` |
+| `HUKAMNAMA_R2_BUCKET` | `sggs-hukamnama-staging` |
+
+Use **Save only**, then deploy with `hukamnama-deploy` outside the freeze. After the deploy, the
+service log shows Litestream's `replicating to` line, and objects appear under
+`hukamnama-state/` in the bucket within a minute.
+
+**Restore.** A missing state file is restored from R2 before the service starts
+(`restore-if-db-not-exists`); an existing file is never overwritten. To restore by hand into a
+scratch path and compare: `render ssh <service-id>` →
+`litestream restore -config /etc/litestream.yml -integrity-check quick -o /tmp/restored.sqlite /var/data/hukamnama-state.sqlite`.
+A rotated or revoked token stops replication but not the service; the log shows the error.
 
 ## Every morning (automatic)
 
@@ -80,5 +113,4 @@ Copy a day's archive off the box for the replay tests with
 
 ## Not yet (see the approved plan)
 
-Litestream backup of the state to R2, the R2 copy of the fetch archive, the device API and the
-APNs sender. Sending stays off until the soak passes and the G3/G4 gates are signed.
+The R2 copy of the fetch archive, the device API and the APNs sender. Sending stays off until the soak passes and the G3/G4 gates are signed.
