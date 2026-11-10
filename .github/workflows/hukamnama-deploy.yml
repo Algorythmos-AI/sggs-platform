@@ -72,7 +72,11 @@ jobs:
           python-version-file: ".python-version"
       - name: Service tests on this commit
         if: steps.cfg.outputs.ready == 'true'
-        run: cd services/hukamnama && python3 -m unittest discover -s tests -t .
+        env:
+          HUKAMNAMA_REQUIRE_PUSH_DEPS: "1"
+        run: |
+          pip install --require-hashes -r services/hukamnama/requirements.txt
+          cd services/hukamnama && python3 -m unittest discover -s tests -t .
       - name: Ask Render to build this exact commit
         if: steps.cfg.outputs.ready == 'true'
         run: |

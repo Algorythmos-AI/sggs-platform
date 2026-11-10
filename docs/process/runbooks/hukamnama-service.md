@@ -111,6 +111,31 @@ Copy a day's archive off the box for the replay tests with
 | `hs_layout_changed` / `hs_parse_failing` | SGPC changed its page. Save the archive for that day, fix the parser in a PR, add the page as a fixture. |
 | Service refuses to start: corpus fingerprint changed | A dataset bump changed the corpus. Re-resolve published days before serving; never delete the state file to get past it. |
 
-## Not yet (see the approved plan)
+## Push (APNs)
 
-The R2 copy of the fetch archive, the device API and the APNs sender. Sending stays off until the soak passes and the G3/G4 gates are signed.
+Sending is off unless the service has `HUKAMNAMA_SEND=on`. To turn it on (owner, once per service):
+
+1. **APNs Auth Key:** Apple Developer → Certificates, Identifiers & Profiles → Keys → **+**,
+   name it `Gurbani Soul push`, tick **Apple Push Notifications service (APNs)**, choose
+   **Sandbox & Production**, and download the `.p8` once. It is not the App Store Connect API key.
+2. **Render → service → Environment → Secret Files:** add `apns.p8` with the file's contents
+   (paste it into the dashboard; never into chat, a ticket or the repository).
+3. **Environment variables:** `HUKAMNAMA_APNS_KEY_FILE=/etc/secrets/apns.p8`,
+   `HUKAMNAMA_APNS_KEY_ID=<the key's 10-character ID>`, `HUKAMNAMA_APNS_TEAM_ID=<team id>`, then
+   `HUKAMNAMA_SEND=on`. **Save only**, then dispatch `hukamnama-deploy` outside the freeze.
+4. Check `/health`: `push.sending` is `true`. If the key is missing or unusable the service
+   refuses to start (Render keeps the previous instance running and shows the error in Logs).
+
+Which phones a service reaches is decided by the app build: TestFlight builds register with
+**staging** (`api-staging.gurbanisoul.com`), App Store builds with **production**
+(`api.gurbanisoul.com`). So staging only ever pushes to TestFlight testers.
+
+Every morning after publishing, `/health.push.today` shows the send states. Alerts:
+`push_breaker` (more than 5% of the first results were 4xx; the run stopped and nothing was
+deleted: check the key, topic and environment, then `resend`), `push_auth_failed` (403: the key
+was revoked or the IDs are wrong), `push_payload_too_large`, `device_flood` (the new-device cap was
+hit). To push a corrected day again: `python -m hukamnama resend <date> --by <you> --reason "…"`.
+
+## Not yet
+
+The R2 copy of the fetch archive.

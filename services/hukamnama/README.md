@@ -78,9 +78,42 @@ file. Published ranges are pinned to the corpus they were resolved in.
 | `GET /v1/hukamnama/today` | `published` (range, opening verse from the corpus, hashes, citation, credit) or `pending` (with `expected_by`) |
 | `GET /v1/hukamnama/YYYY-MM-DD` | one day, within ±400 days; a future date is 404 |
 | `GET /v1/hukamnama?limit=N` | the latest published days, N in 1..30 |
-| `GET /health` | today's status, the last poll, today's alerts, `scripture_sha256` (`no-store`) |
+| `GET /health` | today's status, the last poll, today's alerts, `scripture_sha256`, and `push` (sending on/off, device counts by mode, today's send states) (`no-store`) |
+| `PUT /v1/devices/<token>` | opt a device in: `{env, mode: asap\|scheduled, schedule?, scripture_sha256?, replaces?}`, at most 1 KB; `replaces` deletes the rotated-away token in the same transaction |
+| `DELETE /v1/devices/<token>` | opt out: the row is deleted (404 when it was already gone; the app treats that as done) |
 
-A day held by the gate is served as `pending`. There is no access log.
+A day held by the gate is served as `pending`. There is no access log. Device writes are rate
+limited per client address (in memory only, one minute) and new devices are capped per hour
+(`device_flood` alert). Nothing about a reader is stored beyond the token, its APNs environment,
+the mode, the UTC slot schedule and the corpus fingerprint.
+
+## Push
+
+Off unless `HUKAMNAMA_SEND=on`, which needs the APNs Auth Key (`HUKAMNAMA_APNS_KEY_FILE`,
+`HUKAMNAMA_APNS_KEY_ID`, `HUKAMNAMA_APNS_TEAM_ID`); without a usable key the service refuses to
+start. `push.py`:
+
+- **What is sent** is built only from the published decision, so every Gurmukhi character is the
+  corpus's. Its shape equals the app's `hukamnama.apns` fixture (`tests/fixtures/ios-hukamnama.apns`,
+  copied from gurbani-soul-ios; `test_payload_equals_the_apps_fixture`).
+- **When:** `asap` devices are queued the moment a day is published (within 6 h; a device first
+  registered after the publish waits for tomorrow). `scheduled` devices at their own UTC slot,
+  from the schedule entry in force on that day; a slot that came before the publish gets it at
+  publish time when within 6 h. Never a day older than yesterday.
+- **Durable:** each send is a row (`queued → inflight → sent | failed | suspect | gone`); a row
+  left inflight for 2 minutes is sent again after a restart, and `apns-collapse-id:
+  hukamnama-<date>` collapses repeats on the phone. `apns-expiration` is the next 05:00 IST.
+- **APNs responses:** 200 sent; 410 deletes only when Apple's timestamp is newer than the last
+  registration; `BadDeviceToken`/`DeviceTokenNotForTopic` retries the other environment once
+  (and corrects it on success), else counts a suspect day and deletes after 3 separate days; 429
+  is not retried that day; 5xx and network errors back off (5 attempts); 403
+  `ExpiredProviderToken` rebuilds the provider token once; 413 or any other 403 stops the run with
+  an alert. One provider token is minted per 40 minutes.
+- **Circuit breaker:** more than 5% 4xx among the first 200 results (at least 20) stops the
+  day's run (`push_breaker`) and deletes nothing. Deletions happen only after a day's run
+  finishes untripped.
+- Devices that have not re-registered for 180 days are pruned (the app re-registers daily when
+  opened).
 
 ## Owner tools
 
@@ -88,9 +121,12 @@ A day held by the gate is served as `pending`. There is no access log.
 python3 -m hukamnama approve 2026-11-09 --first-line 29237 --last-line 29247 --by <name> --reason "<why>"
 python3 -m hukamnama hold    2026-11-09 --by <name> --reason "<why>"
 python3 -m hukamnama show    2026-11-09
+python3 -m hukamnama resend  2026-11-09 --by <name> --reason "<why>"   # push the day again (a correction)
 ```
 
-Both write to the `audit` table. An automatic publish never replaces an owner decision.
+They write to the `audit` table. Approving a held day publishes it at that moment, so `asap`
+devices get it then; `resend` re-queues a day already sent (the same collapse id replaces the
+first notification on the phone). An automatic publish never replaces an owner decision.
 
 ## Polling and alerts
 
@@ -109,9 +145,8 @@ Both write to the `audit` table. An automatic publish never replaces an owner de
   - `changed_after_publish`
   - `veto_after_publish`
 
-## Not in this PR (see the approved plan)
+## Not yet
 
-- Device registration and the APNs sender.
-- Litestream backup of the state to R2, and the R2 copy of the fetch archive.
-- Permission letters to SGPC and to the Khalis Foundation (BaniDB). BaniDB is not used: its terms
-  allow personal, non-commercial use only.
+- The R2 copy of the fetch archive.
+- BaniDB is not used: its terms allow personal, non-commercial use only. (SGPC's own pages are the
+  source; the owner confirmed on 2026-11-11 that SGPC does not object to sharing the Hukamnama.)
