@@ -6,7 +6,10 @@
 For each context routed to its own function in that environment (gateway/routes.json) and for
 `all`: /readyz?svc=<context> (or /readyz) answers 200, ready, with that function's contexts, the
 expected commit and the matching X-Service header. And the API's databases and source are not
-downloadable from the site. Sends x-vercel-protection-bypass when VERCEL_AUTOMATION_BYPASS_SECRET
+downloadable from the site. Where the environment serves the Hukamnama pages ("hukamnama_api"),
+each language's /{lang}/hukamnama is a filled page from the `all` function: no template token
+left, the page's own language, never a 404 (a 503 passes with a warning: it means the Hukamnama
+API could not be reached or the day did not prove, which is not this deployment's fault). Sends x-vercel-protection-bypass when VERCEL_AUTOMATION_BYPASS_SECRET
 is set. Retries while functions cold-start. Stdlib only.
 """
 from __future__ import annotations
@@ -22,7 +25,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-from gen_gateway import DATA_DIR, ROUTES_FILE, environments, prefixes_by_context  # noqa: E402
+from gen_gateway import DATA_DIR, ROUTES_FILE, environments, languages, prefixes_by_context  # noqa: E402
 
 NOT_PUBLISHED = (f"/{DATA_DIR}/db/all.sqlite", f"/{DATA_DIR}/db/search.sqlite", f"/{DATA_DIR}/webapp/serve.py")
 
@@ -57,6 +60,22 @@ def check_ready(base: str, name: str, contexts: list[str], commit: str) -> str |
     return None
 
 
+def check_page(base: str, lang: str) -> tuple[str | None, str | None]:
+    """(problem, warning) for one language's Hukamnama page."""
+    url = f"{base}/{lang}/hukamnama"
+    status, svc, raw = get(url)
+    if status == 503 and svc == "all":
+        return None, f"{url}: HTTP 503 from the function (the Hukamnama API is unreachable, or the day did not prove)"
+    if status != 200 or svc != "all":
+        return f"{url}: HTTP {status} X-Service {svc} (want 200 from `all`)", None
+    text = raw.decode("utf-8", "replace")
+    if "__HK_" in text or 'id="hk-strings"' in text:
+        return f"{url}: the page still holds template tokens", None
+    if f'<html lang="{lang}"' not in text:
+        return f"{url}: not the '{lang}' page", None
+    return None, None
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("base")
@@ -84,6 +103,18 @@ def main(argv=None) -> int:
                 time.sleep(a.interval)
         else:
             failures.append(name)
+    if env.get("hukamnama_api"):
+        for lang in languages():
+            for attempt in range(1, a.attempts + 1):
+                problem, warning = check_page(base, lang)
+                if problem is None:
+                    print(f"::warning::{warning}" if warning else f"ok  /{lang}/hukamnama is a filled page from `all`")
+                    break
+                print(f"    {problem} (attempt {attempt}/{a.attempts})")
+                if attempt < a.attempts:
+                    time.sleep(a.interval)
+            else:
+                failures.append(f"/{lang}/hukamnama")
     for path in NOT_PUBLISHED:
         status, _, _ = get(base + path)
         if status == 200:

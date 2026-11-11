@@ -5,7 +5,7 @@
   "DOCS_PDF": "`1` also builds a PDF of every page; CI sets it for every build it tests or deploys, a local build is quicker without.",
   "GH_TOKEN": "A GitHub token for reading the private sibling repositories and their releases: the dataset download, the pinned sibling docs, the repository-map check, the release-complete check and the sibling pin lag on the docs-health page. Preferred over `GITHUB_TOKEN`.",
   "GITHUB_TOKEN": "The fallback GitHub token when `GH_TOKEN` is not set (the token GitHub Actions provides); read by the same scripts.",
-  "HUKAMNAMA_API": "The origin of the public Hukamnama API (`https://api.gurbanisoul.com`) the web server reads each day's record from to fill the Hukamnama pages. Unset (the default), or without a page shell for the language, the pages are not served. Must be `https://…` (or a local `http://127.0.0.1:` / `http://localhost:` address).",
+  "HUKAMNAMA_API": "The origin of the public Hukamnama API (`https://api.gurbanisoul.com`) the web server reads each day's record from to fill the Hukamnama pages. Unset (the default), or without a page shell for the language, the pages are not served. On Vercel the `all` function sets it per environment from `hukamnama_api` in `gateway/routes.json`; a value set on the project wins, and an empty one turns the pages off. Must be `https://…` (or a local `http://127.0.0.1:` / `http://localhost:` address).",
   "HUKAMNAMA_APNS_KEY_FILE": "Path to the APNs Auth Key (`.p8`, PEM) the Hukamnama service signs its provider token with, as a Render secret file (`/etc/secrets/…`); needed only when `HUKAMNAMA_SEND=on`. The key itself never goes in an environment variable or the repository.",
   "HUKAMNAMA_APNS_KEY_ID": "The 10-character Key ID of that APNs Auth Key (Apple Developer → Keys); the `kid` of the provider token.",
   "HUKAMNAMA_APNS_TEAM_ID": "The Apple Developer Team ID that owns the APNs key; the `iss` of the provider token.",
@@ -41,6 +41,7 @@
   "VERCEL_AUTOMATION_BYPASS_SECRET": "Vercel's protection-bypass secret, sent as `x-vercel-protection-bypass` so the contract replay and the function verification can reach a protected staging or preview deployment.",
   "VERCEL_BYPASS": "The protection-bypass secret the wiki's visual review script sends to reach a protected base URL such as the staging alias.",
   "VERCEL_DOCS_BYPASS_SECRET": "The wiki project's protection-bypass secret, sent by the post-deploy smoke test to reach a protected wiki deployment.",
+  "VERCEL_ENV": "Set by Vercel itself in every deployment (`production`, `preview` or `development`); never set by hand. The generated `all` function reads it to choose the Hukamnama API of the environment it runs in (`hukamnama_api` in `gateway/routes.json`; staging is a preview deployment).",
   "VERCEL_ORG_ID": "The Vercel team the API calls of `scripts/ci/vercel_api.py` are made in; required with `VERCEL_TOKEN`.",
   "VERCEL_PROJECT_ID": "The Vercel project `scripts/ci/vercel_api.py has-production` asks about.",
   "VERCEL_TOKEN": "A Vercel API token for `scripts/ci/vercel_api.py` (which deployment serves a domain, a deployment's target, whether a project has a production deployment)."

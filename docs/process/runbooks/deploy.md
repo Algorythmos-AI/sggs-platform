@@ -80,7 +80,8 @@ no release. Open `sggs-staging.vercel.app` logged in to Vercel (it is SSO-protec
 
 The API runs as Python functions in the web project (ADR-0011): `tools/build_api_functions.py`
 generates one function per bounded context plus `all` from the pinned database (each context's slice
-is proven by the slicer), `vercel build` bundles them, and `--verify-output` refuses the build if a
+is proven by the slicer), `vercel build` bundles them, `--add-shells` puts the Hukamnama page shells that build produced into the
+`all` function (docs/architecture/website.md), and `--verify-output` refuses the build if a
 function bundles anything but its entry, the API code and its own database, or if a database or API
 source would be published as a static file. After the alias, `scripts/ci/verify_functions.py` checks
 every function's `/readyz` (this commit, exactly its contexts, `X-Service`), then the gateway probes,
