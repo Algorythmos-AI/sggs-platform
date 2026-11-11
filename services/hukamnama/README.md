@@ -62,7 +62,8 @@ python3 -m unittest discover -s tests -t .     # or: make test-hukamnama (repo r
 ```
 
 Runtime is Python-stdlib only. Environment: `HUKAMNAMA_DB`, `HUKAMNAMA_STATE`, `HUKAMNAMA_ARCHIVE`
-(keep every distinct page fetched, for replay; `hukamnama/archive.py`), `HUKAMNAMA_COMMIT`, `PORT`.
+(keep every distinct page fetched, for replay; `hukamnama/archive.py`), `HUKAMNAMA_PUBLIC_DIR` and
+`HUKAMNAMA_MEANING` (the public snapshot, below), `HUKAMNAMA_COMMIT`, `PORT`.
 
 **Deployed** as the Render service `sggs-hukamnama-staging` (Docker, `services/hukamnama/Dockerfile`,
 1 GB disk at `/var/data`) by `.github/workflows/hukamnama-deploy.yml`, watched from outside by
@@ -86,6 +87,36 @@ A day held by the gate is served as `pending`. There is no access log. Device wr
 limited per client address (in memory only, one minute) and new devices are capped per hour
 (`device_flood` alert). Nothing about a reader is stored beyond the token, its APNs environment,
 the mode, the UTC slot schedule and the corpus fingerprint.
+
+## Public snapshot
+
+`hukamnama/public.py` writes each published day once, as a file, so that public readers (the
+website and the public API) never query this process: a flood or an outage there cannot slow the
+poller or the push sender.
+
+```bash
+python3 -m hukamnama --db ../../db/sggs.sqlite --state /tmp/hk.sqlite serve --public-dir /tmp/hk-public
+python3 -m hukamnama --db ../../db/sggs.sqlite --state /tmp/hk.sqlite export-public --out /tmp/hk-public   # once
+```
+
+| File | Holds |
+|---|---|
+| `v1/hukamnama/<YYYY-MM-DD>.json` | every field of the read API's published record, plus `lines[]` (`id`, `ang`, `gurmukhi`, `translit`, `is_heading`, `is_rahao`, `author`), `ang_end`, `raag`, `author`, `url`, `attribution`, `terms_url` |
+| `v1/hukamnama/index.json` | `scripture_sha256`, `latest`, and `days[]` newest first |
+
+- **Proven or not written.** A day's file is written only when its lines, read again from the
+  corpus, hash to the `range_sha256` it was published with, in the corpus it was published in.
+  Otherwise the day is skipped and logged (`export-public` exits 1).
+- **Kept in step.** The files are written in full at start and checked after every poll. A
+  correction (`approve`) rewrites the day; a `hold` deletes it. A pending or held day has no file.
+- **Author.** `author` is per line. The day-level `author` is `null` when the range mixes authors
+  (a Vaar's saloks and pauri).
+- **Layers.** `gurmukhi` is the verbatim corpus line and `translit` the corpus's rule-based
+  transliteration. With `HUKAMNAMA_MEANING=on` the English translation is added as a separate,
+  labelled layer (`lines[].en` and a top-level `translation` naming the translator). It is off by
+  default; switching it off removes it on the next sync. The Gurmukhi is identical either way.
+- **Frozen for the app.** `tests/fixtures/ios-read-keys.json` lists the keys the shipped iOS app
+  decodes; a test fails if a public record drops one or changes its type or timestamp shape.
 
 ## Push
 

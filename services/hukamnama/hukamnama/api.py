@@ -208,8 +208,9 @@ def serve(state: State, host: str, port: int) -> ThreadingHTTPServer:
     return httpd
 
 
-def tick_loop(state: State, engine, stop: threading.Event) -> None:
-    """Poll on the clock's cadence; idle checks every 10 minutes so the window is never missed."""
+def tick_loop(state: State, engine, stop: threading.Event, after_tick=None) -> None:
+    """Poll on the clock's cadence; idle checks every 10 minutes so the window is never missed.
+    ``after_tick`` runs after every poll (the public snapshot sync); it must not raise."""
     import logging
     log = logging.getLogger("hukamnama")
     while not stop.is_set():
@@ -220,5 +221,7 @@ def tick_loop(state: State, engine, stop: threading.Event) -> None:
                 state.last_tick, state.last_tick_action = now, res.action
         except Exception:
             log.exception("tick failed")
+        if after_tick:
+            after_tick()
         step = clock.poll_interval(now) or timedelta(minutes=10)
         stop.wait(step.total_seconds())

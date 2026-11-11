@@ -6,6 +6,13 @@
   python -m hukamnama hold    YYYY-MM-DD --by NAME --reason TEXT
   python -m hukamnama show    YYYY-MM-DD
   python -m hukamnama resend  YYYY-MM-DD --by NAME --reason TEXT
+  python -m hukamnama export-public --out DIR
+
+Public snapshot (``serve --public-dir DIR`` or ``HUKAMNAMA_PUBLIC_DIR``): every published day is
+written as a file for the public API (see ``public.py``), in full at start and after each poll, so
+an ``approve`` or ``hold`` run from another shell reaches the files within one poll interval.
+``HUKAMNAMA_MEANING=on`` adds the labelled English translation layer; off removes it on the next sync.
+``export-public`` writes the same files once and exits.
 
 Push (``serve``): sending is OFF unless ``HUKAMNAMA_SEND=on``. It then needs the APNs Auth Key,
 read from ``HUKAMNAMA_APNS_KEY_FILE`` (a Render secret file, PEM), ``HUKAMNAMA_APNS_KEY_ID`` and
@@ -45,6 +52,10 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--no-poll", action="store_true")
     s.add_argument("--archive", default=os.environ.get("HUKAMNAMA_ARCHIVE") or None,
                    help="keep every distinct page fetched, gzip, under DIR/<amritsar date>/ (the soak's replay corpus)")
+    s.add_argument("--public-dir", default=os.environ.get("HUKAMNAMA_PUBLIC_DIR") or None,
+                   help="write the public snapshot (one file per published day) under DIR")
+    ex = sub.add_parser("export-public")
+    ex.add_argument("--out", required=True)
     t = sub.add_parser("tick")
     t.add_argument("--force", action="store_true")
     a = sub.add_parser("approve")
@@ -76,10 +87,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "serve":
         state = State(store, fingerprint)
         stop = threading.Event()
+        publisher = _publisher(store, con, fingerprint, args.public_dir) if args.public_dir else None
+        if publisher:
+            publisher.sync_safely(force=True)
         if not args.no_poll:
             fetcher = Archive(args.archive).wrap(fetch) if args.archive else fetch
             engine = Engine(store, con, fingerprint, fetcher=fetcher)
-            threading.Thread(target=tick_loop, args=(state, engine, stop), daemon=True).start()
+            threading.Thread(target=tick_loop, args=(state, engine, stop, publisher.sync_safely if publisher else None),
+                             daemon=True).start()
         if os.environ.get("HUKAMNAMA_SEND", "off") == "on":
             apns = _apns_from_env()
             if apns is None:
@@ -97,6 +112,10 @@ def main(argv: list[str] | None = None) -> int:
         r = Engine(store, con, fingerprint).tick(now, force=args.force)
         print(json.dumps({"action": r.action, "detail": r.detail}, ensure_ascii=False))
         return 0
+    if args.cmd == "export-public":
+        r = _publisher(store, con, fingerprint, args.out).sync(force=True)
+        print(json.dumps({"written": len(r["written"]), "deleted": len(r["deleted"]), "skipped": r["skipped"]}))
+        return 1 if r["skipped"] else 0
     day = clock.parse_day(args.date)
     if args.cmd == "approve":
         res = resolution_for_range(con, args.first_line, args.last_line)
@@ -111,6 +130,11 @@ def main(argv: list[str] | None = None) -> int:
     print(json.dumps({"decision": store.decision(day), "served": day_record(store, day, fingerprint, now)},
                      ensure_ascii=False, indent=1))
     return 0
+
+
+def _publisher(store, con, fingerprint: str, out: str):
+    from .public import DirSink, Publisher
+    return Publisher(store, con, fingerprint, DirSink(out), meaning=os.environ.get("HUKAMNAMA_MEANING", "off") == "on")
 
 
 def _apns_from_env():
