@@ -89,6 +89,12 @@ class Gateway(unittest.TestCase):
         sys.path.insert(0, str(ROOT / "webapp"))
         import hukamnama_feed
         self.assertEqual(sorted(gg.FEEDS), sorted(hukamnama_feed.PATHS))        # the routes are the paths it serves
+        import hukamnama_sitemap
+        self.assertEqual(gg.SITEMAP, hukamnama_sitemap.PATH)
+        sitemap = [r for r in VERCEL["rewrites"] if r["source"].startswith("/sitemap")]
+        self.assertEqual([(r["destination"], r["has"][0]["value"]) for r in sitemap], [("/api/svc/all", CFG["staging"]["host"])])
+        self.assertTrue(re.fullmatch(sitemap[0]["source"], gg.SITEMAP))
+        self.assertFalse(re.fullmatch(sitemap[0]["source"], "/sitemap.xml"))             # the site's own sitemap stays static
         rules = [r for r in VERCEL["rewrites"] if r["source"].startswith("/feeds")]
         self.assertEqual(len(rules), len(gg.FEEDS))
         for r in rules:

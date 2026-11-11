@@ -581,6 +581,16 @@
       "destination": "/api/svc/all"
     },
     {
+      "source": "/sitemap-hukamnama\\.xml",
+      "has": [
+        {
+          "type": "host",
+          "value": "sggs-staging.vercel.app"
+        }
+      ],
+      "destination": "/api/svc/all"
+    },
+    {
       "source": "/api/(.*)",
       "has": [
         {

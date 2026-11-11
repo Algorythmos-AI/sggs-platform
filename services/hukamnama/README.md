@@ -80,6 +80,7 @@ file. Published ranges are pinned to the corpus they were resolved in.
 | `GET /v1/hukamnama/today` | `published` (range, opening verse from the corpus, hashes, citation, credit) or `pending` (with `expected_by`) |
 | `GET /v1/hukamnama/YYYY-MM-DD` | one day, within ±400 days; a future date is 404 |
 | `GET /v1/hukamnama?limit=N` | the latest published days, N in 1..30 |
+| `GET /v1/hukamnama/index` | every published day, newest first: date, Ang, `range_sha256`, `published_at` (no text) |
 | `GET /health` | today's status, the last poll, today's alerts, `scripture_sha256`, and `push` (sending on/off, device counts by mode, today's send states) (`no-store`) |
 | `PUT /v1/devices/<token>` | opt a device in: `{env, mode: asap\|scheduled, schedule?, scripture_sha256?, replaces?}`, at most 1 KB; `replaces` deletes the rotated-away token in the same transaction (the new token keeps its first-registration time and the days it already had). Answers `{"ok": true, "today": {amritsar_date, status: published\|pending\|held, delivery: sent\|due\|not_today, sent_at, reason: null\|registered_after_publish\|slot_passed}, "next_slot_at"}`, computed by the sender's own rules (`push.plan_for_device`); times are UTC `…Z` |
 | `DELETE /v1/devices/<token>` | opt out: the row is deleted (404 when it was already gone; the app treats that as done) |

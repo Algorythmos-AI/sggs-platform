@@ -405,6 +405,22 @@ class PageCheck(unittest.TestCase):
         self.assertIsNone(problem)
         self.assertIn("HTTP 503", warning)
 
+    def test_a_whole_sitemap_listing_every_language_passes_and_anything_else_is_named(self):
+        def check(status, svc, body):
+            real, vf.get = vf.get, lambda url, timeout=60: (status, svc, body)
+            try:
+                return vf.check_sitemap("https://example.test")
+            finally:
+                vf.get = real
+        locs = "".join(f"<url><loc>https://gurbanisoul.com/{l}/hukamnama</loc></url>" for l in gg.languages())
+        whole = ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="x">' + locs + "</urlset>\n").encode()
+        self.assertEqual(check(200, "all", whole), (None, None))
+        self.assertIn("not a whole sitemap", check(200, "all", whole[:-10])[0])
+        self.assertIn("does not list", check(200, "all", whole.replace(b"/en/hukamnama</loc>", b"/en/x</loc>"))[0])
+        self.assertIn("HTTP 404", check(404, None, b"")[0])
+        self.assertIn("X-Service None", check(200, None, whole)[0])
+        self.assertEqual(check(503, "all", b"")[0], None)
+
     def test_an_unreachable_hukamnama_api_is_a_warning_not_a_failed_deploy(self):
         problem, warning = self._check(503, "all", b"Temporarily unavailable")
         self.assertIsNone(problem)

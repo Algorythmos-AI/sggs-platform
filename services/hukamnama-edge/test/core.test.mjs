@@ -159,6 +159,23 @@ test("the list is newest first, without lines unless asked, and never ahead of t
   assert.equal(def.body.items.length, 3);
 });
 
+test("the index lists every published day, newest first, and never one ahead of today", async () => {
+  const env = { BUCKET: bucket(["2026-11-09", "2026-11-10", "2026-11-11", "2026-11-12"]) };
+  const { res, body } = await get("/v1/hukamnama/index", env);
+  assert.equal(res.status, 200);
+  assert.deepEqual(body.days.map((x) => x.amritsar_date), ["2026-11-11", "2026-11-10", "2026-11-09"]);
+  assert.equal(body.latest, "2026-11-11");
+  assert.equal(body.scripture_sha256, FP);
+  assert.equal(res.headers.get("Access-Control-Allow-Origin"), "*");
+  assert.ok(!env.BUCKET.reads.some((k) => k !== "v1/hukamnama/index.json"));     // one read, no day file
+  const empty = await get("/v1/hukamnama/index", { BUCKET: bucket([]) });
+  assert.deepEqual(empty.body, { scripture_sha256: FP, latest: null, days: [] });
+  const none = await get("/v1/hukamnama/index", { BUCKET: bucket([], { "v1/hukamnama/index.json": null }) });
+  assert.deepEqual(none.body, { scripture_sha256: null, latest: null, days: [] });
+  const bad = await get("/v1/hukamnama/index", { BUCKET: bucket([], { "v1/hukamnama/index.json": "{}" }) });
+  assert.equal(bad.res.status, 503);
+});
+
 test("limit must be 1..30", async () => {
   const env = { BUCKET: bucket(["2026-11-11"]) };
   for (const q of ["0", "31", "-1", "abc", "1.5", "999", ""]) {

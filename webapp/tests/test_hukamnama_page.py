@@ -50,8 +50,17 @@ def record(day, rng=R680, **over):
 class FakeApi:
     def __init__(self, days=None, latest=None):
         self.days, self.latest, self.calls, self.down = dict(days or {}), latest, [], False
+        self.index_calls, self.index = [], None       # index: what /index answers (default: the published days)
 
     def __call__(self, url):
+        if url == API + '/v1/hukamnama/index':        # the list of published dates (previous/next links)
+            self.index_calls.append(url)
+            if self.down:
+                raise urllib.error.URLError('down')
+            if self.index is not None:
+                return self.index
+            return {'days': [{'amritsar_date': d, 'published_at': r.get('published_at')}
+                             for d, r in self.days.items() if r.get('status') == 'published']}
         self.calls.append(url)
         if self.down:
             raise urllib.error.URLError('down')
@@ -392,6 +401,86 @@ class OverHttp(Base):
         self.assertEqual(r.status, 404)
         r, _ = self.get('/api/ang/1')
         self.assertEqual(r.status, 200)
+
+
+class DaysAround(Base):
+    """The previous/next links and the breadcrumb trail: built from the API's list of dates."""
+    DAYS = {'2026-11-08': record('2026-11-08', R673), '2026-11-10': record('2026-11-10', R673),
+            '2026-11-11': record('2026-11-11')}
+
+    def links(self, html_):
+        return dict(re.findall(r'<a rel="(prev|next)" href="([^"]*)">', html_))
+
+    def test_a_dated_page_links_the_published_days_on_either_side_skipping_unpublished_ones(self):
+        self.api(days=self.DAYS)
+        _, html_, _ = self.page('2026-11-10')
+        self.assertEqual(self.links(html_), {'prev': '/en/hukamnama/2026-11-08', 'next': '/en/hukamnama/2026-11-11'})
+        self.assertIn('>8 November 2026</a>', html_)
+        self.assertIn('>11 November 2026</a>', html_)
+
+    def test_today_has_no_next_and_the_first_day_no_previous(self):
+        self.api(days=self.DAYS)
+        self.assertEqual(self.links(self.page()[1]), {'prev': '/en/hukamnama/2026-11-10'})
+        self.assertEqual(self.links(self.page('2026-11-08')[1]), {'next': '/en/hukamnama/2026-11-10'})
+
+    def test_a_listed_future_day_is_never_linked(self):
+        fake = self.api(days=self.DAYS)
+        fake.index = {'days': [{'amritsar_date': d} for d in ('2026-11-10', '2026-11-11', '2026-11-12', '2026-10-31')]}
+        self.assertEqual(self.links(self.page()[1]), {'prev': '/en/hukamnama/2026-11-10'})
+
+    def test_without_the_list_the_page_is_shown_without_the_links(self):
+        for index in ({'days': 'x'}, {}, None):
+            hp.reset()
+            fake = self.api(days=self.DAYS)
+            fake.index = index if index is not None else {'nothing': 1}
+            status, html_, _ = self.page('2026-11-10')
+            self.assertEqual((status, self.links(html_)), (200, {}))
+            self.assertNotIn('hk-days', html_)
+
+    def test_an_api_without_the_index_falls_back_to_its_list(self):
+        fake = self.api(days=self.DAYS)
+        real = fake.__call__
+
+        def old_api(url):
+            if url.endswith('/v1/hukamnama/index'):
+                raise urllib.error.HTTPError(url, 400, 'Bad Request', None, None)
+            if url.endswith('/v1/hukamnama?limit=30'):
+                return {'items': list(self.DAYS.values()) + [{'amritsar_date': '2026-11-09', 'status': 'pending'}]}
+            return real(url)
+        with mock.patch.object(hp, 'FETCH', old_api):
+            self.assertEqual(self.links(self.page('2026-11-10')[1]),
+                             {'prev': '/en/hukamnama/2026-11-08', 'next': '/en/hukamnama/2026-11-11'})
+
+    def test_the_list_is_asked_for_once_in_a_burst_and_the_last_one_survives_an_outage(self):
+        fake = self.api(days=self.DAYS)
+        for _ in range(4):
+            self.page('2026-11-10'); self.page()
+        self.assertEqual(len(fake.index_calls), 1)
+        self.assertEqual(len(hp.published_days(date(2026, 11, 11), clock=lambda: 10_000.0)), 3)
+        fake.down = True
+        self.assertEqual(len(hp.published_days(date(2026, 11, 11), clock=lambda: 20_000.0)), 3)   # last good
+        self.assertEqual(len(hp.published_days(date(2026, 11, 9), clock=lambda: 20_001.0)), 1)    # and never ahead
+
+    def test_the_breadcrumb_trail_names_the_site_the_section_and_the_date(self):
+        import json as _json
+        shell, strings = hp.load_shell('en')
+        day = hp._prove(hp.published_record(record('2026-11-10', R673), date(2026, 11, 10)))
+        kw = dict(view='dated', day=day, today=date(2026, 11, 11), hour_ist=8, path='/en/hukamnama/2026-11-10',
+                  asked=date(2026, 11, 10))
+        plain = re.search(r'<script type="application/ld\+json">(.*?)</script>', hp.render(shell, strings, 'en', **kw), re.S)
+        self.assertEqual(_json.loads(plain.group(1))['@type'], 'WebPage')            # a shell without the name: as before
+        named = dict(strings, name='Hukamnama · <Sri> Harmandir Sahib')
+        block = re.search(r'<script type="application/ld\+json">(.*?)</script>', hp.render(shell, named, 'en', **kw), re.S).group(1)
+        self.assertNotIn('<', block)
+        page, crumbs = _json.loads(block)
+        self.assertEqual((page['@type'], crumbs['@type']), ('WebPage', 'BreadcrumbList'))
+        self.assertEqual([(x['position'], x['name'], x['item']) for x in crumbs['itemListElement']],
+                         [(1, 'Gurbani Soul', 'https://gurbanisoul.com/en'),
+                          (2, 'Hukamnama · <Sri> Harmandir Sahib', 'https://gurbanisoul.com/en/hukamnama'),
+                          (3, '10 November 2026', 'https://gurbanisoul.com/en/hukamnama/2026-11-10')])
+        today = _json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', hp.render(
+            shell, named, 'en', view='today', day=day, today=date(2026, 11, 10), hour_ist=8, path='/en/hukamnama'), re.S).group(1))
+        self.assertEqual(len(today[1]['itemListElement']), 2)
 
 
 if __name__ == '__main__':
