@@ -207,6 +207,31 @@ under the same switch and routing as the pages.
 - After a deploy `verify_functions.py` requires the embed to be framable under its own policy and
   the rest of the site not to be.
 
+### The Developers page
+
+`/{lang}/developers` (`frontend/src/pages/[lang]/developers.astro`) explains the public Hukamnama
+API to the people who will call it: a first request, the routes, the record's fields, how to check
+the text against `range_sha256`, how to show and credit it, the embed snippet, the feeds, limits
+and the terms. It is an ordinary static, translated page in the legal-page frame, with no script
+of its own.
+
+- **It states what the code does.** The archive's first date, the list bounds and the embed's
+  themes are constants in `frontend/src/hukamnama.ts`, and the `DevelopersPage` gate compares them
+  with `services/hukamnama-edge/src/core.js` and `webapp/hukamnama_embed.py`. The API's
+  `terms_url` (`public.py`) points at `#terms` on this page; the gate holds the two together.
+- **The example record is a real day's, without the text.** Its ids and `range_sha256` are the
+  record for 2026-11-11, and the gate re-computes that hash from the corpus. Every text field in
+  it is `"…"`: no line of Gurbani is typed into the page or shown in a code font.
+- **One switch for launch.** `HUKAMNAMA_LIVE` in `hukamnama.ts` is true when
+  `gateway/routes.json` gives `production` a `hukamnama_api`, the same key that turns on the
+  pages, feeds, sitemap and embed there. Until then the page is built but `noindex`, absent from
+  `sitemap.xml` and linked from nowhere; from then it is indexed, listed and linked from the
+  footer. It is read from the file, never from the build's environment, so the committed
+  `webapp/static`, staging and production are the same build. The documented API origin is that
+  key's value, or `https://api.gurbanisoul.com` before it is set.
+- Messages with code in them use `<c>…</c>`, rendered by `CodeText.astro`; literal values with a
+  colon (`UTC+05:30`) are passed as values so French spacing never touches them.
+
 What the renderer guarantees:
 
 - It asks the API for one **date** (the Amritsar date it computes itself), never "today", and

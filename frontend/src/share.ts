@@ -57,6 +57,12 @@ export const SHARE: Record<string, Share> = {
     sub: "An optional contribution. Nothing is ever locked.",
     social: "Gurbani Soul is free, offline and ad-free. An optional contribution helps keep it that way.",
   },
+  "developers": {
+    eyebrow: "Developers",
+    title: "The daily Hukamnama, as a free API",
+    sub: "No key · verbatim Gurmukhi · cited by Ang",
+    social: "A free JSON API, with no key, for the daily Hukamnama from Sri Harmandir Sahib, Amritsar. Verbatim Gurmukhi, cited by Ang.",
+  },
   "knowledge-base": {
     eyebrow: KB,
     title: "Sri Guru Granth Sahib Ji — all 1430 Angs, verbatim",
