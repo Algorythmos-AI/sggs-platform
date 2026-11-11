@@ -203,6 +203,8 @@ async function status(request, env, today) {
     published_at: rec ? rec.published_at : null,
     latest: idx.latest,
     scripture_sha256: idx.scripture_sha256,
+    // true while the owner has paused the service: nothing is served until it is resumed
+    paused: idx.paused === true,
   }, CACHE.pending);
 }
 
@@ -216,7 +218,14 @@ async function toOrigin(request, env) {
   // The service trusts the client address only on requests that carry this secret, so a caller
   // cannot forge it; a value sent by the client is always replaced.
   headers.delete("X-Origin-Auth");
-  if (env.ORIGIN_SECRET) headers.set("X-Origin-Auth", env.ORIGIN_SECRET);
+  // The address the service limits by. Only this Worker may say it: whatever the caller sent is
+  // replaced by the address Cloudflare saw, and the service believes it only with the secret.
+  headers.delete("X-Client-IP");
+  if (env.ORIGIN_SECRET) {
+    headers.set("X-Origin-Auth", env.ORIGIN_SECRET);
+    const ip = request.headers.get("CF-Connecting-IP");
+    if (ip) headers.set("X-Client-IP", ip);
+  }
   return (env.ORIGIN_FETCH || fetch)(new Request(request, { headers }));
 }
 

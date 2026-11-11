@@ -197,8 +197,34 @@ test("status reports today and the latest published date", async () => {
   const { body } = await get("/v1/status", { BUCKET: bucket(["2026-11-10"]) });
   assert.deepEqual(body, {
     ok: true, amritsar_date: "2026-11-11", status_today: "pending", published_at: null,
-    latest: "2026-11-10", scripture_sha256: FP,
+    latest: "2026-11-10", scripture_sha256: FP, paused: false,
   });
+});
+
+test("a paused service: the index says so, status reports it, and every day reads as pending", async () => {
+  // what the service writes while paused: no day files, an empty index marked paused
+  const env = { BUCKET: bucket([], { "v1/hukamnama/index.json": JSON.stringify({ scripture_sha256: FP, latest: null, days: [], paused: true }) }) };
+  const status = await get("/v1/status", env);
+  assert.equal(status.body.paused, true);
+  assert.equal(status.body.status_today, "pending");
+  const today = await get("/v1/hukamnama/today", env);
+  assert.deepEqual([today.body.status, today.body.latest], ["pending", null]);
+  assert.deepEqual((await get("/v1/hukamnama", env)).body, { items: [] });
+  assert.deepEqual((await get("/v1/hukamnama/index", env)).body.days, []);
+});
+
+test("the service is told the caller's address only by this Worker, and only with the secret", async () => {
+  const seen = [];
+  const origin = async (req) => { seen.push(req); return new Response("{}"); };
+  const put = (env, headers) => handle(new Request("https://api.gurbanisoul.com/v1/devices/" + "ab".repeat(32), {
+    method: "PUT", body: "{}", headers,
+  }), env, AFTER);
+  await put({ BUCKET: bucket([]), ORIGIN_SECRET: "s3", ORIGIN_FETCH: origin }, { "CF-Connecting-IP": "203.0.113.7", "X-Client-IP": "10.0.0.1" });
+  assert.equal(seen[0].headers.get("X-Client-IP"), "203.0.113.7");      // what Cloudflare saw, not what was sent
+  await put({ BUCKET: bucket([]), ORIGIN_SECRET: "s3", ORIGIN_FETCH: origin }, { "X-Client-IP": "10.0.0.1" });
+  assert.equal(seen[1].headers.get("X-Client-IP"), null);               // nothing seen: nothing claimed
+  await put({ BUCKET: bucket([]), ORIGIN_FETCH: origin }, { "CF-Connecting-IP": "203.0.113.7", "X-Client-IP": "10.0.0.1" });
+  assert.equal(seen[2].headers.get("X-Client-IP"), null);               // no secret: the service would not believe it
 });
 
 test("ETag: a matching If-None-Match is a 304 with no body", async () => {

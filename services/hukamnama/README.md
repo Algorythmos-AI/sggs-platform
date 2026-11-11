@@ -64,7 +64,12 @@ python3 -m unittest discover -s tests -t .     # or: make test-hukamnama (repo r
 Runtime is Python-stdlib only. Environment: `HUKAMNAMA_DB`, `HUKAMNAMA_STATE`, `HUKAMNAMA_ARCHIVE`
 (keep every distinct page fetched, for replay; `hukamnama/archive.py`), `HUKAMNAMA_PUBLIC_DIR` and
 `HUKAMNAMA_MEANING` and the `HUKAMNAMA_PUBLIC_…` bucket settings (the public snapshot, below),
-`HUKAMNAMA_COMMIT`, `PORT`.
+`HUKAMNAMA_ORIGIN_SECRET` and `HUKAMNAMA_ORIGIN_REQUIRED` (whose address a request is limited by, and
+whether direct calls are refused; the runbook explains both), `HUKAMNAMA_COMMIT`, `PORT`.
+
+Owner commands besides `approve`, `hold` and `resend`: `correct` (replace a published day's range,
+keeping its first publication time and adding `corrected_at`) and `pause` / `resume` (stop and
+restore serving and sending without a deploy). All are written to the audit table.
 
 **Deployed** as the Render service `sggs-hukamnama-staging` (Docker, `services/hukamnama/Dockerfile`,
 1 GB disk at `/var/data`) by `.github/workflows/hukamnama-deploy.yml`, watched from outside by

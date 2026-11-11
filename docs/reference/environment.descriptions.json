@@ -44,5 +44,7 @@
   "VERCEL_ENV": "Set by Vercel itself in every deployment (`production`, `preview` or `development`); never set by hand. The generated `all` function reads it to choose the Hukamnama API of the environment it runs in (`hukamnama_api` in `gateway/routes.json`; staging is a preview deployment).",
   "VERCEL_ORG_ID": "The Vercel team the API calls of `scripts/ci/vercel_api.py` are made in; required with `VERCEL_TOKEN`.",
   "VERCEL_PROJECT_ID": "The Vercel project `scripts/ci/vercel_api.py has-production` asks about.",
-  "VERCEL_TOKEN": "A Vercel API token for `scripts/ci/vercel_api.py` (which deployment serves a domain, a deployment's target, whether a project has a production deployment)."
+  "VERCEL_TOKEN": "A Vercel API token for `scripts/ci/vercel_api.py` (which deployment serves a domain, a deployment's target, whether a project has a production deployment).",
+  "HUKAMNAMA_ORIGIN_SECRET": "The secret the edge Worker sends in `X-Origin-Auth`. When set, the Hukamnama service believes a request's client address (`X-Client-IP`) only with it, and limits every other request by its socket's own address. Set the same value on the Worker (`ORIGIN_SECRET`). Never committed.",
+  "HUKAMNAMA_ORIGIN_REQUIRED": "`on` makes the Hukamnama service answer `403` on `/v1/*` to any request without the edge's secret (`/health` stays open). Anything else (the default) leaves direct calls allowed. Needs `HUKAMNAMA_ORIGIN_SECRET`."
 }

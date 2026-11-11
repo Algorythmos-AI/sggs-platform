@@ -6,6 +6,9 @@
   python -m hukamnama hold    YYYY-MM-DD --by NAME --reason TEXT
   python -m hukamnama show    YYYY-MM-DD
   python -m hukamnama resend  YYYY-MM-DD --by NAME --reason TEXT
+  python -m hukamnama correct YYYY-MM-DD --first-line ID --last-line ID --by NAME --reason TEXT
+  python -m hukamnama pause   --by NAME --reason TEXT
+  python -m hukamnama resume  --by NAME --reason TEXT
   python -m hukamnama export-public --out DIR
 
 Public snapshot (``serve --public-dir DIR`` or ``HUKAMNAMA_PUBLIC_DIR``): every published day is
@@ -23,6 +26,14 @@ sending silently off.
 
 ``approve`` and ``hold`` are the owner's tools for a day the gate held (or got wrong). They
 overwrite the day's decision and are written to the audit table.
+
+``correct`` replaces the range of a day that is already published and was wrong. The day keeps its
+first publication time and gains ``corrected_at``; the public files, the feeds and the pages follow
+within one poll interval. It sends no push: run ``resend`` as well if the phones should be told.
+
+``pause`` is the kill switch: within one poll interval nothing is served (every day reads as
+pending, the public files are removed) and nothing is sent. The poller keeps deciding days, so
+``resume`` restores everything. Both are written to the audit table.
 """
 from __future__ import annotations
 
@@ -68,6 +79,13 @@ def main(argv: list[str] | None = None) -> int:
     h.add_argument("date"); h.add_argument("--by", required=True); h.add_argument("--reason", required=True)
     sh = sub.add_parser("show")
     sh.add_argument("date")
+    co = sub.add_parser("correct")
+    co.add_argument("date"); co.add_argument("--first-line", type=int, required=True)
+    co.add_argument("--last-line", type=int, required=True)
+    co.add_argument("--by", required=True); co.add_argument("--reason", required=True)
+    for name in ("pause", "resume"):
+        sw = sub.add_parser(name)
+        sw.add_argument("--by", required=True); sw.add_argument("--reason", required=True)
     rs = sub.add_parser("resend")
     rs.add_argument("date"); rs.add_argument("--by", required=True); rs.add_argument("--reason", required=True)
     args = p.parse_args(argv)
@@ -122,8 +140,20 @@ def main(argv: list[str] | None = None) -> int:
         r = _publisher(store, con, fingerprint, args.out, env={}).sync(force=True)
         print(json.dumps({"written": len(r["written"]), "deleted": len(r["deleted"]), "skipped": r["skipped"]}))
         return 1 if r["skipped"] else 0
+    if args.cmd in ("pause", "resume"):
+        if args.cmd == "pause":
+            store.pause(now, args.by, args.reason)
+        else:
+            store.resume(now, args.by, args.reason)
+        print(json.dumps({"paused": store.paused()}, ensure_ascii=False))
+        return 0
     day = clock.parse_day(args.date)
-    if args.cmd == "approve":
+    if args.cmd == "correct":
+        res = resolution_for_range(con, args.first_line, args.last_line)
+        if not store.correct(day, res, fingerprint, now, args.by, args.reason):
+            print(f"{day} is not published: use `approve` for a held or undecided day", file=sys.stderr)
+            return 1
+    elif args.cmd == "approve":
         res = resolution_for_range(con, args.first_line, args.last_line)
         store.publish(day, res, fingerprint, now, args.by, reason=args.reason, overwrite=True)
     elif args.cmd == "hold":

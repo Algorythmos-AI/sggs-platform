@@ -47,6 +47,7 @@ DAYS = [
     (date(2026, 11, 11), 20889, 20896),    # Ang 463: two saloks by two authors, so the day has no single author
 ]
 PUBLISHED_AT = datetime(2026, 11, 9, 0, 25, 3, tzinfo=timezone.utc)
+CORRECTED_AT = datetime(2026, 11, 9, 6, 0, 0, tzinfo=timezone.utc)
 TODAY = "2026-11-11T02:00:00Z"             # 07:30 in Amritsar on the 11th: today is published
 BEFORE = "2026-11-12T00:10:00Z"            # 05:40 in Amritsar on the 12th: today has no file yet
 
@@ -109,6 +110,9 @@ def snapshots(tmp: Path) -> dict[str, Path]:
         store = Store(str(tmp / "store.sqlite"))
         for day, first, last in DAYS:
             store.publish(day, resolution_for_range(con, first, last), fp, PUBLISHED_AT, "auto")
+        # one day was corrected by the owner, so `corrected_at` is in the samples (and optional)
+        day, first, last = DAYS[0]
+        store.correct(day, resolution_for_range(con, first, last), fp, CORRECTED_AT, "owner", "sample")
         out = {}
         for name, meaning in (("plain", False), ("meaning", True)):
             out[name] = tmp / name
@@ -195,6 +199,8 @@ FIELDS = {
         "citation": "The citation to show with the text: “Sri Guru Granth Sahib Ji · Ang N”.",
         "published_at": "When the day was published here, in UTC, without fractional seconds.",
         "credit": "How the day was located and where its text is from.",
+        "corrected_at": "Present only when the day's range was corrected after it was published: when, in UTC. "
+                        "`published_at` stays the first publication.",
         "raag": "The raag of the opening verse, as the corpus names it.",
         "author": "The author, when every verse of the day has the same one; `null` when they differ, as in a Vaar.",
         "url": "The day's page on gurbanisoul.com.",
@@ -231,6 +237,7 @@ FIELDS = {
         "line_count": "How many lines the day holds.",
         "range_sha256": "The hash that proves the day's lines.",
         "published_at": "When the day was published here, in UTC.",
+        "corrected_at": "Present only when the day was corrected after it was published: when, in UTC.",
     },
     "Index": {
         "scripture_sha256": "The fingerprint of the edition of the text; `null` before any day is published.",
@@ -246,6 +253,7 @@ FIELDS = {
         "published_at": "When today's was published, or `null`.",
         "latest": "The most recent published date, or `null` when there is none.",
         "scripture_sha256": "The fingerprint of the edition of the text; `null` before any day is published.",
+        "paused": "True while the service is paused by its owner: every day then reads as `pending`.",
     },
     "Error": {
         "error": "What went wrong, in a few words.",
@@ -256,6 +264,7 @@ FIELDS = {
 ENUMS = {("Hukamnama", "status"): ["published"], ("Pending", "status"): ["pending"],
          ("Status", "status_today"): ["published", "pending"]}
 FORMATS = {"amritsar_date": "date", "latest": "date", "published_at": "date-time", "expected_by": "date-time",
+           "corrected_at": "date-time",
            "url": "uri", "terms_url": "uri"}
 
 

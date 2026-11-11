@@ -121,13 +121,16 @@ def recent(today, clock=time.monotonic):
 
 # -- what a day says ----------------------------------------------------------------------------
 def _when(day):
-    """The day's publication time as RFC 3339, or midnight UTC of its date when the API's is unusable."""
-    try:
-        t = datetime.fromisoformat(day['published_at'] or '')
-        if t.tzinfo is not None:
-            return t.astimezone(timezone.utc).isoformat(timespec='seconds')
-    except (TypeError, ValueError):
-        pass
+    """When the day's entry last changed, as RFC 3339: when it was corrected, else when it was
+    published, or midnight UTC of its date when the API's times are unusable. A corrected day so
+    reaches feed readers as an updated entry."""
+    for key in ('corrected_at', 'published_at'):
+        try:
+            t = datetime.fromisoformat(day.get(key) or '')
+            if t.tzinfo is not None:
+                return t.astimezone(timezone.utc).isoformat(timespec='seconds')
+        except (TypeError, ValueError):
+            pass
     return f"{day['date'].isoformat()}T00:00:00+00:00"
 
 

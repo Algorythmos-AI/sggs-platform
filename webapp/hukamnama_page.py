@@ -153,9 +153,10 @@ def published_record(body, day):
     if type(first) is not int or type(last) is not int or not isinstance(digest, str) or not HEX64.match(digest) \
             or first < 1 or last < first or last - first >= MAX_LINES:
         raise Unavailable('malformed record')
-    published_at = body.get('published_at')
+    published_at, corrected_at = body.get('published_at'), body.get('corrected_at')
     return {'date': day, 'first': first, 'last': last, 'range_sha256': digest,
             'published_at': published_at if isinstance(published_at, str) else None,
+            'corrected_at': corrected_at if isinstance(corrected_at, str) else None,
             'meaning': isinstance(body.get('translation'), dict)}
 
 
@@ -184,6 +185,7 @@ def _prove(rec):
     return {'date': rec['date'], 'lines': lines, 'ang': verses[0]['ang'], 'ang_end': lines[-1]['ang'],
             'raag': verses[0]['raag'], 'author': authors.pop() if len(authors) == 1 else None,
             'range_sha256': rec['range_sha256'], 'published_at': rec['published_at'],
+            'corrected_at': rec.get('corrected_at'),
             'meaning': any(x['en'] for x in lines)}
 
 
