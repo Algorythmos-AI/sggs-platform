@@ -104,7 +104,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "hold":
         store.hold(day, now, args.by, args.reason, overwrite=True)
     elif args.cmd == "resend":
-        n = store.requeue_day(day, now)
+        n = store.requeue_day(day, now, args.by)
         store.audit(now, args.by, "resend", day, f"{n} devices: {args.reason}")
         print(json.dumps({"requeued": n}))
         return 0

@@ -8,15 +8,23 @@ Delivery is durable and at-least-once: every send is a row in ``sends`` (queued 
 failed / suspect / gone). A restart re-sends rows left inflight, and the device collapses repeats
 by ``apns-collapse-id``. Two modes, as the app registers them:
 
-* ``asap``: queued the moment a day is published (up to ``ASAP_WINDOW`` later; a device first
-  registered after the publish is not sent that day's).
-* ``scheduled``: the device's own UTC slot (from its 12-month DST schedule). At each slot it gets
-  the latest Hukamnama it has not had; if the slot came before the day was published, it gets it
-  at publish time when that is within ``LATE_WINDOW`` of the slot.
+* ``asap``: queued the moment the day is published, or at the next tick when the device switches
+  to asap later that day. A device first registered after the publish is not sent that day's.
+* ``scheduled``: the device's own UTC slot on the Amritsar day (from its 12-month DST schedule;
+  the first entry is in force from the beginning of time, so a schedule the app rebuilt "from
+  now" keeps today's slot). If the slot came before the day was published, it gets it at publish
+  time when that is within ``LATE_WINDOW`` of the slot.
 
-Safety: a circuit breaker stops a run when more than 5% of its first 200 results are 4xx, and
-deletions (410, repeated BadDeviceToken) are applied only after a day's run finishes untripped.
-Sending is off unless ``HUKAMNAMA_SEND=on``; the APNs key lives only in the environment.
+Only the CURRENT Amritsar day is ever pushed (a late approval of yesterday is not sent on today's
+date), and a device gets at most one push per Amritsar day (one ``sends`` row). ``plan_for_device``
+is the single statement of these rules: the sender queues from it and ``PUT /v1/devices`` reports
+it back to the app.
+
+Safety: a circuit breaker stops a run when more than 5% of its first 200 results are 4xx (429 is
+throttling, not a bad request, and does not count), and deletions (410, repeated BadDeviceToken)
+are applied only after a day's run finishes untripped. A 403 or 413 pauses the day for
+``STOP_FOR``; the paused rows stay queued and resume. Sending is off unless ``HUKAMNAMA_SEND=on``;
+the APNs key lives only in the environment.
 """
 from __future__ import annotations
 
@@ -36,10 +44,10 @@ log = logging.getLogger("hukamnama")
 TOPIC = "org.sggs.app"
 HOSTS = {"production": "https://api.push.apple.com", "development": "https://api.sandbox.push.apple.com"}
 TITLE = "Hukamnama · Sri Harmandir Sahib"
-ASAP_WINDOW = timedelta(hours=6)
 LATE_WINDOW = timedelta(hours=6)
 SLOT_WINDOW = timedelta(hours=24)
 STALE_INFLIGHT = timedelta(minutes=2)
+STOP_FOR = timedelta(minutes=20)  # a 403/413 pauses the day this long (Apple: 1 new token per 20 min)
 MAX_ATTEMPTS = 5
 BATCH = 200
 WORKERS = 8
@@ -104,10 +112,15 @@ class APNs:
         self.minted = 0
         self.client = httpx.Client(http2=True, transport=transport, timeout=httpx.Timeout(10.0, connect=5.0))
 
-    def provider_token(self, *, rebuild: bool = False) -> str:
+    def provider_token(self, *, rejected: str | None = None) -> str:
+        """The cached provider token. ``rejected`` is a token APNs answered ExpiredProviderToken
+        to: it is rebuilt only if it is still the cached one, so eight workers rejected at once
+        mint ONE new token (Apple allows one per 20 minutes; more is 429
+        TooManyProviderTokenUpdates)."""
         with self._lock:
             t = self.now()
-            if rebuild or self._jwt is None or t - self._jwt[1] >= JWT_REFRESH:
+            stale = rejected is not None and self._jwt is not None and self._jwt[0] == rejected
+            if stale or self._jwt is None or t - self._jwt[1] >= JWT_REFRESH:
                 import jwt
                 tok = jwt.encode({"iss": self.team_id, "iat": int(t)}, self.key_pem, algorithm="ES256",
                                  headers={"kid": self.key_id})
@@ -117,8 +130,10 @@ class APNs:
 
     def send(self, device_token: str, env: str, body: dict, *, collapse_id: str, expires: int) -> Result:
         import httpx
+        rejected = None
         for attempt in (1, 2):
-            headers = {"authorization": f"bearer {self.provider_token(rebuild=attempt == 2)}",
+            jwt_tok = self.provider_token(rejected=rejected)
+            headers = {"authorization": f"bearer {jwt_tok}",
                        "apns-push-type": "alert", "apns-priority": "10", "apns-topic": self.topic,
                        "apns-collapse-id": collapse_id, "apns-expiration": str(expires)}
             try:
@@ -133,7 +148,8 @@ class APNs:
                 info = {}
             reason = str(info.get("reason", ""))
             if r.status_code == 403 and reason == "ExpiredProviderToken" and attempt == 1:
-                continue                                   # rebuild the provider token once
+                rejected = jwt_tok                         # rebuild the provider token once
+                continue
             return Result(r.status_code, reason, info.get("timestamp"))
         return Result(403, "ExpiredProviderToken")
 
@@ -142,56 +158,141 @@ class APNs:
 
 
 # -- scheduling --------------------------------------------------------------------------------
-def last_slot(schedule: list[dict], now: datetime) -> datetime | None:
-    """The most recent slot instant at or before ``now``, honouring which schedule entry was in
-    force at that instant (so a DST change moves the slot on the right day)."""
-    best = None
-    today = now.astimezone(timezone.utc).date()
-    for d in (today, today - timedelta(days=1)):
+def _in_force(schedule: list[dict], ts: float) -> dict:
+    """The schedule entry in force at ``ts``: the last one that started at or before it. The first
+    entry counts as in force from the beginning of time: the app rebuilds a schedule "from now"
+    whenever the reader changes the time, and that must not void today's earlier slot (a new
+    device is kept from an old push by ``created_at``, not by the schedule)."""
+    cur = schedule[0]
+    for x in schedule:
+        if x["from_utc"] <= ts:
+            cur = x
+    return cur
+
+
+def _slots(schedule: list[dict], days) -> list[datetime]:
+    """Every slot instant on the given UTC dates, each from the entry in force at that instant
+    (so a DST change moves the slot on the right day)."""
+    out = []
+    for d in days:
         for e in schedule:
             inst = datetime(d.year, d.month, d.day, tzinfo=timezone.utc) + timedelta(minutes=e["slot_utc_min"])
-            if inst > now:
-                continue
-            in_force = [x for x in schedule if x["from_utc"] <= inst.timestamp()]
-            if not in_force or in_force[-1] is not e:
-                continue
-            if best is None or inst > best:
-                best = inst
-    return best
+            if _in_force(schedule, inst.timestamp()) is e:
+                out.append(inst)
+    return sorted(set(out))
+
+
+def last_slot(schedule: list[dict], now: datetime) -> datetime | None:
+    """The most recent slot instant at or before ``now``."""
+    if not schedule:
+        return None
+    today = now.astimezone(timezone.utc).date()
+    past = [i for i in _slots(schedule, (today - timedelta(days=1), today)) if i <= now]
+    return past[-1] if past else None
+
+
+def next_slot(schedule: list[dict], now: datetime) -> datetime | None:
+    """The first slot instant strictly after ``now``."""
+    if not schedule:
+        return None
+    today = now.astimezone(timezone.utc).date()
+    nxt = [i for i in _slots(schedule, (today, today + timedelta(days=1), today + timedelta(days=2))) if i > now]
+    return nxt[0] if nxt else None
+
+
+def _z(t: datetime | None) -> str | None:
+    """UTC ISO-8601 with Z, to the second: the form the app parses."""
+    return t.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if t else None
+
+
+@dataclass(frozen=True)
+class Plan:
+    """What today means for one device. ``push_now`` is the sender's: queue it at this tick."""
+    amritsar_date: date
+    status: str                  # published | pending | held
+    delivery: str                # sent | due | not_today
+    sent_at: datetime | None
+    reason: str | None           # registered_after_publish | slot_passed (not_today only)
+    next_slot_at: datetime | None
+    push_now: bool = False
+
+    def as_json(self) -> dict:
+        return {"today": {"amritsar_date": self.amritsar_date.isoformat(), "status": self.status,
+                          "delivery": self.delivery, "sent_at": _z(self.sent_at), "reason": self.reason},
+                "next_slot_at": _z(self.next_slot_at)}
+
+
+def plan_for_device(store: Store, dev: dict, now: datetime, decision: dict | None | bool = False) -> Plan:
+    """The one statement of who gets today's Hukamnama, and when. ``decision`` is today's row when
+    the caller already read it (``due_tokens`` does, once per tick)."""
+    day = clock.amritsar_date(now)
+    if decision is False:
+        decision = store.decision(day)
+    status = decision["status"] if decision else "pending"
+    published = datetime.fromisoformat(decision["decided_at"]) if status == "published" else None
+    if published is not None and published > now:
+        published = None                                # never act on a decision stamped in the future
+    sched = (dev["schedule"] or []) if dev["mode"] == "scheduled" else []
+    nxt = next_slot(sched, now) if sched else None
+
+    def plan(delivery, reason=None, sent_at=None, push=False):
+        return Plan(day, status, delivery, sent_at, reason, nxt, push)
+
+    row = store.send(dev["token"], day)
+    if row is not None:                                 # at most one push per device per day
+        if row["state"] == "sent":
+            return plan("sent", sent_at=row["updated_at"])
+        if row["state"] in ("queued", "inflight"):
+            return plan("due")
+        return plan("not_today")                        # failed / suspect / gone: not retried today
+    if status == "held":
+        return plan("not_today")                        # nothing is sent unless the owner approves
+    if dev["mode"] == "asap":
+        if published is None:
+            return plan("due")                          # it is queued the moment the day is published
+        if dev["created_at"] <= published:
+            return plan("due", push=True)
+        return plan("not_today", "registered_after_publish")
+    # scheduled: the slots that fall on today's Amritsar date, not before the device existed
+    start = clock.at_ist(day, datetime.min.time())
+    end = start + timedelta(days=1)
+    utc_days = {start.astimezone(timezone.utc).date(), (end - timedelta(seconds=1)).astimezone(timezone.utc).date()}
+    slots = [i for i in _slots(sched, sorted(utc_days)) if start <= i < end and i >= dev["created_at"]] \
+        if sched else []
+    past = [i for i in slots if i <= now]
+    if past:
+        slot = past[-1]
+        if published is not None and published - LATE_WINDOW <= slot < published + SLOT_WINDOW:
+            return plan("due", push=True)               # its slot (or publish, for a slot just before it)
+        if published is None and now - slot <= LATE_WINDOW:
+            return plan("due")                          # still inside the late window: sent at publish
+    if any(i > now for i in slots):
+        return plan("due")                              # today's slot is still ahead
+    return plan("not_today", "slot_passed")
 
 
 def due_tokens(store: Store, now: datetime) -> tuple[date, list[str]] | None:
-    """Which devices are due the latest published Hukamnama at ``now`` (and have not had it)."""
-    latest = store.latest_published()
-    if latest is None:
+    """Which devices to queue today's Hukamnama for at ``now``. Only the current Amritsar day is
+    ever pushed: a day approved late (or a late SGPC page for yesterday) is not sent on today's
+    date, and a future-dated row never is."""
+    day = clock.amritsar_date(now)
+    decision = store.decision(day)
+    if decision is None or decision["status"] != "published" or datetime.fromisoformat(decision["decided_at"]) > now:
         return None
-    day = date.fromisoformat(latest["amritsar_date"])
-    if (clock.amritsar_date(now) - day).days > 1:
-        return None                                     # never push an old Hukamnama
-    published = datetime.fromisoformat(latest["decided_at"])
-    if published > now:
-        return None
-    due = []
-    for dev in store.devices():
-        if store.has_send(dev["token"], day):
-            continue
-        if dev["mode"] == "asap":
-            if now - published <= ASAP_WINDOW and dev["created_at"] <= published:
-                due.append(dev["token"])
-            continue
-        slot = last_slot(dev["schedule"] or [], now)
-        if slot is None or slot < dev["created_at"]:
-            continue
-        if published - LATE_WINDOW <= slot < published + SLOT_WINDOW:
-            due.append(dev["token"])
-    return day, due
+    return day, [dev["token"] for dev in store.devices() if plan_for_device(store, dev, now, decision).push_now]
 
 
 # -- the sender ------------------------------------------------------------------------------
 class Sender:
     def __init__(self, store: Store, apns: APNs, *, alert=None, rng=random.random) -> None:
         self.store, self.apns, self.alert, self.rng = store, apns, alert, rng
-        self._stop_day: str | None = None               # 413 / provider-token failure stops a run
+        # A 403 (provider token) or 413 pauses one day until an instant; it expires by itself,
+        # so a transient auth failure or the owner's ``resend`` (another process) is not lost.
+        self._stop: tuple[str, datetime] | None = None
+
+    def _stopped(self, day: str, now: datetime) -> datetime | None:
+        stop = self._stop
+        return stop[1] if stop is not None and stop[0] == day and now < stop[1] else None
 
     def _alert(self, day: date, kind: str, detail: str, now: datetime) -> None:
         if self.store.alert(day, kind, detail, now):
@@ -221,9 +322,12 @@ class Sender:
 
     def _send_one(self, row: dict, decision: dict | None, now: datetime) -> bool:
         tok, day = row["token"], row["amritsar_date"]
+        until = self._stopped(day, now)
+        if until is not None:                            # paused: back in the queue, untried
+            self.store.defer_send(tok, day, "stopped", now, until)
+            return False
         dev = self.store.device(tok)
-        if dev is None or decision is None or decision["status"] != "published" or self._tripped(day) \
-                or self._stop_day == day:
+        if dev is None or decision is None or decision["status"] != "published" or self._tripped(day):
             self.store.finish_send(tok, day, "failed", "skipped", now)
             return False
         body = payload(decision)
@@ -233,42 +337,46 @@ class Sender:
             other = "development" if dev["env"] == "production" else "production"
             res2 = self.apns.send(tok, other, body, **kw)
             if res2.status == 200:                       # the app reported the wrong environment
-                self.store.put_device(tok, other, dev["mode"], dev["schedule"], dev["scripture_sha256"], now)
-                self.store.finish_send(tok, day, "sent", "200 (other env)", now)
+                self.store.set_env(tok, other, dev["env"])
+                self._sent(tok, day, "200 (other env)", now)
                 return True
             n = self.store.mark_suspect_day(tok, date.fromisoformat(day))
             self.store.finish_send(tok, day, "gone" if n >= SUSPECT_DAYS_TO_DELETE else "suspect",
                                    f"400 {res.reason}", now)
             return False
         if res.status == 200:
-            self.store.finish_send(tok, day, "sent", "200", now)
+            self._sent(tok, day, "200", now)
             return True
         if res.status == 410:
             gone = res.timestamp_ms is not None and res.timestamp_ms / 1000 > dev["registered_at"].timestamp()
             self.store.finish_send(tok, day, "gone" if gone else "failed", f"410 {res.reason}", now)
             return False
-        if res.status == 413:
-            self._stop_day = day
-            self.store.finish_send(tok, day, "failed", "413", now)
-            self._alert(date.fromisoformat(day), "push_payload_too_large", "APNs refused the payload size", now)
+        if res.status in (403, 413):
+            # Not this device's fault: pause the whole day, keep this row and the rest queued.
+            self._stop = (day, now + STOP_FOR)
+            self._retry(row, res, now, now + STOP_FOR)
+            kind, what = (("push_payload_too_large", "APNs refused the payload size") if res.status == 413
+                          else ("push_auth_failed", f"APNs 403 {res.reason}"))
+            self._alert(date.fromisoformat(day), kind, what, now)
             return False
-        if res.status == 403:
-            self._stop_day = day
-            self.store.finish_send(tok, day, "failed", f"403 {res.reason}", now)
-            self._alert(date.fromisoformat(day), "push_auth_failed", f"APNs 403 {res.reason}", now)
-            return False
-        if res.status == 429:
-            self.store.finish_send(tok, day, "failed", "429", now)
-            return False
-        if res.status == 0 or res.status >= 500:
-            if row["attempts"] < MAX_ATTEMPTS:
-                back = timedelta(seconds=min(600, 30 * 2 ** (row["attempts"] - 1)) * (0.5 + self.rng()))
-                self.store.finish_send(tok, day, "queued", f"{res.status} {res.reason}".strip(), now, now + back)
-            else:
-                self.store.finish_send(tok, day, "failed", f"{res.status} {res.reason}".strip(), now)
+        if res.status in (0, 429) or res.status >= 500:
+            self._retry(row, res, now)                   # network, throttling, Apple's side: back off
             return False
         self.store.finish_send(tok, day, "failed", f"{res.status} {res.reason}".strip(), now)
         return False
+
+    def _sent(self, tok: str, day: str, status: str, now: datetime) -> None:
+        self.store.finish_send(tok, day, "sent", status, now)
+        self.store.mark_seen(tok, now)                   # a delivered push keeps the device from pruning
+
+    def _retry(self, row: dict, res: Result, now: datetime, at: datetime | None = None) -> None:
+        """Back off and queue again (``at`` or exponential with jitter), or fail after MAX_ATTEMPTS."""
+        tok, day, status = row["token"], row["amritsar_date"], f"{res.status} {res.reason}".strip()
+        if row["attempts"] < MAX_ATTEMPTS:
+            back = timedelta(seconds=min(600, 30 * 2 ** (row["attempts"] - 1)) * (0.5 + self.rng()))
+            self.store.finish_send(tok, day, "queued", status, now, at or now + back)
+        else:
+            self.store.finish_send(tok, day, "failed", status, now)
 
     def _tripped(self, day: str) -> bool:
         return self.store.get_meta(f"push_breaker:{day}") is not None
@@ -277,7 +385,7 @@ class Sender:
         states = self.store.send_states(day)
         done = [(t, s, st) for t, s, st in states if s not in ("queued", "inflight")]
         first = done[:BREAKER_SAMPLE]
-        bad = sum(1 for _, _, st in first if st and st[:1] == "4")
+        bad = sum(1 for _, _, st in first if st and st[:1] == "4" and st[:3] != "429")   # throttling is not bad
         if not self._tripped(day.isoformat()) and len(first) >= BREAKER_MIN and bad / len(first) > BREAKER_RATE:
             self.store.set_meta(f"push_breaker:{day.isoformat()}", now.isoformat())
             self._alert(day, "push_breaker", f"{bad}/{len(first)} of the first results were 4xx; run stopped, "
