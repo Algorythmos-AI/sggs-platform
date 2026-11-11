@@ -1,0 +1,9 @@
+{
+  "name": "hukamnama-edge",
+  "private": true,
+  "type": "module",
+  "description": "Serves the public Hukamnama API at the edge from the service's snapshot files.",
+  "scripts": {
+    "test": "node --test test/core.test.mjs"
+  }
+}

@@ -128,6 +128,9 @@ jobs:
           node-version-file: ".nvmrc"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+      - name: Unit tests — Hukamnama edge Worker (services/hukamnama-edge; no dependencies)
+        working-directory: services/hukamnama-edge
+        run: npm test
       - working-directory: frontend
         run: |
           npm ci
