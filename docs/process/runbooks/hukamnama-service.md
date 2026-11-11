@@ -4,8 +4,8 @@ description: "The Hukamnama service on Render: the staging soak with sending off
 sidebar:
   order: 6
 verified:
-  commit: 4d156a17
-  date: "2026-11-09"
+  commit: 14c89ad9
+  date: "2026-11-12"
 ---
 # Runbook: Hukamnama service
 
@@ -13,7 +13,13 @@ The Hukamnama service (`services/hukamnama/`) locates the daily Hukamnama from S
 Sahib inside the pinned corpus. Before any notification is sent it runs a **14-day soak on
 staging with sending off**: it polls SGPC every morning, decides, and keeps every page it saw. The
 soak measures the real publish minute and the hs.sgpc.net ↔ sgpc.net lag, and checks that at
-least 13 of 14 mornings resolve automatically and correctly against a manual check.
+least 13 of 14 mornings resolve automatically and correctly against a manual check. Sending is
+now on for staging: its `/health` reported `push.sending: true` on 2026-11-12, and a push reached a
+TestFlight device on 2026-11-11. Staging reaches TestFlight builds only ([Push](#push-apns)).
+
+The owner's daily decisions (a held day, approve, hold, resend, corrections) are in
+[the Hukamnama each morning](hukamnama.md); how the service works is
+[the Hukamnama service](../../architecture/hukamnama.md).
 
 ## The service on Render
 

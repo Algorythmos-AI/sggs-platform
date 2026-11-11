@@ -4,8 +4,8 @@ description: "The system in one page: who uses it, the containers across three r
 sidebar:
   order: 1
 verified:
-  commit: 49c71652
-  date: "2026-11-05"
+  commit: 14c89ad9
+  date: "2026-11-12"
 ---
 # Architecture Overview
 
@@ -48,7 +48,7 @@ carries no API-base configuration. `gateway/routes.json` decides the routing per
 
 - **Staging** routes each of the <!--fact:contexts:words-->five<!--/fact--> bounded contexts (`reader`, `search`, `verify`, `insights`,
   `knowledge`) to its own function, with `all` — the whole API — as the catch-all.
-- **Production (every release so far, through v1.5.2)** answers every `/api` path with `all`:
+- **Production (every release so far, through v1.6.4)** answers every `/api` path with `all`:
   `production.services` in `gateway/routes.json` is empty.
 - **From a later release** production routes the five contexts the same way as staging, all five
   in that one release ([services-production](../process/runbooks/services-production.md), step 3).
@@ -57,6 +57,18 @@ carries no API-base configuration. `gateway/routes.json` decides the routing per
 Setting production's `api_platform` back to `render` proxies `/api` to the Render single API, which
 every release still deploys as the rollback target until it is retired. See
 [Environments](../process/environments.md) and [bounded contexts](bounded-contexts-and-gateway.md).
+
+## Beside the API: the Hukamnama service
+
+One part of the system is not in the read-only API above. The
+[Hukamnama service](hukamnama.md) (`services/hukamnama/`) locates the daily Hukamnama · Sri
+Harmandir Sahib in the pinned corpus each morning, serves it by line range with a hash, and pushes
+it to TestFlight builds of the app. It is a long-running process with its own state, so it runs as
+its own Render service, deployed by its own workflow and watched by a dead-man check; today only
+on staging (`api-staging.gurbanisoul.com`). A Cloudflare Worker (`services/hukamnama-edge`) that
+will serve its published days as the public Hukamnama API is built and tested but not deployed.
+On staging the website's `all` function renders the Hukamnama pages, feeds, sitemap and embed
+from that service ([the website](website.md#the-hukamnama-pages-filled-by-the-server-staging-only)).
 
 ## The five layers
 1. **Scripture core** — `lines` (<!--fact:lines-->60,658<!--/fact--> verbatim rows), raags, sections, authors, vaars.

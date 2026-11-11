@@ -4,8 +4,8 @@ description: "What changed in the API, release by release, from a client's point
 sidebar:
   order: 6
 verified:
-  commit: 26d86be7
-  date: "2026-11-08"
+  commit: 14c89ad9
+  date: "2026-11-12"
 ---
 # API changelog
 
@@ -18,7 +18,7 @@ version, `info.version` in the [OpenAPI description](contract-and-openapi.md), i
 | Release | Date | What a client sees |
 |---|---|---|
 | A later release | — | Production's five contexts each answer from their own function, so `X-Service` names the context (`search`, `reader`, …) instead of `all`. Bodies unchanged. Staging routes by context today; production still answers every path from `all`. |
-| 1.6.1 – 1.6.3 | 2026-11-05 – 11-06 | None. |
+| 1.6.1 – 1.6.4 | 2026-11-05 – 11-09 | None. |
 | 1.6.0 | 2026-11-05 | **`en_span`** (`{first, last}` line ids) on every line that belongs to an English record covering two to four printed lines (dataset 1.4.0, `translation_spans`). The English is attached once, as `en` on the last member present in the response, so a list shows it once under the group even when an Ang boundary cuts the span. Additive: a client that ignores `en_span` still finds the English. More lines carry `en` than before, and the English-derived golden vectors moved with the data. |
 | 1.5.2 | 2026-10-29 | None. |
 | 1.5.1 | 2026-10-28 | Bodies follow dataset 1.3.0: `author`, `comp_id` and `section` move where the scholar ruled (Angs 1253, 1363–1384, 695, 524 and 323). No route, parameter or field changed. |
@@ -34,6 +34,11 @@ version, `info.version` in the [OpenAPI description](contract-and-openapi.md), i
 | 1.3.1 | 2026-09-20 | `/api/verify` rejects a claim over 600 characters (`400`). Readings get `Cache-Control` and an **`ETag`**, and answer `If-None-Match` with `304`. HSTS on every response. A 15-second socket timeout and a bounded worker pool. The access log stops recording query strings. |
 | 1.1.1 | 2026-09-15 | `/api/meta` and `/api/health` report **`commit`**, the running build's source commit. |
 | 1.1.0 | 2026-09-15 | `/api/shabad/{comp_id}` returns the composition's printed heading with its body (a heading run shares the composition's `comp_id`), and **`404`** for an unknown or vacated `comp_id` instead of an empty result. |
+
+The public [Hukamnama API](hukamnama.md) at `api.gurbanisoul.com` is a separate API with its own
+version and its own spec (`contract/hukamnama.openapi.json`); it is not listed here and is not live
+yet. The Knowledge Base API is unchanged by it: on staging only, the website's `all` function also
+answers the Hukamnama pages, feeds, sitemap and embed, which are HTML and feed paths outside `/api`.
 
 Before 1.0.0 (2026-09-06), the project used separate web version numbers; the routes a client
 uses today, from `ang` and `search` to the analytics, timing and forms routes, were added then.
