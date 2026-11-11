@@ -132,8 +132,10 @@ Which phones a service reaches is decided by the app build: TestFlight builds re
 
 Every morning after publishing, `/health.push.today` shows the send states. Alerts:
 `push_breaker` (more than 5% of the first results were 4xx; the run stopped and nothing was
-deleted: check the key, topic and environment, then `resend`), `push_auth_failed` (403: the key
-was revoked or the IDs are wrong), `push_payload_too_large`, `device_flood` (the new-device cap was
+deleted: check the key, topic and environment, then `resend`, which clears the breaker and is
+audited), `push_auth_failed` (403: the key was revoked or the IDs are wrong; the day pauses for
+20 minutes and resumes by itself, the queued devices are not lost), `push_payload_too_large`
+(also a 20-minute pause), `device_flood` (the new-device cap was
 hit). To push a corrected day again: `python -m hukamnama resend <date> --by <you> --reason "…"`.
 
 ## Not yet
