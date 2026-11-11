@@ -101,6 +101,16 @@
       "source": "/hukamnama/:rest+",
       "destination": "/en/hukamnama/:rest+",
       "permanent": true
+    },
+    {
+      "source": "/developers",
+      "destination": "/en/developers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/:rest+",
+      "destination": "/en/developers/:rest+",
+      "permanent": true
     }
   ],
   "buildCommand": "npm run build",

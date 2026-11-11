@@ -1,0 +1,21 @@
+---
+// CodeText.astro — one catalogue message whose <c>…</c> parts are code and whose <link1>…</link1>
+// part, if any, is a link to `href`. Every word is escaped by Astro: a translation cannot add
+// markup. A tag with no renderer fails the build, as richMap does.
+import { localeOf } from "../i18n/paths";
+import { useT, type MessageKey } from "../i18n/t";
+
+interface Props {
+  k: MessageKey;
+  values?: Record<string, string | number>;
+  href?: string;
+}
+const { k, values = {}, href } = Astro.props;
+const parts = useT(localeOf(Astro.url.pathname)).rich(k, values);
+for (const p of parts) {
+  if (typeof p !== "string" && p.tag !== "c" && !(p.tag === "link1" && href)) {
+    throw new Error(`CodeText: message ${k} has <${p.tag}>, which this component does not render`);
+  }
+}
+---
+{parts.map((p) => typeof p === "string" ? p : p.tag === "c" ? <code>{p.text}</code> : <a href={href}>{p.text}</a>)}

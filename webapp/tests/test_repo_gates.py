@@ -834,6 +834,100 @@ _BRANDS = tuple(sorted({json.loads(f.read_text(encoding="utf-8")).get("shell", {
                         for f in (ROOT / "frontend" / "src" / "i18n" / "messages").glob("*.json")
                         if not f.name.endswith(".lock.json")} | {"Gurbani Soul"}))
 
+class DevelopersPage(unittest.TestCase):
+    """The Developers page says what the public Hukamnama API really does, and stays out of search
+    until the Hukamnama is launched in production.
+
+    Launch is one key, `production.hukamnama_api` in gateway/routes.json (frontend/src/hukamnama.ts
+    reads it): absent, the page is noindex and not in the sitemap; present, it is indexed and listed.
+    """
+
+    PAGE = FRONTEND / "src" / "pages" / "[lang]" / "developers.astro"
+    CONSTS = FRONTEND / "src" / "hukamnama.ts"
+
+    def _langs(self):
+        return json.loads((FRONTEND / "src" / "i18n" / "locales.json").read_text(encoding="utf-8"))["enabled"]
+
+    def _live(self):
+        routes = json.loads((ROOT / "gateway" / "routes.json").read_text(encoding="utf-8"))
+        return bool(routes.get("production", {}).get("hukamnama_api"))
+
+    def test_the_numbers_it_states_are_the_services(self):
+        ts = self.CONSTS.read_text(encoding="utf-8")
+        edge = (ROOT / "services" / "hukamnama-edge" / "src" / "core.js").read_text(encoding="utf-8")
+        earliest = re.search(r'export const EARLIEST = "([^"]+)"', edge).group(1)
+        default = re.search(r"export const DEFAULT_LIMIT = (\d+)", edge).group(1)
+        most = re.search(r"export const MAX_LIMIT = (\d+)", edge).group(1)
+        self.assertIn(f'HUKAMNAMA_EARLIEST = "{earliest}"', ts)
+        self.assertIn(f"HUKAMNAMA_LIST = {{ default: {default}, max: {most} }}", ts)
+        sys.path.insert(0, str(ROOT / "webapp"))
+        import hukamnama_embed
+        self.assertIn("HUKAMNAMA_EMBED_THEMES = [" + ", ".join(f'"{t}"' for t in hukamnama_embed.THEMES) + "]", ts)
+        self.assertEqual(hukamnama_embed.PATH, "/embed/hukamnama")
+        page = self.PAGE.read_text(encoding="utf-8")
+        for route in ("/v1/hukamnama/today", "/v1/hukamnama/YYYY-MM-DD", "/v1/hukamnama?limit=", "/v1/hukamnama/index", "/v1/status"):
+            self.assertIn(route, page, f"the page does not list {route}")
+            self.assertIn(route.split("?")[0].replace("YYYY-MM-DD", "today"), edge + "/v1/hukamnama/today")
+
+    def test_the_apis_terms_link_lands_on_the_page(self):
+        public = (ROOT / "services" / "hukamnama" / "hukamnama" / "public.py").read_text(encoding="utf-8")
+        self.assertIn('TERMS_URL = f"{SITE}/en/developers#terms"', public)
+        ts = self.CONSTS.read_text(encoding="utf-8")
+        self.assertIn('DEVELOPERS_PATH = "/developers"', ts)
+        self.assertIn('TERMS_ANCHOR = "terms"', ts)
+
+    def test_the_example_record_is_the_published_one(self):
+        """The sample's ids and range_sha256 are a real day's: the corpus lines hash to it. Its text
+        fields are elided in the source, so no line of Gurbani is typed into the page."""
+        page = self.PAGE.read_text(encoding="utf-8")
+        first = int(re.search(r"first_line_id: (\d+)", page).group(1))
+        last = int(re.search(r"last_line_id: (\d+)", page).group(1))
+        digest = re.search(r'range_sha256: "([0-9a-f]{64})"', page).group(1)
+        count = int(re.search(r"const SAMPLE_LINES = (\d+)", page).group(1))
+        self.assertEqual(last - first + 1, count)
+        for field in ("opening_gurmukhi", "opening_translit", "gurmukhi", "translit"):
+            self.assertEqual(set(re.findall(rf'\b{field}: "([^"]*)"', page)), {"…"}, f"{field} must be elided")
+        if not DB.is_file():
+            self.skipTest("db/sggs.sqlite not installed (make dataset)")
+        import hashlib
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        try:
+            rows = con.execute("SELECT gurmukhi, ang, raag, author FROM lines WHERE id BETWEEN ? AND ? ORDER BY id", (first, last)).fetchall()
+        finally:
+            con.close()
+        self.assertEqual(len(rows), count)
+        self.assertEqual(hashlib.sha256("\n".join(r[0] for r in rows).encode("utf-8")).hexdigest(), digest,
+                         "the example's range_sha256 is not the hash of its corpus lines")
+        self.assertIn(f"ang: {rows[0][1]},", page)
+        self.assertIn(f'raag: "{rows[1][2]}"', page)
+        self.assertIn(f'author: "{rows[1][3]}"', page)
+
+    def test_the_check_it_teaches_is_the_services(self):
+        page = self.PAGE.read_text(encoding="utf-8")
+        # In the source the newline is written as two characters, backslash and n; so the page shows them.
+        self.assertIn(r'day.lines.map((line) => line.gurmukhi).join("\\n")', page)
+        self.assertIn('crypto.subtle.digest("SHA-256"', page)
+
+    def test_built_pages_follow_the_launch_switch(self):
+        if _unbuilt():
+            self.skipTest("webapp/static not built")
+        live = self._live()
+        sitemap = (STATIC / "sitemap.xml").read_text(encoding="utf-8")
+        for lang in self._langs():
+            p = STATIC / lang / "developers" / "index.html"
+            self.assertTrue(p.is_file(), f"/{lang}/developers is not built")
+            html = p.read_text(encoding="utf-8")
+            self.assertEqual(bool(_NOINDEX.search(html)), not live, f"/{lang}/developers: noindex must follow the launch switch")
+            self.assertEqual(f"{SITE}/{lang}/developers</loc>" in sitemap, live, f"/{lang}/developers: sitemap must follow the launch switch")
+            self.assertRegex(html, r'<section id="terms"', f"/{lang}/developers has no #terms")
+            self.assertIn(f'<link rel="canonical" href="{SITE}/{lang}/developers"', html)
+            self.assertIn('"@type":"WebAPI"', html)
+            self.assertIn("https://api.gurbanisoul.com/v1/hukamnama/today", html)
+            # Nothing links to it before launch; the footer does after.
+            home = (STATIC / lang / "index.html").read_text(encoding="utf-8")
+            self.assertEqual(f'href="/{lang}/developers"' in home, live, f"/{lang}: footer link must follow the launch switch")
+
+
 class ShareCardMeta(unittest.TestCase):
     """Every built page unfurls as a complete, versioned share card (frontend/src/og, share.ts).
 
