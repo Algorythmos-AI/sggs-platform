@@ -51,14 +51,17 @@ with `all`. The five contexts go live there together in a later release by listi
 `api_platform: render` proxies `/api` back to the Render single API — the rollback. `tools/gen_gateway.py`
 combines it with `serve.ROUTES` and writes the rewrites in `frontend/vercel.json`: every prefix of
 a routed context and its `/api/v1` twin to its function, everything else to `all` — staging's rules
-first, host-conditioned, then production's, host-less. At deploy time `tools/build_api_functions.py` generates the functions themselves;
+first, host-conditioned, then production's, host-less. An environment that names `hukamnama_api`
+(staging only, so far) also gets the two Hukamnama page routes, sent to `all`: the only pages a
+function renders ([the website](website.md)). At deploy time `tools/build_api_functions.py` generates the functions themselves;
 nothing generated is committed.
 
 ## What CI proves
 
 - `gen_gateway.py --check`: the committed rewrites equal what the code generates.
 - `build_api_functions.py --verify-output`: each function bundles only its entry, the API code and
-  its own database slice.
+  its own database slice; `all` also holds the Hukamnama page shell of every language, and no
+  other function does.
 - `X-Service` probes: each routed context answers its own routes; `/api/nope` falls through to `all`.
 - The whole golden contract (<!--fact:contract_records-->311<!--/fact--> records: the seven suites `tools/contract_http.py` replays) replays through the gateway on the staging site.
 
