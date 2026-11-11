@@ -1,0 +1,18 @@
+{
+  "_comment": "The keys the shipped iOS app decodes from a read-API record (HukamnamaEntry.CodingKeys in gurbani-soul-ios ios/App/Shared/HukamnamaShared.swift). They are frozen: a public record must carry each of them with this JSON type and, for published_at, this exact timestamp shape (no fractional seconds: the app decodes with .iso8601). status is a closed enum in the app.",
+  "published": {
+    "amritsar_date": "string",
+    "status": "string",
+    "ang": "integer",
+    "first_line_id": "integer",
+    "last_line_id": "integer",
+    "comp_id": "integer",
+    "opening_gurmukhi": "string",
+    "opening_translit": "string",
+    "range_sha256": "string",
+    "scripture_sha256": "string",
+    "published_at": "string"
+  },
+  "status_values": ["published", "pending", "held"],
+  "timestamp_pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\+00:00$"
+}

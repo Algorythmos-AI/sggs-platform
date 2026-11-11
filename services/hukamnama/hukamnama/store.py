@@ -96,6 +96,12 @@ class Store:
                                       "ORDER BY amritsar_date DESC LIMIT ?", (limit,))]
         return [d for d in (self.decision(date.fromisoformat(x)) for x in days) if d]
 
+    def published(self) -> list[dict]:
+        """Every published day, oldest first (the public snapshot is built from this)."""
+        days = [r[0] for r in self._x("SELECT amritsar_date FROM hukamnamas WHERE status='published' "
+                                      "ORDER BY amritsar_date")]
+        return [d for d in (self.decision(date.fromisoformat(x)) for x in days) if d]
+
     def publish(self, day: date, res: Resolution, fingerprint: str, now: datetime, by: str, *,
                 reason: str | None = None, overwrite: bool = False) -> bool:
         """Record a published Hukamnama. Returns False when the day is already decided and
@@ -162,6 +168,10 @@ class Store:
     def get_meta(self, key: str) -> str | None:
         rows = self._x("SELECT value FROM meta WHERE key = ?", (key,))
         return rows[0][0] if rows else None
+
+    def meta_keys(self, prefix: str) -> list[str]:
+        return [r[0] for r in self._x("SELECT key FROM meta WHERE substr(key, 1, ?) = ? ORDER BY key",
+                                      (len(prefix), prefix))]
 
     def del_meta(self, key: str) -> bool:
         with self._lock:
