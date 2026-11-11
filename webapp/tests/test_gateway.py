@@ -82,7 +82,26 @@ class Gateway(unittest.TestCase):
 
     # -- the Hukamnama pages: the only page routes a function answers --------------------------
     def _page_rules(self, rw):
-        return [r for r in rw if "hukamnama" in r["source"]]
+        return [r for r in rw if "/hukamnama" in r["source"] and not r["source"].startswith("/feeds")]
+
+    def test_hukamnama_feeds_go_to_all_with_the_pages(self):
+        import sys
+        sys.path.insert(0, str(ROOT / "webapp"))
+        import hukamnama_feed
+        self.assertEqual(sorted(gg.FEEDS), sorted(hukamnama_feed.PATHS))        # the routes are the paths it serves
+        rules = [r for r in VERCEL["rewrites"] if r["source"].startswith("/feeds")]
+        self.assertEqual(len(rules), len(gg.FEEDS))
+        for r in rules:
+            self.assertEqual(r["destination"], "/api/svc/all")
+            self.assertEqual(r["has"], [{"type": "host", "value": CFG["staging"]["host"]}])
+        sources = [re.compile("^" + r["source"] + "$") for r in rules]
+        for path in gg.FEEDS:
+            self.assertTrue(any(s.match(path) for s in sources), path)
+        for path in ("/feeds/hukamnamaXxml", "/feeds/hukamnama.xml/x", "/feeds/other.xml", "/en/feeds/hukamnama.xml"):
+            self.assertFalse(any(s.match(path) for s in sources), path)
+        off = copy.deepcopy(CFG)
+        del off["staging"]["hukamnama_api"]
+        self.assertFalse(any(r["source"].startswith("/feeds") for r in gg.rewrites(off)))
 
     def test_hukamnama_pages_go_to_all_only_where_the_environment_names_the_api(self):
         self.assertTrue(CFG["staging"].get("hukamnama_api"), "staging serves the pages")

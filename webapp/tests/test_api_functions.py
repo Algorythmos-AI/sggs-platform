@@ -384,6 +384,27 @@ class PageCheck(unittest.TestCase):
         self.assertIn("not the 'fr' page", self._check(200, "all", self.PAGE, lang="fr")[0])
         self.assertIn("HTTP 503", self._check(503, None, b"")[0])                       # the platform, not the function
 
+    def _feed(self, status, svc, body, path="/feeds/hukamnama.xml"):
+        real, vf.get = vf.get, lambda url, timeout=60: (status, svc, body)
+        try:
+            return vf.check_feed("https://example.test", path)
+        finally:
+            vf.get = real
+
+    def test_a_whole_feed_from_all_passes_and_anything_else_is_named(self):
+        atom = b'<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">\n</feed>\n'
+        feed_json = b'{"version": "https://jsonfeed.org/version/1.1", "items": []}'
+        self.assertEqual(self._feed(200, "all", atom), (None, None))
+        self.assertEqual(self._feed(200, "all", feed_json, "/feeds/hukamnama.json"), (None, None))
+        self.assertIn("not a whole feed", self._feed(200, "all", atom[:-8])[0])
+        self.assertIn("not a whole feed", self._feed(200, "all", b"[]", "/feeds/hukamnama.json")[0])
+        self.assertIn("not a whole feed", self._feed(200, "all", atom, "/feeds/hukamnama.json")[0])
+        self.assertIn("HTTP 404", self._feed(404, None, b"")[0])
+        self.assertIn("X-Service None", self._feed(200, None, atom)[0])
+        problem, warning = self._feed(503, "all", b"Temporarily unavailable.")
+        self.assertIsNone(problem)
+        self.assertIn("HTTP 503", warning)
+
     def test_an_unreachable_hukamnama_api_is_a_warning_not_a_failed_deploy(self):
         problem, warning = self._check(503, "all", b"Temporarily unavailable")
         self.assertIsNone(problem)

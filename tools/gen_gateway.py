@@ -17,7 +17,8 @@ Every CI deployment carries all six; gateway/routes.json decides, per environmen
   * api_platform "render": every /api path is proxied to the Render origin in "api" (the single API).
   * "hukamnama_api" (Vercel functions only): the origin of the public Hukamnama API. Where it is
     set, /{lang}/hukamnama and /{lang}/hukamnama/YYYY-MM-DD (the only pages a function renders,
-    webapp/hukamnama_page.py) go to `all`, which is told that origin (build_api_functions.py).
+    webapp/hukamnama_page.py) and the feeds /feeds/hukamnama.xml and .json
+    (webapp/hukamnama_feed.py) go to `all`, which is told that origin (build_api_functions.py).
     An environment without it has no such rule: those paths stay with the static site.
 
 Staging rules are host-conditioned and come first (Vercel applies the first matching rewrite), so
@@ -48,6 +49,7 @@ MAX_DURATION_S = 60
 # Vercel already). tools/build_api_functions.py --verify-output fails the build on anything else.
 LOCALES_FILE = ROOT / "frontend" / "src" / "i18n" / "locales.json"
 SHELL_DIR = "webapp/hukamnama_shells"   # in a bundle, under DATA_DIR; the Hukamnama page shells
+FEEDS = ("/feeds/hukamnama.xml", "/feeds/hukamnama.json")   # webapp/hukamnama_feed.PATHS (a test keeps them equal)
 # The value of Vercel's VERCEL_ENV in each environment's deployments (staging is an aliased preview).
 VERCEL_ENV = {"staging": "preview", "production": "production"}
 WEB_ONLY = ("src/**", "public/**", "e2e/**", "scripts/**", "dist/**", ".astro/**", "test-results/**",
@@ -143,6 +145,8 @@ def rewrites(cfg: dict) -> list[dict]:
             lang = "(" + "|".join(languages()) + ")"
             add(f"/{lang}/hukamnama", f"/{FN_DIR}/all", host)
             add(f"/{lang}/hukamnama/(\\d\\d\\d\\d-\\d\\d-\\d\\d)", f"/{FN_DIR}/all", host)
+            for feed in FEEDS:
+                add(feed.replace(".", "\\."), f"/{FN_DIR}/all", host)
         add("/api/(.*)", f"/{FN_DIR}/all", host)
         add("/readyz", f"/{FN_DIR}/all", host)
         add("/healthz", f"/{FN_DIR}/all", host)

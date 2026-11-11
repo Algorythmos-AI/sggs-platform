@@ -139,6 +139,28 @@ On Vercel the pages are answered by the `all` API function, per environment:
 A date in the future or an unknown path under these routes is a plain-text 404 from the function,
 not the site's styled 404 page (the function does not bundle the static site).
 
+### The Hukamnama feeds
+
+`/feeds/hukamnama.xml` (Atom) and `/feeds/hukamnama.json` (JSON Feed 1.1) list the most recent
+published days, newest first, up to 30. `webapp/hukamnama_feed.py` builds them in the same `all`
+function, under the same switch and routing as the pages (`hukamnama_api`; staging only so far),
+and each page's `<head>` links both. The paths sit outside the language tree on purpose: a feed is
+one document, and `/feeds/…` is not caught by the generated language redirects.
+
+The rules are the pages' rules:
+
+- From the API's list only each day's date, line-id range, `range_sha256` and publication time are
+  used. The text comes from the server's own corpus, and a day enters a feed only after its lines
+  hash to `range_sha256`. A day that does not prove is left out and logged; it is never shown.
+- A day dated after the Amritsar date at that moment is left out, whatever the API lists.
+- Titles and summaries carry the name, the date and the Ang, never scripture. In an entry's
+  content the Gurmukhi comes first in its own block (`lang="pa"`); transliteration and, when the
+  meaning layer is on upstream, the English translation follow, each under its own label.
+- Feed labels are English; the entries link to the English page. Per-language feeds are not built.
+- A feed is cached for two minutes. If the API is unreachable the last proven list is served;
+  with nothing proven yet the answer is 503 with `Retry-After`.
+- After a deploy `verify_functions.py` requires both to be whole feed documents from `all`.
+
 What the renderer guarantees:
 
 - It asks the API for one **date** (the Amritsar date it computes itself), never "today", and

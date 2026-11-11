@@ -53,6 +53,8 @@ const stringsJson = JSON.stringify(strings).replace(/</g, "\\u003c");
 <Marketing title="__HK_TITLE__" description="__HK_DESCRIPTION__" path={localizeHref("/hukamnama/hk-shell", lang)} ogImage={ogImagePath("home")}>
   <Fragment slot="head">
     <meta name="robots" content="__HK_ROBOTS__" />
+    <link rel="alternate" type="application/atom+xml" title={t("hukamnama.eyebrow")} href="/feeds/hukamnama.xml" />
+    <link rel="alternate" type="application/feed+json" title={t("hukamnama.eyebrow")} href="/feeds/hukamnama.json" />
     <script type="application/ld+json" set:html="__HK_JSONLD__"></script>
     <script type="application/json" id="hk-strings" set:html={stringsJson}></script>
   </Fragment>

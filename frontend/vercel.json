@@ -561,6 +561,26 @@
       "destination": "/api/svc/all"
     },
     {
+      "source": "/feeds/hukamnama\\.xml",
+      "has": [
+        {
+          "type": "host",
+          "value": "sggs-staging.vercel.app"
+        }
+      ],
+      "destination": "/api/svc/all"
+    },
+    {
+      "source": "/feeds/hukamnama\\.json",
+      "has": [
+        {
+          "type": "host",
+          "value": "sggs-staging.vercel.app"
+        }
+      ],
+      "destination": "/api/svc/all"
+    },
+    {
       "source": "/api/(.*)",
       "has": [
         {
