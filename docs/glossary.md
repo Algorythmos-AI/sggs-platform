@@ -42,6 +42,7 @@ the page that uses the term says so. Cite the scripture itself, never this table
 | **Mundavani** | The closing seal of the Granth (Ang 1429), followed by a final salok and Raagmala. |
 | **Raagmala** | The index of raags that closes the Granth (Angs 1429–1430). |
 | **Hukam / Hukamnama** | A composition taken as the day's reading; the API's `/api/random` returns one complete unit for it. In the hymns, ਹੁਕਮੁ is also the divine Will. |
+| **Hukamnama · Sri Harmandir Sahib** | The app's and the website's name for the Hukamnama taken each morning at Sri Harmandir Sahib, Amritsar, dated by the Amritsar date. SGPC's page is used only to locate it; the text is the corpus's ([the Hukamnama service](architecture/hukamnama.md)). Never called the Hukam of the day, which the app chooses by date on the device. |
 | **Nitnem** | The daily prayers; in the app a set of banis ordered by time band, with a Nitnem day that rolls at 03:00. |
 | **Gutka** | A small prayer book; the app's Nitnem screen plays that role. |
 | **Rehras** | The evening prayer; the app carries the SGPC form by default and the Taksal form as a variant. |

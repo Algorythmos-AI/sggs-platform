@@ -4,8 +4,8 @@ description: "How a change reaches users and what keeps production honest: branc
 sidebar:
   order: 0
 verified:
-  commit: 364c4520
-  date: "2026-09-27"
+  commit: 14c89ad9
+  date: "2026-11-12"
 ---
 # Ship and operate
 
@@ -31,6 +31,8 @@ follows from that tag. Nobody deploys by hand, and every step can be undone.
 - [Deploys](runbooks/deploy.md) — the CI-gated pipeline gate by gate, its secrets, and how to read a failed run.
 - [Rollback](runbooks/rollback.md) — the website and the API together, the Render standby, a dataset, the app.
 - [Moving production to functions](runbooks/services-production.md) — the per-context cut-over, gated on the performance baseline and the data canary.
+- [The Hukamnama each morning](runbooks/hukamnama.md) — the owner's decisions: reading `/health`, a held day, approve, hold and resend, corrections, the deploy freeze.
+- [The Hukamnama service](runbooks/hukamnama-service.md) — the Render staging service: setup, the R2 backup, the public snapshot bucket, the APNs key.
 - [The docs site](runbooks/docs-site.md) — keeping docs.gurbanisoul.com honest: deploys, watchers, pins, reviews.
 - [Support inbox](runbooks/support-inbox.md) — the public support address and how mail to it is handled.
 - [Launch-notice sign-up](runbooks/newsletter.md) — the sign-up on the landing page and its privacy rules.
