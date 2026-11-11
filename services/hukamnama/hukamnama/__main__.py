@@ -12,6 +12,8 @@ Public snapshot (``serve --public-dir DIR`` or ``HUKAMNAMA_PUBLIC_DIR``): every 
 written as a file for the public API (see ``public.py``), in full at start and after each poll, so
 an ``approve`` or ``hold`` run from another shell reaches the files within one poll interval.
 ``HUKAMNAMA_MEANING=on`` adds the labelled English translation layer; off removes it on the next sync.
+With ``HUKAMNAMA_PUBLIC_BUCKET`` (and its endpoint and keys, see ``r2.py``) the same files are
+written to an R2 bucket, which the edge Worker serves; a half-configured bucket refuses to start.
 ``export-public`` writes the same files once and exits.
 
 Push (``serve``): sending is OFF unless ``HUKAMNAMA_SEND=on``. It then needs the APNs Auth Key,
@@ -87,9 +89,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "serve":
         state = State(store, fingerprint)
         stop = threading.Event()
-        publisher = _publisher(store, con, fingerprint, args.public_dir) if args.public_dir else None
-        if publisher:
-            publisher.sync_safely(force=True)
+        try:
+            publisher = _publisher(store, con, fingerprint, args.public_dir)
+        except ValueError as e:
+            print(f"public snapshot: {e}", file=sys.stderr)      # half-configured: refuse, as for backups
+            return 2
+        if publisher and args.no_poll:
+            publisher.sync_safely()        # with polling, the poll loop's first pass does this
         if not args.no_poll:
             fetcher = Archive(args.archive).wrap(fetch) if args.archive else fetch
             engine = Engine(store, con, fingerprint, fetcher=fetcher)
@@ -113,7 +119,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"action": r.action, "detail": r.detail}, ensure_ascii=False))
         return 0
     if args.cmd == "export-public":
-        r = _publisher(store, con, fingerprint, args.out).sync(force=True)
+        r = _publisher(store, con, fingerprint, args.out, env={}).sync(force=True)
         print(json.dumps({"written": len(r["written"]), "deleted": len(r["deleted"]), "skipped": r["skipped"]}))
         return 1 if r["skipped"] else 0
     day = clock.parse_day(args.date)
@@ -132,9 +138,19 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-def _publisher(store, con, fingerprint: str, out: str):
+def _publisher(store, con, fingerprint: str, out: str | None, env=os.environ):
+    """The publisher for the configured sinks (a directory, the R2 bucket, or both), or None when
+    neither is configured. Raises ValueError when the bucket is only half configured."""
     from .public import DirSink, Publisher
-    return Publisher(store, con, fingerprint, DirSink(out), meaning=os.environ.get("HUKAMNAMA_MEANING", "off") == "on")
+    from .r2 import MultiSink, from_env
+    sinks = [DirSink(out)] if out else []
+    r2 = from_env(env)
+    if r2:
+        sinks.append(r2)
+    if not sinks:
+        return None
+    sink = sinks[0] if len(sinks) == 1 else MultiSink(*sinks)
+    return Publisher(store, con, fingerprint, sink, meaning=os.environ.get("HUKAMNAMA_MEANING", "off") == "on")
 
 
 def _apns_from_env():

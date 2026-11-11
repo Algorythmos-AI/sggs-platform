@@ -154,6 +154,7 @@ class Publisher:
     nothing changed, so it runs after every poll and once, in full, at start."""
     def __init__(self, store: Store, con: sqlite3.Connection, fingerprint: str, sink, *, meaning: bool = False) -> None:
         self.store, self.con, self.fingerprint, self.sink, self.meaning = store, con, fingerprint, sink, meaning
+        self._full_sync_due = True          # the first sync_safely rewrites everything (see there)
 
     def desired(self) -> tuple[dict[str, bytes], list[str]]:
         objects: dict[str, bytes] = {}
@@ -202,9 +203,13 @@ class Publisher:
             log.info("public snapshot: wrote %d, deleted %d", len(written), len(deleted))
         return {"written": written, "deleted": deleted, "skipped": skipped}
 
-    def sync_safely(self, *, force: bool = False) -> None:
-        """For the poll loop: publishing files must never stop polling or sending."""
+    def sync_safely(self) -> None:
+        """For the poll loop: publishing files must never stop polling or sending.
+
+        The first call that succeeds writes everything (so an emptied or newly added sink is
+        filled); until one succeeds, every call tries the full write again."""
         try:
-            self.sync(force=force)
+            self.sync(force=self._full_sync_due)
+            self._full_sync_due = False
         except Exception:
             log.exception("public snapshot sync failed")

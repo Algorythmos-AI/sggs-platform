@@ -63,7 +63,8 @@ python3 -m unittest discover -s tests -t .     # or: make test-hukamnama (repo r
 
 Runtime is Python-stdlib only. Environment: `HUKAMNAMA_DB`, `HUKAMNAMA_STATE`, `HUKAMNAMA_ARCHIVE`
 (keep every distinct page fetched, for replay; `hukamnama/archive.py`), `HUKAMNAMA_PUBLIC_DIR` and
-`HUKAMNAMA_MEANING` (the public snapshot, below), `HUKAMNAMA_COMMIT`, `PORT`.
+`HUKAMNAMA_MEANING` and the `HUKAMNAMA_PUBLIC_…` bucket settings (the public snapshot, below),
+`HUKAMNAMA_COMMIT`, `PORT`.
 
 **Deployed** as the Render service `sggs-hukamnama-staging` (Docker, `services/hukamnama/Dockerfile`,
 1 GB disk at `/var/data`) by `.github/workflows/hukamnama-deploy.yml`, watched from outside by
@@ -103,6 +104,13 @@ python3 -m hukamnama --db ../../db/sggs.sqlite --state /tmp/hk.sqlite export-pub
 |---|---|
 | `v1/hukamnama/<YYYY-MM-DD>.json` | every field of the read API's published record, plus `lines[]` (`id`, `ang`, `gurmukhi`, `translit`, `is_heading`, `is_rahao`, `author`), `ang_end`, `raag`, `author`, `url`, `attribution`, `terms_url` |
 | `v1/hukamnama/index.json` | `scripture_sha256`, `latest`, and `days[]` newest first |
+
+With `HUKAMNAMA_PUBLIC_BUCKET` set, the same files are also written to a Cloudflare R2 bucket
+(`hukamnama/r2.py`, the S3 API signed with Signature Version 4, stdlib only), which the edge Worker
+(`services/hukamnama-edge`) serves. It needs `HUKAMNAMA_R2_ENDPOINT` and its own bucket-scoped keys
+(`HUKAMNAMA_PUBLIC_ACCESS_KEY_ID`, `HUKAMNAMA_PUBLIC_SECRET_ACCESS_KEY`); half-configured, the
+service refuses to start. A failed write is logged and tried again after the next poll, and the
+first sync after a start writes every file, so a new or emptied bucket fills itself.
 
 - **Proven or not written.** A day's file is written only when its lines, read again from the
   corpus, hash to the `range_sha256` it was published with, in the corpus it was published in.

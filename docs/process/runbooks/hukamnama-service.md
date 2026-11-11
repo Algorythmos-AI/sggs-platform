@@ -82,6 +82,27 @@ scratch path and compare: `render ssh <service-id>` →
 `litestream restore -config /etc/litestream.yml -integrity-check quick -o /tmp/restored.sqlite /var/data/hukamnama-state.sqlite`.
 A rotated or revoked token stops replication but not the service; the log shows the error.
 
+## Public snapshot: the bucket the edge Worker reads
+
+Not set up yet (staging or production). The service can write each published day as a file to an
+R2 bucket, which the edge Worker (`services/hukamnama-edge`) serves as the public API. To turn it on
+for one service, the owner:
+
+1. Creates the bucket (`hukamnama-public-staging` for staging, `hukamnama-public` for production;
+   the names in the Worker's `wrangler.toml`).
+2. Creates an R2 API token scoped to **that bucket only**, Object Read & Write. It is a different
+   token from the backup's.
+3. Adds three values to the service's environment on Render: `HUKAMNAMA_PUBLIC_BUCKET`,
+   `HUKAMNAMA_PUBLIC_ACCESS_KEY_ID`, `HUKAMNAMA_PUBLIC_SECRET_ACCESS_KEY`
+   (`HUKAMNAMA_R2_ENDPOINT` is already there for the backup). Use the token's S3 Access Key ID and
+   Secret, as for Litestream.
+
+With the bucket name set and a key missing, the service refuses to start and names what is
+missing. After the next deploy the first poll writes every published day; `public snapshot: wrote N`
+in the log confirms it. A failed write is logged (`public snapshot sync failed`) and tried again
+after the next poll; it never stops polling or sending. `HUKAMNAMA_MEANING=on` adds the English
+translation layer to the files, and removing it takes the layer out on the next poll.
+
 ## Every morning (automatic)
 
 - The poller runs every minute 05:00–09:00 IST, then every 10 minutes until 14:00 IST.
