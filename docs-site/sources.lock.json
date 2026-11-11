@@ -99,7 +99,7 @@
     "gurbani-soul-ios": {
       "repository": "Algorythmos-AI/gurbani-soul-ios",
       "ref": "main",
-      "commit": "01fcbd24d31d83e62942e7eb972f2c167425e25a",
+      "commit": "0c67ec5414a93d70e920be1c16331560a8b864f3",
       "alias": "ios",
       "include": [
         "docs/ios/*.md",
@@ -135,8 +135,8 @@
           "sha256": "e5cd7a34e20f905a6b4ca95883f15bf541f08e274f4788a2b2e89d407619e875"
         },
         "docs/ios/app-store-listing.md": {
-          "blob": "c4d82f35fe953853d4dc949976c8afac84840014",
-          "sha256": "bc3594dc3bdf6c609b0ce6252dc19299f2bf57117c5085bd7dc64fa801cfee8d"
+          "blob": "99ae412c810bf11c793e317b4ae1ecc24a521bb9",
+          "sha256": "97b34fb8c47b42215fe9820444c088e76f73c9f2db1a36dc6cff026bdd24dcf7"
         },
         "docs/ios/device-checklist-1.4.9.md": {
           "blob": "92ad3f95cdb620257ac9cfde22b60427ccf93b2f",
@@ -211,20 +211,20 @@
           "sha256": "cee1944242c0d2575f21967b3d05f31953e239c1b00c465f629f74f572699a28"
         },
         "ios/testflight-builds.json": {
-          "blob": "05eb84690ccafbcae6d8e7eb8ef2075dc28df85c",
-          "sha256": "dd1f6d5b2cb8babcfdf7facdac286ecfd215a72a5d7416497fedac99b1ce8c46"
+          "blob": "5fb4c10d7b78c1fae4cbe0b259015eeca6b7003d",
+          "sha256": "1bd7ac484fdaefb3f054c63653a81fe78a8131ccb47da54b0463e457e7b7e0b9"
         },
         "ios/tests/test_ios_gates.py": {
-          "blob": "4d16ebaa36e2233653dffba5ed0f4f41681352d5",
-          "sha256": "1e09a49ab90d8eb7112229c2eae8ba2341091f8b5595f808f556af20155341cd"
+          "blob": "5fdaf586fabf51c235c6fadbb98873ee400894c6",
+          "sha256": "35f09aafb9b4090639459b283a251889f7adb905e13957e7362507ec66c46371"
         },
         "ios/tools/appstore_preflight.py": {
           "blob": "4f703129b9eb0f009031eaf6deb7a34a2e4179d0",
           "sha256": "4674077876e5b7257ded7510a505a802db2407520416827eeacc559e1210488c"
         },
         "ios/tools/testflight_archive.sh": {
-          "blob": "bbb0c60216d677e11c094ce4a6e14c8585dbff1c",
-          "sha256": "2cfde35cd7048d5f6c1c228cb033c3f2ba4ec05e78e467106c6e09417f72ad2f"
+          "blob": "70ff9a3effe992e73646bb4a58d553ffd488c54b",
+          "sha256": "3f0c0fe64cd079d7aa8b7321caaedeedcbc77a9572a628a5893d17a79be85a68"
         },
         "ios/tools/testflight_ledger.py": {
           "blob": "7d1d6a6ed45ca73d8b7c9345b7b1b8a16b1281fc",
@@ -243,8 +243,8 @@
           "sha256": "2c059b035782151186942756e80112ea5d942747fed3d582a7ad84d7bc557c68"
         },
         "vendor.lock.json": {
-          "blob": "0d37f099476613f8c1232ced2e67df01ab7224b1",
-          "sha256": "b63d62b1ffd08f8a0b32e7c91f0a8b18e634fea4aef5013dd29141c28b81af26"
+          "blob": "7662832df1050f13cc003413b2dcf53deb5defc3",
+          "sha256": "6285f655947a2f66e05bd43434b91ef3f9904f42bf23e99cdbb98929d1443088"
         }
       }
     }
