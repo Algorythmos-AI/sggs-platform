@@ -1,7 +1,7 @@
 name: docs-freshness
 # Weekly: regenerate the wiki's generated pages and list the pages to re-read — as ONE pull request.
-# Every `tools/gen_*.py` that accepts `--write` is run (a new generator is picked up by opting in to
-# `--write`; the others are skipped), then `tools/docs_check.py --freshness` lists the stamped pages
+# Every page generator (`make docs-generators`, the Makefile's DOCS_GENERATORS) is run in write mode,
+# then `tools/docs_check.py --freshness` lists the stamped pages
 # whose cited code changed since their `verified` stamp, and the pages simply far behind. When a
 # generator changed a file or a page is stale, the branch `bot/docs-refresh` is force-pushed (one
 # commit on integration) and one pull request into integration is opened or updated, titled with the
@@ -58,11 +58,15 @@ jobs:
           key: dataset-${{ hashFiles('dataset.lock.json') }}
       - env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
         run: python3 scripts/data/fetch_dataset.py --cache-dir .dataset-cache
-      - name: Run every generator that accepts --write
+      - name: Run every page generator in write mode (the list is DOCS_GENERATORS in the Makefile)
+        # Until 2026-11-12 this looped over tools/gen_*.py and kept those whose source held a quoted
+        # "--write". None does (they write unless given --check), so every weekly run skipped all of
+        # them and reported it as success. The list is now explicit and tested against docs-check.
         run: |
           : > "$RUNNER_TEMP/gens.md"
-          for g in tools/gen_*.py; do
-            if ! grep -qE "[\"']--write[\"']" "$g"; then echo "skip $g (no --write)"; echo "- \`$g\`: skipped (no \`--write\`)" >> "$RUNNER_TEMP/gens.md"; continue; fi
+          gens="$(make -s docs-generators)"
+          [ -n "$gens" ] || { echo "::error::make docs-generators listed no generator"; exit 1; }
+          for g in $gens; do
             echo "::group::$g --write"
             if python3 "$g" --write; then echo "- \`$g --write\`: ran" >> "$RUNNER_TEMP/gens.md"
             else echo "::warning::$g --write failed"; echo "- \`$g --write\`: **failed** (see the run)" >> "$RUNNER_TEMP/gens.md"; fi
@@ -72,6 +76,7 @@ jobs:
         run: |
           python3 tools/docs_check.py --freshness "$RUNNER_TEMP/fresh.md"
           python3 tools/docs_check.py --health "$RUNNER_TEMP/health.json"
+          python3 tools/docs_check.py --areas "$RUNNER_TEMP/areas.md"
       - name: What changed
         id: state
         run: |
@@ -124,6 +129,8 @@ jobs:
             echo "## ${PAGES} pages to re-read"; echo
             if [ -s "$RUNNER_TEMP/fresh.md" ]; then cat "$RUNNER_TEMP/fresh.md"; else echo "Every stamped page is fresh."; fi
             echo
+            echo "## Code areas with no wiki page"; echo
+            cat "$RUNNER_TEMP/areas.md"; echo
             echo "## What stays human"; echo
             echo "- Re-read each page listed above against the code it cites, fix what drifted and move its \`verified\` stamp. Push those commits to \`$BRANCH\`: the bot never moves a stamp, and never force-pushes over a commit it did not make."
             echo "- \`scripture-diff-guard\` is enforced on this branch: a commit here that adds or removes a Gurmukhi code point fails it."
@@ -218,8 +225,8 @@ jobs:
           fi
           {
             if [ -s "$RUNNER_TEMP/fresh.md" ]; then cat "$RUNNER_TEMP/fresh.md"; else echo "Every stamped page is fresh, but a generator changed a page."; fi
-            printf '\n%s\n\nBy hand, in a branch from integration: run every %s, then %s.\n\nRun: %s\n' \
-              "$why" "\`tools/gen_*.py --write\`" "\`python3 tools/docs_check.py --freshness\`" "$RUN_URL"
+            printf '\n%s\n\nBy hand, in a branch from integration: run %s, then %s.\n\nRun: %s\n' \
+              "$why" "\`make docs-regen\`" "\`python3 tools/docs_check.py --freshness\`" "$RUN_URL"
           } > "$RUNNER_TEMP/issue.md"
           existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$ISSUE_TITLE\"" --json number --jq '.[0].number // empty')"
           if [ -n "$existing" ]; then

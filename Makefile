@@ -48,6 +48,10 @@ ci: check-versions dataset-check test-web test-hukamnama contract docs-check ## 
 	@echo "make ci: PASS"
 
 # ── the wiki (docs-site/ over docs/; docs.gurbanisoul.com) ───────────────────
+# The generators of the wiki's generated pages: `--check` in docs-check and the deploy-docs docs job,
+# write mode in docs-regen (the weekly docs-freshness pull request). tools/tests/test_docs_generators.py
+# keeps this list, docs-check and the docs job in step: a new generator goes here first.
+DOCS_GENERATORS := gen_route_table gen_data_dictionary gen_api_errors gen_contributors gen_env_vars gen_facts
 docs-check: ## docs gates: frontmatter, links, widgets, Mermaid palette, scripture rule, posters, drift vs code, site config, sibling pin, generated pages
 	python3 tools/docs_check.py
 	python3 tools/gen_route_table.py --check
@@ -60,6 +64,10 @@ docs-check: ## docs gates: frontmatter, links, widgets, Mermaid palette, scriptu
 	python3 scripts/brand/contrast_report.py --check
 	python3 tools/fetch_sibling_docs.py --check
 	python3 -m unittest discover -s tools/tests
+docs-generators: ## print the wiki's page generators (one per line; read by docs-freshness.yml)
+	@for g in $(DOCS_GENERATORS); do echo "tools/$$g.py"; done
+docs-regen: ## rewrite every generated wiki page from its source (what the weekly refresh pull request commits)
+	@for g in $(DOCS_GENERATORS); do echo "python3 tools/$$g.py --write"; python3 tools/$$g.py --write || exit 1; done
 docs: ## build the wiki (installs pinned sibling docs; renders every Mermaid fence; validates links)
 	python3 tools/fetch_sibling_docs.py
 	cd docs-site && npm ci && npm run test:unit && node scripts/build-posters.mjs --check && npm run build && npm run check:all

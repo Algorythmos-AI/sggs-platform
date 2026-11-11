@@ -13,10 +13,12 @@ Run each step from the repository root, on the feature branch.
    moved.
 2. **Edit only those pages.** Read each flagged page against the changed code, and correct what
    the change made untrue. Do not rewrite pages that are not listed, and do not restyle anything.
-3. **Regenerate.** Run `python3 tools/gen_facts.py --write`, `python3 tools/gen_env_vars.py --write`,
-   `python3 tools/gen_route_table.py`, `python3 tools/gen_api_errors.py`,
-   `python3 tools/gen_data_dictionary.py` and `python3 tools/gen_contributors.py`. Never edit a
-   generated page by hand.
+3. **Regenerate.** Run `make docs-regen` (every generator in the Makefile's `DOCS_GENERATORS`, in
+   write mode). Never edit a generated page by hand.
+3b. **New code areas.** `python3 tools/docs_check.py --areas`. A new directory or file directly under
+   `services/`, `webapp/` or `frontend/src/pages/`, or a new workflow, must be in the `covers:` of
+   the page that describes it (or be linked from it); `make docs-check` fails otherwise. Only built
+   output or tests go under `exempt` in `tools/docs_areas.json`, with a reason.
 4. **Stamps.** Move a page's `verified: {commit, date}` only after re-reading the whole page
    against the code at that commit. Use the HEAD commit and today's date. A page you did not
    re-read keeps its stamp.

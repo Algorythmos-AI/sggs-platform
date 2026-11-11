@@ -47,13 +47,45 @@ jobs:
           if [ -n "$existing" ]; then
             gh issue close "$existing" --repo "$GITHUB_REPOSITORY" --comment "The pins in docs-site/sources.lock.json are current: nothing the wiki publishes differs from the sibling repositories."
           fi
-      - name: The docs gates pass with the new pins
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        if: steps.pins.outputs.changed == 'true'
+        with: { node-version-file: ".nvmrc", cache: npm, cache-dependency-path: docs-site/package-lock.json }
+      - name: The docs gates with the new pins (a failure goes on the pull request, it does not stop it)
+        # The source-level gates the docs check runs that a pin can break: a sibling page that fails
+        # docs_check, a sibling path the repo map names that moved, a new sibling directory the
+        # sidebar does not place (docs-site/sidebar.mjs). Until 2026-11-12 a failure here ended the job
+        # with no pull request and an issue blaming the token; now the pull request opens anyway
+        # with the failure in its description, so the fix (on integration) has a place to be seen.
+        id: gates
         if: steps.pins.outputs.changed == 'true'
         env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
         run: |
-          python3 tools/fetch_sibling_docs.py --check
-          python3 tools/fetch_sibling_docs.py
-          python3 tools/docs_check.py
+          set -uo pipefail
+          log="$RUNNER_TEMP/gates.log"; : > "$log"; failed=""
+          gate() {
+            echo "::group::$*"
+            if "$@" > "$RUNNER_TEMP/one.log" 2>&1; then cat "$RUNNER_TEMP/one.log"
+            else cat "$RUNNER_TEMP/one.log"; failed="$failed- \`$*\`"$'\n'; { echo "\$ $*"; tail -n 30 "$RUNNER_TEMP/one.log"; echo; } >> "$log"; fi
+            echo "::endgroup::"
+          }
+          gate python3 tools/fetch_sibling_docs.py --check
+          gate python3 tools/fetch_sibling_docs.py
+          gate python3 tools/docs_check.py
+          gate python3 tools/gen_repo_map.py --check
+          gate npm ci --prefix docs-site --no-audit --no-fund
+          gate node --test docs-site/plugins/test/sidebar.test.mjs
+          if [ -z "$failed" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; echo "every gate passes with the new pins"; exit 0; fi
+          echo "ok=false" >> "$GITHUB_OUTPUT"
+          echo "::warning::the docs gates fail with the new pins; the pull request says which"
+          {
+            echo; echo "### The docs gates fail with these pins"; echo
+            printf '%s' "$failed"; echo
+            echo "Fix it on \`integration\`, not on this branch: place a new sibling directory in \`docs-site/sidebar.mjs\`,"
+            echo "update a moved path in \`docs/reference/repo-map.json\`, or fix the page in its own repository."
+            echo "This branch is rebuilt from \`integration\` every day (06:41 UTC, or run *docs-pins* by hand), and"
+            echo "the next run carries the fix."; echo
+            echo '```'; cat "$log"; echo '```'
+          } >> "$RUNNER_TEMP/pins.md"
       - name: Can DOCS_BOT_TOKEN push here? (a dry-run push; nothing is written)
         id: bot
         if: steps.pins.outputs.changed == 'true' && env.HAVE_BOT == 'true'
@@ -132,3 +164,8 @@ jobs:
           else
             gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --label documentation --body-file "$RUNNER_TEMP/issue.md"
           fi
+      - name: A red run when the gates fail with the new pins (the pull request or the issue says why)
+        if: always() && steps.gates.outputs.ok == 'false'
+        run: |
+          echo "::error::the docs gates fail with the new sibling pins; see the pull request description"
+          exit 1

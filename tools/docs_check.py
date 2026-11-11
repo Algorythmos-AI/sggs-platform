@@ -5,6 +5,7 @@
     python3 tools/docs_check.py --db PATH  # also verify cited scripture against the pinned database
     python3 tools/docs_check.py --freshness [OUT]   # the full list of stamps to re-read (report only)
     python3 tools/docs_check.py --health OUT.json   # the numbers on docs/reference/docs-health.md
+    python3 tools/docs_check.py --areas [OUT]       # which code areas are on a wiki page (report only)
 
 Every published page (docs/**/*.md except docs/reports/archive and docs/design) must:
   1. carry frontmatter: `title` (8–120 chars, equal to the body's first H1 read as text) and
@@ -28,6 +29,8 @@ Every published page (docs/**/*.md except docs/reports/archive and docs/design) 
   7. posters (docs/diagrams/posters/*.svg): the spec in docs/diagrams/README.md (viewBox 1200 wide,
      <title>+<desc>, brand colours, no brand red, text ≥ 25px, steps sidecar in step, footer
      naming existing source files).
+Code areas (tools/docs_areas.json): every service, server module, website page and workflow is
+covered by some page of this repository, or listed as exempt or backlog (check_areas).
 Site configuration: docs-site/vercel.json routes /api to the product host (frontend/src/site.ts
 SITE_URL) with git deployments off, and docs-site/sources.lock.json is well-formed.
 
@@ -916,6 +919,95 @@ def check_covers(value) -> list[str]:
     return out
 
 
+# ── code areas: every service, server module, website page and workflow is on some wiki page ────
+# The docs-impact check (tools/docs_coupling.py) can only flag a page that covers the code: a new
+# directory that no page names is invisible to it: the Hukamnama pull requests after 1.6.4 (#376 to
+# #393) changed services/hukamnama*, webapp/hukamnama_*.py and frontend/src/pages/**/hukamnama on no
+# page, so the report said "No page covers the code changed" and nothing was asked of them.
+# tools/docs_areas.json lists the
+# area patterns; an area is one immediate child of a pattern's directory (a file or a directory),
+# and it is covered when one of its files is covered by a page of this repository (`covers:`, or
+# the files it cites — covered_files). An uncovered area must be listed in `exempt` (never needs a
+# page, with a reason) or `backlog` (known gap, shrinks only); a new uncovered area is an error.
+AREAS_FILE = "tools/docs_areas.json"
+MIN_AREA_REASON = 10
+
+
+def areas_config() -> dict:
+    p = ROOT / AREAS_FILE
+    if not p.exists():
+        return {"areas": [], "exempt": {}, "backlog": {}}
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+def code_areas(patterns: list[str], files: list[str] | None = None) -> dict[str, list[str]]:
+    """{area: its tracked files} for patterns like `services/*` or `.github/workflows/*.yml`."""
+    out: dict[str, list[str]] = {}
+    for pat in patterns:
+        parent, _, leaf = pat.strip("/").rpartition("/")
+        rx = re.compile(glob_regex(leaf).pattern.replace("(?:/.*)?$", "$"))
+        prefix = f"{parent}/" if parent else ""
+        for f in tracked_files() if files is None else files:
+            if not f.startswith(prefix):
+                continue
+            child = f[len(prefix):].split("/", 1)[0]
+            if child and rx.match(child):
+                out.setdefault(prefix + child, []).append(f)
+    return dict(sorted(out.items()))
+
+
+def area_coverage(cfg: dict | None = None) -> dict:
+    """Each area's covering pages, and the areas no page covers, split by the config's lists."""
+    cfg = areas_config() if cfg is None else cfg
+    by_file: dict[str, set[str]] = {}
+    for page in published_pages():
+        if is_sibling(page):
+            continue
+        for f in covered_files(page, page.read_text(encoding="utf-8")):
+            by_file.setdefault(f, set()).add(_rel(page))
+    areas = code_areas(cfg.get("areas", []))
+    covered = {a: sorted(set().union(*(by_file.get(f, set()) for f in fs))) for a, fs in areas.items()}
+    exempt, backlog = cfg.get("exempt", {}), cfg.get("backlog", {})
+    bare = [a for a, pages in covered.items() if not pages]
+    return {"areas": areas, "covered": {a: p for a, p in covered.items() if p},
+            "exempt": [a for a in bare if a in exempt], "backlog": [a for a in bare if a in backlog and a not in exempt],
+            "missing": [a for a in bare if a not in exempt and a not in backlog],
+            "stale_entries": sorted(a for a in {**exempt, **backlog} if a not in areas),
+            "backlog_covered": sorted(a for a in backlog if covered.get(a)),
+            "short_reasons": sorted(a for a, why in {**exempt, **backlog}.items() if len(str(why).strip()) < MIN_AREA_REASON)}
+
+
+def check_areas(cfg: dict | None = None) -> list[Problem]:
+    r = area_coverage(cfg)
+    where = ROOT / AREAS_FILE
+    P = [Problem(where, 1, f"code area `{a}` is on no wiki page: add it to the `covers:` of the page that describes it "
+                           f"(or link or excerpt one of its files there), or list it in {AREAS_FILE} `exempt` with a reason",
+                 kind="area") for a in r["missing"]]
+    P += [Problem(where, 1, f"`{a}` in {AREAS_FILE} is not a code area any more: remove it", level="warning", kind="area")
+          for a in r["stale_entries"]]
+    P += [Problem(where, 1, f"backlog area `{a}` is covered now ({', '.join(r['covered'][a][:2])}): remove it from the backlog",
+                  level="notice", kind="area") for a in r["backlog_covered"]]
+    P += [Problem(where, 1, f"`{a}` in {AREAS_FILE}: give a reason of {MIN_AREA_REASON} characters or more", kind="area")
+          for a in r["short_reasons"]]
+    if r["backlog"]:
+        P.append(Problem(where, 1, f"{len(r['backlog'])} code area(s) have no wiki page yet ({AREAS_FILE} backlog); "
+                                   "the list: python3 tools/docs_check.py --areas", level="notice", kind="area"))
+    return P
+
+
+def areas_markdown(r: dict | None = None) -> str:
+    r = area_coverage() if r is None else r
+    out = [f"{len(r['covered'])} of {len(r['areas'])} code areas are on a wiki page; {len(r['exempt'])} are exempt, "
+           f"{len(r['backlog'])} are in the backlog and {len(r['missing'])} are new. Generated by "
+           "`python3 tools/docs_check.py --areas` from `tools/docs_areas.json`.", ""]
+    for title, key in (("New code areas on no page (the docs check fails on these)", "missing"),
+                       ("Backlog: code areas with no page yet", "backlog")):
+        if r[key]:
+            out += [f"## {title}", "", "| Area | Files |", "|---|---|"]
+            out += [f"| `{a}` | {len(r['areas'][a])} |" for a in r[key]] + [""]
+    return "\n".join(out)
+
+
 def freshness() -> list[dict]:
     """Every page with a `verified` stamp: commits since the stamp, and the cited files changed since."""
     rows = []
@@ -1068,6 +1160,9 @@ def health(today: dt.date | None = None) -> dict:
            "median_stamp_age_days": _median(ages),
            "coupling_debt": coupling_debt(),
            "code_commits_with_docs": code_commit_docs_share()}
+    ar = area_coverage()
+    out["code_areas"] = {"total": len(ar["areas"]), "covered": len(ar["covered"]), "exempt": len(ar["exempt"]),
+                         "backlog": len(ar["backlog"]), "missing": len(ar["missing"])}
     lag = sibling_pin_lag()
     if lag:
         out["sibling_pin_lag"] = lag
@@ -1100,6 +1195,7 @@ def run(db_path: Path | None = None) -> list[Problem]:
     problems += check_route_counts()
     problems += check_site_config()
     problems += check_theme()
+    problems += check_areas()
     return problems
 
 
@@ -1109,7 +1205,17 @@ def main(argv=None) -> int:
     ap.add_argument("--freshness", type=Path, metavar="OUT", nargs="?", const=Path("-"),
                     help="report (never fail) the stamped pages whose cited code changed since their stamp; OUT or stdout")
     ap.add_argument("--health", type=Path, metavar="OUT", help="write the docs-health numbers as JSON to OUT and exit 0")
+    ap.add_argument("--areas", type=Path, metavar="OUT", nargs="?", const=Path("-"),
+                    help="report (never fail) which code areas are on a wiki page (tools/docs_areas.json); OUT or stdout")
     a = ap.parse_args(argv)
+    if a.areas is not None:
+        md = areas_markdown()
+        if str(a.areas) == "-":
+            print(md)
+        else:
+            a.areas.write_text(md, encoding="utf-8")
+            print(f"areas: written to {a.areas}")
+        return 0
     if a.health is not None:
         h = health()
         a.health.write_text(json.dumps(h, indent=2) + "\n", encoding="utf-8")

@@ -1,6 +1,7 @@
 ---
 title: "The website"
 description: "How gurbanisoul.com is built: a static Astro site with no framework runtime, two layouts, plain TypeScript page scripts, and the API on the same origin through generated rewrites."
+covers: "frontend/src/layouts/*.astro, frontend/src/pages/[lang]/privacy.astro, frontend/src/pages/[lang]/developers.astro, frontend/src/pages/[lang]/hukamnama/**, frontend/src/pages/ang/**, frontend/src/pages/og/**, webapp/hukamnama_page.py, webapp/hukamnama_feed.py, webapp/hukamnama_sitemap.py, webapp/hukamnama_embed.py"
 sidebar:
   order: 7
 verified:

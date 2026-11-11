@@ -168,7 +168,7 @@ request).
 | every 15 minutes | `uptime` probes the wiki's landing page and `/api/health` through its rewrite; issue *uptime: docs site probe failing* |
 | every 6 hours | `docs-watch`: the domain serves the last deployed commit, the smoke and the live suite pass; issue *docs-watch: production wiki check failing* (after a manual rollback it stays open until the next release — expected) |
 | every night | the `docs` job re-runs on `integration`; issue *docs: nightly wiki build failing* while red |
-| every day, and right after every release | `docs-pins` opens *docs(wiki): bump the sibling docs pins* when a sibling changed a published file (or issue *docs: the sibling docs changed — bump the pins* until `DOCS_BOT_TOKEN` exists); `deploy-production`'s `release` job dispatches it as its last step |
+| every day, and right after every release | `docs-pins` opens *docs(wiki): bump the sibling docs pins* when a sibling changed a published file (or issue *docs: the sibling docs changed — bump the pins* until `DOCS_BOT_TOKEN` exists); `deploy-production`'s `release` job dispatches it as its last step. It runs the source-level docs gates on the new pins first ([below](#the-pins-pull-request)) |
 | Mondays | `docs-links` checks every external link (issue *docs: broken external links*); `security` scans the history; `docs-freshness` opens or refreshes the pull request *docs(wiki): weekly refresh — N pages to re-read* (below), or rewrites issue *docs: wiki pages to re-verify* when it cannot |
 | a page is in the weekly refresh | re-read it against the code it cites, fix what drifted, move its `verified` stamp — in commits pushed to `bot/docs-refresh`; merge the pull request with `--merge`. The bot closes it itself when every page is fresh and nothing was regenerated |
 | a scholar review is due | `make review-pack` writes one PDF — Scripture 101, the glossary's scripture and script sections, the contributors — with a sign-off sheet |
@@ -177,12 +177,23 @@ request).
 ### The weekly refresh pull request
 
 `docs-freshness` (Mondays, or by hand: `gh workflow run docs-freshness.yml --ref integration`)
-installs the sibling docs and the pinned database as the `docs` job does, runs every
-`tools/gen_*.py` that accepts `--write` (a new generator joins by accepting it; the others are
-listed as skipped), and runs `python3 tools/docs_check.py --freshness`. When a generator changed a
-file or a page is stale, it makes **one** commit on `integration` — empty when only pages are
-stale — force-pushes `bot/docs-refresh` and opens or refreshes one pull request into `integration`:
-the regenerated files, the generators run, and the pages to re-read.
+installs the sibling docs and the pinned database as the `docs` job does, runs every page
+generator in write mode (`make docs-regen`; the list is `DOCS_GENERATORS` in the `Makefile`, and
+`tools/tests/test_docs_generators.py` keeps it equal to the generators `make docs-check` and the
+`docs` job check), and runs `python3 tools/docs_check.py --freshness` and `--areas`. When a
+generator changed a file or a page is stale, it makes **one** commit on `integration` — empty when
+only pages are stale — force-pushes `bot/docs-refresh` and opens or refreshes one pull request into
+`integration`: the regenerated files, the generators run, the pages to re-read and the code areas
+no page covers yet.
+
+Until 2026-11-12 the run picked its generators by looking for a quoted `"--write"` in their source.
+None has one (each writes unless given `--check`), so every weekly run skipped them all and still
+went green. The generated pages stayed current only because the `docs` check fails a pull request
+whose generated page is stale; what the weekly run adds is a regeneration when an input changes
+outside a pull request (the pinned database or sibling docs).
+
+Merging the pull request does not re-read anything: it carries an empty commit. The pages it lists
+are fresh again only when someone re-reads each one and moves its stamp on `bot/docs-refresh`.
 
 What the bot will not do:
 
@@ -199,12 +210,37 @@ Without `DOCS_BOT_TOKEN`, with a token that cannot push, or when a step refuses 
 is written to the issue *docs: wiki pages to re-verify* with the reason, as before; the issue is
 closed once a pull request carries the list.
 
+### The pins pull request
+
+`docs-pins` moves a pin only when a published file changed (`tools/docs_pins.py`), then runs the
+source-level gates a pin can break: `fetch_sibling_docs.py --check`, `docs_check.py`,
+`gen_repo_map.py --check` (sibling paths against the new pinned trees) and the sidebar test
+(`docs-site/plugins/test/sidebar.test.mjs`: a new sibling *directory* must be placed in
+`docs-site/sidebar.mjs`; a new page in an existing directory places itself). When a gate fails,
+the pull request is still opened or refreshed, with the failing commands and their output in its
+description, and the run is red. Fix the cause on `integration`: the bot rebuilds its branch from
+`integration` every day (or `gh workflow run docs-pins.yml --ref integration`), so the next run
+carries the fix. Never push to `bot/docs-pins`; it is force-pushed.
+
+Each daily run force-pushes a new commit while a bump is pending, so every check runs again: a
+check that failed for a reason outside the change (the runner's network on 2026-11-11, #392) goes
+green on the next run without anyone touching it. To re-run sooner, re-run the failed jobs on the
+pull request or dispatch the workflow.
+
+The browsers and fonts the docs jobs and `e2e` need are installed by
+`scripts/ci/install_browsers.sh`, which skips packages the runner already has and retries the
+network four times. Before it, a few minutes without the Ubuntu mirrors turned #392's `docs` check
+red (apt exit 100) and kept `e2e · playwright` retrying for two hours.
+
 ### The docs-impact check
 
-The `docs-coupling` job in `deploy-docs.yml` runs `python3 tools/docs_coupling.py BASE..HEAD` on
-every pull request. It writes the pages the change should touch to the job summary and to one
-comment on the pull request, which is found by its hidden marker `<!-- docs-coupling-report -->`
-and updated on each push. A pull request from a fork gets only the summary, because its token
+The `docs-coupling` workflow (`.github/workflows/docs-coupling.yml`) runs
+`python3 tools/docs_coupling.py BASE..HEAD` on every pull request: when it is opened, on each push,
+and when its description is **edited**, so adding a `Docs-impact: none — <reason>` line updates
+the report at once (until 2026-11-12 the job lived in `deploy-docs.yml` and ran only on pushes,
+and four comments kept flagging pages their final description had excused). It writes the pages
+the change should touch to the job summary and to one comment on the pull request, which is found
+by its hidden marker `<!-- docs-coupling-report -->` and updated on each run. A pull request from a fork gets only the summary, because its token
 cannot comment. To see the list locally, run
 `python3 tools/docs_coupling.py origin/integration..HEAD`. The rules are in
 [Writing a page](../../contributing/writing-docs.md#docs-impact).
@@ -214,7 +250,7 @@ The check reports only and the job is always green. To make it a gate:
 1. Wait out at least two weeks of report-only. Read the comments it posted and the coupling debt
    on [Docs health](../../reference/docs-health.md). Fix any `covers:` that flags changes the page
    does not describe. The owner decides when the noise is low enough.
-2. In `.github/workflows/deploy-docs.yml`, set `COUPLING_ENFORCE: "1"` in the `docs-coupling`
+2. In `.github/workflows/docs-coupling.yml`, set `COUPLING_ENFORCE: "1"` in the `docs-coupling`
    job's `env`. From then on, a page that declares `covers:` and was neither updated, re-stamped
    nor excused by a `Docs-impact: none — <reason>` line fails the job. Pages covered only through
    the files they cite are still just reported.
@@ -222,6 +258,24 @@ The check reports only and the job is always green. To make it a gate:
    That is a ruleset change for the owner.
 
 To turn it off again, set the value back to `"0"`.
+
+### Code areas with no page
+
+A page can only be flagged for code it covers, so a new service, server module, website page or
+workflow that no page names is invisible to the docs-impact check: the Hukamnama pull requests
+after 1.6.4 changed `services/hukamnama*`, `webapp/hukamnama_*.py` and the Hukamnama pages with the
+report saying "No page covers the code changed". `tools/docs_areas.json` lists the area patterns
+(`services/*`, `webapp/*`, `frontend/src/pages/*`, `.github/workflows/*.yml`); each immediate child
+of those directories is an area, and it must be covered by some page here (its `covers:`, or a file
+it cites), or be listed in the file:
+
+- `exempt`, with the reason it never needs a page (built output, tests);
+- `backlog`, the gap known when the gate was added (2026-11-12). It only shrinks: once a page
+  covers an area, the docs check asks for the entry to be removed.
+
+A new area on no page fails `docs_check.py` (and so the `docs` check). The list:
+`python3 tools/docs_check.py --areas`; the count is on [Docs health](../../reference/docs-health.md)
+and in the weekly refresh pull request.
 
 ### The scripture diff guard
 
