@@ -1,6 +1,6 @@
 ---
 title: "What the app does"
-description: "Gurbani Soul screen by screen: the five tabs and The Granth Today, the Raag Clock, sharing, widgets and Live Activity, the Hukamnama from Sri Harmandir Sahib in TestFlight builds, Siri and deep links, settings, and accessibility."
+description: "Gurbani Soul screen by screen: the tabs, The Granth Today, the Raag Clock, widgets, the TestFlight-only Hukamnama, Siri and deep links, settings, and accessibility."
 sidebar:
   order: 1
 verified:

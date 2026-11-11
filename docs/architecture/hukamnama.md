@@ -1,6 +1,6 @@
 ---
 title: "The Hukamnama service"
-description: "How the daily Hukamnama · Sri Harmandir Sahib is found and served: SGPC's pages used only to locate, the exact-match resolver and its publish conditions, the two hashes, the owner's hold and approve, push, the public snapshot and edge Worker, and which parts run today."
+description: "How the daily Hukamnama · Sri Harmandir Sahib is located in the corpus and served: the publish rule, the hashes, hold and approve, push, the edge Worker, and what runs today."
 covers: "services/hukamnama/**, services/hukamnama-edge/**, scripts/ci/hukamnama_watch.py, .github/workflows/hukamnama-deploy.yml, .github/workflows/hukamnama-deadman.yml"
 sidebar:
   order: 10

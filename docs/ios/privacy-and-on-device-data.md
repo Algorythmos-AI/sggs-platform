@@ -1,6 +1,6 @@
 ---
 title: "Privacy and on-device data"
-description: "What the app stores and where, what the widgets see, why it makes no network request (and the TestFlight-only Hukamnama exception), what sharing sends, how data is deleted, and the tests behind 'Data Not Collected'."
+description: "What the app stores and where, what the widgets see, why it makes no network request, the TestFlight-only Hukamnama exception, and the tests behind 'Data Not Collected'."
 sidebar:
   order: 3
 verified:
