@@ -140,14 +140,20 @@ def _upstream(day):
             raise Unavailable('malformed latest date')
     if body.get('status') != 'published':
         raise Unavailable('unknown status')
+    return 'published', published_record(body, day)
+
+
+def published_record(body, day):
+    """What is used of a published day's API record: the line-id range, its hash and when it was
+    published. Raises ``Unavailable`` when any of it is malformed."""
     first, last, digest = body.get('first_line_id'), body.get('last_line_id'), body.get('range_sha256')
     if type(first) is not int or type(last) is not int or not isinstance(digest, str) or not HEX64.match(digest) \
             or first < 1 or last < first or last - first >= MAX_LINES:
         raise Unavailable('malformed record')
     published_at = body.get('published_at')
-    return 'published', {'date': day, 'first': first, 'last': last, 'range_sha256': digest,
-                         'published_at': published_at if isinstance(published_at, str) else None,
-                         'meaning': isinstance(body.get('translation'), dict)}
+    return {'date': day, 'first': first, 'last': last, 'range_sha256': digest,
+            'published_at': published_at if isinstance(published_at, str) else None,
+            'meaning': isinstance(body.get('translation'), dict)}
 
 
 def _prove(rec):
