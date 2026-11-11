@@ -4,6 +4,8 @@
 //   GET /v1/hukamnama/YYYY-MM-DD       one day, from the first archived date up to today
 //   GET /v1/hukamnama?limit=N          the latest published days, N in 1..30 (default 7);
 //                                      &include=lines adds every line of each day
+//   GET /v1/hukamnama/index            every published day, newest first (date, Ang, range hash,
+//                                      when; no text): what a sitemap or an archive lists
 //   GET /v1/status                     today's status and the latest published date
 //
 // The Hukamnama service (services/hukamnama, `public.py`) writes one file per published day and
@@ -179,6 +181,18 @@ async function list(request, env, today, query) {
   return json(request, 200, { items }, CACHE.list);
 }
 
+async function index(request, env, today) {
+  const idx = await readIndex(env.BUCKET);
+  // Never a day ahead of the Amritsar date, whatever the file says.
+  const days = idx.days.filter((d) => d && parseDay(d.amritsar_date) !== null && d.amritsar_date <= today
+    && d.amritsar_date >= EARLIEST);
+  return json(request, 200, {
+    scripture_sha256: idx.scripture_sha256 ?? null,
+    latest: days.length ? days[0].amritsar_date : null,
+    days,
+  }, CACHE.list);
+}
+
 async function status(request, env, today) {
   const idx = await readIndex(env.BUCKET);
   const rec = await readDay(env.BUCKET, today);
@@ -226,6 +240,7 @@ export async function handle(request, env, now = new Date()) {
     const today = amritsarDate(now);
     if (path === "/v1/status") return await status(request, env, today);
     if (path === "/v1/hukamnama") return await list(request, env, today, url.searchParams);
+    if (path === "/v1/hukamnama/index") return await index(request, env, today);
     return await day(request, env, today, path.slice("/v1/hukamnama/".length));
   } catch (e) {
     // A file that is not what it should be, or storage that cannot be read: say so, serve nothing.

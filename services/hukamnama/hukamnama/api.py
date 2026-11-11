@@ -3,6 +3,7 @@
   GET /v1/hukamnama/today            the current Amritsar day (published | pending)
   GET /v1/hukamnama/YYYY-MM-DD       one day, within ±400 days of today
   GET /v1/hukamnama?limit=N          the latest published days, N in 1..30 (default 7)
+  GET /v1/hukamnama/index            every published day (date, Ang, range hash, when), newest first
   GET /health                        poller liveness + today's status (for the dead-man check)
   PUT /v1/devices/<token>            opt a device in (body: devices.parse_registration); the answer
                                      says what today means for it (push.plan_for_device)
@@ -111,6 +112,14 @@ def make_handler(state: State):
                 days = [r["amritsar_date"] for r in state.store.recent(int(raw))]
                 self._send(200, {"items": [day_record(state.store, clock.parse_day(d), state.fingerprint, now)
                                            for d in days]})
+                return
+            if u.path == "/v1/hukamnama/index":
+                # every published day, without text: what a sitemap or an archive page lists
+                days = [{"amritsar_date": d["amritsar_date"], "ang": d["resolution"]["ang"],
+                         "range_sha256": d["resolution"]["range_sha256"], "published_at": d["decided_at"]}
+                        for d in reversed(state.store.published()) if clock.parse_day(d["amritsar_date"]) <= today]
+                self._send(200, {"scripture_sha256": state.fingerprint,
+                                 "latest": days[0]["amritsar_date"] if days else None, "days": days})
                 return
             if u.path.startswith("/v1/hukamnama/"):
                 arg = u.path[len("/v1/hukamnama/"):]

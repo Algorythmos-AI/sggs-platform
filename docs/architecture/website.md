@@ -161,6 +161,27 @@ The rules are the pages' rules:
   with nothing proven yet the answer is 503 with `Retry-After`.
 - After a deploy `verify_functions.py` requires both to be whole feed documents from `all`.
 
+### The Hukamnama sitemap, the day-to-day links and structured data
+
+The site's `/sitemap.xml` is static and lists the static pages. The Hukamnama pages gain a URL per
+language every morning, so they have their own, `/sitemap-hukamnama.xml`, built by
+`webapp/hukamnama_sitemap.py` in the same `all` function under the same switch and routing.
+
+- It lists, for every language that has a shell, the today page and one URL per published date,
+  newest first, each with its other-language versions (the same set the page's `<head>` carries).
+  `lastmod` is when that day was published. It holds URLs and times only, no scripture.
+- The dates come from the API's `GET /v1/hukamnama/index` (every published day, no text); an API
+  without that route is asked for its latest 30 instead. A date after the Amritsar date at that
+  moment is never listed, whatever the API says.
+- `robots.txt` does not name this sitemap yet: it is added at launch, when production serves it.
+- The same list gives each page its **previous and next published day**, as links labelled with
+  those days' dates (no new words to translate). Unpublished days are skipped. If the list cannot
+  be read the page is shown without the links.
+- Each page's JSON-LD is a `WebPage` and, since the shell carries the section's name, a
+  `BreadcrumbList`: the site, the Hukamnama page and, on a dated page, that date.
+- After a deploy `verify_functions.py` requires a whole sitemap from `all` that lists each
+  language's page.
+
 What the renderer guarantees:
 
 - It asks the API for one **date** (the Amritsar date it computes itself), never "today", and

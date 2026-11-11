@@ -53,6 +53,7 @@ from romannorm import roman_norm   # noqa: F401  shared fold; re-exported for ge
 from sggs import core
 import hukamnama_page   # the only HTML this server renders; off unless configured
 import hukamnama_feed   # the Hukamnama feeds (Atom, JSON Feed); off unless configured
+import hukamnama_sitemap   # the Hukamnama pages' own sitemap; off unless configured
 core.APP_VERSION, core.APP_BUILT, core.APP_COMMIT = APP_VERSION, APP_BUILT, APP_COMMIT
 from sggs.core import (ApiError, LINE_COLS, _FALLTHROUGH, _ID_MAX, _int, _int_str, _local,   # noqa: F401
     attach_translations, db, have_fts, rows_to_list)   # noqa: F401  (re-exported)
@@ -347,6 +348,8 @@ class H(BaseHTTPRequestHandler):
             if hukamnama_page.respond(self, u.path):           # the Hukamnama pages, when configured
                 return
             if hukamnama_feed.respond(self, u.path):           # and its feeds
+                return
+            if hukamnama_sitemap.respond(self, u.path):        # and their sitemap
                 return
             return self._serve_static(u.path)
         except ApiError as e:                                  # explicit status (e.g. 404 unknown comp_id)

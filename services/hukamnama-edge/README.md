@@ -16,6 +16,7 @@ the pushes, and the API keeps answering while that process restarts.
 | `GET /v1/hukamnama/today` | the current **Amritsar** day: the published record with every line, or `pending` (`expected_by`, `latest`) |
 | `GET /v1/hukamnama/YYYY-MM-DD` | one day, from 2026-11-01 up to today (the archive is permanent); a future or earlier date is 404; a day with no file is `pending` |
 | `GET /v1/hukamnama?limit=N` | the latest published days, newest first, N in 1..30 (default 7); `&include=lines` adds each day's lines |
+| `GET /v1/hukamnama/index` | every published day, newest first: date, Ang, `range_sha256`, `published_at`; no text |
 | `GET /v1/status` | today's status, its publication time, the latest published date, `scripture_sha256` |
 | `PUT`/`DELETE /v1/devices/<token>`, `GET /health` | passed to the service unchanged |
 

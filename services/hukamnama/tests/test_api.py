@@ -66,6 +66,18 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(code, 200)
         self.assertEqual([i["amritsar_date"] for i in body["items"]], ["2026-11-08"])
 
+    def test_index_lists_every_published_day_without_text_and_never_a_held_one(self):
+        code, body, _ = self.get("/v1/hukamnama/index")
+        self.assertEqual(code, 200)
+        day, = body["days"]
+        record = self.get("/v1/hukamnama/2026-11-08")[1]
+        self.assertEqual(day, {"amritsar_date": "2026-11-08", "ang": record["ang"],
+                               "range_sha256": record["range_sha256"], "published_at": record["published_at"]})
+        self.assertEqual((body["latest"], body["scripture_sha256"]), ("2026-11-08", record["scripture_sha256"]))
+        self.assertNotIn("ਿ", str(body)); self.assertNotIn("opening_gurmukhi", str(body))
+        self.state.store.hold(utc(2026, 11, 7).date(), NOW, "auto", "test")           # a held day is not listed
+        self.assertEqual([d["amritsar_date"] for d in self.get("/v1/hukamnama/index")[1]["days"]], ["2026-11-08"])
+
     def test_validation(self):
         for path, code in (("/v1/hukamnama/2026-1-1", 400), ("/v1/hukamnama/2020-01-01", 400),
                            ("/v1/hukamnama/2026-11-10", 404), ("/v1/hukamnama?limit=0", 400),

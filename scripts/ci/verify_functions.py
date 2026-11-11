@@ -10,7 +10,8 @@ downloadable from the site. Where the environment serves the Hukamnama pages ("h
 each language's /{lang}/hukamnama is a filled page from the `all` function: no template token
 left, the page's own language, never a 404 (a 503 passes with a warning: it means the Hukamnama
 API could not be reached or the day did not prove, which is not this deployment's fault). The
-feeds are checked the same way: an Atom document and a JSON Feed, from `all`. Sends x-vercel-protection-bypass when VERCEL_AUTOMATION_BYPASS_SECRET
+feeds are checked the same way: an Atom document and a JSON Feed, from `all`; and the Hukamnama
+sitemap must be a whole sitemap that lists each language's page. Sends x-vercel-protection-bypass when VERCEL_AUTOMATION_BYPASS_SECRET
 is set. Retries while functions cold-start. Stdlib only.
 """
 from __future__ import annotations
@@ -26,7 +27,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-from gen_gateway import DATA_DIR, FEEDS, ROUTES_FILE, environments, languages, prefixes_by_context  # noqa: E402
+from gen_gateway import (DATA_DIR, FEEDS, ROUTES_FILE, SITEMAP, environments, languages,  # noqa: E402
+                         prefixes_by_context)
 
 NOT_PUBLISHED = (f"/{DATA_DIR}/db/all.sqlite", f"/{DATA_DIR}/db/search.sqlite", f"/{DATA_DIR}/webapp/serve.py")
 
@@ -96,6 +98,21 @@ def check_feed(base: str, path: str) -> tuple[str | None, str | None]:
     return (None, None) if ok else (f"{url}: not a whole feed document", None)
 
 
+def check_sitemap(base: str) -> tuple[str | None, str | None]:
+    """(problem, warning) for the Hukamnama sitemap."""
+    url = base + SITEMAP
+    status, svc, raw = get(url)
+    if status == 503 and svc == "all":
+        return None, f"{url}: HTTP 503 from the function (the Hukamnama API is unreachable)"
+    if status != 200 or svc != "all":
+        return f"{url}: HTTP {status} X-Service {svc} (want 200 from `all`)", None
+    text = raw.decode("utf-8", "replace")
+    if not (text.startswith("<?xml") and "<urlset " in text and text.rstrip().endswith("</urlset>")):
+        return f"{url}: not a whole sitemap", None
+    missing = [lang for lang in languages() if f"/{lang}/hukamnama</loc>" not in text]
+    return (f"{url}: does not list the page of {missing}", None) if missing else (None, None)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("base")
@@ -126,6 +143,7 @@ def main(argv=None) -> int:
     if env.get("hukamnama_api"):
         checks = [(f"/{lang}/hukamnama", "a filled page", lambda lang=lang: check_page(base, lang)) for lang in languages()]
         checks += [(path, "a whole feed", lambda path=path: check_feed(base, path)) for path in FEEDS]
+        checks += [(SITEMAP, "a whole sitemap", lambda: check_sitemap(base))]
         for path, what, check in checks:
             for attempt in range(1, a.attempts + 1):
                 problem, warning = check()

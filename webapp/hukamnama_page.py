@@ -27,7 +27,9 @@ The shell contract (``frontend`` builds it; ``tests/fixtures/hukamnama-shell.htm
                                          write "/{lang}/hukamnama__HK_SUFFIX__" for its own URL
   ``__HK_IF_<FLAG>__ … __HK_ENDIF__``    kept when the flag is set, removed otherwise (may be nested)
   ``<script type="application/json" id="hk-strings">{…}</script>``   the language's words and
-                                         patterns (removed from the output); keys in ``STRING_KEYS``
+                                         patterns (removed from the output); keys in ``STRING_KEYS``,
+                                         plus the optional ``date_first`` and ``name`` (the
+                                         section's name, for the breadcrumb trail)
 """
 import hashlib
 import html
@@ -62,6 +64,7 @@ STRING_KEYS = ('months', 'date', 'title_today', 'title_dated', 'h1_today', 'h1_d
                'description_none', 'status_before', 'status_not_today', 'status_none', 'status_missing',
                'citation', 'translation_label', 'rahao_label')
 
+_days = {'memo': None, 'good': None}    # the published dates: (fetched monotonic, 'ok' | 'error', value), last good list
 _memo = {}                 # date iso -> (fetched monotonic, kind, value)   kind: 'published' | 'pending' | 'error'
 _good = {}                 # date iso -> proven day (never expires: it was proven against this corpus)
 _shells = {}               # lang -> (mtime, html, strings)
@@ -228,10 +231,75 @@ def day_state(day, today, clock=time.monotonic):
     raise Unavailable(problem)
 
 
+def _fetch_days(today):
+    """Every published date the API lists, oldest first: [{'date', 'published_at'}]. No text."""
+    try:
+        items = (FETCH(f'{api_base()}/v1/hukamnama/index') or {}).get('days')
+    except urllib.error.HTTPError as e:
+        if e.code not in (400, 404):
+            raise
+        # an API that has no index yet: its list of the latest days (at most 30)
+        items = [x for x in (FETCH(f'{api_base()}/v1/hukamnama?limit=30') or {}).get('items') or []
+                 if isinstance(x, dict) and x.get('status') == 'published']
+    if not isinstance(items, list):
+        raise Unavailable('malformed index')
+    days = {}
+    for x in items:
+        try:
+            d = date.fromisoformat(x.get('amritsar_date') or '')
+        except (AttributeError, TypeError, ValueError):
+            continue
+        if EARLIEST <= d <= today:           # never a day ahead of the Amritsar date, whatever is listed
+            at = x.get('published_at')
+            days[d] = {'date': d, 'published_at': at if isinstance(at, str) else None}
+    return [days[d] for d in sorted(days)]
+
+
+def published_days(today, clock=time.monotonic):
+    """The published dates, oldest first, for the sitemap and the previous/next links. Remembered
+    for a minute; when the API cannot be reached the last list is used. Raises ``Unavailable``
+    when there is none."""
+    now = clock()
+    with _lock:
+        hit, good = _days['memo'], _days['good']
+    if hit and now - hit[0] < (FRESH_TODAY if hit[1] == 'ok' else NEGATIVE):
+        if hit[1] == 'ok' or good is not None:
+            return [x for x in (hit[2] if hit[1] == 'ok' else good) if x['date'] <= today]
+        raise Unavailable(hit[2])
+    try:
+        days = _fetch_days(today)
+    except Unavailable as e:
+        problem = str(e)
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        problem = type(e).__name__
+    else:
+        with _lock:
+            _days['memo'], _days['good'] = (now, 'ok', days), days
+        return days
+    with _lock:
+        _days['memo'] = (now, 'error', problem)
+        good = _days['good']
+    if good is not None:
+        return [x for x in good if x['date'] <= today]
+    raise Unavailable(problem)
+
+
+def neighbours(day, today):
+    """(the published date before ``day``, the one after it); None where there is none, or
+    when the list of dates is not available (the page is then shown without these links)."""
+    try:
+        dates = [x['date'] for x in published_days(today)]
+    except Unavailable:
+        return None, None
+    before, after = [d for d in dates if d < day], [d for d in dates if d > day]
+    return (before[-1] if before else None), (after[0] if after else None)
+
+
 def reset():
     """Forget everything remembered (tests)."""
     with _lock:
         _memo.clear(); _good.clear(); _shells.clear()
+        _days['memo'] = _days['good'] = None
 
 
 # -- rendering ----------------------------------------------------------------------------------
@@ -266,7 +334,9 @@ def _lines_html(day, strings):
     return ''.join(out)
 
 
-def _jsonld(lang, canonical, title, description, day):
+def _jsonld(lang, canonical, title, description, day, name=None, dated=None):
+    """The page's structured data. With the section's ``name`` (a shell string) a breadcrumb
+    trail is added: the site, the Hukamnama page and, on a dated page, that date."""
     page = {'@context': 'https://schema.org', '@type': 'WebPage', 'url': canonical, 'name': title,
             'description': description, 'inLanguage': lang,
             'isPartOf': {'@type': 'WebSite', 'name': 'Gurbani Soul', 'url': SITE + '/'}}
@@ -276,12 +346,18 @@ def _jsonld(lang, canonical, title, description, day):
         page['mainEntity'] = {'@type': 'CreativeWork', 'inLanguage': 'pa-Guru',
                               'isPartOf': {'@type': 'Book', 'name': 'Sri Guru Granth Sahib Ji'},
                               'position': f'Ang {day["ang"]}'}
+    if name:
+        trail = [('Gurbani Soul', f'{SITE}/{lang}'), (name, f'{SITE}/{lang}/hukamnama')] + ([(dated, canonical)] if dated else [])
+        page = [page, {'@context': 'https://schema.org', '@type': 'BreadcrumbList',
+                       'itemListElement': [{'@type': 'ListItem', 'position': i, 'name': n, 'item': url}
+                                           for i, (n, url) in enumerate(trail, 1)]}]
     return json.dumps(page, ensure_ascii=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
 
 
-def render(shell, strings, lang, *, view, day, today, hour_ist, path, asked=None):
+def render(shell, strings, lang, *, view, day, today, hour_ist, path, asked=None, around=(None, None)):
     """The page. ``view`` is 'today' | 'latest' | 'none' | 'dated' | 'missing' | 'unavailable';
-    ``asked`` is the date in the URL of a dated page."""
+    ``asked`` is the date in the URL of a dated page; ``around`` is the published dates before and
+    after the day shown (each a link to that day's own page, labelled with its date)."""
     e = html.escape
     canonical = SITE + path
     shown = _date_text(strings, day['date']) if day else ''
@@ -306,7 +382,11 @@ def render(shell, strings, lang, *, view, day, today, hour_ist, path, asked=None
     flags = {'SHABAD': bool(day), 'STATUS': bool(status), 'TODAY': view == 'today', 'LATEST': view == 'latest',
              'DATED': view == 'dated', 'MEANING': bool(day and day['meaning']),
              'UNAVAILABLE': view == 'unavailable', 'RAAG': bool(day and day['raag']),
-             'AUTHOR': bool(day and day['author'])}
+             'AUTHOR': bool(day and day['author']),
+             'PREV': bool(day and around[0]), 'NEXT': bool(day and around[1]),
+             'DAYS': bool(day and (around[0] or around[1]))}
+    step = {k: (f'/{lang}/hukamnama/{d.isoformat()}', _date_text(strings, d)) if d else ('', '')
+            for k, d in zip(('PREV', 'NEXT'), around)}
     values = {
         'TITLE': e(title), 'H1': e(h1), 'DESCRIPTION': e(description, quote=True),
         'CANONICAL': e(canonical, quote=True),
@@ -321,7 +401,10 @@ def render(shell, strings, lang, *, view, day, today, hour_ist, path, asked=None
         'RANGE_SHA': day['range_sha256'] if day else '',
         'TRANSLATION_LABEL': e(strings['translation_label']),
         'LINES': _lines_html(day, strings) if day else '',
-        'JSONLD': _jsonld(lang, canonical, title, description, day),
+        'PREV_HREF': e(step['PREV'][0], quote=True), 'PREV_DATE': e(step['PREV'][1]),
+        'NEXT_HREF': e(step['NEXT'][0], quote=True), 'NEXT_DATE': e(step['NEXT'][1]),
+        'JSONLD': _jsonld(lang, canonical, title, description, day, name=strings.get('name'),
+                          dated=_date_text(strings, asked) if asked else None),
     }
     out, n = shell, 1
     while n:
@@ -358,7 +441,9 @@ def page_for(lang, day_arg, now):
     asked = None
 
     def out(status, view, day=None):
-        body = render(shell, strings, lang, view=view, day=day, today=today, hour_ist=hour, path=path, asked=asked)
+        around = neighbours(day['date'], today) if day else (None, None)
+        body = render(shell, strings, lang, view=view, day=day, today=today, hour_ist=hour, path=path, asked=asked,
+                      around=around)
         return status, body, _cache_for(view, now) if status == 200 else 'no-store'
 
     try:

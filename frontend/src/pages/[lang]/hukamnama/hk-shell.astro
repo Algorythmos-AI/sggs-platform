@@ -47,6 +47,7 @@ const strings = {
   citation: t("scripture.cite", keep),
   translation_label: t("hukamnama.translationLabel"),
   rahao_label: t("hukamnama.rahaoLabel"),
+  name: t("hukamnama.eyebrow"),          // the section's name in the breadcrumb trail (structured data)
 };
 const stringsJson = JSON.stringify(strings).replace(/</g, "\\u003c");
 ---
@@ -78,6 +79,7 @@ const stringsJson = JSON.stringify(strings).replace(/</g, "\\u003c");
           <li><a href="__HK_PERMALINK__">{t("hukamnama.permalink")}</a></li>
           <li><a href="https://hs.sgpc.net/" rel="noopener external">{t("hukamnama.sgpc")}</a></li>
         </ul>
+        __HK_IF_DAYS__<p class="hk-days">__HK_IF_PREV__<a rel="prev" href="__HK_PREV_HREF__"><span aria-hidden="true">←&nbsp;</span>__HK_PREV_DATE__</a>__HK_ENDIF____HK_IF_NEXT__<a class="hk-next" rel="next" href="__HK_NEXT_HREF__">__HK_NEXT_DATE__<span aria-hidden="true">&nbsp;→</span></a>__HK_ENDIF__</p>__HK_ENDIF__
       </section>
       __HK_ENDIF__
       <footer class="hk-foot">
@@ -110,6 +112,9 @@ const stringsJson = JSON.stringify(strings).replace(/</g, "\\u003c");
     .hk .hk-cite { margin: 6px 0 0; color: var(--accent-text); font-weight: 600; font-size: 14px; }
     .hk .hk-actions { list-style: none; margin: 26px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: 15px; }
     .hk .hk-actions a { color: var(--accent-text); }
+    .hk .hk-days { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 26px; margin: 26px 0 0; padding: 16px 0 0; border-top: 1px solid var(--line); font-size: 15px; }
+    .hk .hk-days a { color: var(--accent-text); min-width: 0; }
+    .hk .hk-days .hk-next { margin-left: auto; text-align: right; }
     .hk .hk-foot { margin: 44px 0 56px; padding: 22px 0 0; border-top: 1px solid var(--line); font-size: 14px; color: var(--ink-soft); }
     .hk .hk-foot p { margin: 0 0 10px; }
     .hk .hk-foot a { color: var(--accent-text); }
