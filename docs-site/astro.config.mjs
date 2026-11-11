@@ -32,6 +32,7 @@ import { remarkFacts } from './plugins/remark-facts.mjs';
 import { rehypeLangPa } from './plugins/rehype-lang-pa.mjs';
 import { SIDEBAR } from './sidebar.mjs';
 import { FEATURES, PDFS } from './plugins/features.mjs';
+import { API_REFERENCES } from './plugins/paths.mjs';
 import { buildPdfs } from './scripts/build-pdfs.mjs';
 
 // The commit this build documents: CI passes PUBLIC_DOCS_COMMIT; locally, git. Emitted as
@@ -85,14 +86,13 @@ export default defineConfig({
       // the generated API reference sits inside the API group, not after Reference
       sidebar: SIDEBAR.map((/** @type {any} */ g) => (g.label === 'API' ? { ...g, items: [...g.items, ...openAPISidebarGroups] } : g)),
       plugins: [
-        starlightOpenAPI([
-          {
-            base: 'api/reference',
-            schema: '../contract/openapi.json',
-            // operation labels are the spec's short `summary` (tools/gen_openapi.py SUMMARIES), with a GET badge
-            sidebar: { label: 'Reference', collapsed: true, operations: { labels: 'summary', badges: true } },
-          },
-        ]),
+        // one reference per generated spec (plugins/paths.mjs API_REFERENCES): the Knowledge Base
+        // API and the public Hukamnama API. Operation labels are each spec's short `summary`, with a GET badge.
+        starlightOpenAPI(API_REFERENCES.map((r) => ({
+          base: r.base,
+          schema: `../${r.spec}`,
+          sidebar: { label: r.label, collapsed: true, operations: { labels: 'summary', badges: true } },
+        }))),
       ],
     }),
     // A PDF of every page, made here — inside the build — because the deploy jobs run their own
