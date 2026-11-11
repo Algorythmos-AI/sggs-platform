@@ -58,6 +58,24 @@ class Entries(unittest.TestCase):
         self.assertIn('os.environ.pop("SGGS_MODULES", None)', src)
         self.assertIn('"all.sqlite"', src)
 
+    def test_only_all_is_told_the_hukamnama_api_and_by_the_environment_it_runs_in(self):
+        apis = {"preview": "https://api-staging.gurbanisoul.com", "production": "https://api.gurbanisoul.com"}
+        src = baf.entry("all", SHA, apis)
+        compile(src, "all.py", "exec")
+        self.assertLess(src.index("HUKAMNAMA_API"), src.index("import serve"))     # set before the server loads
+        for vercel_env, want in (("preview", apis["preview"]), ("production", apis["production"]),
+                                 ("development", None), ("", None)):
+            env = {"VERCEL_ENV": vercel_env}
+            block = src[src.index("_hukamnama_api"):src.index("sys.path.insert")]
+            exec(block, {"os": type("o", (), {"environ": env})})
+            self.assertEqual(env.get("HUKAMNAMA_API"), want, vercel_env)
+        env = {"VERCEL_ENV": "production", "HUKAMNAMA_API": ""}                     # the project's own value wins
+        exec(src[src.index("_hukamnama_api"):src.index("sys.path.insert")], {"os": type("o", (), {"environ": env})})
+        self.assertEqual(env["HUKAMNAMA_API"], "")
+        self.assertNotIn("HUKAMNAMA_API", baf.entry("search", SHA, apis))
+        self.assertNotIn("HUKAMNAMA_API", baf.entry("all", SHA, {}))
+        self.assertNotIn("HUKAMNAMA_API", baf.entry("all", SHA))
+
     def test_commit_must_be_a_full_sha(self):
         with tempfile.TemporaryDirectory() as t:
             with self.assertRaises(SystemExit):
@@ -85,7 +103,8 @@ class UploadIgnore(unittest.TestCase):
     the generated API files drops them from the upload (the build then fails on Vercel, or worse)."""
     GENERATED = ("frontend/_sggs/db/all.sqlite", "frontend/_sggs/db/search.sqlite",
                  "frontend/_sggs/webapp/serve.py", "frontend/_sggs/webapp/sggs/core.py",
-                 "frontend/api/svc/all.py", "frontend/pyproject.toml", "frontend/.python-version")
+                 "frontend/api/svc/all.py", "frontend/pyproject.toml", "frontend/.python-version",
+                 "frontend/_sggs/webapp/hukamnama_shells/en.html")
 
     def patterns(self):
         lines = (ROOT / ".vercelignore").read_text(encoding="utf-8").splitlines()
@@ -109,10 +128,24 @@ class UploadIgnore(unittest.TestCase):
 class OutputGuard(unittest.TestCase):
     """--verify-output reads what `vercel build` actually bundled."""
 
-    def _output(self, root, extra=None, drop=None, static=()):
+    SHELL = ('<!doctype html><html lang="en"><head><title>__HK_TITLE__</title>'
+             '<link rel="stylesheet" href="/_astro/site.css"><script type="module" src="/_astro/a.js"></script>'
+             '<script type="application/json" id="hk-strings">{}</script></head><body>__HK_H1__</body></html>')
+
+    def _output(self, project, extra=None, drop=None, static=(), shells=True, shell_text=None):
+        """A build output at <project>/.vercel/output, the API's files under <project>/frontend."""
+        root = project / ".vercel" / "output"
+        for rel in gg.shell_files() if shells else ():
+            f = project / "frontend" / rel
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text(shell_text or self.SHELL, encoding="utf-8")
+        static = list(static) + ["_astro/a.js", "_astro/site.css"]
         for name in gg.function_names():
             files = {".python-version": "", "pyproject.toml": "", "uv.lock": "", "_vendor/pip/__init__.py": "",
-                     f"api/svc/{name}.py": "", "_sggs/webapp/serve.py": "", f"_sggs/db/{name}.sqlite": ""}
+                     f"api/svc/{name}.py": "", "_sggs/webapp/serve.py": "frontend/_sggs/webapp/serve.py",
+                     f"_sggs/db/{name}.sqlite": ""}
+            if name == "all" and shells:
+                files.update({rel: f"frontend/{rel}" for rel in gg.shell_files()})
             files.update((extra or {}).get(name, {}))
             for f in (drop or {}).get(name, ()):
                 files.pop(f)
@@ -127,7 +160,70 @@ class OutputGuard(unittest.TestCase):
 
     def test_a_clean_build_passes(self):
         with tempfile.TemporaryDirectory() as t:
-            self.assertEqual(baf.verify_output(self._output(Path(t), static=["index.html", "_astro/a.js"])), [])
+            self.assertEqual(baf.verify_output(self._output(Path(t), static=["index.html"])), [])
+
+    # -- the Hukamnama page shells: in `all`, whole, with their assets, and nowhere else ---------
+    def test_all_without_a_languages_shell_fails(self):
+        with tempfile.TemporaryDirectory() as t:
+            lost = gg.shell_files()[-1]
+            problems = baf.verify_output(self._output(Path(t), drop={"all": [lost]}))
+            self.assertEqual(len(problems), 1, problems)
+            self.assertIn(f"{lost} is not bundled", problems[0])
+        with tempfile.TemporaryDirectory() as t:                # named in the map, but the file is not there
+            out = self._output(Path(t))
+            (Path(t) / "frontend" / gg.shell_files()[0]).unlink()
+            self.assertTrue(any("is not bundled" in p for p in baf.verify_output(out)))
+
+    def test_a_shell_that_is_not_whole_fails(self):
+        with tempfile.TemporaryDirectory() as t:
+            problems = baf.verify_output(self._output(Path(t), shell_text="<html>__HK_TITLE__</html>"))
+            self.assertEqual(len(problems), len(gg.shell_files()), problems)
+            self.assertIn("hk-strings", problems[0])
+
+    def test_a_shell_naming_an_asset_the_site_does_not_have_fails(self):
+        with tempfile.TemporaryDirectory() as t:
+            out = self._output(Path(t))
+            (out / "static" / "_astro" / "site.css").unlink()
+            problems = baf.verify_output(out)
+            self.assertEqual(len(problems), len(gg.shell_files()), problems)
+            self.assertIn("/_astro/site.css, which is not in the static output", problems[0])
+
+    def test_a_context_function_bundling_a_shell_fails(self):
+        with tempfile.TemporaryDirectory() as t:
+            rel = gg.shell_files()[0]
+            problems = baf.verify_output(self._output(Path(t), extra={"reader": {rel: f"frontend/{rel}"}}))
+            self.assertEqual(len(problems), 1, problems)
+            self.assertIn("only `all` renders pages", problems[0])
+
+    def test_add_shells_puts_every_language_into_all_and_nowhere_else(self):
+        with tempfile.TemporaryDirectory() as t:
+            out = self._output(Path(t), shells=False)
+            self.assertEqual(len(baf.verify_output(out)), len(gg.shell_files()))    # refused before the step
+            src = Path(t) / "built-shells"
+            src.mkdir()
+            for lang in gg.languages():
+                (src / f"{lang}.html").write_text(self.SHELL.replace('lang="en"', f'lang="{lang}"'), encoding="utf-8")
+            self.assertEqual(baf.add_shells(out, src), gg.shell_files())
+            self.assertEqual(baf.verify_output(out), [])
+            for name in gg.function_names():
+                m = json.loads((out / "functions/api/svc" / f"{name}.func/.vc-config.json").read_text())["filePathMap"]
+                self.assertEqual([k for k in m if "hukamnama_shells" in k], gg.shell_files() if name == "all" else [])
+            pa = Path(t) / "frontend" / "_sggs/webapp/hukamnama_shells/pa.html"
+            self.assertIn('lang="pa"', pa.read_text(encoding="utf-8"))               # each language got its own
+            self.assertEqual(baf.add_shells(out, src), gg.shell_files())            # running it again changes nothing
+            self.assertEqual(baf.verify_output(out), [])
+
+    def test_add_shells_refuses_a_missing_or_broken_shell(self):
+        with tempfile.TemporaryDirectory() as t:
+            out = self._output(Path(t), shells=False)
+            src = Path(t) / "built-shells"
+            src.mkdir()
+            with self.assertRaises(SystemExit):
+                baf.add_shells(out, src)
+            for lang in gg.languages():
+                (src / f"{lang}.html").write_text("<html></html>", encoding="utf-8")
+            with self.assertRaises(SystemExit):
+                baf.add_shells(out, src)
 
     def test_a_stray_web_file_or_another_database_fails(self):
         with tempfile.TemporaryDirectory() as t:
@@ -223,6 +319,11 @@ class GeneratedFunctionsServe(unittest.TestCase):
         for f in doc["functions"]:
             self.assertTrue((self.web / f).is_file(), f)
 
+    def test_generate_bundles_no_shell_of_its_own(self):
+        # shells come from this deploy's site build (--add-shells), never from a directory left on disk
+        self.assertFalse((self.web / "_sggs" / "webapp" / "hukamnama_shells").exists())
+        self.assertTrue((self.web / "_sggs" / "webapp" / "hukamnama_page.py").is_file())
+
     def test_all_serves_every_context_with_a_healthy_database(self):
         base = self._serve("all")
         status, svc, body = self._get(base + "/api/health")
@@ -260,3 +361,30 @@ class GeneratedFunctionsServe(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PageCheck(unittest.TestCase):
+    """The deploy check for /{lang}/hukamnama: a filled page from `all`, or a named problem."""
+    PAGE = b'<!doctype html><html lang="pa" data-intl="pa-IN"><head><title>x</title></head><body></body></html>'
+
+    def _check(self, status, svc, body, lang="pa"):
+        real, vf.get = vf.get, lambda url, timeout=60: (status, svc, body)
+        try:
+            return vf.check_page("https://example.test", lang)
+        finally:
+            vf.get = real
+
+    def test_a_filled_page_from_all_passes(self):
+        self.assertEqual(self._check(200, "all", self.PAGE), (None, None))
+
+    def test_a_static_404_a_token_or_another_language_is_a_problem(self):
+        self.assertIn("HTTP 404", self._check(404, None, b"")[0])
+        self.assertIn("X-Service None", self._check(200, None, self.PAGE)[0])           # a static file answered
+        self.assertIn("template tokens", self._check(200, "all", self.PAGE + b"__HK_TITLE__")[0])
+        self.assertIn("not the 'fr' page", self._check(200, "all", self.PAGE, lang="fr")[0])
+        self.assertIn("HTTP 503", self._check(503, None, b"")[0])                       # the platform, not the function
+
+    def test_an_unreachable_hukamnama_api_is_a_warning_not_a_failed_deploy(self):
+        problem, warning = self._check(503, "all", b"Temporarily unavailable")
+        self.assertIsNone(problem)
+        self.assertIn("HTTP 503", warning)

@@ -101,7 +101,7 @@ function ([bounded contexts and the gateway](bounded-contexts-and-gateway.md)).
 
 The Gurbani Soul pages make no API calls.
 
-### The Hukamnama pages: filled by the server (not live yet)
+### The Hukamnama pages: filled by the server (staging only)
 
 `/{lang}/hukamnama` and `/{lang}/hukamnama/YYYY-MM-DD` are the one exception to "every page is a
 static file". The day's shabad has to be in the first bytes a crawler or a share card reads, and it
@@ -109,14 +109,35 @@ changes each morning, so `webapp/hukamnama_page.py` fills a page **shell** (buil
 per language) with the day's record. Nothing is fetched in the browser.
 
 It is off until two things exist: `HUKAMNAMA_API` (the public Hukamnama API's origin) and a shell
-for the language under `webapp/hukamnama_shells/`. Until then those paths are answered by the
+for the language under `webapp/hukamnama_shells/`. Without them those paths are answered by the
 static site as before. The shell is `frontend/src/pages/[lang]/hukamnama/hk-shell.astro`; after
 `astro build`, `frontend/scripts/extract-hukamnama-shells.mjs` checks it against the contract, moves
 it out of `dist/` to `webapp/hukamnama_shells/<lang>.html` (git-ignored build output) and rewrites
 its own path to `/{lang}/hukamnama__HK_SUFFIX__`, so the canonical, hreflang and language switcher
 are right for today's page and for a dated one. `tools/build_api_functions.py --verify-output`
-refuses a deploy whose static output still holds a shell. The routing to this renderer on Vercel
-is not built yet, so on gurbanisoul.com the paths are still a 404.
+refuses a deploy whose static output still holds a shell.
+
+On Vercel the pages are answered by the `all` API function, per environment:
+
+- **Routing.** An environment that names `hukamnama_api` in `gateway/routes.json` gets two
+  generated rewrites, `/(en|pa|fr)/hukamnama` and the dated form, to `/api/svc/all`. Staging names
+  it (`https://api-staging.gurbanisoul.com`). Production does not yet, so on gurbanisoul.com the
+  paths are still a 404 until launch; turning them on is that one line plus `gen_gateway.py`.
+- **Which API.** The generated `all` entry sets `HUKAMNAMA_API` from that file, chosen by Vercel's
+  `VERCEL_ENV` (staging is a preview deployment), so a production deployment can never read
+  staging's API. A `HUKAMNAMA_API` set on the Vercel project wins; an empty value there turns the
+  pages off without a deploy.
+- **The shells.** They exist only after the site build that runs inside `vercel build`, so the
+  deploy adds them afterwards: `build_api_functions.py --add-shells` copies each language's shell
+  next to the API code and names it in the `all` function's file map. `--verify-output` then
+  refuses the deploy unless `all` holds a whole shell for every enabled language, every `/_astro`
+  file a shell names is in the static output, and no other function holds one.
+- **After the deploy.** `scripts/ci/verify_functions.py` requests `/{lang}/hukamnama` for every
+  language: a filled page from `all` in that language with no template token left. A 503 from the
+  function is a warning, not a failed deploy (the Hukamnama API was unreachable).
+
+A date in the future or an unknown path under these routes is a plain-text 404 from the function,
+not the site's styled 404 page (the function does not bundle the static site).
 
 What the renderer guarantees:
 

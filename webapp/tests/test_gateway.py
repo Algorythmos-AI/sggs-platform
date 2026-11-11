@@ -2,6 +2,7 @@
 import copy
 import importlib.util
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -78,6 +79,60 @@ class Gateway(unittest.TestCase):
         prod = [r for r in gg.rewrites(back) if not r.get("has")]
         self.assertEqual(prod, [{"source": "/api/:path*",
                                  "destination": "https://sggs-knowledge-base.onrender.com/api/:path*"}])
+
+    # -- the Hukamnama pages: the only page routes a function answers --------------------------
+    def _page_rules(self, rw):
+        return [r for r in rw if "hukamnama" in r["source"]]
+
+    def test_hukamnama_pages_go_to_all_only_where_the_environment_names_the_api(self):
+        self.assertTrue(CFG["staging"].get("hukamnama_api"), "staging serves the pages")
+        rules = self._page_rules(VERCEL["rewrites"])
+        self.assertEqual(len(rules), 2)
+        for r in rules:
+            self.assertEqual(r["destination"], "/api/svc/all")
+            self.assertEqual(r["has"], [{"type": "host", "value": CFG["staging"]["host"]}])
+        if not CFG["production"].get("hukamnama_api"):        # until launch: production keeps the static site
+            self.assertFalse(any(not r.get("has") for r in rules))
+        off = copy.deepcopy(CFG)
+        del off["staging"]["hukamnama_api"]
+        self.assertEqual(self._page_rules(gg.rewrites(off)), [])
+        live = copy.deepcopy(CFG)
+        live["production"]["hukamnama_api"] = "https://api.gurbanisoul.com"
+        self.assertEqual(len([r for r in self._page_rules(gg.rewrites(live)) if not r.get("has")]), 2)
+        self.assertEqual(gg.hukamnama_apis(live), {"preview": CFG["staging"]["hukamnama_api"],
+                                                  "production": "https://api.gurbanisoul.com"})
+
+    def test_hukamnama_page_rules_match_exactly_the_paths_the_renderer_serves(self):
+        import sys
+        sys.path.insert(0, str(ROOT / "webapp"))
+        import hukamnama_page
+        sources = [re.compile("^" + r["source"] + "$") for r in self._page_rules(VERCEL["rewrites"])]
+        langs = gg.languages()
+        yes = [f"/{l}/hukamnama" for l in langs] + [f"/{l}/hukamnama/2026-11-11" for l in langs]
+        no = ["/de/hukamnama", "/hukamnama", "/en/hukamnama/hk-shell", "/en/hukamnama/2026-11", "/en/hukamnama/2026-11-11/x",
+              "/en/hukamnamas", "/en/learn/what-is-a-hukamnama", "/api/en/hukamnama", "/en/hukamnama/20261111"]
+        for path in yes:
+            self.assertTrue(any(s.match(path) for s in sources), path)
+            self.assertTrue(hukamnama_page.PATH_RE.match(path), path)     # the function will recognise it
+        for path in no:
+            self.assertFalse(any(s.match(path) for s in sources), path)
+
+    def test_hukamnama_api_must_be_an_https_origin_on_the_vercel_functions(self):
+        for value in ("http://api.gurbanisoul.com", "https://api.gurbanisoul.com/v1", "https://u@api.gurbanisoul.com",
+                      "https://api.gurbanisoul.com?x=1", "", 7):
+            bad = copy.deepcopy(CFG)
+            bad["staging"]["hukamnama_api"] = value
+            with self.assertRaises(SystemExit, msg=repr(value)):
+                gg.environments(bad)
+        bad = copy.deepcopy(CFG)
+        bad["production"] = {"api_platform": "render", "api": "https://example.onrender.com", "services": [],
+                             "hukamnama_api": "https://api.gurbanisoul.com"}
+        with self.assertRaises(SystemExit):
+            gg.environments(bad)
+
+    def test_one_shell_per_enabled_language(self):
+        self.assertEqual(gg.shell_files(), [f"_sggs/webapp/hukamnama_shells/{l}.html" for l in gg.languages()])
+        self.assertIn("en", gg.languages())
 
     def test_routed_contexts_have_probes(self):
         for env in ("staging", "production"):

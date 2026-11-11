@@ -15,6 +15,10 @@ Every CI deployment carries all six; gateway/routes.json decides, per environmen
     that serve.ROUTES tags with that context, and its /api/v1 twin); every other /api path, /readyz
     and /healthz go to `all`. /readyz?svc=<context> reaches that context's readiness check.
   * api_platform "render": every /api path is proxied to the Render origin in "api" (the single API).
+  * "hukamnama_api" (Vercel functions only): the origin of the public Hukamnama API. Where it is
+    set, /{lang}/hukamnama and /{lang}/hukamnama/YYYY-MM-DD (the only pages a function renders,
+    webapp/hukamnama_page.py) go to `all`, which is told that origin (build_api_functions.py).
+    An environment without it has no such rule: those paths stay with the static site.
 
 Staging rules are host-conditioned and come first (Vercel applies the first matching rewrite), so
 production's rules catch every other host, including an unaliased deployment URL. Rewrite sources
@@ -42,6 +46,10 @@ REGION = "pdx1"            # next to the Render API (Oregon) the functions repla
 MAX_DURATION_S = 60
 # The web project's own files: kept out of every function bundle (node_modules is excluded by
 # Vercel already). tools/build_api_functions.py --verify-output fails the build on anything else.
+LOCALES_FILE = ROOT / "frontend" / "src" / "i18n" / "locales.json"
+SHELL_DIR = "webapp/hukamnama_shells"   # in a bundle, under DATA_DIR; the Hukamnama page shells
+# The value of Vercel's VERCEL_ENV in each environment's deployments (staging is an aliased preview).
+VERCEL_ENV = {"staging": "preview", "production": "production"}
 WEB_ONLY = ("src/**", "public/**", "e2e/**", "scripts/**", "dist/**", ".astro/**", "test-results/**",
             "playwright-report/**", "*.json", "*.mjs", "*.ts")
 
@@ -58,6 +66,25 @@ def prefixes_by_context() -> dict[str, list[str]]:
     for p, (ctx,) in sorted(owner.items()):
         out.setdefault(ctx, []).append(p)
     return out
+
+
+def languages() -> list[str]:
+    """The site's enabled languages: one Hukamnama page shell, and one page route, for each."""
+    langs = json.loads(LOCALES_FILE.read_text(encoding="utf-8"))["enabled"]
+    if not langs or any(len(x) != 2 or not x.isalpha() or not x.islower() for x in langs):
+        raise SystemExit(f"locales.json: unexpected language codes {langs}")
+    return list(langs)
+
+
+def shell_files() -> list[str]:
+    """Where the `all` function finds each language's Hukamnama page shell, inside its bundle."""
+    return [f"{DATA_DIR}/{SHELL_DIR}/{lang}.html" for lang in languages()]
+
+
+def hukamnama_apis(cfg: dict) -> dict[str, str]:
+    """VERCEL_ENV value → the Hukamnama API origin, for each environment that serves the pages."""
+    return {VERCEL_ENV[name]: e["hukamnama_api"] for name, e in environments(cfg).items()
+            if e.get("hukamnama_api")}
 
 
 def function_names() -> list[str]:
@@ -79,6 +106,12 @@ def environments(cfg: dict) -> dict[str, dict]:
             raise SystemExit(f"{name}: unknown context(s) {unknown}")
         if e["services"] and e["api_platform"] != "vercel":
             raise SystemExit(f"{name}: per-context services exist only on the Vercel functions")
+        hk = e.get("hukamnama_api")
+        if hk is not None:
+            if e["api_platform"] != "vercel" or name not in VERCEL_ENV:
+                raise SystemExit(f"{name}: the Hukamnama pages are rendered only by the Vercel functions")
+            if not isinstance(hk, str) or not hk.startswith("https://") or "/" in hk[8:] or "?" in hk or "@" in hk:
+                raise SystemExit(f"{name}: hukamnama_api must be an https origin with no path")
     return envs
 
 
@@ -106,6 +139,10 @@ def rewrites(cfg: dict) -> list[dict]:
                 for base in ("/api", "/api/v1"):
                     add(f"{base}/{p}(/.*)?", f"/{FN_DIR}/{ctx}", host)
             add("/readyz", f"/{FN_DIR}/{ctx}", host, query=ctx)
+        if e.get("hukamnama_api"):
+            lang = "(" + "|".join(languages()) + ")"
+            add(f"/{lang}/hukamnama", f"/{FN_DIR}/all", host)
+            add(f"/{lang}/hukamnama/(\\d\\d\\d\\d-\\d\\d-\\d\\d)", f"/{FN_DIR}/all", host)
         add("/api/(.*)", f"/{FN_DIR}/all", host)
         add("/readyz", f"/{FN_DIR}/all", host)
         add("/healthz", f"/{FN_DIR}/all", host)
