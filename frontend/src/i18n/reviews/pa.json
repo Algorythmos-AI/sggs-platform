@@ -2,10 +2,10 @@
   "lang": "pa",
   "reviewer": "Sam Kalaliya (owner, Algorythmos Pty Ltd)",
   "date": "2026-11-12",
-  "catalogSha256": "3ebe408b041175526d8cc18a57461fa491825e3a724bd416566d86b7993b6bb1",
+  "catalogSha256": "20f23d55c37701ee1ef577afef755aa7b6424f910640b32b26ebda61beb366fd",
   "gates": {
-    "G-PA": "signed 2026-11-06: native-speaker polish (PR #356) read and approved by the owner; first signed 2026-11-05 on the rendered /pa pages; the 22 Hukamnama page strings (hukamnama.*) approved by the owner 2026-11-11 from the review sheet and the rendered /pa page; the 57 Developers page strings (developers.*, footer.developers) approved by the owner 2026-11-12 from the review sheet",
-    "G4": "Privacy and Contribute approved by the owner for Algorythmos Pty Ltd (Privacy wording re-read 2026-11-06); no external counsel review"
+    "G-PA": "signed 2026-11-06: native-speaker polish (PR #356) read and approved by the owner; first signed 2026-11-05 on the rendered /pa pages; the 22 Hukamnama page strings (hukamnama.*) approved by the owner 2026-11-11 from the review sheet and the rendered /pa page; the 57 Developers page strings (developers.*, footer.developers) approved by the owner 2026-11-12 from the review sheet; the three privacy strings on the Hukamnama notification (privacy.theAppMakesNo, privacy.remindersAreOptionalLocal, privacy.hukamnamaNotification) approved by the owner 2026-11-12 from the review sheet",
+    "G4": "Privacy and Contribute approved by the owner for Algorythmos Pty Ltd (Privacy wording re-read 2026-11-06); no external counsel review; the Hukamnama notification wording approved by the owner 2026-11-12"
   },
   "decisions": {
     "wordmark": "ਗੁਰਬਾਣੀ ਸੋਲ (Gurmukhi); the App Store name stays Gurbani Soul",
