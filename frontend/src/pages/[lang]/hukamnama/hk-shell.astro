@@ -1,0 +1,115 @@
+---
+// hk-shell.astro — the page SHELL for the Hukamnama pages, one per language. It is not a page a
+// visitor ever opens: scripts/extract-hukamnama-shells.mjs moves the built file out of dist/ to
+// webapp/hukamnama_shells/<lang>.html, and the server (webapp/hukamnama_page.py) fills it for
+// /{lang}/hukamnama and /{lang}/hukamnama/YYYY-MM-DD.
+//
+// No scripture is written here. The shabad arrives as __HK_LINES__, rendered by the server from
+// its own corpus after the day's range hash is proven. The contract (tokens, __HK_IF_…__ blocks,
+// the hk-strings JSON) is documented at the top of webapp/hukamnama_page.py.
+//
+// The route is /{lang}/hukamnama/hk-shell so that every language-aware part of the layout (the
+// canonical, hreflang, the language switcher) writes "/{lang}/hukamnama/hk-shell"; the extract
+// script turns that path into "/{lang}/hukamnama__HK_SUFFIX__" (the suffix is "" or "/YYYY-MM-DD").
+import Marketing from "../../../layouts/Marketing.astro";
+import MarketingNav from "../../../components/MarketingNav.astro";
+import MarketingFooter from "../../../components/MarketingFooter.astro";
+import { LOCALES, localeStaticPaths, type Locale } from "../../../i18n/locales";
+import { localizeHref } from "../../../i18n/paths";
+import { learnHref } from "../../../i18n/content";
+import { useT } from "../../../i18n/t";
+import { ogImagePath } from "../../../routes";
+
+export const getStaticPaths = localeStaticPaths;
+const lang = Astro.params.lang as Locale;
+const { t } = useT(lang);
+const keep = { date: "{date}", ang: "{ang}", d: "{d}", month: "{month}", y: "{y}" };
+
+// The words and patterns the server needs, in this page's language. Month names come from Intl
+// (the same data the rest of the site formats dates with); digits in dates stay Western, as
+// people type them when they search for a day.
+const months = Array.from({ length: 12 }, (_, i) =>
+  new Intl.DateTimeFormat(LOCALES[lang].intl, { month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(2026, i, 1))));
+const strings = {
+  months,
+  date: t("hukamnama.date", keep),
+  date_first: t("hukamnama.dateFirst", keep),
+  title_today: t("hukamnama.titleToday", keep),
+  title_dated: t("hukamnama.titleDated", keep),
+  h1_today: t("hukamnama.h1Today", keep),
+  h1_dated: t("hukamnama.h1Dated", keep),
+  description: t("hukamnama.description", keep),
+  description_none: t("hukamnama.descriptionNone"),
+  status_before: t("hukamnama.statusBefore", keep),
+  status_not_today: t("hukamnama.statusNotToday", keep),
+  status_none: t("hukamnama.statusNone", keep),
+  status_missing: t("hukamnama.statusMissing"),
+  citation: t("scripture.cite", keep),
+  translation_label: t("hukamnama.translationLabel"),
+  rahao_label: t("hukamnama.rahaoLabel"),
+};
+const stringsJson = JSON.stringify(strings).replace(/</g, "\\u003c");
+---
+<Marketing title="__HK_TITLE__" description="__HK_DESCRIPTION__" path={localizeHref("/hukamnama/hk-shell", lang)} ogImage={ogImagePath("home")}>
+  <Fragment slot="head">
+    <meta name="robots" content="__HK_ROBOTS__" />
+    <script type="application/ld+json" set:html="__HK_JSONLD__"></script>
+    <script type="application/json" id="hk-strings" set:html={stringsJson}></script>
+  </Fragment>
+  <MarketingNav overHero={false} />
+
+  <article class="hk">
+    <div class="wrap hk-col">
+      <p class="eyebrow">{t("hukamnama.eyebrow")}</p>
+      <h1>__HK_H1__</h1>
+      __HK_IF_STATUS__<p class="hk-status" role="status">__HK_STATUS__</p>__HK_ENDIF__
+      __HK_IF_UNAVAILABLE__<p class="hk-status" role="status">{t("hukamnama.unavailable")}</p>__HK_ENDIF__
+      __HK_IF_SHABAD__
+      <section class="hk-shabad" data-date="__HK_DATE_ISO__">
+        __HK_IF_LATEST__<h2 class="hk-latest">{t("hukamnama.latestHeading", { date: "__HK_DATE__" })}</h2>__HK_ENDIF__
+        <p class="hk-meta"><time datetime="__HK_DATE_ISO__">__HK_DATE__</time><span aria-hidden="true"> · </span><span>__HK_CITATION__</span></p>
+        __HK_IF_MEANING__<p class="hk-en-label">__HK_TRANSLATION_LABEL__</p>__HK_ENDIF__
+        <div class="hk-lines">__HK_LINES__</div>
+        <p class="hk-cite">__HK_CITATION__</p>
+        <ul class="hk-actions">
+          <li><a href="__HK_READER_HREF__">{t("hukamnama.readAng", { ang: "__HK_ANG__" })}</a></li>
+          <li><a href="__HK_PERMALINK__">{t("hukamnama.permalink")}</a></li>
+          <li><a href="https://hs.sgpc.net/" rel="noopener external">{t("hukamnama.sgpc")}</a></li>
+        </ul>
+      </section>
+      __HK_ENDIF__
+      <footer class="hk-foot">
+        <p>{t("hukamnama.credit")}</p>
+        <p><a href={learnHref(lang, "how-gurbani-soul-verifies-scripture")}>{t("hukamnama.verifyNote")}</a></p>
+      </footer>
+    </div>
+  </article>
+
+  <MarketingFooter />
+
+  <style is:global>
+    /* Global on purpose: the lines are written by the server after the build, so Astro's scoped
+       selectors would never match them. Every rule is under .hk. Gurmukhi stays ink-coloured. */
+    .hk { padding: clamp(88px, 11vw, 128px) 0 0; }
+    .hk .hk-col { max-width: 720px; }
+    .hk h1 { font-size: clamp(30px, 5vw, 46px); margin: 10px 0 14px; }
+    .hk .hk-status { margin: 18px 0; padding: 6px 0 6px 16px; border-left: 2px solid var(--accent); color: var(--ink-soft); font-size: 16px; }
+    .hk .hk-latest { font-size: clamp(20px, 3vw, 26px); margin: 30px 0 6px; }
+    .hk .hk-meta { margin: 0; color: var(--ink-soft); font-size: 14.5px; }
+    .hk .hk-en-label { margin: 18px 0 0; font-size: 13px; color: var(--ink-soft); }
+    .hk .hk-lines { margin: 26px 0 8px; }
+    .hk .hk-line { margin: 0 0 22px; min-width: 0; }
+    .hk .hk-gm { margin: 0; font-size: clamp(21px, 3vw, 28px); line-height: 1.9; color: var(--ink); overflow-wrap: anywhere; }
+    .hk .hk-heading .hk-gm { font-size: clamp(18px, 2.4vw, 22px); }
+    .hk .hk-tl { margin: 2px 0 0; font-size: 15px; font-style: italic; color: var(--ink-soft); overflow-wrap: anywhere; }
+    .hk .hk-en { margin: 4px 0 0; font-size: 16px; color: var(--ink); }
+    .hk .hk-rahao { padding-left: 14px; border-left: 2px solid var(--accent); }
+    .hk .hk-rahao-label { display: inline-block; margin: 2px 0 0; font-size: 12px; font-weight: 650; letter-spacing: .06em; color: var(--accent-text); }
+    .hk .hk-cite { margin: 6px 0 0; color: var(--accent-text); font-weight: 600; font-size: 14px; }
+    .hk .hk-actions { list-style: none; margin: 26px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: 15px; }
+    .hk .hk-actions a { color: var(--accent-text); }
+    .hk .hk-foot { margin: 44px 0 56px; padding: 22px 0 0; border-top: 1px solid var(--line); font-size: 14px; color: var(--ink-soft); }
+    .hk .hk-foot p { margin: 0 0 10px; }
+    .hk .hk-foot a { color: var(--accent-text); }
+  </style>
+</Marketing>

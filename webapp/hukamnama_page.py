@@ -22,7 +22,9 @@ Fidelity (the rules this module exists to keep):
 
 The shell contract (``frontend`` builds it; ``tests/fixtures/hukamnama-shell.html`` is a minimal one):
 
-  ``__HK_<NAME>__``                      replaced with an escaped value (see ``_values``)
+  ``__HK_<NAME>__``                      replaced with an escaped value (``values`` in ``render``);
+                                         ``__HK_SUFFIX__`` is "" or "/YYYY-MM-DD", so the shell can
+                                         write "/{lang}/hukamnama__HK_SUFFIX__" for its own URL
   ``__HK_IF_<FLAG>__ … __HK_ENDIF__``    kept when the flag is set, removed otherwise (may be nested)
   ``<script type="application/json" id="hk-strings">{…}</script>``   the language's words and
                                          patterns (removed from the output); keys in ``STRING_KEYS``
@@ -235,7 +237,10 @@ def _fmt(pattern, **kw):
 
 
 def _date_text(strings, d):
-    return _fmt(strings['date'], d=d.day, month=strings['months'][d.month - 1], y=d.year)
+    # ``date_first`` (optional) is the pattern for the 1st of a month, where a language writes it
+    # differently (French "1er novembre").
+    pattern = strings.get('date_first') if d.day == 1 and strings.get('date_first') else strings['date']
+    return _fmt(pattern, d=d.day, month=strings['months'][d.month - 1], y=d.year)
 
 
 def _lines_html(day, strings):
@@ -299,6 +304,7 @@ def render(shell, strings, lang, *, view, day, today, hour_ist, path, asked=None
     values = {
         'TITLE': e(title), 'H1': e(h1), 'DESCRIPTION': e(description, quote=True),
         'CANONICAL': e(canonical, quote=True),
+        'SUFFIX': e(f'/{asked.isoformat()}' if asked else '', quote=True),   # after "/{lang}/hukamnama" in every URL
         'ROBOTS': 'index, follow' if view in ('today', 'latest', 'dated') else 'noindex, follow',
         'STATUS': e(status), 'DATE': e(shown), 'DATE_ISO': e(day['date'].isoformat() if day else '', quote=True),
         'ANG': str(day['ang']) if day else '', 'RAAG': e(day['raag'] or '') if day else '',

@@ -1115,7 +1115,18 @@ class LanguageRouting(unittest.TestCase):
             self.assertIn('<meta name="robots" content="noindex, follow"', html, route)
             self.assertIn(f'<link rel="canonical" href="{SITE}{to}"', html, route)
             self.assertIn(f'<meta http-equiv="refresh" content="0; url={to}"', html, route)
+            if self._server_rendered(to):
+                continue
             self.assertTrue((STATIC / to.lstrip("/") / "index.html").is_file(), f"{route} forwards to a missing page {to}")
+
+    @staticmethod
+    def _server_rendered(path):
+        """A page the server fills from a shell instead of a static file (the Hukamnama pages):
+        the server's own route pattern must accept the path, and the shell must be in the source."""
+        sys.path.insert(0, str(ROOT / "webapp"))
+        import hukamnama_page
+        shell = FRONTEND / "src" / "pages" / "[lang]" / "hukamnama" / "hk-shell.astro"
+        return bool(hukamnama_page.PATH_RE.match(path)) and shell.is_file()
 
 
 class NoGurbaniInTranslations(unittest.TestCase):

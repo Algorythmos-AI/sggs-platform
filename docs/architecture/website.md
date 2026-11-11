@@ -110,7 +110,13 @@ per language) with the day's record. Nothing is fetched in the browser.
 
 It is off until two things exist: `HUKAMNAMA_API` (the public Hukamnama API's origin) and a shell
 for the language under `webapp/hukamnama_shells/`. Until then those paths are answered by the
-static site as before. The shells and the routing to this renderer on Vercel are not built yet.
+static site as before. The shell is `frontend/src/pages/[lang]/hukamnama/hk-shell.astro`; after
+`astro build`, `frontend/scripts/extract-hukamnama-shells.mjs` checks it against the contract, moves
+it out of `dist/` to `webapp/hukamnama_shells/<lang>.html` (git-ignored build output) and rewrites
+its own path to `/{lang}/hukamnama__HK_SUFFIX__`, so the canonical, hreflang and language switcher
+are right for today's page and for a dated one. `tools/build_api_functions.py --verify-output`
+refuses a deploy whose static output still holds a shell. The routing to this renderer on Vercel
+is not built yet, so on gurbanisoul.com the paths are still a 404.
 
 What the renderer guarantees:
 
