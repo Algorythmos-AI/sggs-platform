@@ -421,6 +421,32 @@ class PageCheck(unittest.TestCase):
         self.assertIn("X-Service None", check(200, None, whole)[0])
         self.assertEqual(check(503, "all", b"")[0], None)
 
+    def test_the_embed_must_be_framable_and_the_site_must_not(self):
+        site = {"x-frame-options": "DENY", "content-security-policy": "default-src 'self'; frame-ancestors 'none'"}
+        embed = {"x-service": "all", "x-robots-tag": "noindex, nofollow",
+                 "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors *"}
+        doc = b'<!doctype html><meta name="robots" content="noindex, nofollow"><p>x</p>'
+
+        def check(site_h=site, embed_h=embed, status=200, body=doc):
+            def fake(url, timeout=60):
+                return (status, embed_h, body) if url.endswith("/embed/hukamnama") else (200, site_h, b"")
+            real, vf.get_headers = vf.get_headers, fake
+            try:
+                return vf.check_embed("https://example.test")
+            finally:
+                vf.get_headers = real
+        self.assertEqual(check(), (None, None))
+        self.assertIn("must forbid framing", check(site_h={"content-security-policy": site["content-security-policy"]})[0])
+        self.assertIn("must forbid framing", check(site_h={"x-frame-options": "DENY", "content-security-policy": "default-src 'self'"})[0])
+        self.assertIn("must be framable", check(embed_h=dict(embed, **{"x-frame-options": "DENY"}))[0])
+        self.assertIn("must be framable", check(embed_h=dict(embed, **{"content-security-policy": site["content-security-policy"]}))[0])
+        self.assertIn("noindex", check(embed_h={k: v for k, v in embed.items() if k != "x-robots-tag"})[0])
+        self.assertIn("not the embed document", check(body=doc + b"<script>")[0])
+        self.assertIn("HTTP 404", check(status=404, embed_h={})[0])
+        self.assertEqual(check(status=503)[0], None)
+        self.assertIn("HTTP 503", check(status=503)[1])
+        self.assertIn("must be framable", check(status=503, embed_h={"x-service": "all", "x-frame-options": "DENY"})[0])
+
     def test_an_unreachable_hukamnama_api_is_a_warning_not_a_failed_deploy(self):
         problem, warning = self._check(503, "all", b"Temporarily unavailable")
         self.assertIsNone(problem)

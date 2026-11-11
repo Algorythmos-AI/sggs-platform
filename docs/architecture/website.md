@@ -182,6 +182,31 @@ language every morning, so they have their own, `/sitemap-hukamnama.xml`, built 
 - After a deploy `verify_functions.py` requires a whole sitemap from `all` that lists each
   language's page.
 
+### The Hukamnama embed
+
+`/embed/hukamnama?lang=en&theme=auto` is a small page for another site to show in an `<iframe>`
+(a Gurdwara's website, a blog). `webapp/hukamnama_embed.py` builds it in the same `all` function,
+under the same switch and routing as the pages.
+
+- **What it shows.** The section's name (a link to the Hukamnama page), the Hukamnama's own date,
+  every Gurmukhi line, the citation (a link to that day's page) and the credit. The day is chosen
+  by the page's rules: today's once published, otherwise the most recent under its own date with
+  the same status line. The lines come from the server's corpus and are shown only after they
+  hash to the published `range_sha256`; otherwise it says it cannot be shown, with no text.
+- **What it is.** One HTML document, about 3 KB, with its styles inline and the site's Gurmukhi
+  font. No script, form, button or image, and no request to any other host. Links open in a new
+  tab and stay on this site. It is `noindex` (meta and `X-Robots-Tag`).
+- **Parameters.** `lang` (a language whose shell carries the embed's words; default `en`) and
+  `theme` (`auto`, `light`, `dark`; default `auto`, which follows the visitor's system). Any other
+  value means the default. Nothing from the query string is written into the document.
+- **Words.** All from existing reviewed strings, carried in the shell's string block (`name`,
+  `credit`, `unavailable`); the embed adds none.
+- **Framing.** It is the one path that may be framed
+  ([security and privacy](security-and-privacy.md)). A host page must be served over http(s):
+  `frame-ancestors *` does not cover a local `file://` page.
+- After a deploy `verify_functions.py` requires the embed to be framable under its own policy and
+  the rest of the site not to be.
+
 What the renderer guarantees:
 
 - It asks the API for one **date** (the Amritsar date it computes itself), never "today", and

@@ -47,7 +47,9 @@ const strings = {
   citation: t("scripture.cite", keep),
   translation_label: t("hukamnama.translationLabel"),
   rahao_label: t("hukamnama.rahaoLabel"),
-  name: t("hukamnama.eyebrow"),          // the section's name in the breadcrumb trail (structured data)
+  name: t("hukamnama.eyebrow"),          // the section's name: breadcrumb trail, and the embed's heading
+  credit: t("hukamnama.credit"),         // the embed (webapp/hukamnama_embed.py) says these two itself
+  unavailable: t("hukamnama.unavailable"),
 };
 const stringsJson = JSON.stringify(strings).replace(/</g, "\\u003c");
 ---

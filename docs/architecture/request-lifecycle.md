@@ -32,7 +32,8 @@ the code named in its footer; the wiki gate keeps the footer honest.
    `mode=ro&immutable=1` with `query_only`; the app can never write to the scripture.
 6. **Respond.** Cacheable segments get `public, max-age=300, s-maxage=3600` and a sha256 ETag
    (a repeat becomes a 304); everything else is `no-store`. Every response carries `nosniff`,
-   `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, HSTS, `X-Request-Id` and `X-Service`.
+   `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, HSTS, `X-Request-Id` and `X-Service`
+   (the Hukamnama embed alone omits the frame ban: it is made to be framed).
 7. **Log the path only.** One JSON line per request with method, path, status, milliseconds and
    the id. The query string is never written ([ADR-0009](../adr/0009-production-verification.md)).
 8. **Errors and limits.** `ApiError` keeps its status; a bad parameter is a 400 with a short

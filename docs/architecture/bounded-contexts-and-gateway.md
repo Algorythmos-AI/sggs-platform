@@ -52,7 +52,7 @@ with `all`. The five contexts go live there together in a later release by listi
 combines it with `serve.ROUTES` and writes the rewrites in `frontend/vercel.json`: every prefix of
 a routed context and its `/api/v1` twin to its function, everything else to `all` — staging's rules
 first, host-conditioned, then production's, host-less. An environment that names `hukamnama_api`
-(staging only, so far) also gets the two Hukamnama page routes, the two feed routes and the Hukamnama sitemap, sent to `all`: the only pages a
+(staging only, so far) also gets the two Hukamnama page routes, the two feed routes, the Hukamnama sitemap and the embed, sent to `all`: the only pages a
 function renders ([the website](website.md)). At deploy time `tools/build_api_functions.py` generates the functions themselves;
 nothing generated is committed.
 

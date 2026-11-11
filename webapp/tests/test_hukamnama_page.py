@@ -467,7 +467,8 @@ class DaysAround(Base):
         day = hp._prove(hp.published_record(record('2026-11-10', R673), date(2026, 11, 10)))
         kw = dict(view='dated', day=day, today=date(2026, 11, 11), hour_ist=8, path='/en/hukamnama/2026-11-10',
                   asked=date(2026, 11, 10))
-        plain = re.search(r'<script type="application/ld\+json">(.*?)</script>', hp.render(shell, strings, 'en', **kw), re.S)
+        unnamed = {k: v for k, v in strings.items() if k != 'name'}
+        plain = re.search(r'<script type="application/ld\+json">(.*?)</script>', hp.render(shell, unnamed, 'en', **kw), re.S)
         self.assertEqual(_json.loads(plain.group(1))['@type'], 'WebPage')            # a shell without the name: as before
         named = dict(strings, name='Hukamnama · <Sri> Harmandir Sahib')
         block = re.search(r'<script type="application/ld\+json">(.*?)</script>', hp.render(shell, named, 'en', **kw), re.S).group(1)

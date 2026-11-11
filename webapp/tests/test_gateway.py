@@ -82,7 +82,7 @@ class Gateway(unittest.TestCase):
 
     # -- the Hukamnama pages: the only page routes a function answers --------------------------
     def _page_rules(self, rw):
-        return [r for r in rw if "/hukamnama" in r["source"] and not r["source"].startswith("/feeds")]
+        return [r for r in rw if "/hukamnama" in r["source"] and not r["source"].startswith(("/feeds", "/embed"))]
 
     def test_hukamnama_feeds_go_to_all_with_the_pages(self):
         import sys
@@ -154,6 +154,35 @@ class Gateway(unittest.TestCase):
                              "hukamnama_api": "https://api.gurbanisoul.com"}
         with self.assertRaises(SystemExit):
             gg.environments(bad)
+
+    def test_the_embed_goes_to_all_and_is_the_only_path_spared_the_frame_ban(self):
+        import sys
+        sys.path.insert(0, str(ROOT / "webapp"))
+        import hukamnama_embed
+        self.assertEqual(gg.EMBED, hukamnama_embed.PATH)
+        rule, = [r for r in VERCEL["rewrites"] if r["source"].startswith("/embed")]
+        self.assertEqual((rule["source"], rule["destination"], rule["has"][0]["value"]),
+                         ("/embed/hukamnama", "/api/svc/all", CFG["staging"]["host"]))
+        site, embed = VERCEL["headers"][0], VERCEL["headers"][1]
+        site_re, embed_re = re.compile("^" + site["source"] + "$"), re.compile("^" + embed["source"] + "$")
+        for path in ("/", "/en", "/en/hukamnama", "/embed", "/embed/other", "/embedded", "/api/health", "/en/embed/hukamnama",
+                     "/feeds/hukamnama.xml", "/reader"):
+            self.assertTrue(site_re.match(path), path)
+            self.assertFalse(embed_re.match(path), path)
+        for path in ("/embed/hukamnama", "/embed/hukamnama/x", "/embed/hukamnamas"):      # exactly one rule each
+            self.assertFalse(site_re.match(path), path)
+            self.assertTrue(embed_re.match(path), path)
+        site_h = {h["key"]: h["value"] for h in site["headers"]}
+        embed_h = {h["key"]: h["value"] for h in embed["headers"]}
+        self.assertEqual(site_h["X-Frame-Options"], "DENY")
+        self.assertIn("frame-ancestors 'none'", site_h["Content-Security-Policy"])
+        self.assertNotIn("X-Frame-Options", embed_h)
+        self.assertEqual(embed_h["Content-Security-Policy"], hukamnama_embed.CSP)         # the page's own policy
+        self.assertIn("noindex", embed_h["X-Robots-Tag"])
+        for key in ("X-Content-Type-Options", "Referrer-Policy", "Strict-Transport-Security"):
+            self.assertEqual(embed_h[key], site_h[key], key)
+        for h in VERCEL["headers"][2:]:                                                  # no later rule touches framing
+            self.assertFalse({x["key"] for x in h["headers"]} & {"X-Frame-Options", "Content-Security-Policy"})
 
     def test_one_shell_per_enabled_language(self):
         self.assertEqual(gg.shell_files(), [f"_sggs/webapp/hukamnama_shells/{l}.html" for l in gg.languages()])
