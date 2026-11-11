@@ -79,7 +79,7 @@ file. Published ranges are pinned to the corpus they were resolved in.
 | `GET /v1/hukamnama/YYYY-MM-DD` | one day, within ±400 days; a future date is 404 |
 | `GET /v1/hukamnama?limit=N` | the latest published days, N in 1..30 |
 | `GET /health` | today's status, the last poll, today's alerts, `scripture_sha256`, and `push` (sending on/off, device counts by mode, today's send states) (`no-store`) |
-| `PUT /v1/devices/<token>` | opt a device in: `{env, mode: asap\|scheduled, schedule?, scripture_sha256?, replaces?}`, at most 1 KB; `replaces` deletes the rotated-away token in the same transaction |
+| `PUT /v1/devices/<token>` | opt a device in: `{env, mode: asap\|scheduled, schedule?, scripture_sha256?, replaces?}`, at most 1 KB; `replaces` deletes the rotated-away token in the same transaction (the new token keeps its first-registration time and the days it already had). Answers `{"ok": true, "today": {amritsar_date, status: published\|pending\|held, delivery: sent\|due\|not_today, sent_at, reason: null\|registered_after_publish\|slot_passed}, "next_slot_at"}`, computed by the sender's own rules (`push.plan_for_device`); times are UTC `…Z` |
 | `DELETE /v1/devices/<token>` | opt out: the row is deleted (404 when it was already gone; the app treats that as done) |
 
 A day held by the gate is served as `pending`. There is no access log. Device writes are rate
@@ -96,24 +96,28 @@ start. `push.py`:
 - **What is sent** is built only from the published decision, so every Gurmukhi character is the
   corpus's. Its shape equals the app's `hukamnama.apns` fixture (`tests/fixtures/ios-hukamnama.apns`,
   copied from gurbani-soul-ios; `test_payload_equals_the_apps_fixture`).
-- **When:** `asap` devices are queued the moment a day is published (within 6 h; a device first
-  registered after the publish waits for tomorrow). `scheduled` devices at their own UTC slot,
-  from the schedule entry in force on that day; a slot that came before the publish gets it at
-  publish time when within 6 h. Never a day older than yesterday.
+- **When:** only the current Amritsar day is ever pushed (a day approved after its Amritsar
+  midnight is not sent), and each device gets at most one push per day. `asap` devices are queued
+  the moment the day is published, or when they switch to `asap` later that day (a device first
+  registered after the publish waits for tomorrow). `scheduled` devices at their own UTC slot on
+  the Amritsar day, from the schedule entry in force then (the first entry counts from the
+  beginning of time, so changing the time keeps today's slot); a slot that came before the
+  publish gets it at publish time when within 6 h.
 - **Durable:** each send is a row (`queued → inflight → sent | failed | suspect | gone`); a row
   left inflight for 2 minutes is sent again after a restart, and `apns-collapse-id:
   hukamnama-<date>` collapses repeats on the phone. `apns-expiration` is the next 05:00 IST.
 - **APNs responses:** 200 sent; 410 deletes only when Apple's timestamp is newer than the last
   registration; `BadDeviceToken`/`DeviceTokenNotForTopic` retries the other environment once
-  (and corrects it on success), else counts a suspect day and deletes after 3 separate days; 429
-  is not retried that day; 5xx and network errors back off (5 attempts); 403
-  `ExpiredProviderToken` rebuilds the provider token once; 413 or any other 403 stops the run with
-  an alert. One provider token is minted per 40 minutes.
-- **Circuit breaker:** more than 5% 4xx among the first 200 results (at least 20) stops the
-  day's run (`push_breaker`) and deletes nothing. Deletions happen only after a day's run
-  finishes untripped.
-- Devices that have not re-registered for 180 days are pruned (the app re-registers daily when
-  opened).
+  (and corrects only the environment on success), else counts a suspect day and deletes after 3
+  separate days; 429, 5xx and network errors back off (5 attempts); 403 `ExpiredProviderToken`
+  rebuilds the provider token once (one new token however many workers were rejected); 413 or
+  any other 403 pauses the day for 20 minutes with an alert, leaving the rows queued to resume.
+  One provider token is minted per 40 minutes.
+- **Circuit breaker:** more than 5% 4xx (429 excluded) among the first 200 results (at least 20)
+  stops the day's run (`push_breaker`) and deletes nothing; `resend` clears it (audited).
+  Deletions happen only after a day's run finishes untripped.
+- Devices neither re-registered nor delivered to for 180 days are pruned (the app re-registers
+  when opened; a delivered push counts as alive).
 
 ## Owner tools
 
@@ -125,7 +129,7 @@ python3 -m hukamnama resend  2026-11-09 --by <name> --reason "<why>"   # push th
 ```
 
 They write to the `audit` table. Approving a held day publishes it at that moment, so `asap`
-devices get it then; `resend` re-queues a day already sent (the same collapse id replaces the
+devices get it then (only while it is still that Amritsar day); `resend` re-queues a day already sent (the same collapse id replaces the
 first notification on the phone). An automatic publish never replaces an owner decision.
 
 ## Polling and alerts

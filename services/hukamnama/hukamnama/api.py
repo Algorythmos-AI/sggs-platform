@@ -4,7 +4,8 @@
   GET /v1/hukamnama/YYYY-MM-DD       one day, within ±400 days of today
   GET /v1/hukamnama?limit=N          the latest published days, N in 1..30 (default 7)
   GET /health                        poller liveness + today's status (for the dead-man check)
-  PUT /v1/devices/<token>            opt a device in (body: devices.parse_registration)
+  PUT /v1/devices/<token>            opt a device in (body: devices.parse_registration); the answer
+                                     says what today means for it (push.plan_for_device)
   DELETE /v1/devices/<token>         opt it out: the row is deleted
 
 A held day is reported as ``pending`` to readers: nothing that failed the gate is ever served.
@@ -20,6 +21,7 @@ from urllib.parse import parse_qs, urlsplit
 
 from . import __version__, clock
 from .devices import MAX_BODY, BadRequest, RateLimiter, parse_registration, valid_token
+from .push import plan_for_device
 from .store import Store
 
 # The source commit, baked into the image (Dockerfile) so a deploy is verified by identity.
@@ -181,7 +183,10 @@ def make_handler(state: State):
                 self._send(429, {"error": "slow down"})
                 return
             state.store.put_device(token, reg.env, reg.mode, reg.schedule, reg.scripture_sha256, now, reg.replaces)
-            self._send(200, {"ok": True}, cache="no-store")
+            # The same rules the sender queues by, so the app can say "sent at 08:24" or "today's
+            # came before you turned this on" instead of guessing.
+            plan = plan_for_device(state.store, state.store.device(token), now)
+            self._send(200, {"ok": True, **plan.as_json()}, cache="no-store")
 
         def _delete(self):
             token = self._device_token()

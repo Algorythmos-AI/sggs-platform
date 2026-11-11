@@ -46,7 +46,8 @@ CREATE TABLE IF NOT EXISTS devices (
   schedule TEXT,                   -- JSON [{from_utc, slot_utc_min}] (scheduled only)
   scripture_sha256 TEXT,
   created_at TEXT NOT NULL,        -- first registration (a new device never gets an old push)
-  registered_at TEXT NOT NULL,     -- last PUT (a 410 older than this does not delete)
+  registered_at TEXT NOT NULL,     -- last PUT or delivered push (a 410 older than this does not
+                                   -- delete; 180 days without either prunes the row)
   suspect_days TEXT                -- JSON list of distinct Amritsar dates with BadDeviceToken
 );
 CREATE TABLE IF NOT EXISTS sends (
@@ -162,31 +163,59 @@ class Store:
         rows = self._x("SELECT value FROM meta WHERE key = ?", (key,))
         return rows[0][0] if rows else None
 
+    def del_meta(self, key: str) -> bool:
+        with self._lock:
+            return self._con.execute("DELETE FROM meta WHERE key = ?", (key,)).rowcount > 0
+
     # -- devices (push) ------------------------------------------------------------------------
     def put_device(self, token: str, env: str, mode: str, schedule: list | None, scripture: str | None,
                    now: datetime, replaces: str | None = None) -> bool:
         """Insert or update one device; ``replaces`` (the token the OS rotated away) is deleted in
-        the same transaction. Returns True when the row is new."""
+        the same transaction. Returns True when the row is new.
+
+        A rotated token is the same phone: it keeps the old row's ``created_at`` (so it is not
+        treated as a device registered after today's publish) and its finished sends (so a day
+        it already had is not pushed twice)."""
         t = _iso(now)
         sched = json.dumps(schedule, separators=(",", ":")) if schedule is not None else None
         with self._lock:
             con = self._con
             con.execute("BEGIN IMMEDIATE")
             try:
+                created = t
                 if replaces and replaces != token:
+                    old = con.execute("SELECT created_at FROM devices WHERE token = ?", (replaces,)).fetchone()
+                    if old is not None:
+                        created = min(old[0], t)
                     con.execute("DELETE FROM devices WHERE token = ?", (replaces,))
                     con.execute("DELETE FROM sends WHERE token = ? AND state IN ('queued','inflight')", (replaces,))
+                    con.execute("UPDATE OR IGNORE sends SET token = ? WHERE token = ?", (token, replaces))
                 new = con.execute("SELECT 1 FROM devices WHERE token = ?", (token,)).fetchone() is None
                 con.execute(
                     "INSERT INTO devices (token, env, mode, schedule, scripture_sha256, created_at, registered_at) "
                     "VALUES (?,?,?,?,?,?,?) ON CONFLICT(token) DO UPDATE SET env=excluded.env, mode=excluded.mode, "
                     "schedule=excluded.schedule, scripture_sha256=excluded.scripture_sha256, "
-                    "registered_at=excluded.registered_at", (token, env, mode, sched, scripture, t, t))
+                    "registered_at=excluded.registered_at", (token, env, mode, sched, scripture, created, t))
                 con.execute("COMMIT")
             except Exception:
                 con.execute("ROLLBACK")
                 raise
         return new
+
+    def set_env(self, token: str, env: str, was: str) -> bool:
+        """Correct one device's APNs environment, only if it is still ``was``: a targeted write, so
+        a PUT that landed meanwhile (mode, schedule) is never undone by the sender's older copy."""
+        return self._x_count("UPDATE devices SET env = ? WHERE token = ? AND env = ?", (env, token, was)) > 0
+
+    def mark_seen(self, token: str, now: datetime) -> None:
+        """A delivered push proves the token is alive: it counts as a registration for pruning
+        (the app re-registers only when opened, so a reader who only reads notifications would
+        otherwise be dropped)."""
+        self._x("UPDATE devices SET registered_at = max(registered_at, ?) WHERE token = ?", (_iso(now), token))
+
+    def _x_count(self, sql: str, args: tuple = ()) -> int:
+        with self._lock:
+            return self._con.execute(sql, args).rowcount
 
     def delete_device(self, token: str) -> bool:
         with self._lock:
@@ -218,7 +247,8 @@ class Store:
         return len(days)
 
     def prune_devices(self, older_than: datetime) -> int:
-        """Drop devices that have not re-registered since ``older_than`` (the app re-PUTs daily)."""
+        """Drop devices neither re-registered nor delivered to since ``older_than`` (the app re-PUTs
+        when opened; a delivered push counts too, see ``mark_seen``)."""
         with self._lock:
             return self._con.execute("DELETE FROM devices WHERE registered_at < ?", (_iso(older_than),)).rowcount
 
@@ -241,13 +271,25 @@ class Store:
                 raise
         return n
 
-    def requeue_day(self, day: date, now: datetime) -> int:
-        """Owner ``resend``: queue the day again for every device that already had it."""
-        t = _iso(now)
+    def requeue_day(self, day: date, now: datetime, by: str = "owner") -> int:
+        """Owner ``resend``: queue the day again for every device that already had it. A tripped
+        circuit breaker for the day is cleared (and audited): otherwise every re-queued row would
+        be skipped again."""
+        t, d = _iso(now), day.isoformat()
         with self._lock:
-            return self._con.execute("UPDATE sends SET state='queued', attempts=0, next_at=?, updated_at=? "
-                                     "WHERE amritsar_date=? AND state IN ('sent','failed')",
-                                     (t, t, day.isoformat())).rowcount
+            con = self._con
+            con.execute("BEGIN IMMEDIATE")
+            try:
+                n = con.execute("UPDATE sends SET state='queued', attempts=0, next_at=?, updated_at=? "
+                                "WHERE amritsar_date=? AND state IN ('sent','failed')", (t, t, d)).rowcount
+                if con.execute("DELETE FROM meta WHERE key = ?", (f"push_breaker:{d}",)).rowcount:
+                    con.execute("INSERT INTO audit (at, actor, action, amritsar_date, detail) VALUES (?,?,?,?,?)",
+                                (t, by, "breaker_cleared", d, "cleared by resend"))
+                con.execute("COMMIT")
+            except Exception:
+                con.execute("ROLLBACK")
+                raise
+        return n
 
     def claim_due(self, now: datetime, limit: int, stale: datetime) -> list[dict]:
         """Mark up to ``limit`` due rows inflight and return them. A row left inflight before
@@ -275,6 +317,21 @@ class Store:
         t = _iso(now)
         self._x("UPDATE sends SET state=?, last_status=?, next_at=?, updated_at=? WHERE token=? AND amritsar_date=?",
                 (state, status, _iso(next_at) if next_at else t, t, token, day))
+
+    def defer_send(self, token: str, day: str, status: str, now: datetime, next_at: datetime) -> None:
+        """Put a claimed row back in the queue untried (the run is paused): the claim's attempt is
+        given back, so a pause never uses up a device's retries."""
+        t = _iso(now)
+        self._x("UPDATE sends SET state='queued', attempts=max(0, attempts-1), last_status=?, next_at=?, "
+                "updated_at=? WHERE token=? AND amritsar_date=?", (status, _iso(next_at), t, token, day))
+
+    def send(self, token: str, day: date) -> dict | None:
+        rows = self._x("SELECT state, last_status, updated_at FROM sends WHERE token=? AND amritsar_date=?",
+                       (token, day.isoformat()))
+        if not rows:
+            return None
+        st, last, at = rows[0]
+        return {"state": st, "last_status": last, "updated_at": datetime.fromisoformat(at)}
 
     def has_send(self, token: str, day: date) -> bool:
         return bool(self._x("SELECT 1 FROM sends WHERE token=? AND amritsar_date=?", (token, day.isoformat())))
