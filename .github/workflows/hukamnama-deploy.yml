@@ -77,6 +77,15 @@ jobs:
         run: |
           pip install --require-hashes -r services/hukamnama/requirements.txt
           cd services/hukamnama && python3 -m unittest discover -s tests -t .
+      - name: Every published day still proves in this commit's database
+        # A dataset bump that moved or changed a published day's lines stops here, with the day
+        # named. An unreachable service (asleep, or never deployed) is not a reason to block.
+        if: steps.cfg.outputs.ready == 'true'
+        run: |
+          set +e
+          python3 scripts/ci/hukamnama_preflight.py "$URL" --db db/sggs.sqlite; rc=$?
+          if [ "$rc" = 2 ]; then echo "::warning::the staging service could not be read; its published days were not proved before this deploy"; exit 0; fi
+          exit "$rc"
       - name: Ask Render to build this exact commit
         if: steps.cfg.outputs.ready == 'true'
         run: |
