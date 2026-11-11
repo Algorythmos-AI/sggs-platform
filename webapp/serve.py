@@ -54,6 +54,7 @@ from sggs import core
 import hukamnama_page   # the only HTML this server renders; off unless configured
 import hukamnama_feed   # the Hukamnama feeds (Atom, JSON Feed); off unless configured
 import hukamnama_sitemap   # the Hukamnama pages' own sitemap; off unless configured
+import hukamnama_embed   # the Hukamnama embed, the one framable page; off unless configured
 core.APP_VERSION, core.APP_BUILT, core.APP_COMMIT = APP_VERSION, APP_BUILT, APP_COMMIT
 from sggs.core import (ApiError, LINE_COLS, _FALLTHROUGH, _ID_MAX, _int, _int_str, _local,   # noqa: F401
     attach_translations, db, have_fts, rows_to_list)   # noqa: F401  (re-exported)
@@ -217,12 +218,15 @@ class H(BaseHTTPRequestHandler):
                 return v
         return uuid.uuid4().hex
 
-    def _sec_headers(self):
+    def _sec_headers(self, framable=False):
         # Defence-in-depth for the local app. No strict CSP on purpose: the UI relies on
         # inline event handlers + an inline pre-paint theme script, which a strict policy
         # would break; nosniff/frame-deny/no-referrer are safe and unconditional.
+        # ``framable`` is for the Hukamnama embed alone (hukamnama_embed), which other sites show
+        # in an iframe and which sends its own strict Content-Security-Policy.
         self.send_header('X-Content-Type-Options', 'nosniff')
-        self.send_header('X-Frame-Options', 'DENY')
+        if not framable:
+            self.send_header('X-Frame-Options', 'DENY')
         self.send_header('Referrer-Policy', 'no-referrer')
         # Honoured only over HTTPS (the hosted API); browsers ignore it on http://localhost.
         self.send_header('Strict-Transport-Security', 'max-age=31536000')
@@ -350,6 +354,8 @@ class H(BaseHTTPRequestHandler):
             if hukamnama_feed.respond(self, u.path):           # and its feeds
                 return
             if hukamnama_sitemap.respond(self, u.path):        # and their sitemap
+                return
+            if hukamnama_embed.respond(self, u.path, u.query):  # and the embed other sites frame
                 return
             return self._serve_static(u.path)
         except ApiError as e:                                  # explicit status (e.g. 404 unknown comp_id)

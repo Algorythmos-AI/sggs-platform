@@ -42,7 +42,7 @@ The same handler serves every host (`serve.py`, and each Vercel function subclas
 | No path traversal | static paths are resolved with `realpath` and must stay under the static root; `%`-encoded input is never decoded | `serve.py` `_resolve_static` |
 | No leaks on error | a bad parameter is a 400 with a message the code wrote; anything unexpected is a 500 with the fixed body `{"error": "internal server error"}` and the traceback only in the log | `serve.py` |
 | Slow clients | 15-second socket timeout; at most 48 worker threads and a backlog of 128 | `serve.py` |
-| Response headers | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, HSTS, `X-Request-Id`, `X-Service` on every response | `serve.py` `_sec_headers` |
+| Response headers | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, HSTS, `X-Request-Id`, `X-Service` on every response; one exception, the Hukamnama embed (`/embed/hukamnama`), omits `X-Frame-Options` and sends its own strict CSP | `serve.py` `_sec_headers` |
 
 ## The browser
 
@@ -53,6 +53,13 @@ Both sites send their headers from `vercel.json`:
   (inline theme and handler code) and one outside origin, the newsletter provider, for
   `connect-src` and `form-action`. The wiki allows inline scripts only by **SHA-256 hash**,
   checked in CI by `npm run check:csp`.
+- **The one framable page.** `/embed/hukamnama` exists to be shown inside other sites, so the
+  website's header rule excludes that path (`/((?!embed/hukamnama).*)`) and a second rule gives it
+  its own set: no `X-Frame-Options`, and `default-src 'none'; style-src 'unsafe-inline'; font-src
+  'self'; frame-ancestors *; base-uri 'none'; form-action 'none'`. The document has no script,
+  form, button or image and takes nothing from its query string, so there is nothing in it to
+  click-jack. A test proves every other path keeps the frame ban, and after each deploy
+  `verify_functions.py` reads the live headers of `/`, a Hukamnama page and the embed.
 - **Transport and isolation.** HSTS for two years with `includeSubDomains; preload`,
   `Cross-Origin-Opener-Policy: same-origin`, and a `Permissions-Policy` that turns off camera,
   microphone and payment (the website keeps geolocation for its own origin, for the raag clock's
