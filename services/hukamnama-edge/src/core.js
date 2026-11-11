@@ -1,7 +1,7 @@
 // The public Hukamnama API, served at the edge from the service's snapshot files.
 //
 //   GET /v1/hukamnama/today            the current Amritsar day (published | pending)
-//   GET /v1/hukamnama/YYYY-MM-DD       one day, within ±400 days of today
+//   GET /v1/hukamnama/YYYY-MM-DD       one day, from the first archived date up to today
 //   GET /v1/hukamnama?limit=N          the latest published days, N in 1..30 (default 7);
 //                                      &include=lines adds every line of each day
 //   GET /v1/status                     today's status and the latest published date
@@ -21,7 +21,7 @@
 
 export const PREFIX = "v1/hukamnama/";
 export const INDEX = PREFIX + "index.json";
-export const MAX_DAYS_AWAY = 400;
+export const EARLIEST = "2026-11-01";      // the archive is permanent: any date from here to today
 export const DEFAULT_LIMIT = 7;
 export const MAX_LIMIT = 30;
 
@@ -63,10 +63,6 @@ export function parseDay(s) {
   const t = Date.parse(s + "T00:00:00Z");
   if (Number.isNaN(t) || new Date(t).toISOString().slice(0, 10) !== s) return null;
   return t;
-}
-
-function daysBetween(a, b) {
-  return Math.round((parseDay(a) - parseDay(b)) / 86400000);
 }
 
 async function readJson(bucket, key) {
@@ -159,10 +155,8 @@ async function day(request, env, today, arg) {
   let want = today;
   if (arg !== "today") {
     if (parseDay(arg) === null) return fail(request, 400, "invalid_request", "date must be YYYY-MM-DD");
-    if (Math.abs(daysBetween(arg, today)) > MAX_DAYS_AWAY) {
-      return fail(request, 400, "invalid_request", "date out of range");
-    }
     if (arg > today) return fail(request, 404, "not_found", "not yet");
+    if (arg < EARLIEST) return fail(request, 404, "not_found", "no Hukamnama is archived before " + EARLIEST);
     want = arg;
   }
   const rec = await readDay(env.BUCKET, want);
