@@ -1,9 +1,12 @@
+import http.client
 import json
+import re
 import tempfile
 import threading
 import unittest
 import urllib.error
 import urllib.request
+from datetime import timedelta
 
 from hukamnama.api import State, serve
 from hukamnama.corpus import open_ro, resolution_for_range, scripture_sha256
@@ -75,6 +78,104 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(code, 200)
         self.assertEqual(body["amritsar_date"], "2026-11-09")
         self.assertEqual(h["Cache-Control"], "no-store")
+
+
+TOKEN, OTHER = "ab" * 32, "cd" * 32
+PUB = utc(2026, 11, 9, 0, 4)                                   # 05:34 IST
+_Z = re.compile(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$")
+
+
+@needs_db
+class DevicePlanTests(unittest.TestCase):
+    """PUT /v1/devices answers what today means for the device, by the sender's own rules."""
+    @classmethod
+    def setUpClass(cls):
+        cls.con = open_ro(DB)
+        cls.fp = scripture_sha256(cls.con)
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.store = Store(f"{self.tmp.name}/s.sqlite")
+        self.now = [PUB - timedelta(hours=1)]
+        self.state = State(self.store, self.fp, now=lambda: self.now[0])
+        self.httpd = serve(self.state, "127.0.0.1", 0)
+        threading.Thread(target=self.httpd.serve_forever, daemon=True).start()
+
+    def tearDown(self):
+        self.httpd.shutdown()
+        self.httpd.server_close()
+        self.tmp.cleanup()
+
+    def put(self, token=TOKEN, at=None, **body):
+        if at is not None:
+            self.now[0] = at
+        b = {"env": "production", "mode": "asap", "scripture_sha256": self.fp, **body}
+        c = http.client.HTTPConnection("127.0.0.1", self.httpd.server_address[1], timeout=5)
+        c.request("PUT", f"/v1/devices/{token}", body=json.dumps(b).encode(), headers={"Content-Type": "application/json"})
+        r = c.getresponse()
+        out = r.status, json.loads(r.read())
+        c.close()
+        return out
+
+    def publish(self, at=PUB):
+        self.store.publish(at.date(), resolution_for_range(self.con, 29226, 29236), self.fp, at, "auto")
+
+    def test_shape(self):
+        code, body = self.put()
+        self.assertEqual(code, 200)
+        self.assertEqual(set(body), {"ok", "today", "next_slot_at"})
+        self.assertEqual(set(body["today"]), {"amritsar_date", "status", "delivery", "sent_at", "reason"})
+        self.assertEqual(body, {"ok": True, "next_slot_at": None,
+                                "today": {"amritsar_date": "2026-11-09", "status": "pending", "delivery": "due",
+                                          "sent_at": None, "reason": None}})
+        _, body = self.put(mode="scheduled", schedule=[{"from_utc": 0, "slot_utc_min": 193}])
+        self.assertEqual(body["next_slot_at"], "2026-11-09T03:13:00Z")
+        self.assertRegex(body["next_slot_at"], _Z)
+
+    def test_asap_due_then_sent(self):
+        self.put()                                              # registered before the publish
+        self.publish()
+        _, body = self.put(at=PUB + timedelta(minutes=1))
+        self.assertEqual((body["today"]["status"], body["today"]["delivery"]), ("published", "due"))
+        self.store.enqueue(PUB.date(), [TOKEN], PUB + timedelta(minutes=1))
+        self.assertEqual(self.put(at=PUB + timedelta(minutes=2))[1]["today"]["delivery"], "due")   # queued
+        self.store.finish_send(TOKEN, "2026-11-09", "sent", "200", utc(2026, 11, 9, 2, 54, 18))
+        _, body = self.put(at=PUB + timedelta(hours=3))
+        self.assertEqual(body["today"], {"amritsar_date": "2026-11-09", "status": "published", "delivery": "sent",
+                                         "sent_at": "2026-11-09T02:54:18Z", "reason": None})
+
+    def test_asap_registered_after_publish(self):
+        self.publish()
+        _, body = self.put(at=PUB + timedelta(minutes=5))
+        self.assertEqual((body["today"]["delivery"], body["today"]["reason"], body["today"]["sent_at"]),
+                         ("not_today", "registered_after_publish", None))
+
+    def test_scheduled_slot_passed(self):
+        self.publish()
+        _, body = self.put(at=utc(2026, 11, 9, 4, 0), mode="scheduled",
+                           schedule=[{"from_utc": 0, "slot_utc_min": 180}])     # 08:30 IST, new after it
+        self.assertEqual((body["today"]["delivery"], body["today"]["reason"]), ("not_today", "slot_passed"))
+        self.assertEqual(body["next_slot_at"], "2026-11-10T03:00:00Z")
+
+    def test_scheduled_slot_ahead(self):
+        self.publish()
+        _, body = self.put(at=PUB + timedelta(minutes=10), mode="scheduled",
+                           schedule=[{"from_utc": 0, "slot_utc_min": 600}])
+        self.assertEqual((body["today"]["delivery"], body["today"]["reason"]), ("due", None))
+        self.assertEqual(body["next_slot_at"], "2026-11-09T10:00:00Z")
+
+    def test_held(self):
+        self.put()
+        self.store.hold(PUB.date(), PUB, "auto", "no match")
+        _, body = self.put(at=PUB + timedelta(minutes=1))
+        self.assertEqual((body["today"]["status"], body["today"]["delivery"]), ("held", "not_today"))
+
+    def test_rotation_reports_the_old_tokens_day(self):
+        self.put(OTHER)
+        self.publish()
+        _, body = self.put(TOKEN, at=PUB + timedelta(minutes=5), replaces=OTHER)
+        self.assertEqual(body["today"]["delivery"], "due")
+        self.assertIsNone(self.store.device(OTHER))
 
 
 if __name__ == "__main__":
