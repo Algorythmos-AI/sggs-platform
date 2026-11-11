@@ -101,6 +101,36 @@ function ([bounded contexts and the gateway](bounded-contexts-and-gateway.md)).
 
 The Gurbani Soul pages make no API calls.
 
+### The Hukamnama pages: filled by the server (not live yet)
+
+`/{lang}/hukamnama` and `/{lang}/hukamnama/YYYY-MM-DD` are the one exception to "every page is a
+static file". The day's shabad has to be in the first bytes a crawler or a share card reads, and it
+changes each morning, so `webapp/hukamnama_page.py` fills a page **shell** (built by the site, one
+per language) with the day's record. Nothing is fetched in the browser.
+
+It is off until two things exist: `HUKAMNAMA_API` (the public Hukamnama API's origin) and a shell
+for the language under `webapp/hukamnama_shells/`. Until then those paths are answered by the
+static site as before. The shells and the routing to this renderer on Vercel are not built yet.
+
+What the renderer guarantees:
+
+- It asks the API for one **date** (the Amritsar date it computes itself), never "today", and
+  refuses an answer that names another date.
+- From the API it uses only the line-id range and `range_sha256`. Every Gurmukhi line, its
+  transliteration and (when the meaning layer is on upstream) its English come from the server's
+  own corpus, and the page is rendered only after those lines hash to `range_sha256`. Otherwise it
+  answers 503 with no text.
+- Nothing is called "today" unless its date is the Amritsar date at that moment. Before the
+  morning's publication the page shows the most recent Hukamnama under that Hukamnama's own date.
+- Every value is HTML-escaped; the JSON-LD cannot close its `<script>`.
+- Today's page is never cached past Amritsar midnight; a dated page is cached for a day; a page
+  with no Hukamnama is `noindex`.
+- If the API is unreachable, a day already proven on this server is still served; anything else
+  is 503 with `Retry-After`, and the API is not asked again for 10 seconds.
+
+The shell contract (tokens, conditional blocks, the language's words) is documented at the top of
+`webapp/hukamnama_page.py`; `webapp/tests/fixtures/hukamnama-shell.html` is a minimal shell.
+
 ## Rules the scripts keep
 
 - **Everything from the API is escaped.** Scripture and API text reach `innerHTML` only through

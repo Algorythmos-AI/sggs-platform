@@ -119,13 +119,13 @@ test("a past day is cached for a day; a day with no file is pending", async () =
   assert.equal(gap.res.headers.get("Cache-Control"), "public, max-age=30");
 });
 
-test("dates: malformed is 400, too far is 400, the future is 404", async () => {
+test("dates: malformed is 400, before the archive or in the future is 404", async () => {
   const env = { BUCKET: bucket(["2026-11-11"]) };
   for (const [path, status, error] of [
     ["/v1/hukamnama/2026-02-30", 400, "date must be YYYY-MM-DD"],
     ["/v1/hukamnama/11-11-2026", 400, "date must be YYYY-MM-DD"],
-    ["/v1/hukamnama/2020-01-01", 400, "date out of range"],
-    ["/v1/hukamnama/2028-01-01", 400, "date out of range"],
+    ["/v1/hukamnama/2026-10-31", 404, "no Hukamnama is archived before 2026-11-01"],
+    ["/v1/hukamnama/2028-01-01", 404, "not yet"],
     ["/v1/hukamnama/2026-11-12", 404, "not yet"],
   ]) {
     const { res, body } = await get(path, env);
@@ -135,6 +135,12 @@ test("dates: malformed is 400, too far is 400, the future is 404", async () => {
     assert.equal(typeof body.request_id, "string");
     assert.equal(res.headers.get("Cache-Control"), "no-store");
   }
+});
+
+test("the archive is permanent: a day years back is still served", async () => {
+  const { res, body } = await get("/v1/hukamnama/2026-11-08", { BUCKET: bucket(["2026-11-08"]) }, at("2031-03-01T02:00:00Z"));
+  assert.equal(res.status, 200);
+  assert.equal(body.amritsar_date, "2026-11-08");
 });
 
 test("a future day is refused even when a file for it exists", async () => {

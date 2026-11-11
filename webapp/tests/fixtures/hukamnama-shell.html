@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>__HK_TITLE__</title>
+<meta name="description" content="__HK_DESCRIPTION__">
+<meta name="robots" content="__HK_ROBOTS__">
+<link rel="canonical" href="__HK_CANONICAL__">
+<script type="application/ld+json">__HK_JSONLD__</script>
+<script type="application/json" id="hk-strings">{"months":["January","February","March","April","May","June","July","August","September","October","November","December"],"date":"{d} {month} {y}","title_today":"Today's Hukamnama · Sri Harmandir Sahib (Golden Temple) · {date}","title_dated":"Hukamnama {date} · Sri Harmandir Sahib (Golden Temple)","h1_today":"Today's Hukamnama · {date}","h1_dated":"Hukamnama · {date}","description":"Hukamnama from Sri Harmandir Sahib, Amritsar, {date}: Sri Guru Granth Sahib Ji · Ang {ang}.","description_none":"The daily Hukamnama from Sri Harmandir Sahib, Amritsar.","status_before":"The Hukamnama for {date} appears after about 05:30 IST.","status_not_today":"The Hukamnama for {date} has not been published.","status_none":"No Hukamnama is available yet for {date}.","status_missing":"No Hukamnama was published here for this date.","citation":"Sri Guru Granth Sahib Ji · Ang {ang}","translation_label":"English translation · Dr. Sant Singh Khalsa","rahao_label":"Rahao"}</script>
+</head>
+<body>
+<h1>__HK_H1__</h1>
+__HK_IF_STATUS__<p class="hk-status">__HK_STATUS__</p>__HK_ENDIF__
+__HK_IF_LATEST__<h2 class="hk-latest">__HK_DATE__</h2>__HK_ENDIF__
+__HK_IF_UNAVAILABLE__<p class="hk-unavailable">Unavailable</p>__HK_ENDIF__
+__HK_IF_SHABAD__<article data-date="__HK_DATE_ISO__" data-range="__HK_RANGE_SHA__">
+__HK_IF_MEANING__<p class="hk-en-label">__HK_TRANSLATION_LABEL__</p>__HK_ENDIF__
+__HK_LINES__
+<p class="hk-cite">__HK_CITATION__</p>
+<a class="hk-reader" href="__HK_READER_HREF__">Read this Ang</a>
+<a class="hk-permalink" href="__HK_PERMALINK__">Permanent link</a>
+</article>__HK_ENDIF__
+</body>
+</html>
