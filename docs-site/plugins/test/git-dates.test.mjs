@@ -15,6 +15,9 @@ test('a page is dated by its own file, a pinned page by its pin, the API referen
   assert.equal(datedFile('data/answer-protocol', '../docs-site/.sources/sggs-data/Answer-Protocol.md'), 'docs-site/sources.lock.json');
   assert.equal(datedFile('data/answer-protocol', '.sources/sggs-data/Answer-Protocol.md'), 'docs-site/sources.lock.json');
   assert.equal(datedFile('api/reference/operations/meta', undefined), 'contract/openapi.json');
+  // the Hukamnama API's reference is dated by its own spec; its guide page by its own file
+  assert.equal(datedFile('api/hukamnama/reference/operations/today', undefined), 'contract/hukamnama.openapi.json');
+  assert.equal(datedFile('api/hukamnama', '../docs/api/hukamnama.md'), 'docs/api/hukamnama.md');
   assert.equal(datedFile('404', 'src/content/docs/404.md'), null);
 });
 

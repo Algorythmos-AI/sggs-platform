@@ -87,6 +87,9 @@ test.describe('brand, the API reference and the header', () => {
     await expect(api.locator('summary', { hasText: /^\s*Reference\s*$/ })).toHaveCount(1);
     // operations are labelled by their short summary, not a sentence
     await expect(api.locator('a[href="/api/reference/operations/search/"]')).toContainText('Search the Granth');
+    // the public Hukamnama API has its own guide and its own generated reference in the same group
+    await expect(api.locator('a[href="/api/hukamnama/"]')).toHaveCount(1);
+    await expect(api.locator('a[href="/api/hukamnama/reference/operations/today/"]')).toContainText("Today's Hukamnama");
     const res = await page.goto('/api/reference/operations/meta/');
     expect(res?.status()).toBe(200);
     await expect(page.locator('h1')).toBeVisible();

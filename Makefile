@@ -82,6 +82,7 @@ review-pack: docs ## the G3 scholar-review pack: Scripture 101, the glossary, th
 
 openapi: ## regenerate contract/openapi.json (29 routes; schemas inferred from real responses) — test-web fails if stale
 	python3 tools/gen_openapi.py
+	python3 tools/gen_hukamnama_openapi.py
 
 contract-http: ## replay the golden contract over HTTP against a running API: make contract-http BASE=http://127.0.0.1:7777
 	@test -n "$(BASE)" || { echo "usage: make contract-http BASE=<api origin>"; exit 2; }

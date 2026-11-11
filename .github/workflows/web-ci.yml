@@ -18,6 +18,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version-file: ".python-version"
+      - uses: actions/setup-node@v5   # the Hukamnama OpenAPI check runs the edge Worker's handler
+        with:
+          node-version-file: ".nvmrc"
       - name: Ruff (bug-only lint gate)
         run: |
           pip install ruff==0.9.10
@@ -29,6 +32,7 @@ jobs:
       - name: Unit tests — Hukamnama service (services/hukamnama; whole-Granth resolver property, push sender)
         env:
           HUKAMNAMA_REQUIRE_PUSH_DEPS: "1"   # the push tests must run here, never skip
+          HUKAMNAMA_REQUIRE_NODE: "1"        # the OpenAPI check runs the Worker's handler: never skip
         run: |
           pip install --require-hashes -r services/hukamnama/requirements.txt
           cd services/hukamnama && python3 -m unittest discover -s tests -t . -v

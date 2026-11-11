@@ -5,13 +5,13 @@
 // sources gives every file's newest commit; src/route-data.ts puts it on each page:
 //   a page from docs/                  -> its own last commit
 //   a page pinned from a sibling repo  -> when the pin last moved (docs-site/sources.lock.json)
-//   the generated API reference        -> contract/openapi.json
+//   a generated API reference          -> its spec under contract/ (paths.mjs API_REFERENCES)
 // A shallow clone would date every file to the one commit it holds, which is wrong, not missing:
 // then no dates are shown, and in CI (where the checkout must be full) the build fails.
 import { execFileSync } from 'node:child_process';
-import { REPO_ROOT } from './paths.mjs';
+import { API_REFERENCES, REPO_ROOT, referenceOf } from './paths.mjs';
 
-export const DATED = ['docs', 'docs-site/sources.lock.json', 'contract/openapi.json'];
+export const DATED = ['docs', 'docs-site/sources.lock.json', ...API_REFERENCES.map((r) => r.spec)];
 
 /** Parse `git log --format=t:%ct --name-only`: the first (newest) time each path appears. */
 export function parseLog(out) {
@@ -43,7 +43,8 @@ export function commitDates({ root = REPO_ROOT, env = process.env, run = execFil
 
 /** The repo-relative file whose last commit dates a page (filePath is relative to docs-site/). */
 export function datedFile(id, filePath) {
-  if (id === 'api/reference' || id.startsWith('api/reference/')) return 'contract/openapi.json';
+  const reference = referenceOf(id);
+  if (reference) return reference.spec;
   if (!filePath) return null;
   const rel = filePath.startsWith('../') ? filePath.slice(3) : `docs-site/${filePath}`;
   if (rel.startsWith('docs-site/.sources/')) return 'docs-site/sources.lock.json';   // a pinned sibling page

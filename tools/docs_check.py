@@ -53,7 +53,8 @@ SITE = ROOT / "docs-site"
 SOURCES_DIR = SITE / ".sources"
 NOT_PUBLISHED = ("docs/reports/archive/", "docs/design/")
 # pages the site generates rather than reads from docs/ (starlight-openapi): a link to one is valid
-VIRTUAL_PAGES = {"docs/api/reference": "/api/reference/"}
+VIRTUAL_PAGES = {"docs/api/reference": "/api/reference/",
+                 "docs/api/hukamnama/reference": "/api/hukamnama/reference/"}
 REQUIRE_VERIFIED: tuple[str, ...] = ("docs/process/", "docs/engineering/", "docs/architecture/")
 STALE_UNTRACKED_DAYS = 60     # a stamp on a page that cites no code is only as good as its date
 TITLE_LEN, DESC_LEN = (8, 120), (40, 200)

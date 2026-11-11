@@ -55,6 +55,13 @@ where the OpenAPI spec pins *shape*:
 over HTTP against a running API, which every deploy does before promoting. Details on
 [Harnesses and golden vectors](../search/harnesses-and-golden-vectors.md).
 
+## A second spec: the Hukamnama API
+
+The public Hukamnama API has its own spec, `contract/hukamnama.openapi.json`, made the same way by
+`tools/gen_hukamnama_openapi.py`: from the real answers of the service's snapshot writer and the
+edge Worker's handler. It has its own version and [its own reference](hukamnama/reference/); how
+it is generated and what its tests hold it to is on [The Hukamnama API](hukamnama.md).
+
 ## The API contract version
 
 `API_CONTRACT_VERSION` in `tools/gen_openapi.py` is the spec's own version, bumped only for an API
