@@ -1,10 +1,10 @@
 {
   "lang": "pa",
   "reviewer": "Sam Kalaliya (owner, Algorythmos Pty Ltd)",
-  "date": "2026-11-06",
-  "catalogSha256": "9fd695933485ca2ef4e7e6855ec531b4e36473176931a4da7406bee8e5a96d6f",
+  "date": "2026-11-11",
+  "catalogSha256": "56fdde89adc2bddbbe49ad91156a7ac23856f1bdbe63106f29850aea7c0106be",
   "gates": {
-    "G-PA": "signed 2026-11-06: native-speaker polish (PR #356) read and approved by the owner; first signed 2026-11-05 on the rendered /pa pages",
+    "G-PA": "signed 2026-11-06: native-speaker polish (PR #356) read and approved by the owner; first signed 2026-11-05 on the rendered /pa pages; the 22 Hukamnama page strings (hukamnama.*) approved by the owner 2026-11-11 from the review sheet and the rendered /pa page",
     "G4": "Privacy and Contribute approved by the owner for Algorythmos Pty Ltd (Privacy wording re-read 2026-11-06); no external counsel review"
   },
   "decisions": {
@@ -12,7 +12,8 @@
     "numerals": "Gurmukhi (੧੨੩) for interface numbers; Ang numbers stay Western",
     "default": "English stays the site default; Punjabi is enabled first",
     "exact": "ਸ਼ੁੱਧ for \"exact\" (ਸਟੀਕ means with commentary in Sikh publishing); open for a Granthi's confirmation",
-    "widget": "ਵਿਜੇਟ"
+    "widget": "ਵਿਜੇਟ",
+    "hukamnamaDates": "dates on the Hukamnama page use Western digits (11 ਨਵੰਬਰ 2026 / 11 novembre 2026), as people type them when searching for a day"
   },
   "notes": "English governs the legal pages. The app, Knowledge Base, newsletter, Stripe checkout and support replies are in English, and the pages say so."
 }

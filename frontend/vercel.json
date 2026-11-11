@@ -91,8 +91,19 @@
       "source": "/contribute/:rest+",
       "destination": "/en/contribute/:rest+",
       "permanent": true
+    },
+    {
+      "source": "/hukamnama",
+      "destination": "/en/hukamnama",
+      "permanent": true
+    },
+    {
+      "source": "/hukamnama/:rest+",
+      "destination": "/en/hukamnama/:rest+",
+      "permanent": true
     }
   ],
+  "buildCommand": "npm run build",
   "rewrites": [
     {
       "source": "/api/analytics(/.*)?",

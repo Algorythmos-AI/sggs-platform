@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev --port 4321",
-    "build": "astro build && node scripts/check-share-cards.mjs",
+    "build": "astro build && node scripts/extract-hukamnama-shells.mjs && node scripts/check-share-cards.mjs",
     "sync": "node scripts/sync-to-webapp.mjs",
     "rollback": "node scripts/sync-to-webapp.mjs --rollback",
     "build:deploy": "npm run build && node scripts/sync-to-webapp.mjs",

@@ -1,17 +1,18 @@
 {
   "lang": "fr",
   "reviewer": "Sam Kalaliya (owner, Algorythmos Pty Ltd)",
-  "date": "2026-11-06",
-  "catalogSha256": "802ec1f0056c96826dfa82850abfb7b0fe1d248674e76f2c2e17488ffbc4fd53",
+  "date": "2026-11-11",
+  "catalogSha256": "9d7e17fe1f33f7b7f076963783ad5a4efb6e43575baee26d952945d84ac7e72d",
   "gates": {
-    "G-FR": "signed: read on the rendered /fr pages from the preview build, after an independent three-pass review of all 545 keys",
+    "G-FR": "signed: read on the rendered /fr pages from the preview build, after an independent three-pass review of all 545 keys; the 22 Hukamnama page strings (hukamnama.*) approved by the owner 2026-11-11 from the review sheet and the rendered /fr page",
     "G4": "Privacy and Contribute approved by the owner for Algorythmos Pty Ltd, including « ce n’est pas un acte de bienfaisance » and the Stripe data-use sentence (« registres commerciaux », « à des fins de marketing »); no external counsel review"
   },
   "decisions": {
     "wordmark": "Gurbani Soul (Latin), as in English",
     "numerals": "Western, French grouping (1 430); Ang numbers unchanged",
     "appNames": "the app's controls are named as the app shows them, in English (Reader, Verify, Lineage, Fixed, Solar…); headings and ordinary words stay French — docs/website/translation-glossary.md",
-    "default": "English stays the site default"
+    "default": "English stays the site default",
+    "hukamnamaDates": "dates on the Hukamnama page: « 11 novembre 2026 », « 1er » for the first of a month"
   },
   "notes": "English governs the legal pages. The app, Knowledge Base, newsletter, Stripe checkout and support replies are in English, and the pages say so. Gurbani is never translated: scripture on French pages is the verbatim Gurmukhi, cited by Ang."
 }

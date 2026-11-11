@@ -141,6 +141,13 @@ class OutputGuard(unittest.TestCase):
             out = self._output(Path(t), drop={"knowledge": ["_sggs/db/knowledge.sqlite"]})
             self.assertTrue(any("knowledge: its database" in p for p in baf.verify_output(out)))
 
+    def test_a_published_hukamnama_shell_fails_the_build(self):
+        with tempfile.TemporaryDirectory() as t:
+            out = self._output(Path(t), static=["en/index.html", "pa/hukamnama/hk-shell/index.html"])
+            problems = baf.verify_output(out)
+            self.assertEqual(len(problems), 1, problems)
+            self.assertIn("Hukamnama page shell", problems[0])
+
     def test_a_published_database_or_api_source_fails(self):
         with tempfile.TemporaryDirectory() as t:
             out = self._output(Path(t), static=["_sggs/db/all.sqlite", "api/svc/all.py", "x.sqlite"])

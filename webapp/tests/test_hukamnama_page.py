@@ -205,6 +205,19 @@ class DatesAndStates(Base):
         self.assertIn('href="https://gurbanisoul.com/en/hukamnama/2026-11-08"', html_)
         self.assertNotIn('Today', html_)
 
+    def test_the_url_suffix_is_empty_for_today_and_the_date_for_a_dated_page(self):
+        strings = hp.load_shell('en')[1]
+        kw = dict(view='none', day=None, today=date(2026, 11, 11), hour_ist=7, path='/en/hukamnama')
+        shell = 'href="/pa/hukamnama__HK_SUFFIX__"'
+        self.assertEqual(hp.render(shell, strings, 'pa', **kw), 'href="/pa/hukamnama"')
+        self.assertEqual(hp.render(shell, strings, 'pa', asked=date(2026, 11, 8), **kw), 'href="/pa/hukamnama/2026-11-08"')
+
+    def test_a_language_may_write_the_first_of_the_month_its_own_way(self):
+        strings = dict(hp.load_shell('en')[1], date_first='1er {month} {y}')
+        self.assertEqual(hp._date_text(strings, date(2026, 12, 1)), '1er December 2026')
+        self.assertEqual(hp._date_text(strings, date(2026, 12, 2)), '2 December 2026')
+        self.assertEqual(hp._date_text(hp.load_shell('en')[1], date(2026, 12, 1)), '1 December 2026')
+
     def test_todays_dated_page_is_dated_not_today(self):
         self.api(days={'2026-11-11': record('2026-11-11')})
         self.assertNotIn('Today', self.page('2026-11-11')[1])

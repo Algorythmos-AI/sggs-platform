@@ -139,6 +139,11 @@ def verify_output(output: Path) -> list[str]:
             rel = p.relative_to(static).as_posix()
             if p.is_file() and (rel.startswith((f"{DATA_DIR}/", f"{FN_DIR}/")) or rel.endswith((".sqlite", ".py"))):
                 problems.append(f"static output would publish {rel}")
+            # The Hukamnama page shell is a template full of tokens, never a page. The site build
+            # (frontend/scripts/extract-hukamnama-shells.mjs) removes it from the output; if a build
+            # skipped that step, refuse to deploy rather than publish it.
+            if p.is_file() and "/hukamnama/hk-shell" in "/" + rel:
+                problems.append(f"static output would publish the Hukamnama page shell: {rel}")
     return problems
 
 
