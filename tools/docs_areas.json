@@ -1,0 +1,29 @@
+{
+  "about": "Code areas that must each be on some wiki page of this repository: covered by a page's `covers:` or by a file the page cites (tools/docs_check.py check_areas). An area is one immediate child (file or directory) of a pattern's directory. A new area on no page fails the docs check: give it a page, or list it under `exempt` with the reason it never needs one. `backlog` is the gap known when the gate was added (2026-11-12); it only shrinks: when a page covers an area, the check says to remove it here. Report: python3 tools/docs_check.py --areas",
+  "areas": [
+    "services/*",
+    "webapp/*",
+    "frontend/src/pages/*",
+    ".github/workflows/*.yml"
+  ],
+  "exempt": {
+    "webapp/static": "the built output of frontend/ (npm run build:deploy), generated and committed; frontend/ is documented",
+    "webapp/tests": "the server's tests; the gates they back are described on docs/process/ci-gates.md",
+    "webapp/README.md": "documentation itself, kept next to the code it describes",
+    "frontend/src/pages/404.astro": "the not-found page: static text with no behaviour to describe"
+  },
+  "backlog": {
+    "frontend/src/pages/analytics.astro": "a Knowledge Base page with no wiki page covering it yet (baseline 2026-11-12)",
+    "frontend/src/pages/browse.astro": "a Knowledge Base page with no wiki page covering it yet (baseline 2026-11-12)",
+    "frontend/src/pages/divergence.astro": "a Knowledge Base page with no wiki page covering it yet (baseline 2026-11-12)",
+    "frontend/src/pages/library.astro": "a Knowledge Base page with no wiki page covering it yet (baseline 2026-11-12)",
+    "frontend/src/pages/lineage.astro": "a Knowledge Base page with no wiki page covering it yet (baseline 2026-11-12)",
+    "frontend/src/pages/nitnem.astro": "a Knowledge Base page with no wiki page covering it yet (baseline 2026-11-12)",
+    "frontend/src/pages/raag-clock.astro": "a Knowledge Base page with no wiki page covering it yet (baseline 2026-11-12)",
+    "frontend/src/pages/reader.astro": "a Knowledge Base page with no wiki page covering it yet (baseline 2026-11-12)",
+    "frontend/src/pages/search.astro": "a Knowledge Base page with no wiki page covering it yet (baseline 2026-11-12)",
+    "frontend/src/pages/themes.astro": "a Knowledge Base page with no wiki page covering it yet (baseline 2026-11-12)",
+    "frontend/src/pages/trail.astro": "a Knowledge Base page with no wiki page covering it yet (baseline 2026-11-12)",
+    "webapp/Dockerfile": "named on docs/process/environments.md and runbooks/deploy.md but in no page's covers: yet (baseline 2026-11-12)"
+  }
+}

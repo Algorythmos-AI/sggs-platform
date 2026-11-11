@@ -1,6 +1,7 @@
 ---
 title: "The website — gurbanisoul.com"
 description: "The public website gurbanisoul.com: domains, languages and redirects, SEO, Open Graph images, security headers, imagery, screenshots, Contribute and the gates."
+covers: "frontend/src/pages/[lang]/index.astro, frontend/src/pages/sitemap.xml.ts, frontend/src/pages/rss.xml.ts, frontend/src/pages/ang/**, frontend/src/pages/og/**, frontend/public/robots.txt"
 sidebar:
   order: 4
 ---
