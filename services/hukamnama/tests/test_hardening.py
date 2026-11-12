@@ -267,5 +267,86 @@ class Pausing(unittest.TestCase):
             self.assertEqual([r[0] for r in Store(state)._x("SELECT action FROM audit ORDER BY id")], ["pause", "resume"])
 
 
+
+@needs_db
+class AfterADatasetBump(unittest.TestCase):
+    """The corpus fingerprint changed under a running archive: published days move to the new
+    corpus only when every one is byte-identical there; otherwise nothing is served."""
+    OLD = "0" * 64
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.state = f"{self.tmp.name}/s.sqlite"
+        con = open_ro(DB)
+        self.addCleanup(con.close)
+        self.fp = scripture_sha256(con)
+        store = Store(self.state)
+        # two days published under an older corpus (same lines, another fingerprint)
+        store.publish(D8, resolution_for_range(con, *RANGE), self.OLD, NOW, "auto")
+        store.publish(D9, resolution_for_range(con, *OTHER), self.OLD, NOW, "auto")
+        store.set_meta("scripture_sha256", self.OLD)
+
+    def run_cli(self, *args):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = main(["--db", DB, "--state", self.state, *args])
+        return code, out.getvalue(), err.getvalue()
+
+    def test_days_that_prove_are_repinned_and_served_again(self):
+        code, out, _ = self.run_cli("repin")
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(out), {"scripture_sha256": self.fp, "published": 2})
+        store = Store(self.state)
+        self.assertEqual(store.get_meta("scripture_sha256"), self.fp)
+        self.assertEqual({d["scripture_sha256"] for d in store.published()}, {self.fp})
+        self.assertEqual([r[0] for r in store._x("SELECT action FROM audit WHERE action = 'repin'")], ["repin"])
+        # and the public files can be written again: every day proves in the corpus it now names
+        code, out, _ = self.run_cli("export-public", "--out", f"{self.tmp.name}/public")
+        self.assertEqual((code, json.loads(out)["skipped"]), (0, []))
+        # a second start changes nothing more
+        self.assertEqual(self.run_cli("repin")[0], 0)
+        self.assertEqual(len(Store(self.state)._x("SELECT 1 FROM audit WHERE action = 'repin'")), 1)
+
+    def test_one_day_that_does_not_prove_stops_everything_and_changes_nothing(self):
+        store = Store(self.state)
+        row = store.decision(D9)["resolution"]
+        row["range_sha256"] = "f" * 64                       # its lines are not what was published
+        store._con.execute("UPDATE hukamnamas SET resolution = ? WHERE amritsar_date = ?", (json.dumps(row), D9.isoformat()))
+        store._con.commit()
+        for cmd in (("repin",), ("tick",), ("export-public", "--out", f"{self.tmp.name}/public")):
+            code, _, err = self.run_cli(*cmd)
+            self.assertEqual(code, 2, cmd)
+            self.assertIn("2026-11-09", err)
+            self.assertNotIn("2026-11-08", err, "the day that proves is not blamed")
+        store = Store(self.state)
+        self.assertEqual(store.get_meta("scripture_sha256"), self.OLD, "nothing is re-pinned while a day fails")
+        self.assertEqual({d["scripture_sha256"] for d in store.published()}, {self.OLD})
+        self.assertFalse(os.path.exists(f"{self.tmp.name}/public"))
+
+    def test_the_owner_can_fix_the_day_and_then_it_starts(self):
+        store = Store(self.state)
+        row = store.decision(D9)["resolution"]
+        row["range_sha256"] = "f" * 64
+        store._con.execute("UPDATE hukamnamas SET resolution = ? WHERE amritsar_date = ?", (json.dumps(row), D9.isoformat()))
+        store._con.commit()
+        # correct is allowed while the archive is stopped: it is the fix
+        code, _, _ = self.run_cli("correct", "2026-11-09", "--first-line", str(OTHER[0]), "--last-line", str(OTHER[1]),
+                                  "--by", "owner", "--reason", "re-resolved after the dataset bump")
+        self.assertEqual(code, 0)
+        self.assertEqual(self.run_cli("repin")[0], 0)
+        self.assertEqual({d["scripture_sha256"] for d in Store(self.state).published()}, {self.fp})
+
+    def test_a_range_that_left_the_corpus_is_named(self):
+        store = Store(self.state)
+        row = store.decision(D8)["resolution"]
+        row["first_line_id"], row["last_line_id"] = 99_999_990, 99_999_995
+        store._con.execute("UPDATE hukamnamas SET resolution = ? WHERE amritsar_date = ?", (json.dumps(row), D8.isoformat()))
+        store._con.commit()
+        code, _, err = self.run_cli("repin")
+        self.assertEqual(code, 2)
+        self.assertIn("2026-11-08: lines 99999990-99999995", err)
+
+
 if __name__ == "__main__":
     unittest.main()

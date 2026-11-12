@@ -6,6 +6,7 @@
   python -m hukamnama hold    YYYY-MM-DD --by NAME --reason TEXT
   python -m hukamnama show    YYYY-MM-DD
   python -m hukamnama resend  YYYY-MM-DD --by NAME --reason TEXT
+  python -m hukamnama repin
   python -m hukamnama correct YYYY-MM-DD --first-line ID --last-line ID --by NAME --reason TEXT
   python -m hukamnama pause   --by NAME --reason TEXT
   python -m hukamnama resume  --by NAME --reason TEXT
@@ -30,6 +31,11 @@ overwrite the day's decision and are written to the audit table.
 ``correct`` replaces the range of a day that is already published and was wrong. The day keeps its
 first publication time and gains ``corrected_at``; the public files, the feeds and the pages follow
 within one poll interval. It sends no push: run ``resend`` as well if the phones should be told.
+
+A dataset bump changes the corpus fingerprint. At the next start every published day is proved
+in the new corpus (same line ids, same ``range_sha256``); if all prove they are re-pinned to it
+and the service carries on. If any does not, nothing is served, decided or published until it is
+fixed with ``correct`` or ``hold``; ``repin`` runs the same proof and reports.
 
 ``pause`` is the kill switch: within one poll interval nothing is served (every day reads as
 pending, the public files are removed) and nothing is sent. The poller keeps deciding days, so
@@ -86,6 +92,7 @@ def main(argv: list[str] | None = None) -> int:
     for name in ("pause", "resume"):
         sw = sub.add_parser(name)
         sw.add_argument("--by", required=True); sw.add_argument("--reason", required=True)
+    sub.add_parser("repin")
     rs = sub.add_parser("resend")
     rs.add_argument("date"); rs.add_argument("--by", required=True); rs.add_argument("--reason", required=True)
     args = p.parse_args(argv)
@@ -95,14 +102,27 @@ def main(argv: list[str] | None = None) -> int:
     fingerprint = scripture_sha256(con)
     store = Store(args.state)
     known = store.get_meta("scripture_sha256")
-    if known and known != fingerprint and args.cmd == "serve":
-        # published ranges are pinned to the corpus they were resolved in; a different corpus
-        # would serve ids that may point elsewhere. Refuse rather than guess.
-        print(f"corpus fingerprint changed ({known[:12]} -> {fingerprint[:12]}); re-resolve before serving",
-              file=sys.stderr)
-        return 2
-    store.set_meta("scripture_sha256", fingerprint)
     now = clock.utcnow()
+    if known and known != fingerprint:
+        # Published ranges are pinned to the corpus they were resolved in. After a dataset bump
+        # they move to the new corpus only when every one of them is byte-identical there.
+        failed = repin(store, con, fingerprint, now, known)
+        if failed:
+            print(f"corpus changed ({known[:12]} -> {fingerprint[:12]}) and {len(failed)} published day(s) "
+                  "no longer prove in it:", file=sys.stderr)
+            for line in failed:
+                print(f"  {line}", file=sys.stderr)
+            print("fix each with `correct` (or `hold`), then start again", file=sys.stderr)
+            if args.cmd in ("serve", "tick", "export-public", "repin"):
+                return 2                      # never serve, decide or publish over days that do not prove
+        else:
+            logging.getLogger("hukamnama").warning("corpus changed (%s -> %s): every published day proved "
+                                                   "unchanged and was re-pinned", known[:12], fingerprint[:12])
+    else:
+        store.set_meta("scripture_sha256", fingerprint)
+    if args.cmd == "repin":
+        print(json.dumps({"scripture_sha256": fingerprint, "published": len(store.published())}))
+        return 0
 
     if args.cmd == "serve":
         state = State(store, fingerprint)
@@ -166,6 +186,33 @@ def main(argv: list[str] | None = None) -> int:
     print(json.dumps({"decision": store.decision(day), "served": day_record(store, day, fingerprint, now)},
                      ensure_ascii=False, indent=1))
     return 0
+
+
+def repin(store, con, fingerprint: str, now, was: str) -> list[str]:
+    """After a corpus change: prove every published day in the new corpus and, if all prove,
+    re-pin them to it. Returns what did not prove (then nothing is changed).
+
+    A day proves when its line-id range still exists and its lines hash to the ``range_sha256`` it
+    was published with: the text readers were given is byte-identical. Its other facts (Ang,
+    composition, opening line) are then read again from the new corpus."""
+    failed, moved = [], {}
+    for d in store.published():
+        if d["scripture_sha256"] == fingerprint:
+            continue
+        r = d["resolution"]
+        try:
+            res = resolution_for_range(con, r["first_line_id"], r["last_line_id"])
+        except ValueError as e:
+            failed.append(f"{d['amritsar_date']}: lines {r['first_line_id']}-{r['last_line_id']}: {e}")
+            continue
+        if res.range_sha256 != r["range_sha256"]:
+            failed.append(f"{d['amritsar_date']}: lines {r['first_line_id']}-{r['last_line_id']} hash to "
+                          f"{res.range_sha256[:12]}, published as {r['range_sha256'][:12]}")
+            continue
+        moved[d["amritsar_date"]] = res
+    if not failed:
+        store.repin(moved, fingerprint, now, was)
+    return failed
 
 
 def _publisher(store, con, fingerprint: str, out: str | None, env=os.environ):
