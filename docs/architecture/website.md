@@ -233,6 +233,11 @@ of its own.
 - Messages with code in them use `<c>…</c>`, rendered by `CodeText.astro`; literal values with a
   colon (`UTC+05:30`) are passed as values so French spacing never touches them.
 
+A day whose range was corrected after publication (`corrected_at` in the API record) shows a
+short notice under its date, "Corrected on …", with the Amritsar date of the correction; a
+correction time that is not a time shows nothing. The page's action list also links to the
+support page's contact section to report a text error.
+
 What the renderer guarantees:
 
 - It asks the API for one **date** (the Amritsar date it computes itself), never "today", and

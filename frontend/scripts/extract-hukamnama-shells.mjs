@@ -29,8 +29,8 @@ const STRING_KEYS = ["months", "date", "title_today", "title_dated", "h1_today",
   "translation_label", "rahao_label"];
 const REQUIRED = ["TITLE", "DESCRIPTION", "ROBOTS", "JSONLD", "H1", "LINES", "CITATION", "SUFFIX"];
 const KNOWN = new Set([...REQUIRED, "CANONICAL", "STATUS", "DATE", "DATE_ISO", "ANG", "RAAG", "AUTHOR",
-  "READER_HREF", "PERMALINK", "RANGE_SHA", "TRANSLATION_LABEL", "PREV_HREF", "PREV_DATE", "NEXT_HREF", "NEXT_DATE", "ENDIF",
-  ...["SHABAD", "STATUS", "TODAY", "LATEST", "DATED", "MEANING", "UNAVAILABLE", "RAAG", "AUTHOR", "PREV", "NEXT", "DAYS"].map((f) => `IF_${f}`)]);
+  "READER_HREF", "PERMALINK", "RANGE_SHA", "TRANSLATION_LABEL", "PREV_HREF", "PREV_DATE", "NEXT_HREF", "NEXT_DATE", "CORRECTED_DATE", "ENDIF",
+  ...["SHABAD", "STATUS", "TODAY", "LATEST", "DATED", "MEANING", "UNAVAILABLE", "RAAG", "AUTHOR", "PREV", "NEXT", "DAYS", "CORRECTED"].map((f) => `IF_${f}`)]);
 
 const problems = [];
 let written = 0;

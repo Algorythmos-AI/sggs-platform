@@ -319,6 +319,15 @@ def _date_text(strings, d):
     return _fmt(pattern, d=d.day, month=strings['months'][d.month - 1], y=d.year)
 
 
+def _corrected_on(day):
+    """The Amritsar date a day was corrected on, or None."""
+    try:
+        t = datetime.fromisoformat((day or {}).get('corrected_at') or '')
+    except (TypeError, ValueError):
+        return None
+    return t.astimezone(IST).date() if t.tzinfo is not None else None
+
+
 def _lines_html(day, strings):
     e = html.escape
     out = []
@@ -387,6 +396,10 @@ def render(shell, strings, lang, *, view, day, today, hour_ist, path, asked=None
              'AUTHOR': bool(day and day['author']),
              'PREV': bool(day and around[0]), 'NEXT': bool(day and around[1]),
              'DAYS': bool(day and (around[0] or around[1]))}
+    # A day whose range was corrected after it was published says so, with the Amritsar date it
+    # was corrected on. A correction time that is not a time shows nothing.
+    corrected = _corrected_on(day)
+    flags['CORRECTED'] = corrected is not None
     step = {k: (f'/{lang}/hukamnama/{d.isoformat()}', _date_text(strings, d)) if d else ('', '')
             for k, d in zip(('PREV', 'NEXT'), around)}
     values = {
@@ -403,6 +416,7 @@ def render(shell, strings, lang, *, view, day, today, hour_ist, path, asked=None
         'RANGE_SHA': day['range_sha256'] if day else '',
         'TRANSLATION_LABEL': e(strings['translation_label']),
         'LINES': _lines_html(day, strings) if day else '',
+        'CORRECTED_DATE': e(_date_text(strings, corrected)) if corrected else '',
         'PREV_HREF': e(step['PREV'][0], quote=True), 'PREV_DATE': e(step['PREV'][1]),
         'NEXT_HREF': e(step['NEXT'][0], quote=True), 'NEXT_DATE': e(step['NEXT'][1]),
         'JSONLD': _jsonld(lang, canonical, title, description, day, name=strings.get('name'),
