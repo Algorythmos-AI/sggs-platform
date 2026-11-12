@@ -409,7 +409,8 @@ def send_loop(sender: Sender, stop: threading.Event, now=clock.utcnow, every: fl
     while not stop.is_set():
         t = now()
         try:
-            sender.tick(t)
+            if sender.store.paused() is None:      # the owner's pause switch: nothing is sent
+                sender.tick(t)
             if last_prune != t.date():
                 last_prune = t.date()
                 sender.prune(t)

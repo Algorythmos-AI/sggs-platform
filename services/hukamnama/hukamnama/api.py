@@ -13,6 +13,8 @@ A held day is reported as ``pending`` to readers: nothing that failed the gate i
 """
 from __future__ import annotations
 
+import hmac
+import ipaddress
 import json
 import os
 import threading
@@ -29,6 +31,8 @@ from .store import Store
 COMMIT = os.environ.get("HUKAMNAMA_COMMIT") or os.environ.get("RENDER_GIT_COMMIT") or "unknown"
 
 SECURITY_HEADERS = {"X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "Referrer-Policy": "no-referrer"}
+READS_PER_MINUTE = 120      # per client address; the edge serves public reads, so this is a backstop
+SOCKET_TIMEOUT = 15         # seconds a connection may sit idle before its thread is released
 SOURCE_CREDIT = "Located by Ang from the Hukamnama published by SGPC (hs.sgpc.net); text from Sri Guru Granth Sahib Ji."
 
 
@@ -42,7 +46,12 @@ def day_record(store: Store, day, fingerprint: str, now: datetime) -> dict:
                 "opening_translit": r["opening_translit"], "line_count": r["line_count"],
                 "range_sha256": r["range_sha256"], "scripture_sha256": d["scripture_sha256"],
                 "citation": f"Sri Guru Granth Sahib Ji · Ang {r['ang']}",
-                "published_at": d["decided_at"], "credit": SOURCE_CREDIT}
+                "published_at": d["decided_at"], "credit": SOURCE_CREDIT,
+                **({"corrected_at": c["at"]} if (c := store.correction(day)) else {})}
+    return pending_record(day, fingerprint)
+
+
+def pending_record(day, fingerprint: str) -> dict:
     return {"amritsar_date": day.isoformat(), "status": "pending", "scripture_sha256": fingerprint,
             "expected_by": clock.at_ist(day, clock.EXPECTED_BY).astimezone(timezone.utc).isoformat(timespec="seconds")}
 
@@ -54,24 +63,38 @@ class State:
         self.last_tick_action: str | None = None
         self.lock = threading.Lock()
         self.limiter = RateLimiter()
+        # Reads have their own budget, so a flood of reads cannot use up the write budget of the
+        # address it comes from (or the reverse).
+        self.reads = RateLimiter(per_minute=READS_PER_MINUTE)
         self.sending = False                 # set by main when HUKAMNAMA_SEND=on and the key loaded
+        # The edge in front of this service proves itself with a shared secret (X-Origin-Auth).
+        # Only a request that carries it may say which address it is for (X-Client-IP).
+        self.origin_secret = os.environ.get("HUKAMNAMA_ORIGIN_SECRET", "")
+        self.origin_required = os.environ.get("HUKAMNAMA_ORIGIN_REQUIRED", "off") == "on"
 
 
 def make_handler(state: State):
     class Handler(BaseHTTPRequestHandler):
         server_version = "hukamnama"
         sys_version = ""
+        timeout = SOCKET_TIMEOUT             # a slow or silent client cannot hold a thread open
+
+        def handle(self):
+            try:
+                super().handle()
+            except (TimeoutError, ConnectionError):
+                pass                           # the client went away or stalled: nothing to answer
 
         def log_message(self, *args):          # no access log, by design (privacy)
             pass
 
-        def _send(self, code: int, body: dict, cache: str = "public, max-age=60") -> None:
+        def _send(self, code: int, body: dict, cache: str = "public, max-age=60", headers: dict | None = None) -> None:
             raw = json.dumps(body, ensure_ascii=False).encode("utf-8")
             self.send_response(code)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(raw)))
             self.send_header("Cache-Control", cache if code == 200 else "no-store")
-            for k, v in SECURITY_HEADERS.items():
+            for k, v in {**SECURITY_HEADERS, **(headers or {})}.items():
                 self.send_header(k, v)
             self.end_headers()
             if self.command != "HEAD":
@@ -90,6 +113,13 @@ def make_handler(state: State):
             u = urlsplit(self.path)
             now = state.now()
             today = clock.amritsar_date(now)
+            paused = state.store.paused() is not None
+            if u.path != "/health":
+                if not self._allowed():
+                    return
+                if not state.reads.allow(self._client()):
+                    self._send(429, {"error": "slow down"}, headers={"Retry-After": "60"})
+                    return
             if u.path == "/health":
                 with state.lock:
                     last, action = state.last_tick, state.last_tick_action
@@ -99,6 +129,7 @@ def make_handler(state: State):
                                  "decision_today": (state.store.decision(today) or {}).get("status"),
                                  "last_tick": last.isoformat(timespec="seconds") if last else None,
                                  "last_tick_action": action, "alerts_today": state.store.alerts(today),
+                                 "paused": paused,
                                  "scripture_sha256": state.fingerprint,
                                  "push": {"sending": state.sending, "devices": state.store.device_count(),
                                           "today": state.store.send_stats(today)}}, cache="no-store")
@@ -109,7 +140,7 @@ def make_handler(state: State):
                 if not raw.isdigit() or not 1 <= int(raw) <= 30:
                     self._send(400, {"error": "limit must be 1..30"})
                     return
-                days = [r["amritsar_date"] for r in state.store.recent(int(raw))]
+                days = [] if paused else [r["amritsar_date"] for r in state.store.recent(int(raw))]
                 self._send(200, {"items": [day_record(state.store, clock.parse_day(d), state.fingerprint, now)
                                            for d in days]})
                 return
@@ -117,7 +148,8 @@ def make_handler(state: State):
                 # every published day, without text: what a sitemap or an archive page lists
                 days = [{"amritsar_date": d["amritsar_date"], "ang": d["resolution"]["ang"],
                          "range_sha256": d["resolution"]["range_sha256"], "published_at": d["decided_at"]}
-                        for d in reversed(state.store.published()) if clock.parse_day(d["amritsar_date"]) <= today]
+                        for d in reversed(state.store.published())
+                        if not paused and clock.parse_day(d["amritsar_date"]) <= today]
                 self._send(200, {"scripture_sha256": state.fingerprint,
                                  "latest": days[0]["amritsar_date"] if days else None, "days": days})
                 return
@@ -137,14 +169,43 @@ def make_handler(state: State):
                     if day > today:
                         self._send(404, {"error": "not yet"})
                         return
-                self._send(200, day_record(state.store, day, state.fingerprint, now))
+                # While paused nothing is served: every day reads as pending, as a held day does.
+                self._send(200, pending_record(day, state.fingerprint) if paused
+                           else day_record(state.store, day, state.fingerprint, now))
                 return
             self._send(404, {"error": "not found"})
 
         # -- device registration ----------------------------------------------------------------
+        def _from_edge(self) -> bool:
+            """True when the request carries the edge's secret (compared in constant time)."""
+            secret = state.origin_secret
+            return bool(secret) and hmac.compare_digest(self.headers.get("X-Origin-Auth", "").encode(), secret.encode())
+
+        def _allowed(self) -> bool:
+            """With HUKAMNAMA_ORIGIN_REQUIRED=on, /v1 answers only requests that came through the
+            edge; a direct call to this host is refused. /health stays open for the health checks."""
+            if state.origin_required and not self._from_edge():
+                self._send(403, {"error": "forbidden"})
+                return False
+            return True
+
         def _client(self) -> str:
+            """The address a request is limited by.
+
+            With an origin secret set, only the edge is believed: its X-Client-IP when the secret
+            matches, the socket's own peer otherwise, so a caller cannot pick its own bucket by
+            sending a header. Without one (a service with no edge in front) the first
+            X-Forwarded-For entry is used, as the host's proxy sets it."""
+            peer = self.client_address[0] or "?"
+            if state.origin_secret:
+                if not self._from_edge():
+                    return peer
+                try:
+                    return str(ipaddress.ip_address(self.headers.get("X-Client-IP", "").strip()))
+                except ValueError:
+                    return "edge"
             fwd = self.headers.get("X-Forwarded-For", "")
-            return (fwd.split(",")[0].strip() if fwd else self.client_address[0]) or "?"
+            return (fwd.split(",")[0].strip() if fwd else peer) or "?"
 
         def _device_token(self) -> str | None:
             u = urlsplit(self.path)
@@ -172,8 +233,10 @@ def make_handler(state: State):
             if token is None:
                 self._send(404, {"error": "not found"})
                 return
+            if not self._allowed():
+                return
             if not state.limiter.allow(self._client()):
-                self._send(429, {"error": "slow down"})
+                self._send(429, {"error": "slow down"}, headers={"Retry-After": "60"})
                 return
             raw_len = self.headers.get("Content-Length", "")
             if not raw_len.isdigit() or int(raw_len) > MAX_BODY:
@@ -202,8 +265,10 @@ def make_handler(state: State):
             if token is None or not valid_token(token):
                 self._send(404 if token is None else 400, {"error": "not found" if token is None else "bad token"})
                 return
+            if not self._allowed():
+                return
             if not state.limiter.allow(self._client()):
-                self._send(429, {"error": "slow down"})
+                self._send(429, {"error": "slow down"}, headers={"Retry-After": "60"})
                 return
             gone = state.store.delete_device(token)
             self._send(200 if gone else 404, {"ok": gone}, cache="no-store")

@@ -58,6 +58,7 @@ A published day carries the whole shabad, line by line.
 | `range_sha256` | The hash that proves the lines (below). |
 | `scripture_sha256` | The fingerprint of the edition of the text the lines were read from. |
 | `published_at` | When the day was published here, in UTC. |
+| `corrected_at` | Present only when the day's range was corrected after it was published: when, in UTC. `published_at` stays the first publication. |
 | `url`, `attribution`, `terms_url` | The day's page, the credit to show with its link, and the terms. |
 | `lines[].en`, `translation` | Dr. Sant Singh Khalsa's English translation, where it is included: a separate, labelled layer, never the Gurbani. |
 
@@ -89,6 +90,20 @@ When no Hukamnama is published for the day asked for, the answer is still `200`,
 `latest`, the most recent published date. This is the answer before the morning's publication, and
 for a day that was held back because it could not be proved. A day is never served under another
 day's date: to show the most recent Hukamnama, ask for `latest` by its own date and show that date.
+
+## A corrected day
+
+If a published day turns out to be the wrong shabad, its range is replaced. The record then
+carries `corrected_at`, and its `range_sha256` and lines are the corrected ones; `published_at`
+stays the time of the first publication. The index carries `corrected_at` for the day too, and the
+website's feeds show the day as an updated entry. A client that keeps days should compare
+`range_sha256` (or send `If-None-Match`) rather than assume a published day never changes.
+
+## When the service is paused
+
+The owner can pause the service without a deploy. While it is paused every day reads as
+`pending`, the list and the index are empty, and `/v1/status` says `"paused": true`. Nothing is
+served until it is resumed; then everything returns as it was.
 
 ## Caching
 

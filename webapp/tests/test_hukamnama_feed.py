@@ -148,6 +148,18 @@ class Dates(Base):
         self.assertEqual([e.find(ATOM + 'updated').text for e in feed.findall(ATOM + 'entry')],
                          ['2026-11-11T00:00:00+00:00', '2026-11-10T00:00:00+00:00'])
 
+    def test_a_corrected_day_reaches_feed_readers_as_an_updated_entry(self):
+        self.api(record('2026-11-11'), record('2026-11-10', R673, corrected_at='2026-11-11T09:30:00+00:00'))
+        feed, _, _ = self.atom()
+        self.assertEqual([e.find(ATOM + 'updated').text for e in feed.findall(ATOM + 'entry')],
+                         ['2026-11-11T00:25:03+00:00', '2026-11-11T09:30:00+00:00'])
+        self.assertEqual(feed.find(ATOM + 'updated').text, '2026-11-11T09:30:00+00:00')
+        # a correction time that is not a time is ignored, never shown
+        self.api(record('2026-11-11', corrected_at='<b>now</b>'))
+        feed, body, _ = self.atom()
+        self.assertEqual(feed.find(ATOM + 'entry').find(ATOM + 'updated').text, '2026-11-11T00:25:03+00:00')
+        self.assertNotIn('<b>now', body)
+
 
 class Layers(Base):
     def test_titles_and_summaries_never_carry_scripture(self):

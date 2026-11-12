@@ -597,6 +597,11 @@
      "translation": {
       "$ref": "#/components/schemas/Translation",
       "description": "Present only when the lines carry `en`: whose translation it is."
+     },
+     "corrected_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Present only when the day's range was corrected after it was published: when, in UTC. `published_at` stays the first publication."
      }
     },
     "required": [
@@ -840,6 +845,11 @@
       "type": "string",
       "format": "date-time",
       "description": "When the day was published here, in UTC."
+     },
+     "corrected_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Present only when the day was corrected after it was published: when, in UTC."
      }
     },
     "required": [
@@ -921,12 +931,17 @@
        }
       ],
       "description": "The fingerprint of the edition of the text; `null` before any day is published."
+     },
+     "paused": {
+      "type": "boolean",
+      "description": "True while the service is paused by its owner: every day then reads as `pending`."
      }
     },
     "required": [
      "amritsar_date",
      "latest",
      "ok",
+     "paused",
      "published_at",
      "scripture_sha256",
      "status_today"

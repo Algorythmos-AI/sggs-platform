@@ -109,6 +109,23 @@ in the log confirms it. A failed write is logged (`public snapshot sync failed`)
 after the next poll; it never stops polling or sending. `HUKAMNAMA_MEANING=on` adds the English
 translation layer to the files, and removing it takes the layer out on the next poll.
 
+## Behind the edge: whose address a request is limited by
+
+The device routes and every read are rate-limited per client address (writes 20 a minute, reads
+120 a minute, each with its own budget; a connection idle for 15 seconds is dropped). Which address
+that is depends on two settings:
+
+| Setting | Effect |
+|---|---|
+| neither (staging today) | the first `X-Forwarded-For` entry, as Render's proxy sets it |
+| `HUKAMNAMA_ORIGIN_SECRET` | only a request carrying the same value in `X-Origin-Auth` may name its address (`X-Client-IP`, set by the edge Worker from what Cloudflare saw); any other request is limited by its socket's own address, so a caller cannot pick a bucket by sending a header |
+| `HUKAMNAMA_ORIGIN_REQUIRED=on` as well | `/v1/*` answers `403` to anything that did not come through the edge; `/health` stays open for Render and the dead-man check |
+
+Set the same secret on the Worker (`npx wrangler secret put ORIGIN_SECRET`) and on Render, the
+Worker first. Turn `HUKAMNAMA_ORIGIN_REQUIRED` on only when every caller goes through the edge:
+the iOS app and the website's page function call this host directly on staging today. Required
+without a secret refuses everyone.
+
 ## Every morning (automatic)
 
 - The poller runs every minute 05:00–09:00 IST, then every 10 minutes until 14:00 IST.
@@ -136,6 +153,8 @@ Copy a day's archive off the box for the replay tests with
 | Issue: nothing by 07:00 IST | Open hs.sgpc.net. If SGPC is late, nothing to do. If it is up, look at `/health` alerts. |
 | `held_no_match` / `held_veto` | Check the day by hand against the corpus, then `python -m hukamnama approve …` or `hold …` over `render ssh` (both are audited). A `held_no_match` alert names the nearest corpus run and the differing words when one run is that close (≤3 words). Confirm the difference is the source's, not ours (the corpus is PDF-proven; compare ShabadOS too), then approve that range, adding the heading line before it if the page printed one: `approve <date> --first-line <first> --last-line <last> --by <you> --reason "SGPC page variant: <word>"`. Example: 2026-11-10, Ang 678, SGPC wrote ਨਾਨਕੁ for the corpus's ਨਾਨਕ (lines 29433-29442). |
 | `hs_layout_changed` / `hs_parse_failing` | SGPC changed its page. Save the archive for that day, fix the parser in a PR, add the page as a fixture. |
+| A published day is the wrong shabad | `python -m hukamnama correct <date> --first-line <first> --last-line <last> --by <you> --reason "…"`. The day keeps its first publication time and gains `corrected_at`; the public files, the feeds (as an updated entry) and the pages follow within one poll interval (up to ten minutes when idle). It sends no push: run `resend` as well if the phones should be told. Only a published day can be corrected; use `approve` for a held one. |
+| Something is badly wrong and nothing should be shown | `python -m hukamnama pause --by <you> --reason "…"`. Within one poll interval every day reads as pending, the public files are removed and nothing is sent; `/health` and `/v1/status` say `paused`. The poller keeps deciding days, so `python -m hukamnama resume --by <you> --reason "…"` restores everything. Both are audited. |
 | Service refuses to start: corpus fingerprint changed | A dataset bump changed the corpus. Re-resolve published days before serving; never delete the state file to get past it. |
 
 ## Push (APNs)

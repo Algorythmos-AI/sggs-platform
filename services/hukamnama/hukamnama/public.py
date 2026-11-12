@@ -160,7 +160,10 @@ class Publisher:
         objects: dict[str, bytes] = {}
         skipped: list[str] = []
         days = []
-        for d in self.store.published():
+        paused = self.store.paused() is not None
+        # Paused: no day file is published (the sync removes those already there), and the index
+        # says so. The edge then answers every day as pending. Resuming writes them all back.
+        for d in ([] if paused else self.store.published()):
             day = date.fromisoformat(d["amritsar_date"])
             try:
                 rec = public_record(self.store, self.con, day, self.fingerprint, meaning=self.meaning)
@@ -172,10 +175,11 @@ class Publisher:
             objects[f"{PREFIX}{day.isoformat()}.json"] = encode(rec)
             days.append({"amritsar_date": rec["amritsar_date"], "ang": rec["ang"], "raag": rec["raag"],
                          "author": rec["author"], "line_count": rec["line_count"],
-                         "range_sha256": rec["range_sha256"], "published_at": rec["published_at"]})
+                         "range_sha256": rec["range_sha256"], "published_at": rec["published_at"],
+                         **({"corrected_at": rec["corrected_at"]} if "corrected_at" in rec else {})})
         days.sort(key=lambda x: x["amritsar_date"], reverse=True)
         objects[INDEX] = encode({"scripture_sha256": self.fingerprint, "latest": days[0]["amritsar_date"] if days else None,
-                                 "days": days})
+                                 "days": days, **({"paused": True} if paused else {})})
         return objects, skipped
 
     def sync(self, *, force: bool = False) -> dict:

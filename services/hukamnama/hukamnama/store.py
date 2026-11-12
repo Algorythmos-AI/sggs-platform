@@ -64,6 +64,10 @@ CREATE INDEX IF NOT EXISTS sends_due ON sends(state, next_at);
 """
 
 
+CORRECTION = "correction:"          # meta key prefix: correction:<date> -> when, and the hashes before
+PAUSED = "paused"                   # meta key: present while the owner has paused serving and sending
+
+
 def _iso(t: datetime) -> str:
     return t.astimezone(timezone.utc).isoformat(timespec="seconds")
 
@@ -127,6 +131,54 @@ class Store:
                 self._con.execute("INSERT INTO audit (at, actor, action, amritsar_date, detail) VALUES (?,?,?,?,?)",
                                   (_iso(now), by, "hold", day.isoformat(), reason))
         return changed
+
+    def correct(self, day: date, res: Resolution, fingerprint: str, now: datetime, by: str, reason: str) -> bool:
+        """Replace a published day's range with the right one. Returns False when the day is not
+        published (use ``approve`` for a held or undecided day).
+
+        The day keeps the time it was first published; when it was corrected, and the hash it had
+        before, are kept beside it (``correction``) and written to the audit table. A second
+        correction keeps the first record's original hash, so the trail always starts at what
+        readers first saw."""
+        with self._lock:
+            row = self._con.execute("SELECT resolution FROM hukamnamas WHERE amritsar_date = ? AND status = 'published'",
+                                    (day.isoformat(),)).fetchone()
+            if not row:
+                return False
+            before = json.loads(row[0])["range_sha256"]
+            key = CORRECTION + day.isoformat()
+            old = self._con.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+            first = json.loads(old[0])["first_range_sha256"] if old else before
+            self._con.execute("UPDATE hukamnamas SET resolution = ?, scripture_sha256 = ?, reason = ? WHERE amritsar_date = ?",
+                              (json.dumps(asdict(res), ensure_ascii=False), fingerprint, reason, day.isoformat()))
+            self._con.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
+                              (key, json.dumps({"at": _iso(now), "first_range_sha256": first,
+                                                "previous_range_sha256": before})))
+            self._con.execute("INSERT INTO audit (at, actor, action, amritsar_date, detail) VALUES (?,?,?,?,?)",
+                              (_iso(now), by, "correct", day.isoformat(), f"{before[:12]} -> {res.key()}: {reason}"))
+        return True
+
+    def correction(self, day: date) -> dict | None:
+        """When a published day was corrected and what it replaced, or None."""
+        raw = self.get_meta(CORRECTION + day.isoformat())
+        return json.loads(raw) if raw else None
+
+    # -- the pause switch ----------------------------------------------------------------------
+    def pause(self, now: datetime, by: str, reason: str) -> None:
+        """Stop serving and sending, without a deploy. The poller keeps deciding days, so ``resume``
+        restores everything at once."""
+        self.set_meta(PAUSED, json.dumps({"at": _iso(now), "by": by, "reason": reason}))
+        self.audit(now, by, "pause", None, reason)
+
+    def resume(self, now: datetime, by: str, reason: str) -> bool:
+        was = self.del_meta(PAUSED)
+        if was:
+            self.audit(now, by, "resume", None, reason)
+        return was
+
+    def paused(self) -> dict | None:
+        raw = self.get_meta(PAUSED)
+        return json.loads(raw) if raw else None
 
     # -- observations --------------------------------------------------------------------------
     def observe(self, day: date, source: str, now: datetime, status: str, *, cand_key: str | None = None,
