@@ -667,6 +667,7 @@
     "statusNotToday": "Aucun Hukamnama n’a paru ici pour le {date}. Le plus récent est ci-dessous.",
     "statusNone": "Aucun Hukamnama n’est encore disponible ici pour le {date}.",
     "statusMissing": "Aucun Hukamnama n’a été publié ici pour cette date.",
+    "corrected": "Corrigé le {date}.",
     "unavailable": "Le Hukamnama ne peut pas être affiché pour le moment. Veuillez réessayer dans quelques minutes.",
     "latestHeading": "Le plus récent : {date}",
     "translationLabel": "Traduction anglaise : Dr Sant Singh Khalsa",

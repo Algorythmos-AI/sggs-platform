@@ -73,6 +73,7 @@ const stringsJson = JSON.stringify(strings).replace(/</g, "\\u003c");
       <section class="hk-shabad" data-date="__HK_DATE_ISO__">
         __HK_IF_LATEST__<h2 class="hk-latest">{t("hukamnama.latestHeading", { date: "__HK_DATE__" })}</h2>__HK_ENDIF__
         <p class="hk-meta"><time datetime="__HK_DATE_ISO__">__HK_DATE__</time><span aria-hidden="true"> · </span><span>__HK_CITATION__</span></p>
+        __HK_IF_CORRECTED__<p class="hk-corrected">{t("hukamnama.corrected", { date: "__HK_CORRECTED_DATE__" })}</p>__HK_ENDIF__
         __HK_IF_MEANING__<p class="hk-en-label">__HK_TRANSLATION_LABEL__</p>__HK_ENDIF__
         <div class="hk-lines">__HK_LINES__</div>
         <p class="hk-cite">__HK_CITATION__</p>
@@ -80,6 +81,7 @@ const stringsJson = JSON.stringify(strings).replace(/</g, "\\u003c");
           <li><a href="__HK_READER_HREF__">{t("hukamnama.readAng", { ang: "__HK_ANG__" })}</a></li>
           <li><a href="__HK_PERMALINK__">{t("hukamnama.permalink")}</a></li>
           <li><a href="https://hs.sgpc.net/" rel="noopener external">{t("hukamnama.sgpc")}</a></li>
+          <li><a href={localizeHref("/support#contact", lang)}>{t("footer.reportError")}</a></li>
         </ul>
         __HK_IF_DAYS__<p class="hk-days">__HK_IF_PREV__<a rel="prev" href="__HK_PREV_HREF__"><span aria-hidden="true">←&nbsp;</span>__HK_PREV_DATE__</a>__HK_ENDIF____HK_IF_NEXT__<a class="hk-next" rel="next" href="__HK_NEXT_HREF__">__HK_NEXT_DATE__<span aria-hidden="true">&nbsp;→</span></a>__HK_ENDIF__</p>__HK_ENDIF__
       </section>
@@ -102,6 +104,7 @@ const stringsJson = JSON.stringify(strings).replace(/</g, "\\u003c");
     .hk .hk-status { margin: 18px 0; padding: 6px 0 6px 16px; border-left: 2px solid var(--accent); color: var(--ink-soft); font-size: 16px; }
     .hk .hk-latest { font-size: clamp(20px, 3vw, 26px); margin: 30px 0 6px; }
     .hk .hk-meta { margin: 0; color: var(--ink-soft); font-size: 14.5px; }
+    .hk .hk-corrected { margin: 6px 0 0; color: var(--ink-soft); font-size: 14.5px; }
     .hk .hk-en-label { margin: 18px 0 0; font-size: 13px; color: var(--ink-soft); }
     .hk .hk-lines { margin: 26px 0 8px; }
     .hk .hk-line { margin: 0 0 22px; min-width: 0; }

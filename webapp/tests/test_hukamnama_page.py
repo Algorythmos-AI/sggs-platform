@@ -151,6 +151,25 @@ class Fidelity(Base):
         self.assertIn('data-line="29501"', html_)
 
 
+class Corrections(Base):
+    def test_a_corrected_day_says_when_in_amritsars_date(self):
+        # corrected at 20:00 UTC on the 11th, which is already the 12th in Amritsar
+        self.api(days={'2026-11-11': record('2026-11-11', corrected_at='2026-11-11T20:00:00+00:00')})
+        _, page, _ = self.page('2026-11-11')
+        self.assertIn('<p class="hk-corrected">Corrected on 12 November 2026.</p>', page)
+
+    def test_an_uncorrected_day_says_nothing(self):
+        self.api(days={'2026-11-11': record('2026-11-11')})
+        self.assertNotIn('hk-corrected', self.page('2026-11-11')[1])
+
+    def test_a_correction_time_that_is_not_a_time_shows_nothing(self):
+        for bad in ('<b>now</b>', '2026-11-11T20:00:00', 12, ''):
+            self.api(days={'2026-11-11': record('2026-11-11', corrected_at=bad)})
+            page = self.page('2026-11-11')[1]
+            self.assertNotIn('hk-corrected', page, bad)
+            self.assertNotIn('<b>now', page)
+
+
 class DatesAndStates(Base):
     def test_published_today_is_called_today(self):
         self.api(days={'2026-11-11': record('2026-11-11')})
