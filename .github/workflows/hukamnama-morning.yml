@@ -1,0 +1,79 @@
+name: hukamnama-morning
+
+# The morning check: does the website show the Hukamnama the API published? From outside, after
+# the morning's publication, it reads the page in each language, the JSON feed's newest entry and
+# the embed, hashes the Gurmukhi each one shows and holds it to the API's range_sha256 for the
+# date shown (scripts/ci/hukamnama_morning.py). A mismatch opens one issue per Amritsar date.
+# It changes nothing. Each environment is silent until its two variables are set.
+#
+#   staging     variable HUKAMNAMA_STAGING_SITE_URL (repository), HUKAMNAMA_STAGING_URL (already set);
+#               secret VERCEL_AUTOMATION_BYPASS_SECRET (environment: staging)
+#   production  variables HUKAMNAMA_PROD_SITE_URL and HUKAMNAMA_PROD_API_URL (repository)
+
+on:
+  schedule:
+    - cron: "45 1 * * *"    # 07:15 IST: after the morning's publication
+    - cron: "30 4 * * *"    # 10:00 IST: once more, after caches have turned over
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: hukamnama-morning
+  cancel-in-progress: true
+
+jobs:
+  staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 5
+    env:
+      SITE: ${{ vars.HUKAMNAMA_STAGING_SITE_URL }}
+      API: ${{ vars.HUKAMNAMA_STAGING_URL }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      WHERE: staging
+    steps:
+      - uses: actions/checkout@v5
+        if: env.SITE != '' && env.API != ''
+      - name: Compare every surface with the API
+        if: env.SITE != '' && env.API != ''
+        id: check
+        run: |
+          set +e
+          out="$(python3 scripts/ci/hukamnama_morning.py "$SITE" "$API")"; rc=$?
+          echo "$out"
+          { echo "report<<EOF"; echo "$out"; echo "EOF"; } >> "$GITHUB_OUTPUT"
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+      - name: Open or update today's issue
+        if: env.SITE != '' && env.API != '' && steps.check.outputs.rc != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT: ${{ steps.check.outputs.report }}
+        run: bash scripts/ci/hukamnama_morning_issue.sh
+  production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SITE: ${{ vars.HUKAMNAMA_PROD_SITE_URL }}
+      API: ${{ vars.HUKAMNAMA_PROD_API_URL }}
+      WHERE: production
+    steps:
+      - uses: actions/checkout@v5
+        if: env.SITE != '' && env.API != ''
+      - name: Compare every surface with the API
+        if: env.SITE != '' && env.API != ''
+        id: check
+        run: |
+          set +e
+          out="$(python3 scripts/ci/hukamnama_morning.py "$SITE" "$API")"; rc=$?
+          echo "$out"
+          { echo "report<<EOF"; echo "$out"; echo "EOF"; } >> "$GITHUB_OUTPUT"
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+      - name: Open or update today's issue
+        if: env.SITE != '' && env.API != '' && steps.check.outputs.rc != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT: ${{ steps.check.outputs.report }}
+        run: bash scripts/ci/hukamnama_morning_issue.sh

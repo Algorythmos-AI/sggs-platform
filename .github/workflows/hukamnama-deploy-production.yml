@@ -1,0 +1,119 @@
+name: hukamnama-deploy-production
+
+# Deploys the Hukamnama service (services/hukamnama) to its PRODUCTION Render service, from a
+# release tag. Never from a branch, never on a push: the owner dispatches it with the tag that
+# production runs (vX.Y.Z on main). Render auto-deploy is OFF for the service.
+#
+# Before anything is deployed it proves, against the database the tag pins, every day the running
+# service has published (scripts/ci/hukamnama_preflight.py). A dataset bump that moved or changed
+# a published day's lines stops here, with the day named, instead of taking the service down.
+#
+# Deploy freeze: 23:00–04:30 UTC (04:30–10:00 IST), the hours SGPC publishes and the poller
+# decides, and the hours the push is sent.
+#
+# Setup (owner, once): runbook docs/process/runbooks/hukamnama-service.md.
+#   secret   RENDER_DEPLOY_HOOK_HUKAMNAMA_PROD   (environment: production)
+#   variable HUKAMNAMA_PROD_URL                  (repository) the service's own origin (/health)
+#   variable HUKAMNAMA_PROD_READ_URL             (repository, optional) where its published days are
+#                                                read from when the service refuses direct calls
+#                                                (HUKAMNAMA_ORIGIN_REQUIRED): the public API origin
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The release tag to deploy (vX.Y.Z, on main)"
+        type: string
+        required: true
+      first_deploy:
+        description: "The service has never run: skip the proof of its published days"
+        type: boolean
+        default: false
+      override_freeze:
+        description: "Deploy even inside the 23:00–04:30 UTC publish window"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hukamnama-deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 45
+    env:
+      HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_HUKAMNAMA_PROD }}
+      URL: ${{ vars.HUKAMNAMA_PROD_URL }}
+      READ_URL: ${{ vars.HUKAMNAMA_PROD_READ_URL || vars.HUKAMNAMA_PROD_URL }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Configured, and asked for a release tag?
+        run: |
+          if [ -z "$HOOK" ] || [ -z "$URL" ]; then
+            echo "::error::Hukamnama production is not set up (deploy hook or HUKAMNAMA_PROD_URL missing): docs/process/runbooks/hukamnama-service.md"
+            exit 1
+          fi
+          case "$TAG" in
+            v[0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "::error::'$TAG' is not a release tag (vX.Y.Z)"; exit 1 ;;
+          esac
+      - name: Deploy freeze (23:00–04:30 UTC)
+        env:
+          OVERRIDE: ${{ inputs.override_freeze }}
+        run: |
+          m=$(( 10#$(date -u +%H) * 60 + 10#$(date -u +%M) ))
+          if { [ "$m" -ge 1380 ] || [ "$m" -lt 270 ]; } && [ "$OVERRIDE" != "true" ]; then
+            echo "::error::Inside the Hukamnama publish window (23:00–04:30 UTC). Dispatch later, or with override_freeze."
+            exit 1
+          fi
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+      - name: The tag is a release on main
+        id: sha
+        run: |
+          sha="$(git rev-parse "refs/tags/${TAG}^{commit}")"
+          git fetch --quiet origin main
+          if ! git merge-base --is-ancestor "$sha" origin/main; then
+            echo "::error::$TAG ($sha) is not on main: production runs only what was released"
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "deploying $TAG = ${sha::7}"
+      - uses: ./.github/actions/fetch-dataset
+        with: { token: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: ".nvmrc"
+      - name: Service tests on the tag
+        env:
+          HUKAMNAMA_REQUIRE_PUSH_DEPS: "1"
+          HUKAMNAMA_REQUIRE_NODE: "1"
+        run: |
+          pip install --require-hashes -r services/hukamnama/requirements.txt
+          cd services/hukamnama && python3 -m unittest discover -s tests -t .
+      - name: Every published day still proves in this tag's database
+        if: ${{ !inputs.first_deploy }}
+        run: python3 scripts/ci/hukamnama_preflight.py "$READ_URL" --db db/sggs.sqlite
+      - name: Ask Render to build this exact commit
+        env:
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          case "$HOOK" in *\?*) sep='&' ;; *) sep='?' ;; esac
+          curl -fsS -X POST "${HOOK}${sep}ref=${SHA}" -o /dev/null
+          echo "deploy requested for ${SHA::7}"
+      - name: Wait until the service runs this commit
+        env:
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: python3 scripts/ci/hukamnama_watch.py wait "$URL" --commit "$SHA" --timeout 1800
+      - name: And its published days still prove, as served
+        run: python3 scripts/ci/hukamnama_preflight.py "$READ_URL" --db db/sggs.sqlite

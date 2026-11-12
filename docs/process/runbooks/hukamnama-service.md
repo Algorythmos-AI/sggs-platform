@@ -134,6 +134,45 @@ without a secret refuses everyone.
 - Each distinct page fetched is kept at `/var/data/archive/<amritsar date>/` (gzip) with an
   `index.ndjson` of every fetch. Day folders older than 60 days are pruned.
 
+## The morning check (automatic)
+
+`hukamnama-morning.yml` runs at 07:15 and 10:00 IST. From outside it reads what a visitor reads
+(the page in English, Punjabi and French, the JSON feed's newest entry, the embed), hashes the
+Gurmukhi lines each one shows and compares that with the `range_sha256` the API published for the
+date shown. Once the API has published today's Hukamnama, every surface must show today's. A
+mismatch opens one issue per Amritsar date, and later runs comment on it.
+
+It is silent until its variables are set (repository variables):
+
+| Environment | Variables |
+|---|---|
+| staging | `HUKAMNAMA_STAGING_SITE_URL` (the staging site's origin); the API is `HUKAMNAMA_STAGING_URL` |
+| production | `HUKAMNAMA_PROD_SITE_URL` and `HUKAMNAMA_PROD_API_URL` |
+
+Run it by hand: `python3 scripts/ci/hukamnama_morning.py <site origin> <api origin>`.
+
+## Production deploys (owner, by hand)
+
+Production never deploys on a push. After a release, dispatch `hukamnama-deploy-production` with
+the release tag:
+
+```bash
+gh workflow run hukamnama-deploy-production.yml --repo Algorythmos-AI/sggs-platform -f tag=vX.Y.Z
+```
+
+It refuses a tag that is not `vX.Y.Z` on `main`, runs the service's tests on the tag, and then,
+before asking Render for anything, proves every day the running service has published against the
+database the tag pins. If a dataset bump moved or changed a published day's lines the run stops
+with the day named: correct or re-approve that day on the running service first. For the very
+first deploy, when there is no service to read, add `-f first_deploy=true`.
+
+Setup, once: the Render service with auto-deploy off, its deploy hook as the secret
+`RENDER_DEPLOY_HOOK_HUKAMNAMA_PROD` in the `production` environment, and the repository variable
+`HUKAMNAMA_PROD_URL`. If the service refuses direct calls (`HUKAMNAMA_ORIGIN_REQUIRED=on`), also
+set `HUKAMNAMA_PROD_READ_URL` to the public API origin, where its published days can be read.
+
+The staging deploy runs the same proof on every push.
+
 ## Looking at the soak
 
 ```bash
