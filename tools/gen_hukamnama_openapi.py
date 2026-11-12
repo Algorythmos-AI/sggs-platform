@@ -201,6 +201,8 @@ FIELDS = {
         "credit": "How the day was located and where its text is from.",
         "corrected_at": "Present only when the day's range was corrected after it was published: when, in UTC. "
                         "`published_at` stays the first publication.",
+        "rahao_gurmukhi": "Present only when the shabad has exactly one rahao (refrain): its lines, verbatim, "
+                          "in order. Absent when there is none or more than one; nothing is guessed.",
         "raag": "The raag of the opening verse, as the corpus names it.",
         "author": "The author, when every verse of the day has the same one; `null` when they differ, as in a Vaar.",
         "url": "The day's page on gurbanisoul.com.",

@@ -9,6 +9,7 @@ the same bytes (``range_sha256``) from the same corpus (``scripture_sha256``).
 from __future__ import annotations
 
 import hashlib
+import re
 import sqlite3
 from dataclasses import dataclass
 
@@ -29,6 +30,7 @@ class Line:
     is_header: bool
     gurmukhi: str
     translit: str
+    is_rahao: bool = False
 
 
 @dataclass(frozen=True)
@@ -43,6 +45,9 @@ class Resolution:
     range_sha256: str
     line_count: int
     heading_included: bool
+    # The shabad's ਰਹਾਉ couplet, verbatim corpus lines (display only: the widget's refrain). Empty
+    # when the range has no rahao or more than one, or for decisions stored before it existed.
+    rahao_gurmukhi: tuple[str, ...] = ()
 
     def key(self) -> str:
         return f"{self.first_line_id}-{self.last_line_id}-{self.range_sha256}"
@@ -94,8 +99,27 @@ def range_sha256(texts: list[str]) -> str:
 
 
 def _lines(con: sqlite3.Connection, sql: str, args: tuple) -> list[Line]:
-    return [Line(r[0], r[1], r[2], bool(r[3]), r[4] or "", r[5] or "")
-            for r in con.execute(f"SELECT id, ang, comp_id, is_header, gurmukhi, translit FROM lines {sql}", args)]
+    return [Line(r[0], r[1], r[2], bool(r[3]), r[4] or "", r[5] or "", bool(r[6]))
+            for r in con.execute(f"SELECT id, ang, comp_id, is_header, gurmukhi, translit, is_rahao FROM lines {sql}", args)]
+
+
+_VERSE_END = re.compile(r"॥[੦-੯]+॥$")   # ॥੧॥ — closes a numbered verse, so a refrain starts after it
+RAHAO_MAX_LINES = 3
+
+
+def rahao_block(rng: list[Line]) -> tuple[str, ...]:
+    """The range's one ਰਹਾਉ couplet: the line marked rahao plus the verse lines just before it, back
+    to the previous numbered verse end or heading (at most ``RAHAO_MAX_LINES``). Nothing is guessed:
+    no rahao, or more than one, gives ``()``."""
+    idx = [i for i, x in enumerate(rng) if x.is_rahao]
+    if len(idx) != 1:
+        return ()
+    start = end = idx[0]
+    while start > 0 and not rng[start - 1].is_header and not _VERSE_END.search(rng[start - 1].gurmukhi):
+        start -= 1
+    if end - start + 1 > RAHAO_MAX_LINES:
+        return ()
+    return tuple(x.gurmukhi for x in rng[start:end + 1])
 
 
 def lines_in_range(con: sqlite3.Connection, first: int, last: int) -> list[Line]:
@@ -117,7 +141,7 @@ def resolution_for_range(con: sqlite3.Connection, first: int, last: int) -> Reso
     return Resolution(ang=o.ang, first_line_id=first, last_line_id=last, comp_id=o.comp_id,
                       opening_line_id=o.id, opening_gurmukhi=o.gurmukhi, opening_translit=o.translit,
                       range_sha256=range_sha256([x.gurmukhi for x in rng]), line_count=len(rng),
-                      heading_included=rng[0].is_header)
+                      heading_included=rng[0].is_header, rahao_gurmukhi=rahao_block(rng))
 
 
 def resolve(con: sqlite3.Connection, cand: Candidate) -> Resolution | NoMatch:

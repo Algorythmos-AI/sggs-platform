@@ -47,6 +47,7 @@ def day_record(store: Store, day, fingerprint: str, now: datetime) -> dict:
                 "range_sha256": r["range_sha256"], "scripture_sha256": d["scripture_sha256"],
                 "citation": f"Sri Guru Granth Sahib Ji · Ang {r['ang']}",
                 "published_at": d["decided_at"], "credit": SOURCE_CREDIT,
+                **({"rahao_gurmukhi": list(r["rahao_gurmukhi"])} if r.get("rahao_gurmukhi") else {}),
                 **({"corrected_at": c["at"]} if (c := store.correction(day)) else {})}
     return pending_record(day, fingerprint)
 

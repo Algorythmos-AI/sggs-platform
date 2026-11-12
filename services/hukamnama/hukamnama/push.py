@@ -80,6 +80,7 @@ def payload(decision: dict) -> dict:
         "amritsar_date": day, "ang": r["ang"], "first_line_id": r["first_line_id"],
         "last_line_id": r["last_line_id"], "comp_id": r["comp_id"], "range_sha256": r["range_sha256"],
         "scripture_sha256": decision["scripture_sha256"], "opening_translit": r["opening_translit"],
+        **({"rahao_gurmukhi": list(r["rahao_gurmukhi"])} if r.get("rahao_gurmukhi") else {}),
     }
 
 

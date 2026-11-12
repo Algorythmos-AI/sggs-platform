@@ -2,8 +2,8 @@ import itertools
 import unittest
 from datetime import date
 
-from hukamnama.corpus import (NoMatch, Resolution, agrees, lines_in_range, open_ro, range_sha256, resolution_for_range,
-                              resolve, scripture_sha256)
+from hukamnama.corpus import (RAHAO_MAX_LINES, _lines, NoMatch, Resolution, agrees, lines_in_range, open_ro, rahao_block,
+                              range_sha256, resolution_for_range, resolve, scripture_sha256)
 from hukamnama.locate import words
 from hukamnama.sources import Candidate, parse_hs, parse_mukhwak
 from tests.helpers import DB, HAS_DB, fixture, needs_db
@@ -96,6 +96,34 @@ class ResolverTests(unittest.TestCase):
         for a, b in ((10, 5), (1, 1000), (60_000, 61_000)):
             with self.assertRaises(ValueError):
                 resolution_for_range(self.con, a, b)
+
+    def test_rahao_is_the_refrain_couplet_verbatim(self):
+        r = resolution_for_range(self.con, 29574, 29580)        # 12 Nov 2026, Ang 682
+        self.assertEqual(r.rahao_gurmukhi, ("ਤੇਰਾ ਜਨੁ ਰਾਮ ਨਾਮ ਰੰਗਿ ਜਾਗਾ ॥",
+                                            "ਆਲਸੁ ਛੀਜਿ ਗਇਆ ਸਭੁ ਤਨ ਤੇ ਪ੍ਰੀਤਮ ਸਿਉ ਮਨੁ ਲਾਗਾ ॥ ਰਹਾਉ ॥"))
+
+    def test_rahao_property_over_every_composition(self):
+        """Every block is consecutive verbatim corpus lines of its composition that end on its one
+        rahao line, start after a heading or a numbered verse end, and never exceed the cap; a
+        composition with no rahao or several gets none."""
+        comps = [c for (c,) in self.con.execute("SELECT DISTINCT comp_id FROM lines ORDER BY comp_id")]
+        given = 0
+        for c in comps:
+            rng = _lines(self.con, "WHERE comp_id = ? ORDER BY id", (c,))
+            block = rahao_block(rng)
+            marked = [i for i, x in enumerate(rng) if x.is_rahao]
+            if len(marked) != 1:
+                self.assertEqual(block, (), c)
+                continue
+            if not block:
+                continue
+            given += 1
+            end = marked[0]
+            start = end - len(block) + 1
+            self.assertLessEqual(len(block), RAHAO_MAX_LINES, c)
+            self.assertEqual(block, tuple(x.gurmukhi for x in rng[start:end + 1]), c)
+            self.assertFalse(any(x.is_header for x in rng[start:end + 1]), c)
+        self.assertGreater(given, 2000)
 
     def test_scripture_fingerprint_matches_the_ios_manifest_definition(self):
         fp = scripture_sha256(self.con)
