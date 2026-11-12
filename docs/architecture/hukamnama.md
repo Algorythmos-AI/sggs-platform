@@ -109,9 +109,11 @@ After an automatic publish the service keeps reading both pages for 2 hours. A c
 | `range_sha256` | sha256 of the range's `gurmukhi` lines joined by `\n` (UTF-8). The app, the website and the public snapshot each recompute it from their own copy of the corpus before showing a day; a mismatch shows nothing. |
 | `scripture_sha256` | sha256 over every corpus line in id order (`id`, NUL, `gurmukhi`, newline). It equals the iOS database manifest's value, so equal values mean the same ids carry the same text. |
 
-The service refuses to start when the corpus fingerprint differs from the one recorded in its
-state file: published ranges are pinned to the corpus they were resolved in, and a dataset bump
-needs its published days re-resolved first.
+When the corpus fingerprint differs from the one recorded in its state file (a dataset bump), the
+service proves every published day in the new corpus at start: the same line ids must exist and
+hash to the `range_sha256` the day was published with. If all prove, they are re-pinned to the
+new corpus and it carries on (audited as `repin`). If any does not, it refuses to serve, decide or
+publish, and names the day; `correct` and `hold` still run, because they are the fix.
 
 ## Hold, approve and resend
 
