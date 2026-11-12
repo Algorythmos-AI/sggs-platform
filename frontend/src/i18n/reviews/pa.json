@@ -2,9 +2,9 @@
   "lang": "pa",
   "reviewer": "Sam Kalaliya (owner, Algorythmos Pty Ltd)",
   "date": "2026-11-12",
-  "catalogSha256": "20f23d55c37701ee1ef577afef755aa7b6424f910640b32b26ebda61beb366fd",
+  "catalogSha256": "22ca4928fc84b5766ac58282f25c38a7a60d959dee506136a5414694955a9829",
   "gates": {
-    "G-PA": "signed 2026-11-06: native-speaker polish (PR #356) read and approved by the owner; first signed 2026-11-05 on the rendered /pa pages; the 22 Hukamnama page strings (hukamnama.*) approved by the owner 2026-11-11 from the review sheet and the rendered /pa page; the 57 Developers page strings (developers.*, footer.developers) approved by the owner 2026-11-12 from the review sheet; the three privacy strings on the Hukamnama notification (privacy.theAppMakesNo, privacy.remindersAreOptionalLocal, privacy.hukamnamaNotification) approved by the owner 2026-11-12 from the review sheet",
+    "G-PA": "signed 2026-11-06: native-speaker polish (PR #356) read and approved by the owner; first signed 2026-11-05 on the rendered /pa pages; the 22 Hukamnama page strings (hukamnama.*) approved by the owner 2026-11-11 from the review sheet and the rendered /pa page; the 57 Developers page strings (developers.*, footer.developers) approved by the owner 2026-11-12 from the review sheet; the three privacy strings on the Hukamnama notification (privacy.theAppMakesNo, privacy.remindersAreOptionalLocal, privacy.hukamnamaNotification) approved by the owner 2026-11-12 from the review sheet; the correction notice (hukamnama.corrected) approved by the owner 2026-11-12",
     "G4": "Privacy and Contribute approved by the owner for Algorythmos Pty Ltd (Privacy wording re-read 2026-11-06); no external counsel review; the Hukamnama notification wording approved by the owner 2026-11-12"
   },
   "decisions": {
