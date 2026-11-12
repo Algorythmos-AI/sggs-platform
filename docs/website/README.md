@@ -1,7 +1,7 @@
 ---
 title: "The website — gurbanisoul.com"
 description: "The public website gurbanisoul.com: domains, languages and redirects, SEO, Open Graph images, security headers, imagery, screenshots, Contribute and the gates."
-covers: "frontend/src/pages/[lang]/index.astro, frontend/src/pages/sitemap.xml.ts, frontend/src/pages/rss.xml.ts, frontend/src/pages/ang/**, frontend/src/pages/og/**, frontend/public/robots.txt"
+covers: "frontend/src/pages/[lang]/index.astro, frontend/src/pages/sitemap.xml.ts, frontend/src/pages/rss.xml.ts, frontend/src/pages/ang/**, frontend/src/pages/og/**, frontend/src/pages/robots.txt.ts, frontend/src/pages/llms.txt.ts"
 sidebar:
   order: 4
 ---
@@ -115,7 +115,7 @@ SEO/social/PWA block is a shared component, **`frontend/src/components/Seo.astro
   once the app is live (`APP_STORE_LIVE`) — the `apple-itunes-app` Smart App Banner.
 
 `og:image` defaults to the page's OG card (`/og/v2/<slug>.png`, see **OG images** below).
-`frontend/public/robots.txt` points crawlers at the canonical host and names `/sitemap.xml`, which
+`frontend/src/pages/robots.txt.ts` (it names the Hukamnama sitemap too, once the Hukamnama is launched, and `llms.txt.ts` beside it writes a plain map of the site with the rules for quoting) points crawlers at the canonical host and names `/sitemap.xml`, which
 is now **generated** (see **Routes, sitemap & RSS**). `Base.astro` derives its canonical/OG from
 `Astro.url.pathname` so every Knowledge Base page is self-consistent without per-page props.
 

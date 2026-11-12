@@ -8,7 +8,9 @@ name: hukamnama-morning
 #
 #   staging     variable HUKAMNAMA_STAGING_SITE_URL (repository), HUKAMNAMA_STAGING_URL (already set);
 #               secret VERCEL_AUTOMATION_BYPASS_SECRET (environment: staging)
-#   production  variables HUKAMNAMA_PROD_SITE_URL and HUKAMNAMA_PROD_API_URL (repository)
+#   production  variables HUKAMNAMA_PROD_SITE_URL and HUKAMNAMA_PROD_API_URL (repository); with
+#               INDEXNOW_KEY (repository variable; public by design) a passing check also tells
+#               search engines that today's pages changed (scripts/ci/indexnow.py)
 
 on:
   schedule:
@@ -77,3 +79,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPORT: ${{ steps.check.outputs.report }}
         run: bash scripts/ci/hukamnama_morning_issue.sh
+      - name: Tell search engines today's pages are up (IndexNow)
+        # only after the check above confirmed that every surface shows what the API published
+        if: env.SITE != '' && env.API != '' && steps.check.outputs.rc == '0' && steps.check.outputs.confirmed != '' && vars.INDEXNOW_KEY != ''
+        env:
+          KEY: ${{ vars.INDEXNOW_KEY }}
+          DAY: ${{ steps.check.outputs.confirmed }}
+        run: python3 scripts/ci/indexnow.py "$SITE" "$DAY" --key "$KEY" || echo "::warning::IndexNow did not accept the ping (the pages are unaffected)"

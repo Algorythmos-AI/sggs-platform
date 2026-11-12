@@ -908,6 +908,27 @@ class DevelopersPage(unittest.TestCase):
         self.assertIn(r'day.lines.map((line) => line.gurmukhi).join("\\n")', page)
         self.assertIn('crypto.subtle.digest("SHA-256"', page)
 
+    def test_robots_and_llms_follow_the_launch_switch(self):
+        """robots.txt names the Hukamnama sitemap, and llms.txt describes the Hukamnama, only once
+        production serves them; llms.txt never holds scripture and always states how to quote."""
+        if _unbuilt():
+            self.skipTest("webapp/static not built")
+        live = self._live()
+        robots = (STATIC / "robots.txt").read_text(encoding="utf-8")
+        self.assertIn(f"Sitemap: {SITE}/sitemap.xml", robots)
+        self.assertEqual(f"Sitemap: {SITE}/sitemap-hukamnama.xml" in robots, live)
+        llms = (STATIC / "llms.txt").read_text(encoding="utf-8")
+        self.assertTrue(llms.startswith("# Gurbani Soul\n"))
+        self.assertEqual("## Hukamnama" in llms, live)
+        self.assertEqual("/v1/hukamnama/today" in llms, live)
+        self.assertIn('"Sri Guru Granth Sahib Ji · Ang N"', llms)
+        self.assertIn("never correct, shorten, re-space or reorder", llms)
+        self.assertIsNone(re.search("[\u0A00-\u0A7F]", llms), "llms.txt must hold no Gurmukhi")
+        for word in ("official", "AI-powered", "the only"):
+            self.assertNotIn(word, llms)
+        src = (FRONTEND / "src" / "pages" / "llms.txt.ts").read_text(encoding="utf-8")
+        self.assertIn("not affiliated with SGPC", src)
+
     def test_built_pages_follow_the_launch_switch(self):
         if _unbuilt():
             self.skipTest("webapp/static not built")

@@ -141,6 +141,10 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  - {w}")
         return 1
     print("\nevery surface agrees with the API")
+    if state == "published" and api_today.get("amritsar_date") == today and os.environ.get("GITHUB_OUTPUT"):
+        # for the step that tells search engines: today's pages are confirmed right
+        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+            f.write(f"confirmed={today}\n")
     return 0
 
 
