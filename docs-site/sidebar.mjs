@@ -139,6 +139,8 @@ export const LABELS = {
   'adr/0011-api-as-functions-in-the-web-project': '0011 · The API as Vercel functions',
   'adr/0012-docs-site': '0012 · The docs site',
   'adr/0013-outbound-assistant-links': '0013 · Outbound assistant links',
+  'adr/0014-public-hukamnama-api': '0014 · The public Hukamnama API',
+  'adr/0015-hukamnama-meaning-layer': '0015 · The Hukamnama meaning layer',
   'data/adr/0002-comp-id-keep-last-regroup': '0002 · Heading runs join the composition',
   'data/adr/0003-integrity-proofs': '0003 · Every dataset carries its proofs',
   'data/adr/0004-backups-and-restore': '0004 · Recoverable from the backups',
