@@ -598,6 +598,13 @@
       "$ref": "#/components/schemas/Translation",
       "description": "Present only when the lines carry `en`: whose translation it is."
      },
+     "rahao_gurmukhi": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Present only when the shabad has exactly one rahao (refrain): its lines, verbatim, in order. Absent when there is none or more than one; nothing is guessed."
+     },
      "corrected_at": {
       "type": "string",
       "format": "date-time",
