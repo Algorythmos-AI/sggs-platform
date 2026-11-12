@@ -158,6 +158,19 @@ class Store:
                               (_iso(now), by, "correct", day.isoformat(), f"{before[:12]} -> {res.key()}: {reason}"))
         return True
 
+    def repin(self, resolutions: dict[str, Resolution], fingerprint: str, now: datetime, was: str) -> None:
+        """Move published days to a new corpus, all at once. The caller has proved that each day's
+        lines are byte-identical there; only then may the fingerprint they are served under change."""
+        with self._lock:
+            for day, res in resolutions.items():
+                self._con.execute("UPDATE hukamnamas SET resolution = ?, scripture_sha256 = ? "
+                                  "WHERE amritsar_date = ? AND status = 'published'",
+                                  (json.dumps(asdict(res), ensure_ascii=False), fingerprint, day))
+            self._con.execute("INSERT OR REPLACE INTO meta (key, value) VALUES ('scripture_sha256', ?)", (fingerprint,))
+            self._con.execute("INSERT INTO audit (at, actor, action, amritsar_date, detail) VALUES (?,?,?,?,?)",
+                              (_iso(now), "service", "repin", None,
+                               f"{was[:12]} -> {fingerprint[:12]}: {len(resolutions)} published day(s) proved unchanged"))
+
     def correction(self, day: date) -> dict | None:
         """When a published day was corrected and what it replaced, or None."""
         raw = self.get_meta(CORRECTION + day.isoformat())
