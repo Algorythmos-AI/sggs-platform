@@ -174,7 +174,7 @@ language every morning, so they have their own, `/sitemap-hukamnama.xml`, built 
 - The dates come from the API's `GET /v1/hukamnama/index` (every published day, no text); an API
   without that route is asked for its latest 30 instead. A date after the Amritsar date at that
   moment is never listed, whatever the API says.
-- `robots.txt` does not name this sitemap yet: it is added at launch, when production serves it.
+- `robots.txt` (`frontend/src/pages/robots.txt.ts`) names this sitemap only once production serves it: the same launch switch as the Developers page (`HUKAMNAMA_LIVE`). `llms.txt` gains its Hukamnama section on the same switch.
 - The same list gives each page its **previous and next published day**, as links labelled with
   those days' dates (no new words to translate). Unpublished days are skipped. If the list cannot
   be read the page is shown without the links.

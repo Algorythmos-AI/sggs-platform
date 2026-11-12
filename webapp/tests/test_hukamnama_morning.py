@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT / "scripts" / "ci"))
 sys.path.insert(0, os.path.dirname(HERE))
 import hukamnama_feed as hf  # noqa: E402
 import hukamnama_morning as m  # noqa: E402
+import indexnow  # noqa: E402
 import hukamnama_preflight as pre  # noqa: E402
 from test_hukamnama_embed import Base  # noqa: E402
 from test_hukamnama_page import AFTER, BEFORE, DB, R673, R680, corpus_lines, record  # noqa: E402
@@ -145,6 +146,35 @@ class Dates(unittest.TestCase):
     def test_the_hash_is_the_apis_definition(self):
         self.assertEqual(m.range_sha256(["a", "b"]), hashlib.sha256(b"a\nb").hexdigest())
         self.assertEqual(date.fromisoformat(TODAY).isoformat(), TODAY)
+
+
+
+class IndexNow(unittest.TestCase):
+    def test_it_names_the_page_in_each_language_and_the_days_own_page(self):
+        body = indexnow.payload("https://gurbanisoul.com", TODAY, "abcd1234-efgh", ["en", "pa"])
+        self.assertEqual(body["host"], "gurbanisoul.com")
+        self.assertEqual(body["keyLocation"], "https://gurbanisoul.com/abcd1234-efgh.txt")
+        self.assertEqual(body["urlList"], ["https://gurbanisoul.com/en/hukamnama", "https://gurbanisoul.com/pa/hukamnama",
+                                           f"https://gurbanisoul.com/en/hukamnama/{TODAY}", f"https://gurbanisoul.com/pa/hukamnama/{TODAY}"])
+
+    def test_anything_but_a_plain_site_a_date_and_a_key_is_refused(self):
+        ok = ("https://gurbanisoul.com", TODAY, "abcd1234-efgh", ["en"])
+        for i, bad in ((0, "http://gurbanisoul.com"), (0, "https://gurbanisoul.com/x"), (0, "https://gurbanisoul.com?a=1"),
+                       (1, "today"), (1, "2026-11-12/../x"), (2, "short"), (2, "has space 12345"), (2, "a/b/c/d/e/f/g/h"),
+                       (3, []), (3, ["en", "../x"])):
+            args = list(ok)
+            args[i] = bad
+            with self.assertRaises(ValueError, msg=bad):
+                indexnow.payload(*args)
+
+    def test_a_dry_run_sends_nothing(self):
+        import contextlib
+        import io
+        from unittest import mock
+        with mock.patch.object(indexnow.urllib.request, "urlopen", side_effect=AssertionError("sent")), \
+                contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(indexnow.main(["https://gurbanisoul.com", TODAY, "--key", "abcd1234-efgh", "--dry-run"]), 0)
+        self.assertIn(f"/fr/hukamnama/{TODAY}", out.getvalue())
 
 
 if __name__ == "__main__":

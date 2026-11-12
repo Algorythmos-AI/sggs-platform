@@ -113,6 +113,7 @@ export const LABELS = {
   'process/ci-gates': 'CI gates',
   'process/release': 'Release process',
   'process/runbooks/deploy': 'Deploys',
+  'process/runbooks/hukamnama-launch': 'Launching the Hukamnama',
   'process/runbooks/rollback': 'Rollback',
   'process/runbooks/services-production': 'Moving production to functions',
   'process/runbooks/newsletter': 'Launch-notice sign-up',
