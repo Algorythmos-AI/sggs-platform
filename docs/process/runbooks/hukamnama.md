@@ -123,5 +123,8 @@ Close the day's dead-man issue with a line saying what you decided.
   `override_freeze` input exists for an emergency fix only. The service runs one instance with a
   disk, so a deploy restarts it for a few seconds.
 - **A dataset bump** (`dataset.lock.json`) also deploys the service. If the corpus fingerprint
-  changed, the service refuses to start until published days are re-resolved against the new
-  corpus. Never delete the state file to get past it: it holds every decision and the audit trail.
+  changed, the service proves every published day in the new corpus at start and, when all are
+  byte-identical there, re-pins them and carries on. It refuses to start only when a day does not
+  prove, and names it: fix that day with `correct` or `hold`, confirm with
+  `python -m hukamnama repin`, and restart. The deploy runs the same proof first. Never delete the
+  state file to get past it: it holds every decision and the audit trail.
