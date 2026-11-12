@@ -5,7 +5,7 @@ covers: "services/hukamnama/**, services/hukamnama-edge/**, scripts/ci/hukamnama
 sidebar:
   order: 10
 verified:
-  commit: 14c89ad9
+  commit: 57cee42f
   date: "2026-11-12"
 ---
 # The Hukamnama service
@@ -140,7 +140,10 @@ no time-zone database is needed, and a naive datetime is refused.
 
 Sending is off unless `HUKAMNAMA_SEND=on`, which needs the APNs Auth Key; without a usable key the
 service refuses to start. `push.py` builds every notification from the published decision, so its
-text is the corpus's, and its shape is pinned to the app's fixture by a test. Only the **current
+text is the corpus's, and its shape is pinned to the app's fixture by a test. Beside the range,
+a day records its ਰਹਾਉ couplet (`rahao_gurmukhi`, from `corpus.rahao_block`: the one line marked
+rahao plus the verse lines before it back to a numbered verse end or a heading, at most 3), which
+the read API and the push carry for the large widget; a shabad with no ਰਹਾਉ or several gets none. Only the **current
 Amritsar day** is ever pushed, at most once per device per day: `asap` devices when the day
 publishes, `scheduled` devices at their own UTC slot. Sends are durable rows that survive a restart;
 a circuit breaker stops a day's run when more than 5% of its first results are 4xx, and deletes

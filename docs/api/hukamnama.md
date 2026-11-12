@@ -54,6 +54,7 @@ A published day carries the whole shabad, line by line.
 | `ang`, `ang_end` | The Ang the shabad opens on and the Ang it ends on. |
 | `citation` | The citation to show with the text: "Sri Guru Granth Sahib Ji · Ang N". |
 | `lines` | Every line in order: `gurmukhi` (verbatim), `translit` (a rule-based reading aid), `is_heading`, `is_rahao`, `author`. |
+| `rahao_gurmukhi` | Optional. The shabad's ਰਹਾਉ couplet, verbatim, in order (the same lines that carry `is_rahao` and the verse just before it). Present only when the shabad has exactly one ਰਹਾਉ; nothing is guessed. A convenience for small surfaces such as widgets. |
 | `author`, `raag` | The day's author and raag. When the verses have more than one author, as in a Vaar, `author` is `null` and each line carries its own. |
 | `range_sha256` | The hash that proves the lines (below). |
 | `scripture_sha256` | The fingerprint of the edition of the text the lines were read from. |
