@@ -84,7 +84,9 @@ verse bodies. There is **no fuzzy tier**. A day publishes automatically only whe
 
 1. hs.sgpc.net parses into a complete card dated today in Amritsar.
 2. Its words equal, word for word, one run of consecutive corpus lines that starts on a verse, lies
-   within one Ang of SGPC's Ang, and ends where a composition ends.
+   within one Ang of SGPC's Ang, and ends where a composition ends, or on a line that closes a
+   numbered shabad (a marker with two or more numbers, such as ॥੨॥੩॥) inside a longer one, as
+   where Bhagat bani keeps several shabads under one heading.
 3. The same resolution has been seen in an unbroken run of polls for at least 2 minutes, so a page
    saved half-way never publishes.
 4. The marquee does not veto it.

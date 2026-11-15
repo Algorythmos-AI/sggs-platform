@@ -103,7 +103,16 @@ def _lines(con: sqlite3.Connection, sql: str, args: tuple) -> list[Line]:
             for r in con.execute(f"SELECT id, ang, comp_id, is_header, gurmukhi, translit, is_rahao FROM lines {sql}", args)]
 
 
-_VERSE_END = re.compile(r"॥[੦-੯]+॥$")   # ॥੧॥ — closes a numbered verse, so a refrain starts after it
+_VERSE_END = re.compile(r"॥[੦-੯]+॥$")
+# ॥੨॥੩॥, ॥੪॥੧॥੧੨॥ — a closing run with two or more numbers ends a numbered shabad (verse count,
+# then the shabad's own number); a single ॥੨॥ ends a verse only.
+_SHABAD_END = re.compile(r"॥\s*[੦-੯]+\s*॥(?:\s*[੦-੯]+\s*॥)+\s*$")
+
+
+def closes_shabad(line: str) -> bool:
+    """Does this verse line close a numbered shabad? Bhagat bani (and a few other runs) keep several
+    shabads under one heading, so one ``comp_id`` can hold many; this marker is where each ends."""
+    return bool(_SHABAD_END.search(line))   # ॥੧॥ — closes a numbered verse, so a refrain starts after it
 RAHAO_MAX_LINES = 3
 
 
@@ -175,9 +184,11 @@ def resolve(con: sqlite3.Connection, cand: Candidate) -> Resolution | NoMatch:
     i, j = matches[0]
     last = window[j]
     nxt = _lines(con, "WHERE id = ?", (last.id + 1,))
-    if nxt and not (nxt[0].is_header or nxt[0].comp_id != last.comp_id):
+    if nxt and not (nxt[0].is_header or nxt[0].comp_id != last.comp_id or closes_shabad(last.gurmukhi)):
         # a page saved half-way can end exactly on a verse; a Hukamnama ends where a composition
-        # (shabad, or a Vaar's pauri) ends, so the next corpus line must open something new
+        # (shabad, or a Vaar's pauri) ends, so the next corpus line must open something new — or
+        # the last line closes a numbered shabad inside a longer composition (॥੨॥੩॥: 14 Nov 2026,
+        # Bhagat Kabir on Ang 692, comp 2743 holds several shabads under one heading)
         return NoMatch(f"source ends mid-composition at line {last.id} (incomplete page?)")
     first = window[i].id
     if cand.title and i > 0 and window[i - 1].is_header and window[i - 1].id == first - 1 \
