@@ -52,6 +52,7 @@ import sys
 import threading
 
 from . import clock
+from .alerts import from_env as alerts_from_env
 from .api import State, day_record, serve, tick_loop
 from .archive import Archive
 from .corpus import open_ro, resolution_for_range, scripture_sha256
@@ -125,7 +126,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "serve":
+        try:
+            alerts = alerts_from_env(os.environ)
+        except ValueError as e:
+            print(f"phone alerts: {e}", file=sys.stderr)          # half-configured: refuse, as for backups
+            return 2
         state = State(store, fingerprint)
+        state.alert_hook = alerts
         stop = threading.Event()
         try:
             publisher = _publisher(store, con, fingerprint, args.public_dir)
@@ -136,7 +143,7 @@ def main(argv: list[str] | None = None) -> int:
             publisher.sync_safely()        # with polling, the poll loop's first pass does this
         if not args.no_poll:
             fetcher = Archive(args.archive).wrap(fetch) if args.archive else fetch
-            engine = Engine(store, con, fingerprint, fetcher=fetcher)
+            engine = Engine(store, con, fingerprint, fetcher=fetcher, alert_hook=alerts)
             threading.Thread(target=tick_loop, args=(state, engine, stop, publisher.sync_safely if publisher else None),
                              daemon=True).start()
         if os.environ.get("HUKAMNAMA_SEND", "off") == "on":
@@ -144,12 +151,13 @@ def main(argv: list[str] | None = None) -> int:
             if apns is None:
                 return 2
             from .push import Sender, send_loop
-            threading.Thread(target=send_loop, args=(Sender(store, apns), stop), daemon=True).start()
+            threading.Thread(target=send_loop, args=(Sender(store, apns, alert=alerts), stop), daemon=True).start()
             state.sending = True
         httpd = serve(state, args.host, args.port)
         signal.signal(signal.SIGTERM, lambda *_: (stop.set(), threading.Thread(target=httpd.shutdown).start()))
-        logging.info("hukamnama %s serving on %s:%s (scripture %s)", "poll" if not args.no_poll else "read-only",
-                     args.host, args.port, fingerprint[:12])
+        logging.info("hukamnama %s serving on %s:%s (scripture %s; phone alerts %s)",
+                     "poll" if not args.no_poll else "read-only", args.host, args.port, fingerprint[:12],
+                     "on" if alerts else "off")
         httpd.serve_forever()
         return 0
     if args.cmd == "tick":

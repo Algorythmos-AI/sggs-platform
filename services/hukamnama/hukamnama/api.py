@@ -16,6 +16,7 @@ from __future__ import annotations
 import hmac
 import ipaddress
 import json
+import logging
 import os
 import threading
 from datetime import datetime, timedelta, timezone
@@ -68,6 +69,7 @@ class State:
         # address it comes from (or the reverse).
         self.reads = RateLimiter(per_minute=READS_PER_MINUTE)
         self.sending = False                 # set by main when HUKAMNAMA_SEND=on and the key loaded
+        self.alert_hook = None               # phone alerts (alerts.NtfyAlerts), set by main
         # The edge in front of this service proves itself with a shared secret (X-Origin-Auth).
         # Only a request that carries it may say which address it is for (X-Client-IP).
         self.origin_secret = os.environ.get("HUKAMNAMA_ORIGIN_SECRET", "")
@@ -251,8 +253,13 @@ def make_handler(state: State):
                 return
             now = state.now()
             if state.store.device(token) is None and not state.limiter.allow_new():
-                state.store.alert(clock.amritsar_date(now), "device_flood", "new-device cap reached; refusing new rows",
-                                  now)
+                day = clock.amritsar_date(now)
+                what = "new-device cap reached; refusing new rows"
+                if state.store.alert(day, "device_flood", what, now) and state.alert_hook:
+                    try:
+                        state.alert_hook(day.isoformat(), "device_flood", what)
+                    except Exception:                  # an alert channel must never fail a request
+                        logging.getLogger("hukamnama").exception("alert hook failed")
                 self._send(429, {"error": "slow down"})
                 return
             state.store.put_device(token, reg.env, reg.mode, reg.schedule, reg.scripture_sha256, now, reg.replaces)
