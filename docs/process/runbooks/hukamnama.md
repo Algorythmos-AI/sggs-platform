@@ -22,13 +22,18 @@ The rule behind every step: **late is acceptable, wrong is not.** A held day is 
 
 ## How you hear about a problem
 
+- **Your phone (ntfy), first.** When `HUKAMNAMA_ALERT_NTFY_URL` is set, every new service alert is
+  posted to your phone the moment it is raised: a hold, or a morning with nothing published, as
+  **urgent**; a late or changed page as high. Each says what readers see and what to run. Setup is
+  in the [service runbook](hukamnama-service.md#phone-alerts-ntfy). GitHub's scheduled checks can
+  run hours late (13 Nov 2026's 07:00 check ran at 12:34), so do not wait for the issue.
 - **The dead-man issue.** `hukamnama-deadman.yml` reads `/health` at 06:00, 07:00 and 14:15 IST.
   When the service is unreachable, the poller is stale (no poll for 15 minutes inside 05:00–14:00
   IST), nothing is published by 07:00 IST, or the service raised any other alert today, it opens
   one issue titled "Hukamnama service: problem on <date> (Amritsar)", and later runs comment on it.
-  It never restarts or redeploys anything.
-- **`/health`.** The service's own alerts are listed there and nowhere else: no mail or chat
-  channel is connected to them.
+  It also posts to your phone (the same topic), which covers the service being down. It never
+  restarts or redeploys anything.
+- **`/health`.** The service's own alerts are always listed there, phone or not.
 
 ```bash
 curl -s https://api-staging.gurbanisoul.com/health | python3 -m json.tool
