@@ -91,8 +91,29 @@
       "source": "/contribute/:rest+",
       "destination": "/en/contribute/:rest+",
       "permanent": true
+    },
+    {
+      "source": "/hukamnama",
+      "destination": "/en/hukamnama",
+      "permanent": true
+    },
+    {
+      "source": "/hukamnama/:rest+",
+      "destination": "/en/hukamnama/:rest+",
+      "permanent": true
+    },
+    {
+      "source": "/developers",
+      "destination": "/en/developers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/:rest+",
+      "destination": "/en/developers/:rest+",
+      "permanent": true
     }
   ],
+  "buildCommand": "npm run build",
   "rewrites": [
     {
       "source": "/api/analytics(/.*)?",
@@ -530,6 +551,66 @@
       "destination": "/api/svc/verify"
     },
     {
+      "source": "/(en|pa|fr)/hukamnama",
+      "has": [
+        {
+          "type": "host",
+          "value": "sggs-staging.vercel.app"
+        }
+      ],
+      "destination": "/api/svc/all"
+    },
+    {
+      "source": "/(en|pa|fr)/hukamnama/(\\d\\d\\d\\d-\\d\\d-\\d\\d)",
+      "has": [
+        {
+          "type": "host",
+          "value": "sggs-staging.vercel.app"
+        }
+      ],
+      "destination": "/api/svc/all"
+    },
+    {
+      "source": "/feeds/hukamnama\\.xml",
+      "has": [
+        {
+          "type": "host",
+          "value": "sggs-staging.vercel.app"
+        }
+      ],
+      "destination": "/api/svc/all"
+    },
+    {
+      "source": "/feeds/hukamnama\\.json",
+      "has": [
+        {
+          "type": "host",
+          "value": "sggs-staging.vercel.app"
+        }
+      ],
+      "destination": "/api/svc/all"
+    },
+    {
+      "source": "/sitemap-hukamnama\\.xml",
+      "has": [
+        {
+          "type": "host",
+          "value": "sggs-staging.vercel.app"
+        }
+      ],
+      "destination": "/api/svc/all"
+    },
+    {
+      "source": "/embed/hukamnama",
+      "has": [
+        {
+          "type": "host",
+          "value": "sggs-staging.vercel.app"
+        }
+      ],
+      "destination": "/api/svc/all"
+    },
+    {
       "source": "/api/(.*)",
       "has": [
         {
@@ -574,7 +655,7 @@
   ],
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/((?!embed/hukamnama).*)",
       "headers": [
         {
           "key": "X-Content-Type-Options",
@@ -603,6 +684,35 @@
         {
           "key": "Cross-Origin-Opener-Policy",
           "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/embed/hukamnama(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'none'; style-src 'unsafe-inline'; font-src 'self'; frame-ancestors *; base-uri 'none'; form-action 'none'"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=()"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
         }
       ]
     },

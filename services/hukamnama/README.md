@@ -61,7 +61,19 @@ python3 -m hukamnama --db ../../db/sggs.sqlite --state /tmp/hk.sqlite tick --for
 python3 -m unittest discover -s tests -t .     # or: make test-hukamnama (repo root)
 ```
 
-Runtime is Python-stdlib only. Environment: `HUKAMNAMA_DB`, `HUKAMNAMA_STATE`, `PORT`.
+Runtime is Python-stdlib only. Environment: `HUKAMNAMA_DB`, `HUKAMNAMA_STATE`, `HUKAMNAMA_ARCHIVE`
+(keep every distinct page fetched, for replay; `hukamnama/archive.py`), `HUKAMNAMA_PUBLIC_DIR` and
+`HUKAMNAMA_MEANING` and the `HUKAMNAMA_PUBLIC_…` bucket settings (the public snapshot, below),
+`HUKAMNAMA_ORIGIN_SECRET` and `HUKAMNAMA_ORIGIN_REQUIRED` (whose address a request is limited by, and
+whether direct calls are refused; the runbook explains both), `HUKAMNAMA_COMMIT`, `PORT`.
+
+Owner commands besides `approve`, `hold` and `resend`: `correct` (replace a published day's range,
+keeping its first publication time and adding `corrected_at`) and `pause` / `resume` (stop and
+restore serving and sending without a deploy). All are written to the audit table.
+
+**Deployed** as the Render service `sggs-hukamnama-staging` (Docker, `services/hukamnama/Dockerfile`,
+1 GB disk at `/var/data`) by `.github/workflows/hukamnama-deploy.yml`, watched from outside by
+`hukamnama-deadman.yml`. Setup and operations: `docs/process/runbooks/hukamnama-service.md`.
 
 `serve` refuses to start if the corpus fingerprint differs from the one recorded in the state
 file. Published ranges are pinned to the corpus they were resolved in.
@@ -73,9 +85,84 @@ file. Published ranges are pinned to the corpus they were resolved in.
 | `GET /v1/hukamnama/today` | `published` (range, opening verse from the corpus, hashes, citation, credit) or `pending` (with `expected_by`) |
 | `GET /v1/hukamnama/YYYY-MM-DD` | one day, within ±400 days; a future date is 404 |
 | `GET /v1/hukamnama?limit=N` | the latest published days, N in 1..30 |
-| `GET /health` | today's status, the last poll, today's alerts, `scripture_sha256` (`no-store`) |
+| `GET /v1/hukamnama/index` | every published day, newest first: date, Ang, `range_sha256`, `published_at` (no text) |
+| `GET /health` | today's status, the last poll, today's alerts, `scripture_sha256`, and `push` (sending on/off, device counts by mode, today's send states) (`no-store`) |
+| `PUT /v1/devices/<token>` | opt a device in: `{env, mode: asap\|scheduled, schedule?, scripture_sha256?, replaces?}`, at most 1 KB; `replaces` deletes the rotated-away token in the same transaction (the new token keeps its first-registration time and the days it already had). Answers `{"ok": true, "today": {amritsar_date, status: published\|pending\|held, delivery: sent\|due\|not_today, sent_at, reason: null\|registered_after_publish\|slot_passed}, "next_slot_at"}`, computed by the sender's own rules (`push.plan_for_device`); times are UTC `…Z` |
+| `DELETE /v1/devices/<token>` | opt out: the row is deleted (404 when it was already gone; the app treats that as done) |
 
-A day held by the gate is served as `pending`. There is no access log.
+A day held by the gate is served as `pending`. There is no access log. Device writes are rate
+limited per client address (in memory only, one minute) and new devices are capped per hour
+(`device_flood` alert). Nothing about a reader is stored beyond the token, its APNs environment,
+the mode, the UTC slot schedule and the corpus fingerprint.
+
+## Public snapshot
+
+`hukamnama/public.py` writes each published day once, as a file, so that public readers (the
+website and the public API) never query this process: a flood or an outage there cannot slow the
+poller or the push sender.
+
+```bash
+python3 -m hukamnama --db ../../db/sggs.sqlite --state /tmp/hk.sqlite serve --public-dir /tmp/hk-public
+python3 -m hukamnama --db ../../db/sggs.sqlite --state /tmp/hk.sqlite export-public --out /tmp/hk-public   # once
+```
+
+| File | Holds |
+|---|---|
+| `v1/hukamnama/<YYYY-MM-DD>.json` | every field of the read API's published record, plus `lines[]` (`id`, `ang`, `gurmukhi`, `translit`, `is_heading`, `is_rahao`, `author`), `ang_end`, `raag`, `author`, `url`, `attribution`, `terms_url` |
+| `v1/hukamnama/index.json` | `scripture_sha256`, `latest`, and `days[]` newest first |
+
+With `HUKAMNAMA_PUBLIC_BUCKET` set, the same files are also written to a Cloudflare R2 bucket
+(`hukamnama/r2.py`, the S3 API signed with Signature Version 4, stdlib only), which the edge Worker
+(`services/hukamnama-edge`) serves. It needs `HUKAMNAMA_R2_ENDPOINT` and its own bucket-scoped keys
+(`HUKAMNAMA_PUBLIC_ACCESS_KEY_ID`, `HUKAMNAMA_PUBLIC_SECRET_ACCESS_KEY`); half-configured, the
+service refuses to start. A failed write is logged and tried again after the next poll, and the
+first sync after a start writes every file, so a new or emptied bucket fills itself.
+
+- **Proven or not written.** A day's file is written only when its lines, read again from the
+  corpus, hash to the `range_sha256` it was published with, in the corpus it was published in.
+  Otherwise the day is skipped and logged (`export-public` exits 1).
+- **Kept in step.** The files are written in full at start and checked after every poll. A
+  correction (`approve`) rewrites the day; a `hold` deletes it. A pending or held day has no file.
+- **Author.** `author` is per line. The day-level `author` is `null` when the range mixes authors
+  (a Vaar's saloks and pauri).
+- **Layers.** `gurmukhi` is the verbatim corpus line and `translit` the corpus's rule-based
+  transliteration. With `HUKAMNAMA_MEANING=on` the English translation is added as a separate,
+  labelled layer (`lines[].en` and a top-level `translation` naming the translator). It is off by
+  default; switching it off removes it on the next sync. The Gurmukhi is identical either way.
+- **Frozen for the app.** `tests/fixtures/ios-read-keys.json` lists the keys the shipped iOS app
+  decodes; a test fails if a public record drops one or changes its type or timestamp shape.
+
+## Push
+
+Off unless `HUKAMNAMA_SEND=on`, which needs the APNs Auth Key (`HUKAMNAMA_APNS_KEY_FILE`,
+`HUKAMNAMA_APNS_KEY_ID`, `HUKAMNAMA_APNS_TEAM_ID`); without a usable key the service refuses to
+start. `push.py`:
+
+- **What is sent** is built only from the published decision, so every Gurmukhi character is the
+  corpus's. Its shape equals the app's `hukamnama.apns` fixture (`tests/fixtures/ios-hukamnama.apns`,
+  copied from gurbani-soul-ios; `test_payload_equals_the_apps_fixture`).
+- **When:** only the current Amritsar day is ever pushed (a day approved after its Amritsar
+  midnight is not sent), and each device gets at most one push per day. `asap` devices are queued
+  the moment the day is published, or when they switch to `asap` later that day (a device first
+  registered after the publish waits for tomorrow). `scheduled` devices at their own UTC slot on
+  the Amritsar day, from the schedule entry in force then (the first entry counts from the
+  beginning of time, so changing the time keeps today's slot); a slot that came before the
+  publish gets it at publish time when within 6 h.
+- **Durable:** each send is a row (`queued → inflight → sent | failed | suspect | gone`); a row
+  left inflight for 2 minutes is sent again after a restart, and `apns-collapse-id:
+  hukamnama-<date>` collapses repeats on the phone. `apns-expiration` is the next 05:00 IST.
+- **APNs responses:** 200 sent; 410 deletes only when Apple's timestamp is newer than the last
+  registration; `BadDeviceToken`/`DeviceTokenNotForTopic` retries the other environment once
+  (and corrects only the environment on success), else counts a suspect day and deletes after 3
+  separate days; 429, 5xx and network errors back off (5 attempts); 403 `ExpiredProviderToken`
+  rebuilds the provider token once (one new token however many workers were rejected); 413 or
+  any other 403 pauses the day for 20 minutes with an alert, leaving the rows queued to resume.
+  One provider token is minted per 40 minutes.
+- **Circuit breaker:** more than 5% 4xx (429 excluded) among the first 200 results (at least 20)
+  stops the day's run (`push_breaker`) and deletes nothing; `resend` clears it (audited).
+  Deletions happen only after a day's run finishes untripped.
+- Devices neither re-registered nor delivered to for 180 days are pruned (the app re-registers
+  when opened; a delivered push counts as alive).
 
 ## Owner tools
 
@@ -83,9 +170,12 @@ A day held by the gate is served as `pending`. There is no access log.
 python3 -m hukamnama approve 2026-11-09 --first-line 29237 --last-line 29247 --by <name> --reason "<why>"
 python3 -m hukamnama hold    2026-11-09 --by <name> --reason "<why>"
 python3 -m hukamnama show    2026-11-09
+python3 -m hukamnama resend  2026-11-09 --by <name> --reason "<why>"   # push the day again (a correction)
 ```
 
-Both write to the `audit` table. An automatic publish never replaces an owner decision.
+They write to the `audit` table. Approving a held day publishes it at that moment, so `asap`
+devices get it then (only while it is still that Amritsar day); `resend` re-queues a day already sent (the same collapse id replaces the
+first notification on the phone). An automatic publish never replaces an owner decision.
 
 ## Polling and alerts
 
@@ -94,19 +184,18 @@ Both write to the `audit` table. An automatic publish never replaces an owner de
 - Alerts, one per day and kind, are listed on `/health`:
   - `late`: nothing resolved by 07:00 IST
   - `not_published`: nothing by 14:00 IST
-  - `held_no_match`: a settled page does not match the corpus
+  - `held_no_match`: a settled page does not match the corpus. When one run of corpus lines with
+    the page's word count differs in at most 3 words, the alert names it and the words, e.g.
+    `nearest run lines 29433-29442 differs in 1 word: word 79/81 ਨਾਨਕੁ (source) vs ਨਾਨਕ (corpus)`.
+    That is a diagnosis for the owner, never a decision: the day stays held.
   - `held_veto`
   - `hs_layout_changed`
   - `hs_parse_failing`: 5 unparseable polls in a row
   - `changed_after_publish`
   - `veto_after_publish`
 
-## Not in this PR (see the approved plan)
+## Not yet
 
-- Device registration and the APNs sender.
-- The Render service definition. It needs an always-on instance and a persistent disk, which is a
-  cost decision for the owner.
-- Litestream backup and the external dead-man check.
-- A 14-day staging soak with the fetch archive, before any push is enabled.
-- Permission letters to SGPC and to the Khalis Foundation (BaniDB). BaniDB is not used: its terms
-  allow personal, non-commercial use only.
+- The R2 copy of the fetch archive.
+- BaniDB is not used: its terms allow personal, non-commercial use only. (SGPC's own pages are the
+  source; the owner confirmed on 2026-11-11 that SGPC does not object to sharing the Hukamnama.)

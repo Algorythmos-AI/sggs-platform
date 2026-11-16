@@ -17,8 +17,9 @@ export interface Props {
   description: string;
   path?: string;      // the page's own localized path, e.g. "/en/features" — for canonical + og:url
   ogImage?: string;   // absolute or root-relative; defaults to the path's OG card
+  noindex?: boolean;  // a page built before its feature is launched: kept out of search and the sitemap
 }
-const { title, description, path = "/", ogImage } = Astro.props;
+const { title, description, path = "/", ogImage, noindex = false } = Astro.props;
 const lang = localeOf(Astro.url.pathname);
 const locale = LOCALES[lang];
 const { t } = useT(lang);
@@ -29,6 +30,7 @@ const { t } = useT(lang);
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>{title}</title>
+  {noindex && <meta name="robots" content="noindex, follow" />}
   <Seo title={title} description={description} path={path} ogImage={ogImage} themeColor="light" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <!-- Resolve theme before first paint. The marketing site is LIGHT-FIRST: with no stored choice

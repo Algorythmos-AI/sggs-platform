@@ -38,7 +38,34 @@ CREATE TABLE IF NOT EXISTS audit (
   amritsar_date TEXT, detail TEXT
 );
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
+-- Push: one row per opted-in device. Only what sending needs: no account, zone name or IP.
+CREATE TABLE IF NOT EXISTS devices (
+  token TEXT PRIMARY KEY,          -- APNs device token (lowercase hex)
+  env TEXT NOT NULL CHECK (env IN ('production','development')),
+  mode TEXT NOT NULL CHECK (mode IN ('asap','scheduled')),
+  schedule TEXT,                   -- JSON [{from_utc, slot_utc_min}] (scheduled only)
+  scripture_sha256 TEXT,
+  created_at TEXT NOT NULL,        -- first registration (a new device never gets an old push)
+  registered_at TEXT NOT NULL,     -- last PUT or delivered push (a 410 older than this does not
+                                   -- delete; 180 days without either prunes the row)
+  suspect_days TEXT                -- JSON list of distinct Amritsar dates with BadDeviceToken
+);
+CREATE TABLE IF NOT EXISTS sends (
+  token TEXT NOT NULL,
+  amritsar_date TEXT NOT NULL,
+  state TEXT NOT NULL CHECK (state IN ('queued','inflight','sent','failed','suspect','gone')),
+  attempts INTEGER NOT NULL DEFAULT 0,
+  last_status TEXT,
+  next_at TEXT NOT NULL,           -- not before (backoff)
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (token, amritsar_date)
+);
+CREATE INDEX IF NOT EXISTS sends_due ON sends(state, next_at);
 """
+
+
+CORRECTION = "correction:"          # meta key prefix: correction:<date> -> when, and the hashes before
+PAUSED = "paused"                   # meta key: present while the owner has paused serving and sending
 
 
 def _iso(t: datetime) -> str:
@@ -73,6 +100,12 @@ class Store:
                                       "ORDER BY amritsar_date DESC LIMIT ?", (limit,))]
         return [d for d in (self.decision(date.fromisoformat(x)) for x in days) if d]
 
+    def published(self) -> list[dict]:
+        """Every published day, oldest first (the public snapshot is built from this)."""
+        days = [r[0] for r in self._x("SELECT amritsar_date FROM hukamnamas WHERE status='published' "
+                                      "ORDER BY amritsar_date")]
+        return [d for d in (self.decision(date.fromisoformat(x)) for x in days) if d]
+
     def publish(self, day: date, res: Resolution, fingerprint: str, now: datetime, by: str, *,
                 reason: str | None = None, overwrite: bool = False) -> bool:
         """Record a published Hukamnama. Returns False when the day is already decided and
@@ -98,6 +131,67 @@ class Store:
                 self._con.execute("INSERT INTO audit (at, actor, action, amritsar_date, detail) VALUES (?,?,?,?,?)",
                                   (_iso(now), by, "hold", day.isoformat(), reason))
         return changed
+
+    def correct(self, day: date, res: Resolution, fingerprint: str, now: datetime, by: str, reason: str) -> bool:
+        """Replace a published day's range with the right one. Returns False when the day is not
+        published (use ``approve`` for a held or undecided day).
+
+        The day keeps the time it was first published; when it was corrected, and the hash it had
+        before, are kept beside it (``correction``) and written to the audit table. A second
+        correction keeps the first record's original hash, so the trail always starts at what
+        readers first saw."""
+        with self._lock:
+            row = self._con.execute("SELECT resolution FROM hukamnamas WHERE amritsar_date = ? AND status = 'published'",
+                                    (day.isoformat(),)).fetchone()
+            if not row:
+                return False
+            before = json.loads(row[0])["range_sha256"]
+            key = CORRECTION + day.isoformat()
+            old = self._con.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+            first = json.loads(old[0])["first_range_sha256"] if old else before
+            self._con.execute("UPDATE hukamnamas SET resolution = ?, scripture_sha256 = ?, reason = ? WHERE amritsar_date = ?",
+                              (json.dumps(asdict(res), ensure_ascii=False), fingerprint, reason, day.isoformat()))
+            self._con.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
+                              (key, json.dumps({"at": _iso(now), "first_range_sha256": first,
+                                                "previous_range_sha256": before})))
+            self._con.execute("INSERT INTO audit (at, actor, action, amritsar_date, detail) VALUES (?,?,?,?,?)",
+                              (_iso(now), by, "correct", day.isoformat(), f"{before[:12]} -> {res.key()}: {reason}"))
+        return True
+
+    def repin(self, resolutions: dict[str, Resolution], fingerprint: str, now: datetime, was: str) -> None:
+        """Move published days to a new corpus, all at once. The caller has proved that each day's
+        lines are byte-identical there; only then may the fingerprint they are served under change."""
+        with self._lock:
+            for day, res in resolutions.items():
+                self._con.execute("UPDATE hukamnamas SET resolution = ?, scripture_sha256 = ? "
+                                  "WHERE amritsar_date = ? AND status = 'published'",
+                                  (json.dumps(asdict(res), ensure_ascii=False), fingerprint, day))
+            self._con.execute("INSERT OR REPLACE INTO meta (key, value) VALUES ('scripture_sha256', ?)", (fingerprint,))
+            self._con.execute("INSERT INTO audit (at, actor, action, amritsar_date, detail) VALUES (?,?,?,?,?)",
+                              (_iso(now), "service", "repin", None,
+                               f"{was[:12]} -> {fingerprint[:12]}: {len(resolutions)} published day(s) proved unchanged"))
+
+    def correction(self, day: date) -> dict | None:
+        """When a published day was corrected and what it replaced, or None."""
+        raw = self.get_meta(CORRECTION + day.isoformat())
+        return json.loads(raw) if raw else None
+
+    # -- the pause switch ----------------------------------------------------------------------
+    def pause(self, now: datetime, by: str, reason: str) -> None:
+        """Stop serving and sending, without a deploy. The poller keeps deciding days, so ``resume``
+        restores everything at once."""
+        self.set_meta(PAUSED, json.dumps({"at": _iso(now), "by": by, "reason": reason}))
+        self.audit(now, by, "pause", None, reason)
+
+    def resume(self, now: datetime, by: str, reason: str) -> bool:
+        was = self.del_meta(PAUSED)
+        if was:
+            self.audit(now, by, "resume", None, reason)
+        return was
+
+    def paused(self) -> dict | None:
+        raw = self.get_meta(PAUSED)
+        return json.loads(raw) if raw else None
 
     # -- observations --------------------------------------------------------------------------
     def observe(self, day: date, source: str, now: datetime, status: str, *, cand_key: str | None = None,
@@ -129,9 +223,209 @@ class Store:
         return [{"at": a, "kind": k, "detail": d} for a, k, d in
                 self._x("SELECT at, kind, detail FROM alerts WHERE amritsar_date = ? ORDER BY id", (day.isoformat(),))]
 
+    def audit(self, now: datetime, actor: str, action: str, day: date | None, detail: str) -> None:
+        self._x("INSERT INTO audit (at, actor, action, amritsar_date, detail) VALUES (?,?,?,?,?)",
+                (_iso(now), actor, action, day.isoformat() if day else None, detail))
+
     def set_meta(self, key: str, value: str) -> None:
         self._x("INSERT OR REPLACE INTO meta VALUES (?, ?)", (key, value))
 
     def get_meta(self, key: str) -> str | None:
         rows = self._x("SELECT value FROM meta WHERE key = ?", (key,))
         return rows[0][0] if rows else None
+
+    def meta_keys(self, prefix: str) -> list[str]:
+        return [r[0] for r in self._x("SELECT key FROM meta WHERE substr(key, 1, ?) = ? ORDER BY key",
+                                      (len(prefix), prefix))]
+
+    def del_meta(self, key: str) -> bool:
+        with self._lock:
+            return self._con.execute("DELETE FROM meta WHERE key = ?", (key,)).rowcount > 0
+
+    # -- devices (push) ------------------------------------------------------------------------
+    def put_device(self, token: str, env: str, mode: str, schedule: list | None, scripture: str | None,
+                   now: datetime, replaces: str | None = None) -> bool:
+        """Insert or update one device; ``replaces`` (the token the OS rotated away) is deleted in
+        the same transaction. Returns True when the row is new.
+
+        A rotated token is the same phone: it keeps the old row's ``created_at`` (so it is not
+        treated as a device registered after today's publish) and its finished sends (so a day
+        it already had is not pushed twice)."""
+        t = _iso(now)
+        sched = json.dumps(schedule, separators=(",", ":")) if schedule is not None else None
+        with self._lock:
+            con = self._con
+            con.execute("BEGIN IMMEDIATE")
+            try:
+                created = t
+                if replaces and replaces != token:
+                    old = con.execute("SELECT created_at FROM devices WHERE token = ?", (replaces,)).fetchone()
+                    if old is not None:
+                        created = min(old[0], t)
+                    con.execute("DELETE FROM devices WHERE token = ?", (replaces,))
+                    con.execute("DELETE FROM sends WHERE token = ? AND state IN ('queued','inflight')", (replaces,))
+                    con.execute("UPDATE OR IGNORE sends SET token = ? WHERE token = ?", (token, replaces))
+                new = con.execute("SELECT 1 FROM devices WHERE token = ?", (token,)).fetchone() is None
+                con.execute(
+                    "INSERT INTO devices (token, env, mode, schedule, scripture_sha256, created_at, registered_at) "
+                    "VALUES (?,?,?,?,?,?,?) ON CONFLICT(token) DO UPDATE SET env=excluded.env, mode=excluded.mode, "
+                    "schedule=excluded.schedule, scripture_sha256=excluded.scripture_sha256, "
+                    "registered_at=excluded.registered_at", (token, env, mode, sched, scripture, created, t))
+                con.execute("COMMIT")
+            except Exception:
+                con.execute("ROLLBACK")
+                raise
+        return new
+
+    def set_env(self, token: str, env: str, was: str) -> bool:
+        """Correct one device's APNs environment, only if it is still ``was``: a targeted write, so
+        a PUT that landed meanwhile (mode, schedule) is never undone by the sender's older copy."""
+        return self._x_count("UPDATE devices SET env = ? WHERE token = ? AND env = ?", (env, token, was)) > 0
+
+    def mark_seen(self, token: str, now: datetime) -> None:
+        """A delivered push proves the token is alive: it counts as a registration for pruning
+        (the app re-registers only when opened, so a reader who only reads notifications would
+        otherwise be dropped)."""
+        self._x("UPDATE devices SET registered_at = max(registered_at, ?) WHERE token = ?", (_iso(now), token))
+
+    def _x_count(self, sql: str, args: tuple = ()) -> int:
+        with self._lock:
+            return self._con.execute(sql, args).rowcount
+
+    def delete_device(self, token: str) -> bool:
+        with self._lock:
+            n = self._con.execute("DELETE FROM devices WHERE token = ?", (token,)).rowcount
+            self._con.execute("DELETE FROM sends WHERE token = ? AND state IN ('queued','inflight')", (token,))
+        return n > 0
+
+    def device(self, token: str) -> dict | None:
+        rows = self._x("SELECT token, env, mode, schedule, scripture_sha256, created_at, registered_at, suspect_days "
+                       "FROM devices WHERE token = ?", (token,))
+        return _device(rows[0]) if rows else None
+
+    def devices(self, mode: str | None = None) -> list[dict]:
+        sql = "SELECT token, env, mode, schedule, scripture_sha256, created_at, registered_at, suspect_days FROM devices"
+        rows = self._x(sql + (" WHERE mode = ?" if mode else "") + " ORDER BY token", (mode,) if mode else ())
+        return [_device(r) for r in rows]
+
+    def device_count(self) -> dict:
+        return {m: n for m, n in self._x("SELECT mode, count(*) FROM devices GROUP BY mode")}
+
+    def mark_suspect_day(self, token: str, day: date) -> int:
+        """Record a BadDeviceToken day; returns how many distinct days the token has failed on."""
+        with self._lock:
+            row = self._con.execute("SELECT suspect_days FROM devices WHERE token = ?", (token,)).fetchone()
+            if row is None:
+                return 0
+            days = sorted(set(json.loads(row[0] or "[]")) | {day.isoformat()})
+            self._con.execute("UPDATE devices SET suspect_days = ? WHERE token = ?", (json.dumps(days), token))
+        return len(days)
+
+    def prune_devices(self, older_than: datetime) -> int:
+        """Drop devices neither re-registered nor delivered to since ``older_than`` (the app re-PUTs
+        when opened; a delivered push counts too, see ``mark_seen``)."""
+        with self._lock:
+            return self._con.execute("DELETE FROM devices WHERE registered_at < ?", (_iso(older_than),)).rowcount
+
+    # -- sends (push) --------------------------------------------------------------------------
+    def enqueue(self, day: date, tokens: list[str], now: datetime) -> int:
+        """Queue ``day`` for each token in ONE transaction; a token already queued or sent for the
+        day is left alone (at-least-once, never twice by design)."""
+        t = _iso(now)
+        with self._lock:
+            con = self._con
+            con.execute("BEGIN IMMEDIATE")
+            try:
+                n = 0
+                for tok in tokens:
+                    n += con.execute("INSERT OR IGNORE INTO sends (token, amritsar_date, state, next_at, updated_at) "
+                                     "VALUES (?,?, 'queued', ?, ?)", (tok, day.isoformat(), t, t)).rowcount
+                con.execute("COMMIT")
+            except Exception:
+                con.execute("ROLLBACK")
+                raise
+        return n
+
+    def requeue_day(self, day: date, now: datetime, by: str = "owner") -> int:
+        """Owner ``resend``: queue the day again for every device that already had it. A tripped
+        circuit breaker for the day is cleared (and audited): otherwise every re-queued row would
+        be skipped again."""
+        t, d = _iso(now), day.isoformat()
+        with self._lock:
+            con = self._con
+            con.execute("BEGIN IMMEDIATE")
+            try:
+                n = con.execute("UPDATE sends SET state='queued', attempts=0, next_at=?, updated_at=? "
+                                "WHERE amritsar_date=? AND state IN ('sent','failed')", (t, t, d)).rowcount
+                if con.execute("DELETE FROM meta WHERE key = ?", (f"push_breaker:{d}",)).rowcount:
+                    con.execute("INSERT INTO audit (at, actor, action, amritsar_date, detail) VALUES (?,?,?,?,?)",
+                                (t, by, "breaker_cleared", d, "cleared by resend"))
+                con.execute("COMMIT")
+            except Exception:
+                con.execute("ROLLBACK")
+                raise
+        return n
+
+    def claim_due(self, now: datetime, limit: int, stale: datetime) -> list[dict]:
+        """Mark up to ``limit`` due rows inflight and return them. A row left inflight before
+        ``stale`` (the process died mid-request) is due again."""
+        t = _iso(now)
+        with self._lock:
+            con = self._con
+            con.execute("BEGIN IMMEDIATE")
+            try:
+                rows = con.execute(
+                    "SELECT token, amritsar_date, attempts FROM sends WHERE (state='queued' AND next_at <= ?) "
+                    "OR (state='inflight' AND updated_at < ?) ORDER BY next_at, token LIMIT ?",
+                    (t, _iso(stale), limit)).fetchall()
+                for tok, d, _ in rows:
+                    con.execute("UPDATE sends SET state='inflight', attempts=attempts+1, updated_at=? "
+                                "WHERE token=? AND amritsar_date=?", (t, tok, d))
+                con.execute("COMMIT")
+            except Exception:
+                con.execute("ROLLBACK")
+                raise
+        return [{"token": tok, "amritsar_date": d, "attempts": a + 1} for tok, d, a in rows]
+
+    def finish_send(self, token: str, day: str, state: str, status: str, now: datetime,
+                    next_at: datetime | None = None) -> None:
+        t = _iso(now)
+        self._x("UPDATE sends SET state=?, last_status=?, next_at=?, updated_at=? WHERE token=? AND amritsar_date=?",
+                (state, status, _iso(next_at) if next_at else t, t, token, day))
+
+    def defer_send(self, token: str, day: str, status: str, now: datetime, next_at: datetime) -> None:
+        """Put a claimed row back in the queue untried (the run is paused): the claim's attempt is
+        given back, so a pause never uses up a device's retries."""
+        t = _iso(now)
+        self._x("UPDATE sends SET state='queued', attempts=max(0, attempts-1), last_status=?, next_at=?, "
+                "updated_at=? WHERE token=? AND amritsar_date=?", (status, _iso(next_at), t, token, day))
+
+    def send(self, token: str, day: date) -> dict | None:
+        rows = self._x("SELECT state, last_status, updated_at FROM sends WHERE token=? AND amritsar_date=?",
+                       (token, day.isoformat()))
+        if not rows:
+            return None
+        st, last, at = rows[0]
+        return {"state": st, "last_status": last, "updated_at": datetime.fromisoformat(at)}
+
+    def has_send(self, token: str, day: date) -> bool:
+        return bool(self._x("SELECT 1 FROM sends WHERE token=? AND amritsar_date=?", (token, day.isoformat())))
+
+    def send_stats(self, day: date) -> dict:
+        return {s: n for s, n in self._x("SELECT state, count(*) FROM sends WHERE amritsar_date=? GROUP BY state",
+                                         (day.isoformat(),))}
+
+    def send_states(self, day: date) -> list[tuple[str, str, str | None]]:
+        return self._x("SELECT token, state, last_status FROM sends WHERE amritsar_date=? ORDER BY updated_at",
+                       (day.isoformat(),))
+
+    def latest_published(self) -> dict | None:
+        rows = self._x("SELECT amritsar_date FROM hukamnamas WHERE status='published' ORDER BY amritsar_date DESC LIMIT 1")
+        return self.decision(date.fromisoformat(rows[0][0])) if rows else None
+
+
+def _device(r: tuple) -> dict:
+    tok, env, mode, sched, fp, created, registered, suspect = r
+    return {"token": tok, "env": env, "mode": mode, "schedule": json.loads(sched) if sched else None,
+            "scripture_sha256": fp, "created_at": datetime.fromisoformat(created),
+            "registered_at": datetime.fromisoformat(registered), "suspect_days": json.loads(suspect or "[]")}

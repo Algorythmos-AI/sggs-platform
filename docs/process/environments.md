@@ -14,6 +14,7 @@ verified:
 | Branch | working tree | `integration` | `main` |
 | Web | `serve.py` on :7777 | `sggs-staging.vercel.app` (SSO-protected; open logged in) | **`gurbanisoul.com`** (canonical) |
 | API | same process | Vercel functions in the web project, one per context + `all` (ADR-0011) | Vercel functions in the web project: every `/api` path is answered by `all` (v1.3.10, and 1.4.0 keeps it so); each context moves to its own function, as on staging, in a later release after the app is live (Render `sggs-knowledge-base.onrender.com` kept as rollback) |
+| Hukamnama service | `python3 -m hukamnama … serve` (`services/hukamnama/README.md`) | Render `sggs-hukamnama-staging`, `api-staging.gurbanisoul.com`, deployed by `hukamnama-deploy.yml` from `integration` ([runbook](runbooks/hukamnama-service.md)) | none yet; the public API is planned at `api.gurbanisoul.com` through the edge Worker ([the Hukamnama service](../architecture/hukamnama.md)) |
 | iOS | simulator | TestFlight **Internal** | TestFlight **External** / App Store |
 | DB profile | full | full | full (public profile until the English licence is recorded) |
 | Who deploys | you | `deploy-staging.yml` on push to integration | `deploy-production.yml` on push to main |

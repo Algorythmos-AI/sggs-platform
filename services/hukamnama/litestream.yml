@@ -1,0 +1,29 @@
+# Litestream: continuous off-box backup of the Hukamnama decision/audit state to Cloudflare R2.
+#
+# Only the state DB is replicated. The scripture DB is read-only and comes from the dataset pin;
+# the fetch archive is a separate copy (not here yet).
+#
+# Values come from the service's environment (Render dashboard), never from this file:
+#   LITESTREAM_ACCESS_KEY_ID / LITESTREAM_SECRET_ACCESS_KEY  R2 API token, Object Read & Write,
+#                                                            scoped to the one bucket
+#   HUKAMNAMA_R2_ENDPOINT   https://<account id>.r2.cloudflarestorage.com
+#   HUKAMNAMA_R2_BUCKET     sggs-hukamnama-staging (or the production bucket)
+#   HUKAMNAMA_STATE         set by the Dockerfile
+#
+# entrypoint.sh runs Litestream only when the credentials are present, so local runs, tests and
+# a service without R2 keep working as before.
+exec: python -m hukamnama serve
+
+dbs:
+  - path: ${HUKAMNAMA_STATE}
+    # A fresh disk (lost or replaced) restores the last replicated state before the service
+    # starts. A disk that still has the file is never overwritten.
+    restore-if-db-not-exists: true
+    replica:
+      type: s3
+      bucket: ${HUKAMNAMA_R2_BUCKET}
+      path: hukamnama-state
+      endpoint: ${HUKAMNAMA_R2_ENDPOINT}
+      region: auto
+      force-path-style: true
+      sync-interval: 10s

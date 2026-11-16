@@ -30,8 +30,16 @@ export const PLATFORM_REPO = 'Algorythmos-AI/sggs-platform';
 export const PLATFORM_REF = 'integration';
 export const SOURCES_DIR = 'docs-site/.sources';
 export const NOT_PUBLISHED = ['docs/reports/archive/', 'docs/design/'];
-// pages the site generates rather than reads from docs/ (starlight-openapi); tools/docs_check.py has the same map
-export const VIRTUAL_PAGES = { 'docs/api/reference': '/api/reference/' };
+// The API references the site generates (starlight-openapi), each from a spec that a generator
+// writes from real responses: where it is mounted, its spec and the file to edit instead of the page.
+export const API_REFERENCES = [
+  { base: 'api/reference', spec: 'contract/openapi.json', generator: 'tools/gen_openapi.py', label: 'Reference' },
+  { base: 'api/hukamnama/reference', spec: 'contract/hukamnama.openapi.json', generator: 'tools/gen_hukamnama_openapi.py', label: 'Hukamnama reference' },
+];
+/** The generated reference a page id belongs to, or null. */
+export const referenceOf = (id) => API_REFERENCES.find((r) => id === r.base || String(id).startsWith(`${r.base}/`)) ?? null;
+// pages the site generates rather than reads from docs/; tools/docs_check.py has the same map
+export const VIRTUAL_PAGES = Object.fromEntries(API_REFERENCES.map((r) => [`docs/${r.base}`, `/${r.base}/`]));
 
 /** The pinned sibling sources: { <repo name>: { repository, commit, alias, ... } }. */
 export function loadSources() {

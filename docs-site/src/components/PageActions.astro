@@ -10,11 +10,13 @@
 import { exportedIds, SITE_ORIGIN } from '../../plugins/export-pages.mjs';
 import { assistantLinks } from '../../plugins/assistant-links.mjs';
 import { PDFS } from '../../plugins/features.mjs';
+import { referenceOf } from '../../plugins/paths.mjs';
 
 const route = Astro.locals.starlightRoute;
 const id = route.id || 'index';
 const hasMarkdown = exportedIds().has(id);
-const isReference = id === 'api/reference' || id.startsWith('api/reference/');
+const reference = referenceOf(id);
+const isReference = reference !== null;
 const show = id !== '404' && (hasMarkdown || isReference);
 const pageUrl = SITE_ORIGIN + (id === 'index' ? '/' : `/${id}/`);
 const markdown = hasMarkdown ? `/md/${id}.md` : null;
@@ -58,7 +60,7 @@ const primary = markdown ? { action: 'copy-md', label: 'Copy page' } : { action:
               </a></li>
             )}
             {isReference && (
-              <li><a class="pa__item" href="https://github.com/Algorythmos-AI/sggs-platform/blob/integration/contract/openapi.json" target="_blank" rel="noopener noreferrer">
+              <li><a class="pa__item" href={`https://github.com/Algorythmos-AI/sggs-platform/blob/integration/${reference!.spec}`} target="_blank" rel="noopener noreferrer">
                 <svg class="pa__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M9 2.5H4.5A1.5 1.5 0 0 0 3 4v8a1.5 1.5 0 0 0 1.5 1.5h7A1.5 1.5 0 0 0 13 12V6.5z" /><path d="M9 2.5v4h4" /></svg>
                 <span class="pa__label">Open OpenAPI JSON</span><svg class="pa__icon pa__out" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6 4h6v6M12 4 4.5 11.5" /></svg><span class="sr-only"> (opens in a new tab)</span>
               </a></li>

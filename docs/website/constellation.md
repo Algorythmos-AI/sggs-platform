@@ -1,6 +1,7 @@
 ---
 title: "The Constellation"
 description: "How the Constellation (web and iOS) shows which themes a verse also carries: the additive caption, two rankings, encodings, lenses, the Sky and its caveats."
+covers: "frontend/src/pages/constellation.astro, frontend/src/scripts/constellation.ts"
 sidebar:
   order: 3
 ---

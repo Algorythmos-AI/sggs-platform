@@ -4,8 +4,8 @@ description: "How the SGGS Knowledge Base is built: three repositories, one read
 sidebar:
   order: 0
 verified:
-  commit: 49c71652
-  date: "2026-11-05"
+  commit: 14c89ad9
+  date: "2026-11-12"
 ---
 # Architecture
 
@@ -37,6 +37,7 @@ In three sentences:
 - [The insights context](insights-context.md) — theme networks, author and raag emphasis, Vaars and related verses: every number precomputed, descriptive only.
 - [The knowledge context](knowledge-context.md) — raag-timing claims credited to their sources, disagreement kept, and forms taken only from headings.
 - [The website](website.md) — a static Astro site with no framework runtime, two layouts, and the API on the same origin.
+- [The Hukamnama service](hukamnama.md) — the daily Hukamnama · Sri Harmandir Sahib: SGPC used only to locate, an exact-match resolver, the owner's hold and approve, push, and what runs today.
 - [Security and privacy](security-and-privacy.md) — the defences at each layer, what is collected about readers, and the known gaps.
 - [Quality and observability](quality-and-observability.md) — each quality, how it is measured and gated, how production is watched, and what is not yet wired.
 - [Microservices roadmap](microservices-roadmap.md) — how the monolith became modules, then functions, and what is left.

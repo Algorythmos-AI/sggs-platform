@@ -115,7 +115,7 @@ on a symbol it cannot find. A page without `covers:` covers the files it cites.
 On every pull request the `docs-coupling` job runs
 `python3 tools/docs_coupling.py BASE..HEAD`. It lists the pages whose covered code the change
 touches while neither the page nor its `verified` stamp changes, and posts the list as one comment
-on the pull request (updated on each push). Tests, lockfiles, built output, `CHANGELOG.md` and the
+on the pull request, updated on each push and each edit of the description. Tests, lockfiles, built output, `CHANGELOG.md` and the
 generators of generated pages are not counted.
 
 For each listed page, re-read it against the code and either update it or move its stamp. When
@@ -129,6 +129,16 @@ The reason must be at least ten characters. The check reports only for now; the 
 it is turned on ([Docs site](../process/runbooks/docs-site.md#the-docs-impact-check)).
 [Docs health](../reference/docs-health.md) shows the same numbers across the whole wiki: fresh
 stamps, coupling debt over 30 days, and how often code changes touch `docs/`.
+
+### New code needs a page
+
+The check can only name pages that cover the code, so new code that no page covers passes it
+silently. `make docs-check` therefore fails on a new **code area** that no page covers: a directory
+or file directly under `services/`, `webapp/` or `frontend/src/pages/`, or a workflow in
+`.github/workflows/` (the patterns are in `tools/docs_areas.json`). Add the new path to the
+`covers:` of the page that describes it, or link or excerpt one of its files there. When it never
+needs a page (built output, tests), list it under `exempt` in `tools/docs_areas.json` with the
+reason. `python3 tools/docs_check.py --areas` lists the areas still waiting for a page.
 
 ## Sibling repositories
 

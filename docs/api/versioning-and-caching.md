@@ -4,8 +4,8 @@ description: "The two API surfaces and their errors, request ids, which response
 sidebar:
   order: 3
 verified:
-  commit: 49c71652
-  date: "2026-11-05"
+  commit: 14c89ad9
+  date: "2026-11-12"
 ---
 # Versioning and caching
 
@@ -67,7 +67,7 @@ no cached body outlives the database it came from.
 | Header | Value | Why |
 |---|---|---|
 | `X-Content-Type-Options` | `nosniff` | the body is what the type says |
-| `X-Frame-Options` | `DENY` | the API is never framed |
+| `X-Frame-Options` | `DENY` | the API is never framed (the Hukamnama embed, an HTML page outside `/api`, alone omits it) |
 | `Referrer-Policy` | `no-referrer` | a request never carries where it came from |
 | `Strict-Transport-Security` | `max-age=31536000` | honoured on the hosted API |
 | `X-Request-Id` | the request id | one id from the edge to the log |

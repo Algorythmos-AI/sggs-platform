@@ -1,0 +1,453 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGPC</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- Bootstrap & FontAwesome -->
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" type="0caff1128323fd9e0b06236b-text/javascript"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <style>
+     img:hover{
+      transform: scale(1.1);
+      transition: all 0.3s ease-in-out;
+    }
+    /* 🌟 General Styles */
+    body {
+      font-family: "Arial", sans-serif;
+      
+      padding-top: 0px;
+      /* Adjusted to prevent overlap with navbar */
+    }
+
+    /* 🟣 Navbar Styling */
+    .navbar {
+      background: linear-gradient(135deg, rgba(255, 140, 0, 0.8), #000000, #00008b);
+      font-size: 18px;
+      font-weight: bold;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1050;
+      padding: 12px 0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Ensure full width */
+    .navbar .container {
+      max-width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* 🔗 Navbar Links */
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      padding: 12px 20px;
+      transition: color 0.3s ease-in-out;
+    }
+
+    .navbar a:hover,
+    .navbar-nav .nav-link.active {
+      color: #ffcc00;
+    }
+
+    /* Enhanced active link styling */
+    .navbar-nav .nav-link.active {
+      color: #ffcc00 ;
+       /* Slight background highlight */
+      border-radius: 5px; /* Rounded corners */
+    }
+
+    /* Add margin between navbar items */
+    .navbar-nav .nav-item {
+      margin: 0 15px;
+      /* Adjust as needed */
+    }
+
+    /* Ensure links are properly spaced */
+    .navbar-nav .nav-link {
+      padding: 12px 20px;
+      /* Adds even spacing around links */
+    }
+
+    /* 🎭 Navbar Toggler */
+    .navbar-toggler {
+      border: none;
+      outline: none;
+    }
+
+    /* 📱 Responsive Adjustments */
+    @media (max-width: 991px) {
+      .navbar-nav {
+        text-align: center;
+      }
+
+      .navbar-nav .nav-link {
+        display: block;
+        padding: 12px;
+      }
+    }
+
+    /* 🏠 Home Icon */
+    .home-icon {
+      font-size: 22px;
+      
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      padding: 8px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .home-icon:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* 📜 Footer Styling */
+    .footer {
+      background: linear-gradient(135deg, black, #001f3f, rgb(90, 72, 2), #00008b);
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      text-align: center;
+      padding: 15px;
+      margin-top: 40px;
+    }
+  </style>
+
+  <script type="0caff1128323fd9e0b06236b-text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      let navbar = document.getElementById("navbarNavDropdown");
+      let toggler = document.querySelector(".navbar-toggler");
+
+      // Toggle navbar on toggler button click
+      toggler.addEventListener("click", function () {
+        let bsCollapse = new bootstrap.Collapse(navbar, {
+          toggle: true // Ensure it toggles instead of just hiding
+        });
+      });
+
+      // Close navbar when clicking outside (only when open)
+      document.addEventListener("click", function (event) {
+        if (!navbar.contains(event.target) && !toggler.contains(event.target)) {
+          let bsCollapse = new bootstrap.Collapse(navbar, {
+            toggle: false
+          });
+          bsCollapse.hide();
+        }
+      });
+
+      // Close navbar when clicking on any menu item
+      document.querySelectorAll(".nav-link").forEach(item => {
+        item.addEventListener("click", function () {
+          let bsCollapse = new bootstrap.Collapse(navbar, {
+            toggle: false
+          });
+          bsCollapse.hide();
+        });
+      });
+    });
+
+    function redirectToSGPC(event) {
+      event.preventDefault(); // Prevent immediate navigation
+      let userConfirmed = confirm("You will be redirected to SGPC.net. Do you want to continue?");
+      if (userConfirmed) {
+        window.location.href = "https://sgpc.net/";
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; redirectToSGPC(event)" data-cf-modified-0caff1128323fd9e0b06236b-="">
+        <img src="https://hs.sgpc.net/logo-sgpc.png" style="width: auto;height: 50px" alt="SGPC Logo" class="nav-logo">
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-center" id="navbarNavDropdown">
+        <ul class="navbar-nav text-center">
+          <li class="nav-item">
+            <a class="nav-link active" href="index.php">ਹੁਕਮਨਾਮਾ ਸਾਹਿਬ</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " href="hspdf.php">ਹੁਕਮਨਾਮਾ ਸਾਹਿਬ (PDF)</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " href="archiveView.php">ਹੁਕਮਨਾਮਾ ARCHIVES</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " href="sangrand.php">ਸੰਗਰਾਂਦ ਹੁਕਮਨਾਮਾ</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " href="apps.php">SGPC Apps</a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="0caff1128323fd9e0b06236b-|49" defer></script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a58378764eeae7c8',t:'MTc5NDI5NzA3MQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a58378764eeae7c8',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+</html>
+<link rel="stylesheet" type="text/css" href="includes/style.css?v=1792212975" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400..800&display=swap" />
+
+<div class="container sangrandBackground" id="details">
+    <div class="text-center">
+        <h2 class="hukamnama-title">ਮੁੱਖਵਾਕ</h2>
+        <h2 class="hukamnama-title">ਸੱਚਖੰਡ ਸ੍ਰੀ ਹਰਿਮੰਦਰ ਸਾਹਿਬ, ਸ੍ਰੀ ਅੰਮ੍ਰਿਤਸਰ</h2>
+
+    </div>
+
+    
+    
+        <!-- ✅ Date and Time -->
+        <div class="text-center">
+            <p class="fs-5 customDate"><strong>
+                10-11-2026  05:30 AM            </strong></p>
+        </div>
+
+        <!-- ✅ Audio Section -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6 d-flex justify-content-center">
+                <div class="audio-card text-center w-100 px-2">
+                    <label class="audio-label">🎵 Hukamnama Audio</label>
+                    <audio class="audio-player w-100" src="https://hs.sgpc.net/hukamnamaaudio/SGPCNET101126.mp3"
+                        controls></audio>
+                </div>
+            </div>
+            <div class="col-md-6 d-flex justify-content-center">
+                <div class="audio-card text-center w-100 px-2">
+                    <label class="audio-label">🎵 Katha Audio</label>
+                    <audio class="audio-player w-100" src="https://hs.sgpc.net/kathaaudio/katha101126.mp3"
+                        controls></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ Gurmukhi -->
+        <div class="hukamnama-card mt-4">
+            <h4 class="hukamnama-title">ਧਨਾਸਰੀ ਮਹਲਾ ੫ ॥</h4>
+            <h5 class="hukamnama-subtitle"></h5>
+            <p class="hukamnama-text">ਜਿਨਿ ਤੁਮ ਭੇਜੇ ਤਿਨਹਿ ਬੁਲਾਏ ਸੁਖ ਸਹਜ ਸੇਤੀ ਘਰਿ ਆਉ ॥ ਅਨਦ ਮੰਗਲ ਗੁਨ ਗਾਉ ਸਹਜ ਧੁਨਿ ਨਿਹਚਲ ਰਾਜੁ ਕਮਾਉ ॥੧॥ ਤੁਮ ਘਰਿ ਆਵਹੁ ਮੇਰੇ ਮੀਤ ॥ ਤੁਮਰੇ ਦੋਖੀ ਹਰਿ ਆਪਿ ਨਿਵਾਰੇ ਅਪਦਾ ਭਈ ਬਿਤੀਤ ॥ ਰਹਾਉ ॥ ਪ੍ਰਗਟ ਕੀਨੇ ਪ੍ਰਭ ਕਰਨੇਹਾਰੇ ਨਾਸਨ ਭਾਜਨ ਥਾਕੇ ॥ ਘਰਿ ਮੰਗਲ ਵਾਜਹਿ ਨਿਤ ਵਾਜੇ ਅਪੁਨੈ ਖਸਮਿ ਨਿਵਾਜੇ ॥੨॥ ਅਸਥਿਰ ਰਹਹੁ ਡੋਲਹੁ ਮਤ ਕਬਹੂ ਗੁਰ ਕੈ ਬਚਨਿ ਅਧਾਰਿ ॥ ਜੈ ਜੈ ਕਾਰੁ ਸਗਲ ਭੂ ਮੰਡਲ ਮੁਖ ਊਜਲ ਦਰਬਾਰ ॥੩॥ ਜਿਨ ਕੇ ਜੀਅ ਤਿਨੈ ਹੀ ਫੇਰੇ ਆਪੇ ਭਇਆ ਸਹਾਈ ॥ ਅਚਰਜੁ ਕੀਆ ਕਰਨੈਹਾਰੈ ਨਾਨਕੁ ਸਚੁ ਵਡਿਆਈ ॥੪॥੪॥੨੮॥ </p>
+            <p class="customDate"><strong>ਮੰਗਲਵਾਰ, ੨੫ ਕੱਤਕ (ਸੰਮਤ ੫੫੮ ਨਾਨਕਸ਼ਾਹੀ)</strong></p>
+            <p class="customDate"><strong>(ਅੰਗ: ੬੭੮)</strong></p> <!-- 🔁 Add this -->
+        </div><br>
+
+        <!-- ✅ Punjabi Explanation -->
+        <div class="hukamnama-card2">
+            <h4 class="hukamnama-title">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</h4>
+            <p class="hukamnama-text">(ਹੇ ਮੇਰੀ ਜਿੰਦੇ!) ਜਿਸ ਨੇ ਤੈਨੂੰ (ਸੰਸਾਰ ਵਿਚ) ਭੇਜਿਆ ਹੈ, ਉਸੇ ਨੇ ਤੈਨੂੰ ਆਪਣੇ ਵਲ ਪ੍ਰੇਰਨਾ ਸ਼ੁਰੂ ਕੀਤੀ ਹੋਈ ਹੈ, ਤੂੰ ਆਨੰਦ ਨਾਲ ਆਤਮਕ ਅਡੋਲਤਾ ਨਾਲ ਹਿਰਦੇ-ਘਰ ਵਿਚ ਟਿਕੀ ਰਹੁ । ਹੇ ਜਿੰਦੇ! ਆਤਮਕ ਅਡੋਲਤਾ ਦੀ ਰੌ ਵਿਚ, ਆਨੰਦ ਖ਼ੁਸ਼ੀ ਪੈਦਾ ਕਰਨ ਵਾਲੇ ਹਰਿ-ਗੁਣ ਗਾਇਆ ਕਰ (ਇਸ ਤਰ੍ਹਾਂ ਕਾਮਾਦਿਕ ਵੈਰੀਆਂ ਉਤੇ) ਅਟੱਲ ਰਾਜ ਕਰ ।੧।ਮੇਰੇ ਮਿੱਤਰ (ਮਨ)! (ਹੁਣ) ਤੂੰ ਹਿਰਦੇ-ਘਰ ਵਿਚ ਟਿਕਿਆ ਰਹੁ (ਆ ਜਾ) । ਪਰਮਾਤਮਾ ਨੇ ਆਪ ਹੀ (ਕਾਮਾਦਿਕ) ਤੇਰੇ ਵੈਰੀ ਦੂਰ ਕਰ ਦਿੱਤੇ ਹਨ, (ਕਾਮਾਦਿਕਾਂ ਤੋਂ ਪੈ ਰਹੀ ਮਾਰ ਦੀ) ਬਿਪਤਾ (ਹੁਣ) ਮੁੱਕ ਗਈ ਹੈ ।ਰਹਾਉ। (ਹੇ ਮੇਰੀ ਜਿੰਦੇ!) ਸਭ ਕੁਝ ਕਰ ਸਕਣ ਵਾਲੇ ਖਸਮ-ਪ੍ਰਭੂ ਨੇ ਜਿਨ੍ਹਾਂ ਉਤੇ ਮੇਹਰ ਕੀਤੀ, ਉਹਨਾਂ ਦੇ ਅੰਦਰ ਉਸ ਨੇ ਆਪਣਾ ਆਪ ਪਰਗਟ ਕਰ ਦਿੱਤਾ, ਉਹਨਾਂ ਦੀਆਂ ਭਟਕਣਾਂ ਮੁੱਕ ਗਈਆਂ, ਉਹਨਾਂ ਦੇ ਹਿਰਦੇ-ਘਰ ਵਿਚ ਆਤਮਕ ਆਨੰਦ ਦੇ (ਮਾਨੋ) ਵਾਜੇ ਸਦਾ ਵੱਜਣ ਲੱਗ ਪੈਂਦੇ ਹਨ ।੨।(ਹੇ ਜਿੰਦੇ!) ਗੁਰੂ ਦੇ ਉਪਦੇਸ਼ ਉਤੇ ਤੁਰ ਕੇ, ਗੁਰੂ ਦੇ ਆਸਰੇ ਰਹਿ ਕੇ, ਤੂੰ ਭੀ (ਕਾਮਾਦਿਕ ਵੈਰੀਆਂ ਦੇ ਟਾਕਰੇ ਤੇ) ਪੱਕੇ ਪੈਰਾਂ ਤੇ ਖਲੋ ਜਾ, ਵੇਖੀਂ, ਹੁਣ ਕਦੇ ਭੀ ਨਾਹ ਡੋਲੀਂ । ਸਾਰੀ ਸ੍ਰਿਸ਼ਟੀ ਵਿਚ ਸੋਭਾ ਹੋਵੇਗੀ, ਪ੍ਰਭੂ ਦੀ ਹਜ਼ੂਰੀ ਵਿਚ ਤੇਰਾ ਮੂੰਹ ਉਜਲਾ ਹੋਵੇਗਾ ।੩।ਹੇ ਨਾਨਕ! ਜਿਸ ਪ੍ਰਭੂ ਜੀ ਨੇ ਜੀਵ ਪੈਦਾ ਕੀਤੇ ਹੋਏ ਹਨ, ਉਹ ਆਪ ਹੀ ਇਹਨਾਂ ਨੂੰ (ਵਿਕਾਰਾਂ ਵਲੋਂ) ਮੋੜਦਾ ਹੈ, ਉਹ ਆਪ ਹੀ ਮਦਦਗਾਰ ਬਣਦਾ ਹੈ । ਸਭ ਕੁਝ ਕਰ ਸਕਣ ਵਾਲੇ ਪਰਮਾਤਮਾ ਨੇ ਇਹ ਅਨੋਖੀ ਖੇਡ ਬਣਾ ਦਿੱਤੀ ਹੈ, ਉਸ ਦੀ ਵਡਿਆਈ ਸਦਾ ਕਾਇਮ ਰਹਿਣ ਵਾਲੀ ਹੈ ।੪।੪।੨੮।</p>
+        </div><br>
+
+        <!-- ✅ English Translation -->
+        <!-- ✅ English Translation -->
+        <div class="hukamnama-card2 english-card">
+
+            <h4 class="hukamnama-title" style="font-size: 30px;">
+                English Translation
+            </h4>
+
+            <h5 class="hukamnama-title">
+                DHANAASAREE, FIFTH MEHL:            </h5>
+
+            <h6 class="hukamnama-subtitle">
+                            </h6>
+
+            <p class="hukamnama-text">
+                The One who sent you, has now recalled you; return to your home now in peace and pleasure. In bliss and ecstasy, sing His Glorious Praises; by this celestial tune, you shall acquire your everlasting kingdom.  || 1 ||   Come back to your home, O my friend. The Lord Himself has eliminated your enemies, and your misfortunes are past.  ||  Pause  ||   God, the Creator Lord, has glorified you, and your running and rushing around has ended. In your home, there is rejoicing; the musical instruments continually play, and your Husband Lord has exalted you.  || 2 ||   Remain firm and steady, and do not ever waver; take the Guru’s Word as your Support. You shall be applauded and congratulated all over the world, and your face shall be radiant in the Court of the Lord.  || 3 ||   All beings belong to Him; He Himself transforms them, and He Himself becomes their help and support. The Creator Lord has worked a wondrous miracle; O Nanak, His glorious greatness is true.  || 4 || 4 || 28 ||               </p>
+
+            <p class="customDate">
+                <strong>Tuesday, 25th Katak (Samvat 558 Nanakshahi)</strong>
+            </p>
+
+            <p class="customDate">
+                <strong>(Page: 678)</strong>
+            </p>
+
+        </div>
+
+        <!-- ✅ PDF Section — generated live from the content shown above -->
+        <div class="pdf-section text-center mt-4">
+            <script type="application/json"
+                id="hukamnamaPdfData">{"date":"2026-11-10","ang":"678","hukamnama_time":"05:30:00","gheading1":"ਧਨਾਸਰੀ ਮਹਲਾ ੫ ॥","gheading2":"","ghukamnama":"ਜਿਨਿ ਤੁਮ ਭੇਜੇ ਤਿਨਹਿ ਬੁਲਾਏ ਸੁਖ ਸਹਜ ਸੇਤੀ ਘਰਿ ਆਉ ॥ ਅਨਦ ਮੰਗਲ ਗੁਨ ਗਾਉ ਸਹਜ ਧੁਨਿ ਨਿਹਚਲ ਰਾਜੁ ਕਮਾਉ ॥੧॥ ਤੁਮ ਘਰਿ ਆਵਹੁ ਮੇਰੇ ਮੀਤ ॥ ਤੁਮਰੇ ਦੋਖੀ ਹਰਿ ਆਪਿ ਨਿਵਾਰੇ ਅਪਦਾ ਭਈ ਬਿਤੀਤ ॥ ਰਹਾਉ ॥ ਪ੍ਰਗਟ ਕੀਨੇ ਪ੍ਰਭ ਕਰਨੇਹਾਰੇ ਨਾਸਨ ਭਾਜਨ ਥਾਕੇ ॥ ਘਰਿ ਮੰਗਲ ਵਾਜਹਿ ਨਿਤ ਵਾਜੇ ਅਪੁਨੈ ਖਸਮਿ ਨਿਵਾਜੇ ॥੨॥ ਅਸਥਿਰ ਰਹਹੁ ਡੋਲਹੁ ਮਤ ਕਬਹੂ ਗੁਰ ਕੈ ਬਚਨਿ ਅਧਾਰਿ ॥ ਜੈ ਜੈ ਕਾਰੁ ਸਗਲ ਭੂ ਮੰਡਲ ਮੁਖ ਊਜਲ ਦਰਬਾਰ ॥੩॥ ਜਿਨ ਕੇ ਜੀਅ ਤਿਨੈ ਹੀ ਫੇਰੇ ਆਪੇ ਭਇਆ ਸਹਾਈ ॥ ਅਚਰਜੁ ਕੀਆ ਕਰਨੈਹਾਰੈ ਨਾਨਕੁ ਸਚੁ ਵਡਿਆਈ ॥੪॥੪॥੨੮॥ ","ghukamnamadesc":"(ਹੇ ਮੇਰੀ ਜਿੰਦੇ!) ਜਿਸ ਨੇ ਤੈਨੂੰ (ਸੰਸਾਰ ਵਿਚ) ਭੇਜਿਆ ਹੈ, ਉਸੇ ਨੇ ਤੈਨੂੰ ਆਪਣੇ ਵਲ ਪ੍ਰੇਰਨਾ ਸ਼ੁਰੂ ਕੀਤੀ ਹੋਈ ਹੈ, ਤੂੰ ਆਨੰਦ ਨਾਲ ਆਤਮਕ ਅਡੋਲਤਾ ਨਾਲ ਹਿਰਦੇ-ਘਰ ਵਿਚ ਟਿਕੀ ਰਹੁ । ਹੇ ਜਿੰਦੇ! ਆਤਮਕ ਅਡੋਲਤਾ ਦੀ ਰੌ ਵਿਚ, ਆਨੰਦ ਖ਼ੁਸ਼ੀ ਪੈਦਾ ਕਰਨ ਵਾਲੇ ਹਰਿ-ਗੁਣ ਗਾਇਆ ਕਰ (ਇਸ ਤਰ੍ਹਾਂ ਕਾਮਾਦਿਕ ਵੈਰੀਆਂ ਉਤੇ) ਅਟੱਲ ਰਾਜ ਕਰ ।੧।ਮੇਰੇ ਮਿੱਤਰ (ਮਨ)! (ਹੁਣ) ਤੂੰ ਹਿਰਦੇ-ਘਰ ਵਿਚ ਟਿਕਿਆ ਰਹੁ (ਆ ਜਾ) । ਪਰਮਾਤਮਾ ਨੇ ਆਪ ਹੀ (ਕਾਮਾਦਿਕ) ਤੇਰੇ ਵੈਰੀ ਦੂਰ ਕਰ ਦਿੱਤੇ ਹਨ, (ਕਾਮਾਦਿਕਾਂ ਤੋਂ ਪੈ ਰਹੀ ਮਾਰ ਦੀ) ਬਿਪਤਾ (ਹੁਣ) ਮੁੱਕ ਗਈ ਹੈ ।ਰਹਾਉ। (ਹੇ ਮੇਰੀ ਜਿੰਦੇ!) ਸਭ ਕੁਝ ਕਰ ਸਕਣ ਵਾਲੇ ਖਸਮ-ਪ੍ਰਭੂ ਨੇ ਜਿਨ੍ਹਾਂ ਉਤੇ ਮੇਹਰ ਕੀਤੀ, ਉਹਨਾਂ ਦੇ ਅੰਦਰ ਉਸ ਨੇ ਆਪਣਾ ਆਪ ਪਰਗਟ ਕਰ ਦਿੱਤਾ, ਉਹਨਾਂ ਦੀਆਂ ਭਟਕਣਾਂ ਮੁੱਕ ਗਈਆਂ, ਉਹਨਾਂ ਦੇ ਹਿਰਦੇ-ਘਰ ਵਿਚ ਆਤਮਕ ਆਨੰਦ ਦੇ (ਮਾਨੋ) ਵਾਜੇ ਸਦਾ ਵੱਜਣ ਲੱਗ ਪੈਂਦੇ ਹਨ ।੨।(ਹੇ ਜਿੰਦੇ!) ਗੁਰੂ ਦੇ ਉਪਦੇਸ਼ ਉਤੇ ਤੁਰ ਕੇ, ਗੁਰੂ ਦੇ ਆਸਰੇ ਰਹਿ ਕੇ, ਤੂੰ ਭੀ (ਕਾਮਾਦਿਕ ਵੈਰੀਆਂ ਦੇ ਟਾਕਰੇ ਤੇ) ਪੱਕੇ ਪੈਰਾਂ ਤੇ ਖਲੋ ਜਾ, ਵੇਖੀਂ, ਹੁਣ ਕਦੇ ਭੀ ਨਾਹ ਡੋਲੀਂ । ਸਾਰੀ ਸ੍ਰਿਸ਼ਟੀ ਵਿਚ ਸੋਭਾ ਹੋਵੇਗੀ, ਪ੍ਰਭੂ ਦੀ ਹਜ਼ੂਰੀ ਵਿਚ ਤੇਰਾ ਮੂੰਹ ਉਜਲਾ ਹੋਵੇਗਾ ।੩।ਹੇ ਨਾਨਕ! ਜਿਸ ਪ੍ਰਭੂ ਜੀ ਨੇ ਜੀਵ ਪੈਦਾ ਕੀਤੇ ਹੋਏ ਹਨ, ਉਹ ਆਪ ਹੀ ਇਹਨਾਂ ਨੂੰ (ਵਿਕਾਰਾਂ ਵਲੋਂ) ਮੋੜਦਾ ਹੈ, ਉਹ ਆਪ ਹੀ ਮਦਦਗਾਰ ਬਣਦਾ ਹੈ । ਸਭ ਕੁਝ ਕਰ ਸਕਣ ਵਾਲੇ ਪਰਮਾਤਮਾ ਨੇ ਇਹ ਅਨੋਖੀ ਖੇਡ ਬਣਾ ਦਿੱਤੀ ਹੈ, ਉਸ ਦੀ ਵਡਿਆਈ ਸਦਾ ਕਾਇਮ ਰਹਿਣ ਵਾਲੀ ਹੈ ।੪।੪।੨੮।","gfooter1":"ਮੰਗਲਵਾਰ, ੨੫ ਕੱਤਕ (ਸੰਮਤ ੫੫੮ ਨਾਨਕਸ਼ਾਹੀ)","gfooter2":"(ਅੰਗ: ੬੭੮)","eheading1":"DHANAASAREE, FIFTH MEHL:","eheading2":"","ehukamnamadesc":"The One who sent you, has now recalled you; return to your home now in peace and pleasure. In bliss and ecstasy, sing His Glorious Praises; by this celestial tune, you shall acquire your everlasting kingdom.  || 1 ||   Come back to your home, O my friend. The Lord Himself has eliminated your enemies, and your misfortunes are past.  ||  Pause  ||   God, the Creator Lord, has glorified you, and your running and rushing around has ended. In your home, there is rejoicing; the musical instruments continually play, and your Husband Lord has exalted you.  || 2 ||   Remain firm and steady, and do not ever waver; take the Guru’s Word as your Support. You shall be applauded and congratulated all over the world, and your face shall be radiant in the Court of the Lord.  || 3 ||   All beings belong to Him; He Himself transforms them, and He Himself becomes their help and support. The Creator Lord has worked a wondrous miracle; O Nanak, His glorious greatness is true.  || 4 || 4 || 28 ||   ","efooter1":"Tuesday, 25th Katak (Samvat 558 Nanakshahi)","efooter2":"(Page: 678)"}</script>
+
+            <a href="#" class="pdf-button" data-hukamnama-pdf="hukamnamaPdfData">
+                📜 Download &amp; View Hukamnama PDF
+            </a>
+
+        </div>
+
+    </div>
+
+<script src="assets/js/html2pdf.bundle.min.js?v=1788841532" type="0caff1128323fd9e0b06236b-text/javascript"></script>
+<script src="assets/js/hukamnama-pdf.js?v=1793610724" type="0caff1128323fd9e0b06236b-text/javascript"></script>
+
+<!-- ===================== FOOTER (ISOLATED & NAVBAR-SAFE) ===================== -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<footer class="sgpc-footer text-center">
+  <div class="container">
+    <div class="sgpc-footer-content">
+      <p class="sgpc-footer-text">
+        Under Design & Development by Internet Department | ©
+        <strong>SGPC</strong>
+      </p>
+
+      <div class="sgpc-social-icons">
+        <a href="https://www.facebook.com/sgpcamritsar.org" target="_blank"
+           class="fab fa-facebook" aria-label="Facebook"></a>
+
+        <a href="https://www.instagram.com/sgpc_amritsar/" target="_blank"
+           class="fab fa-instagram sgpc-insta" aria-label="Instagram"></a>
+
+        <a href="https://twitter.com/sgpcamritsar" target="_blank"
+           class="fab fa-twitter" aria-label="Twitter"></a>
+
+        <a href="https://www.youtube.com/c/SGPCAmritsar-official" target="_blank"
+           class="fab fa-youtube sgpc-yt" aria-label="YouTube"></a>
+
+        <a href="https://t.me/sgpc_amritsar" target="_blank"
+           class="fab fa-telegram sgpc-telegram" aria-label="Telegram"></a>
+
+        <a href="https://whatsapp.com/channel/0029VaEcc9NKQuJBzhIg7h26" target="_blank"
+           class="fab fa-whatsapp" aria-label="WhatsApp"></a>
+
+        <a href="apps.php" target="_blank"
+           class="fab fa-google-play sgpc-playstore" aria-label="Google Play"></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> -->
+
+<!-- ✅ Prevent Multiple Audio Playback -->
+<script type="0caff1128323fd9e0b06236b-text/javascript">
+  document.addEventListener('play', function (e) {
+    var audios = document.getElementsByTagName('audio');
+    for (var i = 0, len = audios.length; i < len; i++) {
+      if (audios[i] !== e.target) {
+        audios[i].pause();
+      }
+    }
+  }, true);
+</script>
+
+<!-- ✅ Footer Styling -->
+<style>
+/* ===================== SGPC FOOTER ONLY ===================== */
+.sgpc-footer {
+  background: linear-gradient(135deg, #003092, #ff8c00);
+  padding: 20px 0;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+  margin-top: 40px;
+}
+
+.sgpc-footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.sgpc-footer-text {
+  color: #FFF085;
+  font-size: 14px;
+  margin: 0;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.sgpc-footer-text:hover {
+  color: #ffcc00;
+  transform: scale(1.05);
+}
+
+/* Icons base (fully scoped) */
+.sgpc-footer .sgpc-social-icons a {
+  color: #FFF085;
+  font-size: 32px;
+  margin: 0 15px;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.sgpc-footer .sgpc-social-icons a:hover {
+  transform: scale(1.3);
+}
+
+/* Solid brand colors */
+.sgpc-footer .fa-facebook:hover { color: #1877F2; }
+.sgpc-footer .fa-twitter:hover { color: #1DA1F2; }
+.sgpc-footer .fa-whatsapp:hover { color: #25D366; }
+.sgpc-footer .sgpc-telegram:hover { color: #229ED9;}
+
+/* Instagram (gradient + white) */
+.sgpc-footer .sgpc-insta:hover {
+  background: radial-gradient(circle at 30% 30%,
+    #ffffff 0%,
+    #fdf497 12%,
+    #fd5949 40%,
+    #d6249f 65%,
+    #285AEB 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Telegram (blue + white) 
+.sgpc-footer .sgpc-telegram:hover {
+  background: linear-gradient(135deg,
+    #ffffff 0%,
+    #229ED9 45%,
+    #0088CC 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+} */
+
+/* YouTube (red + white) */
+.sgpc-footer .sgpc-yt:hover {
+  background: linear-gradient(135deg,
+    #ffffff 0%,
+    #FF0000 45%,
+    #CC0000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Google Play (multi-color) */
+.sgpc-footer .sgpc-playstore:hover {
+  background: linear-gradient(45deg,
+    #00A0FF,
+    #00E676,
+    #FFD700,
+    #FF3D00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+  .sgpc-footer .sgpc-social-icons a {
+    font-size: 26px;
+    margin: 0 10px;
+  }
+}
+</style>
+<!-- ===================== END FOOTER ===================== -->

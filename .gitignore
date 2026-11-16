@@ -63,3 +63,6 @@ docs-site/public/posters/
 docs-site/qa-shots/
 docs-site/src/og/fonts/
 docs-site/src/og/render.ts
+
+# The Hukamnama page shells: build output of frontend (scripts/extract-hukamnama-shells.mjs)
+webapp/hukamnama_shells/

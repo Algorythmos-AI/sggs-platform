@@ -8,6 +8,7 @@
 import { getCollection } from "astro:content";
 import { SUPPORT_EMAIL, IMAGE_CREDITS, APP_STORE_URL, APP_STORE_LIVE } from "../site";
 import { CONTRIBUTE_MODE } from "../contribute";
+import { HUKAMNAMA_LIVE } from "../hukamnama";
 import { LEARN_SLUGS } from "../routes";
 import { localeOf, localizeHref } from "../i18n/paths";
 import { learnHref, articleLangFor } from "../i18n/content";
@@ -39,6 +40,8 @@ const columns: { title: string; links: { href: string; label: string; lang?: str
       { href: L("/features"), label: t("nav.features") },
       { href: L("/watch"), label: t("nav.watch") },
       { href: "/search", label: t("nav.knowledgeBase") },
+      // The Hukamnama API's page, once the Hukamnama is launched (hukamnama.ts).
+      ...(HUKAMNAMA_LIVE ? [{ href: L("/developers"), label: t("footer.developers") }] : []),
     ],
   },
   {

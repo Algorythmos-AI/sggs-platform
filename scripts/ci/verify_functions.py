@@ -6,7 +6,14 @@
 For each context routed to its own function in that environment (gateway/routes.json) and for
 `all`: /readyz?svc=<context> (or /readyz) answers 200, ready, with that function's contexts, the
 expected commit and the matching X-Service header. And the API's databases and source are not
-downloadable from the site. Sends x-vercel-protection-bypass when VERCEL_AUTOMATION_BYPASS_SECRET
+downloadable from the site. Where the environment serves the Hukamnama pages ("hukamnama_api"),
+each language's /{lang}/hukamnama is a filled page from the `all` function: no template token
+left, the page's own language, never a 404 (a 503 passes with a warning: it means the Hukamnama
+API could not be reached or the day did not prove, which is not this deployment's fault). The
+feeds are checked the same way: an Atom document and a JSON Feed, from `all`; and the Hukamnama
+sitemap must be a whole sitemap that lists each language's page. The embed (/embed/hukamnama) must
+be the one response that may be framed, with its own strict policy, while the site's pages still
+forbid framing: both are read from the live response headers, which Vercel sets from vercel.json. Sends x-vercel-protection-bypass when VERCEL_AUTOMATION_BYPASS_SECRET
 is set. Retries while functions cold-start. Stdlib only.
 """
 from __future__ import annotations
@@ -22,7 +29,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-from gen_gateway import DATA_DIR, ROUTES_FILE, environments, prefixes_by_context  # noqa: E402
+from gen_gateway import (DATA_DIR, EMBED, FEEDS, ROUTES_FILE, SITEMAP, environments, languages,  # noqa: E402
+                         prefixes_by_context)
 
 NOT_PUBLISHED = (f"/{DATA_DIR}/db/all.sqlite", f"/{DATA_DIR}/db/search.sqlite", f"/{DATA_DIR}/webapp/serve.py")
 
@@ -37,6 +45,19 @@ def get(url: str, timeout: int = 60):
             return r.status, r.headers.get("X-Service"), r.read()
     except urllib.error.HTTPError as e:
         return e.code, e.headers.get("X-Service"), e.read()
+
+
+def get_headers(url: str, timeout: int = 60):
+    """(status, headers with lower-case names, body)."""
+    headers = {"User-Agent": "sggs-deploy-verify"}
+    if os.environ.get("VERCEL_AUTOMATION_BYPASS_SECRET"):
+        headers["x-vercel-protection-bypass"] = os.environ["VERCEL_AUTOMATION_BYPASS_SECRET"]
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.status, {k.lower(): v for k, v in r.headers.items()}, r.read()
+    except urllib.error.HTTPError as e:
+        return e.code, {k.lower(): v for k, v in e.headers.items()}, e.read()
 
 
 def check_ready(base: str, name: str, contexts: list[str], commit: str) -> str | None:
@@ -55,6 +76,83 @@ def check_ready(base: str, name: str, contexts: list[str], commit: str) -> str |
     if body.get("contexts") != contexts or svc != want_svc:
         return f"{url}: contexts {body.get('contexts')} X-Service {svc} (want {contexts} / {want_svc})"
     return None
+
+
+def check_page(base: str, lang: str) -> tuple[str | None, str | None]:
+    """(problem, warning) for one language's Hukamnama page."""
+    url = f"{base}/{lang}/hukamnama"
+    status, svc, raw = get(url)
+    if status == 503 and svc == "all":
+        return None, f"{url}: HTTP 503 from the function (the Hukamnama API is unreachable, or the day did not prove)"
+    if status != 200 or svc != "all":
+        return f"{url}: HTTP {status} X-Service {svc} (want 200 from `all`)", None
+    text = raw.decode("utf-8", "replace")
+    if "__HK_" in text or 'id="hk-strings"' in text:
+        return f"{url}: the page still holds template tokens", None
+    if f'<html lang="{lang}"' not in text:
+        return f"{url}: not the '{lang}' page", None
+    return None, None
+
+
+def check_feed(base: str, path: str) -> tuple[str | None, str | None]:
+    """(problem, warning) for one Hukamnama feed."""
+    url = base + path
+    status, svc, raw = get(url)
+    if status == 503 and svc == "all":
+        return None, f"{url}: HTTP 503 from the function (the Hukamnama API is unreachable)"
+    if status != 200 or svc != "all":
+        return f"{url}: HTTP {status} X-Service {svc} (want 200 from `all`)", None
+    text = raw.decode("utf-8", "replace")
+    if path.endswith(".json"):
+        try:
+            ok = json.loads(text).get("version", "").startswith("https://jsonfeed.org/version/")
+        except (ValueError, AttributeError):
+            ok = False
+    else:
+        ok = text.startswith("<?xml") and '<feed xmlns="http://www.w3.org/2005/Atom"' in text and text.rstrip().endswith("</feed>")
+    return (None, None) if ok else (f"{url}: not a whole feed document", None)
+
+
+def check_sitemap(base: str) -> tuple[str | None, str | None]:
+    """(problem, warning) for the Hukamnama sitemap."""
+    url = base + SITEMAP
+    status, svc, raw = get(url)
+    if status == 503 and svc == "all":
+        return None, f"{url}: HTTP 503 from the function (the Hukamnama API is unreachable)"
+    if status != 200 or svc != "all":
+        return f"{url}: HTTP {status} X-Service {svc} (want 200 from `all`)", None
+    text = raw.decode("utf-8", "replace")
+    if not (text.startswith("<?xml") and "<urlset " in text and text.rstrip().endswith("</urlset>")):
+        return f"{url}: not a whole sitemap", None
+    missing = [lang for lang in languages() if f"/{lang}/hukamnama</loc>" not in text]
+    return (f"{url}: does not list the page of {missing}", None) if missing else (None, None)
+
+
+def check_embed(base: str) -> tuple[str | None, str | None]:
+    """(problem, warning): the embed may be framed and nothing else may. Read from live headers."""
+    for path in ("/", f"/{languages()[0]}/hukamnama"):                 # the site still forbids framing
+        status, h, _ = get_headers(base + path)
+        csp = h.get("content-security-policy", "")
+        if h.get("x-frame-options") != "DENY" or "frame-ancestors 'none'" not in csp:
+            return (f"{base}{path}: HTTP {status} must forbid framing (X-Frame-Options {h.get('x-frame-options')!r}, "
+                    f"CSP {csp[:80]!r})"), None
+    url = base + EMBED
+    status, h, raw = get_headers(url)
+    if status == 503 and h.get("x-service") == "all":
+        warning = f"{url}: HTTP 503 from the function (the Hukamnama API is unreachable)"
+    elif status != 200 or h.get("x-service") != "all":
+        return f"{url}: HTTP {status} X-Service {h.get('x-service')} (want 200 from `all`)", None
+    else:
+        warning = None
+        text = raw.decode("utf-8", "replace")
+        if "<script" in text or 'name="robots" content="noindex' not in text:
+            return f"{url}: not the embed document (a script, or no noindex)", None
+    csp = h.get("content-security-policy", "")
+    if "x-frame-options" in h or "frame-ancestors *" not in csp or "default-src 'none'" not in csp:
+        return f"{url}: must be framable under its own strict policy (X-Frame-Options {h.get('x-frame-options')!r}, CSP {csp!r})", None
+    if "noindex" not in h.get("x-robots-tag", ""):
+        return f"{url}: must send X-Robots-Tag noindex", None
+    return None, warning
 
 
 def main(argv=None) -> int:
@@ -84,6 +182,22 @@ def main(argv=None) -> int:
                 time.sleep(a.interval)
         else:
             failures.append(name)
+    if env.get("hukamnama_api"):
+        checks = [(f"/{lang}/hukamnama", "a filled page", lambda lang=lang: check_page(base, lang)) for lang in languages()]
+        checks += [(path, "a whole feed", lambda path=path: check_feed(base, path)) for path in FEEDS]
+        checks += [(SITEMAP, "a whole sitemap", lambda: check_sitemap(base))]
+        checks += [(EMBED, "the one framable page (the site still forbids framing)", lambda: check_embed(base))]
+        for path, what, check in checks:
+            for attempt in range(1, a.attempts + 1):
+                problem, warning = check()
+                if problem is None:
+                    print(f"::warning::{warning}" if warning else f"ok  {path} is {what} from `all`")
+                    break
+                print(f"    {problem} (attempt {attempt}/{a.attempts})")
+                if attempt < a.attempts:
+                    time.sleep(a.interval)
+            else:
+                failures.append(path)
     for path in NOT_PUBLISHED:
         status, _, _ = get(base + path)
         if status == 200:

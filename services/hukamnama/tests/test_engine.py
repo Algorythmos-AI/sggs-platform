@@ -91,6 +91,17 @@ class EngineTests(unittest.TestCase):
         self.assertIn("held_no_match", self.alerts)
         self.assertEqual(self.store.decision(DAY)["status"], "held")
 
+    def test_hold_alert_names_the_nearest_run(self):
+        self.fetch.pages[HS_URL] = fixture("hs-2026-11-10.html")
+        self.fetch.pages[MUKHWAK_URL] = None
+        acts = [self.engine.tick(utc(2026, 11, 10, 0, 0) + timedelta(minutes=m)).action for m in range(8)]
+        self.assertIn("held", acts)
+        detail = [a["detail"] for a in self.store.alerts(date(2026, 11, 10)) if a["kind"] == "held_no_match"]
+        self.assertEqual(len(detail), 1)
+        self.assertIn("Ang 678", detail[0])
+        self.assertIn("nearest run lines 29433-29442", detail[0])
+        self.assertIsNone(self.store.decision(date(2026, 11, 10))["resolution"])
+
     def test_restart_is_idempotent(self):
         self.run_minutes(T0, 3)
         again = Engine(Store(f"{self.tmp.name}/state.sqlite"), self.con, self.fp, self.fetch)

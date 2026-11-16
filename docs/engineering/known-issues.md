@@ -41,6 +41,7 @@ and live verification passes live under [reports](../reports/README.md).
 | **v1.5.2** | 2026-10-29 | Share cards drawn with HarfBuzz and resvg; a share page for every Ang at `/ang/N`; shared verses from the app link to it. | A card's verse is read from the database, never typed (`AngSharePages`); the share pages are `noindex` and stay out of `routes.ts`. |
 | **v1.6.0** | 2026-11-05 | Marketing pages move under a language prefix with permanent redirects from the old URLs; one message catalog; dataset 1.4.0 aligns the English in source order with multi-line spans. | No interface English outside the catalog (pseudo-locale build in CI); the redirects are generated, never hand-edited; a span's English sits once, on its last line ([translation layer](../data/translation-layer.md)). |
 | **v1.6.1 – v1.6.3** | 2026-11-05 – 11-06 | The Punjabi (1.6.1) and French (1.6.2) sites are switched on; the Punjabi copy is revised after a native-speaker review (1.6.3). | A language ships whole or not at all: every key translated and current, and a signed review record that pins the catalog's sha256 (`i18n-status.mjs` in CI); Ang numbers stay in Western digits in every language ([internationalisation](../architecture/i18n.md)). |
+| **v1.6.4** | 2026-11-09 | The wiki fills its counts from the code and reports the pages a change leaves behind; the Hukamnama service (#367) is added, not yet deployed. | The Hukamnama service serves corpus text only: SGPC's page locates the day, an exact match publishes, anything else is held for the owner ([the Hukamnama service](../architecture/hukamnama.md)). |
 
 ## Still open
 
@@ -58,6 +59,9 @@ and live verification passes live under [reports](../reports/README.md).
 | The app's Sufficient Contrast and Larger Text accessibility labels | not declared in App Store Connect until gurbani-soul-ios issue #23 is done | iOS |
 | The Jaap pauris 79 and 80 display repair (iOS 1.4.7) | draws without a dotted circle; the stored text is unchanged; flagged for scholar review | scholar review |
 | The yakash display of the subjoined ya (1.4.3) | accepted by the owner for that release on 2026-10-17; the scholar's review continues, and a requested change ships in the next release | brand |
+| Hukamnama · Sri Harmandir Sahib in App Store builds | dark until the G3 copy review (gurbani-soul-ios `docs/review/g3-hukamnama.md`, `REVIEWED: false`) is signed and G4 changes the privacy text, the App Store label and the privacy manifest; TestFlight builds carry it | scholar review, owner |
+| The public Hukamnama API and a production Hukamnama service | not set up: no production service, no public snapshot bucket, the edge Worker not deployed, `api.gurbanisoul.com` not answering; the website's Hukamnama pages are routed on staging only | owner |
+| Hukamnama hardening still to build | the service does not yet check the Worker's `X-Origin-Auth`; the Worker's rate-limit binding is not configured; the fetch archive has no R2 copy; the service's alerts reach the owner only through `/health` and the dead-man issue | platform |
 | Japji `author = null`: author filters for Guru Nanak miss it | known, deferred | data |
 | `comp_type` mislabelled in places | suppressed at the display layer; prefer `comp_id`/`section` | data |
 

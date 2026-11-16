@@ -14,6 +14,7 @@
 import { ENABLED_LOCALES, type Locale } from "./i18n/locales";
 import { isLocalizedPath, stripLocale } from "./i18n/paths";
 import { articleLocales } from "./i18n/content";
+import { DEVELOPERS_PATH, HUKAMNAMA_LIVE } from "./hukamnama";
 
 export type ChangeFreq =
   | "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
@@ -72,6 +73,7 @@ const pageRoutes: Route[] = [
   { path: "/privacy",      lastmod: LASTMOD, changefreq: "yearly",  priority: 0.4, og: "privacy" },
   { path: "/support",      lastmod: LASTMOD, changefreq: "yearly",  priority: 0.5, og: "support" },
   { path: "/contribute",   lastmod: "2026-10-17", changefreq: "yearly",  priority: 0.4, og: "contribute" },
+  { path: DEVELOPERS_PATH, lastmod: "2026-11-12", changefreq: "monthly", priority: 0.5, og: "developers" },
   ...learnRoutes,
 ];
 
@@ -84,7 +86,11 @@ const langsOf = (path: string): Locale[] => {
   return article ? articleLocales(article) : ENABLED_LOCALES;
 };
 
-export const routes: Route[] = pageRoutes.flatMap((r) =>
+// The Developers page is built before the Hukamnama is launched, noindex (hukamnama.ts): it joins
+// the sitemap on launch day. Its share card is built either way (ogSlugs reads pageRoutes).
+const listed = (r: Route) => r.path !== DEVELOPERS_PATH || HUKAMNAMA_LIVE;
+
+export const routes: Route[] = pageRoutes.filter(listed).flatMap((r) =>
   isLocalizedPath(r.path) ? langsOf(r.path).map((l) => ({ ...r, path: inLocale(r.path, l) })) : [r]);
 
 // The set of distinct OG card slugs the site needs (drives og/v2/[slug].png getStaticPaths).

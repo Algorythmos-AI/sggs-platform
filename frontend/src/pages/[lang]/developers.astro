@@ -1,0 +1,245 @@
+---
+// developers.astro — the public Hukamnama API, explained for the people who will call it.
+//
+// Every statement here is checked against the code that answers the requests:
+// services/hukamnama-edge/src/core.js (routes, caching, errors, limits), services/hukamnama/
+// hukamnama/public.py (the record's fields; its `terms_url` points at #terms on this page) and
+// webapp/hukamnama_embed.py (the embed's parameters). Keep it true before you keep it short.
+//
+// The example record is the real one for 2026-11-11 (the DevelopersPage gate re-computes its
+// range_sha256 from the corpus). Its text fields are replaced by "…": no line of Gurbani is typed
+// into this file, and none is shown in a code font.
+//
+// Hidden from search until launch (src/hukamnama.ts HUKAMNAMA_LIVE): noindex and out of the sitemap.
+import Marketing from "../../layouts/Marketing.astro";
+import LegalPage from "../../components/LegalPage.astro";
+import JsonLd from "../../components/JsonLd.astro";
+import CodeText from "../../components/CodeText.astro";
+import { SITE_URL, SUPPORT_EMAIL } from "../../site";
+import { HUKAMNAMA_API, HUKAMNAMA_EARLIEST, HUKAMNAMA_EMBED_THEMES, HUKAMNAMA_LIST, HUKAMNAMA_LIVE, TERMS_ANCHOR } from "../../hukamnama";
+import { ENABLED_LOCALES, localeStaticPaths, type Locale } from "../../i18n/locales";
+import { localizeHref } from "../../i18n/paths";
+import { useT, type MessageKey } from "../../i18n/t";
+
+export const getStaticPaths = localeStaticPaths;
+const lang = Astro.params.lang as Locale;
+const L = (href: string) => localizeHref(href, lang);
+const { t } = useT(lang);
+const here = L("/developers");
+const canonical = new URL(here, SITE_URL).href;
+
+// "a, b or c" would need a word per language; a plain list of the literal values needs none.
+const listOf = (xs: string[]) => xs.join(", ");
+
+const V1 = `${HUKAMNAMA_API}/v1`;
+const endpoints: { request: string; key: MessageKey; values?: Record<string, string> }[] = [
+  { request: "GET /v1/hukamnama/today", key: "developers.epToday" },
+  { request: "GET /v1/hukamnama/YYYY-MM-DD", key: "developers.epDate", values: { first: HUKAMNAMA_EARLIEST } },
+  { request: "GET /v1/hukamnama?limit=7", key: "developers.epList", values: { max: String(HUKAMNAMA_LIST.max), def: String(HUKAMNAMA_LIST.default) } },
+  { request: "GET /v1/hukamnama/index", key: "developers.epIndex" },
+  { request: "GET /v1/status", key: "developers.epStatus" },
+];
+
+// The record the API serves for 2026-11-11, with every text field replaced by "…" and only the
+// first two of its lines. Everything else is the published value.
+const SAMPLE_DATE = "2026-11-11";
+const SAMPLE_LINES = 7;
+const dayUrl = `${SITE_URL}/en/hukamnama/${SAMPLE_DATE}`;
+const attributionText = "Hukamnama · Sri Harmandir Sahib, via Gurbani Soul";
+const sample = {
+  amritsar_date: SAMPLE_DATE,
+  status: "published",
+  ang: 680,
+  first_line_id: 29497,
+  last_line_id: 29503,
+  comp_id: 2699,
+  opening_line_id: 29498,
+  opening_gurmukhi: "…",
+  opening_translit: "…",
+  line_count: SAMPLE_LINES,
+  range_sha256: "61975a8dea4d5174e173a5c6d1f3b761653f19ba7029b4386d03a475ed7689f4",
+  scripture_sha256: "0eff4bae60cfcf1c63ae4ac14c2ecf255a9457edc0bebaf627aa28dedb89c84f",
+  citation: "Sri Guru Granth Sahib Ji · Ang 680",
+  published_at: "2026-11-11T00:25:03+00:00",
+  credit: "Located by Ang from the Hukamnama published by SGPC (hs.sgpc.net); text from Sri Guru Granth Sahib Ji.",
+  ang_end: 680,
+  raag: "ਧਨਾਸਰੀ",
+  author: "Guru Arjan Dev Ji (M5)",
+  url: dayUrl,
+  attribution: { text: attributionText, url: dayUrl },
+  terms_url: `${SITE_URL}/en/developers#${TERMS_ANCHOR}`,
+  lines: [
+    { id: 29497, ang: 680, gurmukhi: "…", translit: "…", is_heading: true, is_rahao: false, author: "Guru Arjan Dev Ji (M5)" },
+    { id: 29498, ang: 680, gurmukhi: "…", translit: "…", is_heading: false, is_rahao: false, author: "Guru Arjan Dev Ji (M5)" },
+  ],
+};
+const sampleJson = JSON.stringify(sample, null, 2);
+
+const fields: { names: string[]; key: MessageKey }[] = [
+  { names: ["amritsar_date"], key: "developers.fDate" },
+  { names: ["status"], key: "developers.fStatus" },
+  { names: ["ang", "ang_end"], key: "developers.fAng" },
+  { names: ["citation"], key: "developers.fCitation" },
+  { names: ["lines"], key: "developers.fLines" },
+  { names: ["author", "raag"], key: "developers.fAuthor" },
+  { names: ["range_sha256", "scripture_sha256"], key: "developers.fHashes" },
+  { names: ["published_at"], key: "developers.fPublished" },
+  { names: ["lines[].en", "translation"], key: "developers.fEn" },
+];
+
+const curl = `curl ${V1}/hukamnama/today`;
+const verifyJs = `const res = await fetch("${V1}/hukamnama/today");
+const day = await res.json();
+
+if (day.status === "published") {
+  const text = day.lines.map((line) => line.gurmukhi).join("\\n");
+  const bytes = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  const hex = [...new Uint8Array(digest)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  if (hex !== day.range_sha256) throw new Error("lines do not match range_sha256");
+}`;
+const creditHtml = `<a href="${dayUrl}">${attributionText}</a>`;
+const embedHtml = `<iframe src="${SITE_URL}/embed/hukamnama?lang=${lang}&amp;theme=auto"
+        title="Hukamnama · Sri Harmandir Sahib" loading="lazy"
+        style="width:100%;max-width:640px;height:520px;border:0"></iframe>`;
+const feeds = [`${SITE_URL}/feeds/hukamnama.xml`, `${SITE_URL}/feeds/hukamnama.json`];
+
+const guidelines: MessageKey[] = ["developers.d1", "developers.d2", "developers.d3", "developers.d4", "developers.d5", "developers.d6"];
+const limits: MessageKey[] = ["developers.l1", "developers.l2", "developers.l3", "developers.l4", "developers.l5"];
+const terms: MessageKey[] = ["developers.t1", "developers.t2", "developers.t3", "developers.t4"];
+
+const toc = [
+  { id: "quick-start", label: t("developers.start") },
+  { id: "endpoints", label: t("developers.endpoints") },
+  { id: "response", label: t("developers.response") },
+  { id: "verify", label: t("developers.verify") },
+  { id: "display", label: t("developers.display") },
+  { id: "credit", label: t("developers.credit") },
+  { id: "embed", label: t("developers.embed") },
+  { id: "feeds", label: t("developers.feeds") },
+  { id: "limits", label: t("developers.limits") },
+  { id: TERMS_ANCHOR, label: t("developers.terms") },
+];
+
+const apiLd = {
+  "@context": "https://schema.org",
+  "@type": "WebAPI",
+  "@id": `${canonical}#api`,
+  name: t("developers.title"),
+  description: t("developers.metaDescription"),
+  url: canonical,
+  documentation: canonical,
+  termsOfService: `${canonical}#${TERMS_ANCHOR}`,
+  isAccessibleForFree: true,
+  inLanguage: lang,
+  provider: { "@type": "Organization", "@id": `${SITE_URL}/#org`, name: "Algorythmos Pty Ltd", url: SITE_URL },
+};
+---
+<Marketing title={t("developers.metaTitle")} description={t("developers.metaDescription")} path={here} noindex={!HUKAMNAMA_LIVE}>
+  <JsonLd slot="head" data={apiLd} />
+  <LegalPage eyebrow={t("developers.eyebrow")} title={t("developers.title")} lede={t("developers.lede")} id="v-developers" toc={toc}>
+    <section id="quick-start">
+      <h2>{t("developers.start")}</h2>
+      <p>{t("developers.startBody")}</p>
+      <pre class="dev-code" tabindex="0" translate="no"><code>{curl}</code></pre>
+      <p><CodeText k="developers.startPending" values={{ utc: "UTC+05:30", pending: '"status": "pending"' }} /></p>
+    </section>
+
+    <section id="endpoints">
+      <h2>{t("developers.endpoints")}</h2>
+      <p class="dev-base" translate="no"><code>{HUKAMNAMA_API}</code></p>
+      <dl class="dev-list">
+        {endpoints.map((e) => (
+          <div>
+            <dt translate="no"><code>{e.request}</code></dt>
+            <dd><CodeText k={e.key} values={e.values} /></dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <section id="response">
+      <h2>{t("developers.response")}</h2>
+      <p><CodeText k="developers.responseBody" values={{ date: SAMPLE_DATE, count: SAMPLE_LINES }} /></p>
+      <pre class="dev-code" tabindex="0" translate="no" id="dev-sample"><code>{sampleJson}</code></pre>
+      <dl class="dev-list">
+        {fields.map((f) => (
+          <div>
+            <dt translate="no">{f.names.map((n, i) => <>{i > 0 && ", "}<code>{n}</code></>)}</dt>
+            <dd><CodeText k={f.key} /></dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <section id="verify">
+      <h2>{t("developers.verify")}</h2>
+      <p><CodeText k="developers.verifyBody" /></p>
+      <pre class="dev-code" tabindex="0" translate="no" id="dev-verify"><code>{verifyJs}</code></pre>
+      <p>{t("developers.verifyHow")}</p>
+      <p><CodeText k="developers.verifyReport" href={L("/support#contact")} /></p>
+    </section>
+
+    <section id="display">
+      <h2>{t("developers.display")}</h2>
+      <ul>
+        {guidelines.map((k) => <li><CodeText k={k} /></li>)}
+      </ul>
+    </section>
+
+    <section id="credit">
+      <h2>{t("developers.credit")}</h2>
+      <p>{t("developers.creditBody")}</p>
+      <pre class="dev-code" tabindex="0" translate="no"><code>{creditHtml}</code></pre>
+      <p><CodeText k="developers.creditNote" /></p>
+    </section>
+
+    <section id="embed">
+      <h2>{t("developers.embed")}</h2>
+      <p>{t("developers.embedBody")}</p>
+      <pre class="dev-code" tabindex="0" translate="no" id="dev-embed"><code>{embedHtml}</code></pre>
+      <p><CodeText k="developers.embedOptions" values={{ langs: listOf(ENABLED_LOCALES), themes: listOf(HUKAMNAMA_EMBED_THEMES) }} /></p>
+    </section>
+
+    <section id="feeds">
+      <h2>{t("developers.feeds")}</h2>
+      <p>{t("developers.feedsBody")}</p>
+      <ul class="dev-urls" translate="no">
+        {feeds.map((f) => <li><code>{f}</code></li>)}
+      </ul>
+    </section>
+
+    <section id="limits">
+      <h2>{t("developers.limits")}</h2>
+      <ul>
+        {limits.map((k) => <li><CodeText k={k} /></li>)}
+      </ul>
+    </section>
+
+    <section id={TERMS_ANCHOR}>
+      <h2>{t("developers.terms")}</h2>
+      <ul>
+        {terms.map((k) => <li><CodeText k={k} /></li>)}
+      </ul>
+      <p><CodeText k="developers.contact" values={{ email: SUPPORT_EMAIL }} href={`mailto:${SUPPORT_EMAIL}`} /></p>
+    </section>
+  </LegalPage>
+
+  <style>
+    /* Code is left-to-right Latin in every language, and scrolls inside its own box on a phone. */
+    .dev-code { margin: 0 0 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper-2); color: var(--ink); overflow-x: auto; max-width: 100%; font-size: 13.5px; line-height: 1.6; -webkit-overflow-scrolling: touch; }
+    .dev-code code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+    .dev-code:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .dev-base { margin: 0 0 6px; }
+    .dev-list { margin: 0 0 16px; padding: 0; }
+    .dev-list > div { padding: 12px 0; border-top: 1px solid var(--line); }
+    .dev-list > div:first-child { border-top: 0; }
+    .dev-list dt { margin: 0 0 4px; font-weight: 600; }
+    .dev-list dd { margin: 0; color: var(--ink); }
+    .dev-urls { list-style: none; padding-left: 0; }
+    :global(.legal code) { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85em; padding: 1px 6px; border-radius: 6px; background: var(--paper-2); border: 1px solid var(--line); overflow-wrap: anywhere; }
+    :global(.legal) .dev-code code { font-size: 1em; padding: 0; border: 0; border-radius: 0; background: none; overflow-wrap: normal; }
+  </style>
+</Marketing>

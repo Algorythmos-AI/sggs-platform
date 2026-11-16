@@ -33,6 +33,10 @@ export function docsHealthHtml(h) {
     [`Coupling debt, last ${h.window_days} days`, `${debt.merges_with_debt ?? 0} of ${debt.merges ?? 0} merges changed covered code without its page (${debt.page_flags ?? 0} page flags)`],
     [`Code commits that also changed docs/, last ${h.window_days} days`, `${pct(share.pct)} (${share.with_docs ?? 0} of ${share.code_commits ?? 0})`],
   ];
+  if (h.code_areas) {
+    const a = h.code_areas;
+    rows.push(['Code areas on a wiki page', `${a.covered} of ${a.total} (${a.exempt} exempt, ${a.backlog} in the backlog with no page yet)`]);
+  }
   if (h.sibling_pin_lag) {
     const lag = Object.entries(h.sibling_pin_lag).map(([k, v]) => `${esc(k)}: ${v.days !== undefined ? `${v.days} days` : `${v.commits} commits`} behind`).join('; ');
     rows.push(['Sibling pins behind their branch', lag]);

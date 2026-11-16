@@ -26,8 +26,8 @@ PORT = int(os.environ.get('PORT') or os.environ.get('SGGS_PORT') or '7777')
 # doesn't force an 86 MB DB re-commit. /api/meta and /api/health prefer these; the
 # DB meta row is the fallback. Bump on every search-logic release so the UI footer
 # (which reads /api/meta) reflects the running build.
-APP_VERSION = '1.6.4'
-APP_BUILT = '2026-11-09'
+APP_VERSION = '1.6.5'
+APP_BUILT = '2026-11-16'
 
 
 # The exact source commit of the running build, so a deploy can be verified by
@@ -51,6 +51,10 @@ from romannorm import roman_norm   # noqa: F401  shared fold; re-exported for ge
 # serve.hukam_package, the golden-vector generator, harnesses, tests) are unchanged.
 # ---------------------------------------------------------------------------------------------
 from sggs import core
+import hukamnama_page   # the only HTML this server renders; off unless configured
+import hukamnama_feed   # the Hukamnama feeds (Atom, JSON Feed); off unless configured
+import hukamnama_sitemap   # the Hukamnama pages' own sitemap; off unless configured
+import hukamnama_embed   # the Hukamnama embed, the one framable page; off unless configured
 core.APP_VERSION, core.APP_BUILT, core.APP_COMMIT = APP_VERSION, APP_BUILT, APP_COMMIT
 from sggs.core import (ApiError, LINE_COLS, _FALLTHROUGH, _ID_MAX, _int, _int_str, _local,   # noqa: F401
     attach_translations, db, have_fts, rows_to_list)   # noqa: F401  (re-exported)
@@ -214,12 +218,15 @@ class H(BaseHTTPRequestHandler):
                 return v
         return uuid.uuid4().hex
 
-    def _sec_headers(self):
+    def _sec_headers(self, framable=False):
         # Defence-in-depth for the local app. No strict CSP on purpose: the UI relies on
         # inline event handlers + an inline pre-paint theme script, which a strict policy
         # would break; nosniff/frame-deny/no-referrer are safe and unconditional.
+        # ``framable`` is for the Hukamnama embed alone (hukamnama_embed), which other sites show
+        # in an iframe and which sends its own strict Content-Security-Policy.
         self.send_header('X-Content-Type-Options', 'nosniff')
-        self.send_header('X-Frame-Options', 'DENY')
+        if not framable:
+            self.send_header('X-Frame-Options', 'DENY')
         self.send_header('Referrer-Policy', 'no-referrer')
         # Honoured only over HTTPS (the hosted API); browsers ignore it on http://localhost.
         self.send_header('Strict-Transport-Security', 'max-age=31536000')
@@ -342,6 +349,14 @@ class H(BaseHTTPRequestHandler):
                 seg = u.path.split('/')[2] if u.path.count('/') >= 2 else ''
                 cache = _CACHE_IMMUTABLE if seg in _CACHEABLE else 'no-store'
                 return self._respond(200, body, 'application/json; charset=utf-8', cache)
+            if hukamnama_page.respond(self, u.path):           # the Hukamnama pages, when configured
+                return
+            if hukamnama_feed.respond(self, u.path):           # and its feeds
+                return
+            if hukamnama_sitemap.respond(self, u.path):        # and their sitemap
+                return
+            if hukamnama_embed.respond(self, u.path, u.query):  # and the embed other sites frame
+                return
             return self._serve_static(u.path)
         except ApiError as e:                                  # explicit status (e.g. 404 unknown comp_id)
             msg = json.dumps({'error': e.message}).encode()

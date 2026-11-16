@@ -24,6 +24,9 @@ test('the health table shows each number', () => {
   assert.match(html, /<code>f8b2e506d8bc<\/code>/);
   assert.ok(!/Sibling pins/.test(html), 'no lag row without lag data');
   assert.match(docsHealthHtml({ ...H, sibling_pin_lag: { 'sggs-data': { commits: 3 } } }), /sggs-data: 3 commits behind/);
+  assert.ok(!/Code areas/.test(html), 'no areas row without area data');
+  assert.match(docsHealthHtml({ ...H, code_areas: { total: 61, covered: 45, exempt: 4, backlog: 12, missing: 0 } }),
+    /45 of 61 \(4 exempt, 12 in the backlog with no page yet\)/);
 });
 
 test('without .health.json the widget says it was not measured', () => {

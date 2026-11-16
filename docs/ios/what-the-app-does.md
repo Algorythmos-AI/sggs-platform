@@ -1,6 +1,6 @@
 ---
 title: "What the app does"
-description: "Gurbani Soul screen by screen: the five tabs and The Granth Today, the Raag Clock, sharing, widgets and Live Activity, Siri and deep links, settings, and accessibility."
+description: "Gurbani Soul screen by screen: the tabs, The Granth Today, the Raag Clock, widgets, the TestFlight-only Hukamnama, Siri and deep links, settings, and accessibility."
 sidebar:
   order: 1
 verified:
@@ -84,6 +84,40 @@ A **Live Activity** (opt-in in settings) shows the bani being read and a percent
 Screen and in the Dynamic Island; it never shows a verse. The widgets read only what the app writes
 to the App Group ([privacy and on-device data](privacy-and-on-device-data.md)).
 
+## Hukamnama · Sri Harmandir Sahib (TestFlight only)
+
+The daily Hukamnama taken at Sri Harmandir Sahib, Amritsar, as a push, a sheet, a Nitnem card and
+a widget (gurbani-soul-ios #127, #128, #130; checked against the app's `main` on 2026-11-12,
+version 1.6.4). It is a separate feature from the Hukam of the day above, which it never replaces
+and is never called. The server side is [the Hukamnama service](../architecture/hukamnama.md).
+
+- **Where it ships.** Only in TestFlight builds: `testflight_archive.sh` switches it on for the
+  `testflight` channel alone (`HUKAMNAMA_ENABLED=YES` and the `HUKAMNAMA_WIDGET` compilation
+  condition), and those builds talk to the staging service. An App Store archive compiles it out
+  while the G3 copy review (`docs/review/g3-hukamnama.md`, `REVIEWED: false`) is unsigned, which
+  `HukamnamaGates` in `ios/tests/test_ios_gates.py` enforces. The privacy text and the App Store
+  label (G4) must also change before it is switched on there.
+- **Opt-in.** A toggle in Reminders asks for notification permission and registers the device
+  (`PUT /v1/devices/<token>`): "as soon as it's published" or "at a time I choose" (a schedule of
+  UTC slots built on the device; no zone name leaves it). Turning it off, or losing permission,
+  deletes the registration. The line under the toggle reports today's delivery from the server's
+  answer.
+- **What is shown.** The push carries the date, the Ang and the opening verse the server copied
+  from the corpus. The sheet reads the range from the app's own database and shows it only after
+  the lines hash to `range_sha256`; otherwise it locates the shabad again by Ang and opening verse,
+  or asks for an app update. No code path renders lines that failed the hash. Dates are the
+  Amritsar date.
+- **The Nitnem card** sits beside the Hukam of the day card and shows the Amritsar date and the
+  Ang; the verse is read in the sheet.
+- **The widget** (Home Screen small, medium and large, and the three Lock Screen sizes) is filled
+  by the notification service extension, which writes the push into `hukamnama-snapshot.json` and
+  reloads the widget without editing the notification. While today's Hukamnama is not yet published
+  and only between 05:30 and 14:00 IST, the widget also makes one `GET /v1/hukamnama/today`. Its
+  timeline has its own entries at Amritsar midnight, 05:30 and 14:00 IST, so it never shows an old
+  verse as today's; a shabad that does not fit is not shown in part.
+- **Links.** `sggs://hukamnama` and `sggs://hukamnama/yyyy-MM-dd` (a real date within ±400 days)
+  open the sheet; a notification tap goes there.
+
 ## Siri, Shortcuts, Spotlight and links
 
 - **App Intents** (`AppIntents.swift`): Today's Hukam, Draw a Hukam, What raag is it now, Read a
@@ -122,8 +156,8 @@ Source: `ios/App/Sources/Navigation/Router.swift` in gurbani-soul-ios, read at t
 
 ## What the public build leaves out
 
-There are no feature flags in the code. The app looks at which tables its bundled database has and
-hides what is missing. The **public** profile, the one on the App Store, has no English layer, so
+The one build-time switch is the Hukamnama above, on in TestFlight builds only. Otherwise the app
+looks at which tables its bundled database has and hides what is missing. The **public** profile, the one on the App Store, has no English layer, so
 it has no English search mode, no English toggle and no translation credit. Timing and the banis
 are gated the same way. See [the database pair](db-pair-and-launch-integrity.md) for the two
 profiles and the licence gate that decides which may ship.

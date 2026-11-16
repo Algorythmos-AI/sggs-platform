@@ -173,6 +173,7 @@ jobs:
         run: |
           vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
           vercel build --prod --token="$VERCEL_TOKEN"
+          python3 tools/build_api_functions.py --add-shells .vercel/output
           python3 tools/build_api_functions.py --verify-output .vercel/output
           # The CLI's stdout shape differs between environments (it broke the first gated
           # deploy), so capture both streams, log them, and resolve the URL with a tested

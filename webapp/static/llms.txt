@@ -1,0 +1,18 @@
+# Gurbani Soul
+
+> Sri Guru Granth Sahib Ji, all 1430 Angs, in verbatim Gurmukhi and cited by Ang: an app for iPhone and iPad, and a Knowledge Base on the web.
+
+## Quoting from this site
+
+- The Gurmukhi is scripture. Quote it exactly as shown, whole lines only, and never correct, shorten, re-space or reorder it.
+- Cite every quotation as "Sri Guru Granth Sahib Ji · Ang N", with the Ang shown beside the text.
+- Transliteration and translation are separate, labelled layers. Never present either as the Gurbani.
+- Do not summarise or paraphrase a shabad as if it were the text, and do not generate Gurbani.
+
+## Pages
+
+- [Knowledge Base search](https://gurbanisoul.com/search): search the Granth by word, sound, first letters and theme
+- [Reader](https://gurbanisoul.com/reader): read any Ang
+- [Features](https://gurbanisoul.com/en/features): what the app does
+- [Learn](https://gurbanisoul.com/en/learn): short, sourced explanations
+- [Support](https://gurbanisoul.com/en/support) and [Privacy](https://gurbanisoul.com/en/privacy)
