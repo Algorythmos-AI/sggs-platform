@@ -2,7 +2,7 @@ import itertools
 import unittest
 from datetime import date
 
-from hukamnama.corpus import (RAHAO_MAX_LINES, _lines, NoMatch, Resolution, agrees, lines_in_range, open_ro, rahao_block,
+from hukamnama.corpus import (RAHAO_MAX_LINES, _lines, closes_shabad, NoMatch, Resolution, agrees, lines_in_range, open_ro, rahao_block,
                               range_sha256, resolution_for_range, resolve, scripture_sha256)
 from hukamnama.locate import words
 from hukamnama.sources import Candidate, parse_hs, parse_mukhwak
@@ -96,6 +96,58 @@ class ResolverTests(unittest.TestCase):
         for a, b in ((10, 5), (1, 1000), (60_000, 61_000)):
             with self.assertRaises(ValueError):
                 resolution_for_range(self.con, a, b)
+
+    def _text(self, a, b):
+        return " ".join(g for (g,) in self.con.execute("SELECT gurmukhi FROM lines WHERE id BETWEEN ? AND ? ORDER BY id", (a, b)))
+
+    def test_a_shabad_inside_a_longer_composition_resolves(self):
+        """14 Nov 2026: Bhagat Kabir, Ang 692 (lines 29956-29961, ending ॥੨॥੩॥). Comp 2743 holds
+        several of his shabads under one heading; the day was held as 'ends mid-composition'."""
+        r = resolve(self.con, candidate(692, None, self._text(29956, 29961), day=date(2026, 11, 14)))
+        self.assertIsInstance(r, Resolution, getattr(r, "reason", ""))
+        self.assertEqual((r.first_line_id, r.last_line_id, r.ang), (29956, 29961, 692))
+        self.assertEqual(r.rahao_gurmukhi[-1].endswith("ਰਹਾਉ ॥"), True)
+
+    def test_a_page_cut_at_a_plain_verse_end_inside_it_is_still_no_match(self):
+        r = resolve(self.con, candidate(692, None, self._text(29956, 29957), day=date(2026, 11, 14)))
+        self.assertIsInstance(r, NoMatch)
+        self.assertIn("mid-composition", r.reason)
+
+    def test_closes_shabad(self):
+        for line, want in (("ਕਿਆ ਕਾਸੀ ਕਿਆ ਊਖਰੁ ਮਗਹਰੁ ਰਾਮੁ ਰਿਦੈ ਜਉ ਹੋਈ ॥੨॥੩॥", True),
+                           ("ਨਾਮ ਉਦਕੁ ਪੀਵਤ ਜਨ ਨਾਨਕ ਤਿਆਗੇ ਸਭਿ ਅਨੁਰਾਗਾ ॥੨॥੧੬॥੪੭॥", True),
+                           ("ਜਿਉ ਜਲੁ ਜਲ ਮਹਿ ਪੈਸਿ ਨ ਨਿਕਸੈ ਤਿਉ ਢੁਰਿ ਮਿਲਿਓ ਜੁਲਾਹੋ ॥੧॥", False),
+                           ("ਜਉ ਤਨੁ ਕਾਸੀ ਤਜਹਿ ਕਬੀਰਾ ਰਮਈਐ ਕਹਾ ਨਿਹੋਰਾ ॥੧॥ ਰਹਾਉ ॥", False),
+                           ("ਹਰਿ ਕੇ ਲੋਗਾ ਮੈ ਤਉ ਮਤਿ ਕਾ ਭੋਰਾ ॥", False)):
+            self.assertEqual(closes_shabad(line), want, line)
+
+    def test_every_inner_shabad_resolves_to_itself_or_to_nothing(self):
+        """Every numbered shabad that ends inside a longer composition, served as SGPC would serve
+        it: it resolves to exactly its own lines, or is held — never to another range."""
+        rows = _lines(self.con, "ORDER BY id", ())
+        exact = wrong = 0
+        start = None
+        for k, x in enumerate(rows):
+            if x.is_header:
+                start = None
+                continue
+            if start is None:
+                start = k
+            nxt = rows[k + 1] if k + 1 < len(rows) else None
+            if closes_shabad(x.gurmukhi):
+                inner = nxt is not None and not nxt.is_header and nxt.comp_id == x.comp_id
+                if inner:
+                    a, b = rows[start], x
+                    r = resolve(self.con, candidate(a.ang, None, self._text(a.id, b.id)))
+                    if isinstance(r, Resolution):
+                        if (r.first_line_id, r.last_line_id) == (a.id, b.id):
+                            exact += 1
+                        else:
+                            wrong += 1
+                start = None
+        self.assertEqual(wrong, 0)
+        self.assertGreater(exact, 100)
+        print(f"\n  inner shabads: {exact} exact, 0 wrong")
 
     def test_rahao_is_the_refrain_couplet_verbatim(self):
         r = resolution_for_range(self.con, 29574, 29580)        # 12 Nov 2026, Ang 682

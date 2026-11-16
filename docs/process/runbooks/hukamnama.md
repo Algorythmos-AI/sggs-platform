@@ -82,7 +82,8 @@ Ang).
    ShabadOS as well. **Never change the corpus to match SGPC**: a real fault in the corpus is
    flagged for review in sggs-data, never fixed here.
 4. If the shabad is certain, `approve` its range: the first line is the first verse, or the heading
-   line before it when the page printed one, and the last line is where the composition ends. Put
+   line before it when the page printed one, and the last line is where the shabad ends (its
+   numbered marker, such as ॥੨॥੩॥, even when the composition carries on). Put
    the reason in words someone can audit later (for example "SGPC page variant in one word").
 5. If you are not certain, leave it held. Readers see `pending`, the website and the app show the
    most recent day under its own date, and nothing is wrong.
