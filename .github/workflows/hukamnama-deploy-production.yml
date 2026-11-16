@@ -2,7 +2,8 @@ name: hukamnama-deploy-production
 
 # Deploys the Hukamnama service (services/hukamnama) to its PRODUCTION Render service, from a
 # release tag. Never from a branch, never on a push: the owner dispatches it with the tag that
-# production runs (vX.Y.Z on main). Render auto-deploy is OFF for the service.
+# production runs (vX.Y.Z on main). Render auto-deploy is OFF for the service. Dispatch it from
+# main (`--ref main`): the production environment refuses a run from any other branch.
 #
 # Before anything is deployed it proves, against the database the tag pins, every day the running
 # service has published (scripts/ci/hukamnama_preflight.py). A dataset bump that moved or changed
