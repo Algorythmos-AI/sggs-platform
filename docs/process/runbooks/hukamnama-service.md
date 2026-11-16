@@ -184,6 +184,32 @@ render ssh <service-id>              # then: ls /var/data/archive; python -m huk
 Copy a day's archive off the box for the replay tests with
 `render ssh <service-id> -- tar -C /var/data/archive -czf - 2026-11-10 > hk-2026-11-10.tgz`.
 
+## Phone alerts (ntfy)
+
+A held day only reaches readers once you approve it, so every new alert is posted to your phone
+the moment the service raises it, through [ntfy](https://ntfy.sh) (free app, no account). A hold, a
+closed window with nothing published, a stopped push or a failed dead-man check is **urgent**
+(sounds through the lock screen and Focus, if you allow it); a late or changed page is **high**.
+Each alert says what happened, what readers see, and the command to run; tapping it opens this
+runbook. It carries the date, Ang and reason only, never a device token or reader data.
+
+Setup, once per environment:
+
+1. Make a topic name that nobody can guess (it is the secret: whoever knows it can read the
+   alerts): `python3 -c "import secrets; print('hk-' + secrets.token_urlsafe(18))"`.
+2. In the ntfy iPhone app: **+** → that topic on `ntfy.sh` → subscribe. In iOS Settings → ntfy,
+   allow notifications; to let urgent alerts through Sleep, add ntfy to the Focus's allowed apps.
+3. Render → the service → Environment: `HUKAMNAMA_ALERT_NTFY_URL = https://ntfy.sh/<topic>` and
+   `HUKAMNAMA_ENV = staging` (or `production`). A malformed value stops the service from starting,
+   as a half-configured backup does.
+4. GitHub → Settings → Secrets → Actions: the same URL as `HUKAMNAMA_ALERT_NTFY_URL`, for the
+   dead-man check (it alerts when the service itself is down and cannot post).
+5. Test: `printf 'test alert' | HUKAMNAMA_ALERT_NTFY_URL=https://ntfy.sh/<topic> HUKAMNAMA_ENV=staging
+   PYTHONPATH=services/hukamnama python3 -m hukamnama.alerts 2026-11-16 deadman` — your phone
+   should ring within seconds.
+
+Unset, the service runs as before, without phone alerts; the dead-man issue stays the record.
+
 ## When a morning goes wrong
 
 | Symptom | Action |

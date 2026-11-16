@@ -138,6 +138,13 @@ no time-zone database is needed, and a naive datetime is refused.
 | 14:00 | `not_published` alert if still nothing |
 | 04:30–10:00 | deploy freeze for the service (23:00–04:30 UTC in `hukamnama-deploy.yml`) |
 
+## Alerts
+
+Every new alert (one per day and kind) is stored, shown on `/health`, and, when
+`HUKAMNAMA_ALERT_NTFY_URL` is set, posted at once to the owner's phone through ntfy (`alerts.py`):
+holds and lost mornings urgent, late or changed pages high. The external dead-man check posts to the
+same topic when the service itself is down. Setup: the [service runbook](../process/runbooks/hukamnama-service.md#phone-alerts-ntfy).
+
 ## Push
 
 Sending is off unless `HUKAMNAMA_SEND=on`, which needs the APNs Auth Key; without a usable key the
