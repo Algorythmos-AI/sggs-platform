@@ -47,9 +47,10 @@ Anything else is 404 and never reaches the service.
 - **Origin secret.** Passed-through requests carry `X-Origin-Auth` from the `ORIGIN_SECRET`
   secret, and `X-Client-IP` from the address Cloudflare saw; values sent by the caller are always
   replaced. The service believes `X-Client-IP` only with the secret (`HUKAMNAMA_ORIGIN_SECRET`).
-- **Rate limit.** When a `RATE_LIMITER` binding is present, reads are limited per client address
-  and answer 429 with `Retry-After`. The binding is not configured in `wrangler.toml` yet: check
-  the current Cloudflare documentation for its configuration before enabling it.
+- **Rate limit.** The `RATE_LIMITER` binding limits reads per client address (`CF-Connecting-IP`)
+  to 120 a minute and answers 429 with `Retry-After`. Cloudflare counts per location and
+  approximately: a burst of 300 requests from one address on 2026-11-16 got 235 answers and 65
+  429s. Without the binding the Worker does not limit.
 
 ## Run the tests
 
