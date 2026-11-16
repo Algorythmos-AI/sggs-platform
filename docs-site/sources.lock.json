@@ -99,7 +99,7 @@
     "gurbani-soul-ios": {
       "repository": "Algorythmos-AI/gurbani-soul-ios",
       "ref": "main",
-      "commit": "0c67ec5414a93d70e920be1c16331560a8b864f3",
+      "commit": "ff5217d0f02972ae97b26bdd0c71c395aab74e0c",
       "alias": "ios",
       "include": [
         "docs/ios/*.md",
@@ -211,8 +211,8 @@
           "sha256": "cee1944242c0d2575f21967b3d05f31953e239c1b00c465f629f74f572699a28"
         },
         "ios/testflight-builds.json": {
-          "blob": "5fb4c10d7b78c1fae4cbe0b259015eeca6b7003d",
-          "sha256": "1bd7ac484fdaefb3f054c63653a81fe78a8131ccb47da54b0463e457e7b7e0b9"
+          "blob": "85c4aefa8a60bfcb34c80706d540ad3a23c165b0",
+          "sha256": "e349f87a8413b5f7fda48c667fb76f65264794d2226cb9305f74b39dea28689c"
         },
         "ios/tests/test_ios_gates.py": {
           "blob": "5fdaf586fabf51c235c6fadbb98873ee400894c6",
