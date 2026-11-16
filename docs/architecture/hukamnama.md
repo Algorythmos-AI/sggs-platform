@@ -33,8 +33,8 @@ backups are in [the service runbook](../process/runbooks/hukamnama-service.md); 
 | State backup (Litestream to R2) | In the code and the image (#378); on when the four R2 values are set on the service. |
 | Push to iPhones (APNs) | In the code (#381, #382). On staging `/health` reports `push.sending: true`; a push reached a TestFlight device end to end on 2026-11-11 (gurbani-soul-ios #130). Staging only ever reaches TestFlight builds. |
 | The app's side: registration, sheet, card, widget, notification service extension | Shipped in **TestFlight builds only** (gurbani-soul-ios #127, #128, #130). App Store builds compile it out until its G3 copy review and G4 privacy changes are signed ([what the app does](../ios/what-the-app-does.md#hukamnama--sri-harmandir-sahib-testflight-only)). |
-| Public snapshot files | In the code (#383, #385). Writing them to an R2 bucket is **not set up** on any service yet. |
-| Edge Worker (`services/hukamnama-edge`) for `api.gurbanisoul.com` | In the code and tested in CI (#384). **Not deployed**; `api.gurbanisoul.com` does not answer yet. |
+| Public snapshot files | In the code (#383, #385). Production writes them to the R2 bucket `hukamnama-public` (created 2026-11-16); staging has no public bucket. |
+| Edge Worker (`services/hukamnama-edge`) for `api.gurbanisoul.com` | Deployed 2026-11-16 as `hukamnama-edge`, with `api.gurbanisoul.com` as its Custom Domain, reading `hukamnama-public`. Reads answer; it serves nothing until production publishes a day. Passing `/health` and device registration to the service needs `ORIGIN_URL` (#413). |
 | Website pages, feeds, sitemap and embed | In the code (#386–#391); routed **on staging only**, where they read `api-staging.gurbanisoul.com` ([the website](website.md#the-hukamnama-pages-filled-by-the-server-staging-only)). Production keeps those paths off until launch. |
 | Developers page and the OpenAPI spec | In the code (#393, #394); the spec is `contract/hukamnama.openapi.json`, generated. |
 | Planned, not built | The R2 copy of the fetch archive; the service checking the Worker's `X-Origin-Auth`; the Worker's rate-limit binding. |
@@ -175,7 +175,8 @@ identical either way.
 The edge Worker serves those files as the public API and holds no scripture. It computes today's
 Amritsar date per request, serves a file only when its own date equals the date asked for, never
 serves a future date, and answers 503 rather than another day's text. Device registration and
-`/health` are passed to the service. The routes, caching and errors are on
+`/health` are passed to the service: to `ORIGIN_URL`, the service's own https origin, when it is set
+(required for a Custom Domain, which has nothing behind its hostname), otherwise to the same URL. The routes, caching and errors are on
 [the Hukamnama API](../api/hukamnama.md) page.
 
 ## Hosting and environments
