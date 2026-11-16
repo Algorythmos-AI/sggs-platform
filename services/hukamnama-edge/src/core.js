@@ -19,7 +19,10 @@
 //     different day's Hukamnama.
 //   * A day without a file is `pending`. Held days have no file, so they read as pending too.
 //   * Reads are open to any origin (CORS) and carry a strong ETag. Device registration and
-//     /health are passed to the service unchanged, with no CORS headers added here.
+//     /health are passed to the service, with no CORS headers added here: to ORIGIN_URL when it
+//     is set (the service's own https origin; needed when this Worker owns its hostname as a
+//     Custom Domain and nothing sits behind it), otherwise to the same URL (a Worker on a route
+//     in front of the service).
 
 export const PREFIX = "v1/hukamnama/";
 export const INDEX = PREFIX + "index.json";
@@ -226,7 +229,32 @@ async function toOrigin(request, env) {
     const ip = request.headers.get("CF-Connecting-IP");
     if (ip) headers.set("X-Client-IP", ip);
   }
-  return (env.ORIGIN_FETCH || fetch)(new Request(request, { headers }));
+  let target = request.url;
+  if (env.ORIGIN_URL !== undefined && env.ORIGIN_URL !== "") {
+    const origin = originOf(env.ORIGIN_URL);
+    if (origin === null) {
+      // A misconfigured origin is a setup error: say so, and never send the request somewhere else.
+      return fail(request, 503, "unavailable", "temporarily unavailable", { "Retry-After": "30" });
+    }
+    const url = new URL(request.url);
+    target = origin + url.pathname + url.search;
+  }
+  const body = request.method === "GET" || request.method === "HEAD" ? undefined : await request.arrayBuffer();
+  return (env.ORIGIN_FETCH || fetch)(new Request(target, { method: request.method, headers, body, redirect: "manual" }));
+}
+
+/** "https://host[:port]" when the value is exactly an https origin (no path, query or credentials), else null. */
+export function originOf(value) {
+  let u;
+  try {
+    u = new URL(String(value));
+  } catch {
+    return null;
+  }
+  if (u.protocol !== "https:" || u.username || u.password || u.search || u.hash || (u.pathname !== "/" && u.pathname !== "")) {
+    return null;
+  }
+  return u.origin;
 }
 
 export async function handle(request, env, now = new Date()) {
