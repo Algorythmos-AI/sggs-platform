@@ -157,8 +157,13 @@ Production never deploys on a push. After a release, dispatch `hukamnama-deploy-
 the release tag:
 
 ```bash
-gh workflow run hukamnama-deploy-production.yml --repo Algorythmos-AI/sggs-platform -f tag=vX.Y.Z
+gh workflow run hukamnama-deploy-production.yml --repo Algorythmos-AI/sggs-platform --ref main -f tag=v1.7.0
 ```
+
+Write the real tag in place of `v1.7.0` (`gh release list` shows the latest). `--ref main` is
+required: the `production` environment only accepts runs from `main`, so a run dispatched from
+`integration` is rejected before its first step. That also means the workflow can be used only
+once a release has carried it to `main`.
 
 It refuses a tag that is not `vX.Y.Z` on `main`, runs the service's tests on the tag, and then,
 before asking Render for anything, proves every day the running service has published against the
