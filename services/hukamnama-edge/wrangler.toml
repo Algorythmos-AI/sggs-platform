@@ -1,11 +1,27 @@
-# The public Hukamnama API (api.gurbanisoul.com). Deployed by the owner with `npx wrangler deploy`
-# from this directory; nothing here is deployed by CI yet. No account id, zone id or secret
-# belongs in this file: wrangler reads the account from its login, and the origin secret is set
-# with `npx wrangler secret put ORIGIN_SECRET`.
+# The public Hukamnama API (api.gurbanisoul.com). Deployed by the owner, with `npx wrangler deploy`
+# from this directory or by pasting a one-file bundle into the dashboard editor; nothing here is
+# deployed by CI yet. No account id, zone id or secret belongs in this file: wrangler reads the
+# account from its login, and the origin secret is set with `npx wrangler secret put ORIGIN_SECRET`.
+#
+# This file records the production Worker as it runs (set up in the dashboard on 2026-11-16), so a
+# `wrangler deploy` from here keeps every binding and variable instead of dropping the ones that
+# were added by hand. The Custom Domain `api.gurbanisoul.com` is attached in the dashboard.
 name = "hukamnama-edge"
 main = "src/index.js"
-compatibility_date = "2026-10-01"
-workers_dev = false
+compatibility_date = "2026-11-16"
+workers_dev = true
+
+# Where /health and device registration are passed on: the service's own https origin. Needed
+# because api.gurbanisoul.com is a Custom Domain with nothing behind it (core.js toOrigin).
+[vars]
+ORIGIN_URL = "https://sggs-hukamnama-prod.onrender.com"
+
+# Public reads per client address: 120 a minute, the same budget the service gives reads.
+# Cloudflare counts per location and approximately; past the limit the Worker answers 429.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 120, period = 60 }
 
 # The bucket the Hukamnama service writes its public snapshot to (services/hukamnama, public.py).
 [[r2_buckets]]

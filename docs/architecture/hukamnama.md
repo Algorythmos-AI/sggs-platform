@@ -34,10 +34,10 @@ backups are in [the service runbook](../process/runbooks/hukamnama-service.md); 
 | Push to iPhones (APNs) | In the code (#381, #382). On staging `/health` reports `push.sending: true`; a push reached a TestFlight device end to end on 2026-11-11 (gurbani-soul-ios #130). Staging only ever reaches TestFlight builds. |
 | The app's side: registration, sheet, card, widget, notification service extension | Shipped in **TestFlight builds only** (gurbani-soul-ios #127, #128, #130). App Store builds compile it out until its G3 copy review and G4 privacy changes are signed ([what the app does](../ios/what-the-app-does.md#hukamnama--sri-harmandir-sahib-testflight-only)). |
 | Public snapshot files | In the code (#383, #385). Production writes them to the R2 bucket `hukamnama-public` (created 2026-11-16); staging has no public bucket. |
-| Edge Worker (`services/hukamnama-edge`) for `api.gurbanisoul.com` | Deployed 2026-11-16 as `hukamnama-edge`, with `api.gurbanisoul.com` as its Custom Domain, reading `hukamnama-public`. Reads answer; it serves nothing until production publishes a day. Passing `/health` and device registration to the service needs `ORIGIN_URL` (#413). |
+| Edge Worker (`services/hukamnama-edge`) for `api.gurbanisoul.com` | Deployed 2026-11-16 as `hukamnama-edge`, with `api.gurbanisoul.com` as its Custom Domain, reading `hukamnama-public`. Reads answer; it serves nothing until production publishes a day. `/health` and device registration reach the service through `ORIGIN_URL` with the shared `ORIGIN_SECRET`; reads are limited to 120 a minute per address. The production service refuses direct `/v1` calls (`HUKAMNAMA_ORIGIN_REQUIRED=on`). |
 | Website pages, feeds, sitemap and embed | In the code (#386–#391); routed **on staging only**, where they read `api-staging.gurbanisoul.com` ([the website](website.md#the-hukamnama-pages-filled-by-the-server-staging-only)). Production keeps those paths off until launch. |
 | Developers page and the OpenAPI spec | In the code (#393, #394); the spec is `contract/hukamnama.openapi.json`, generated. |
-| Planned, not built | The R2 copy of the fetch archive; the service checking the Worker's `X-Origin-Auth`; the Worker's rate-limit binding. |
+| Planned, not built | The R2 copy of the fetch archive. |
 
 ## The flow
 
