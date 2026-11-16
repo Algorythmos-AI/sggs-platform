@@ -3,6 +3,34 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.6.5] — 2026-11-16
+
+Everything for the daily Hukamnama from Sri Harmandir Sahib on the web and as a public API is in place and switched off: nothing new is routed, linked or indexed in production until the launch switch is set. The privacy policy now describes the optional Hukamnama notification. No scripture, corpus or dataset change.
+
+### Added
+- **Hukamnama pages, built but not routed in production** (#386, #387, #388, #390, #404): `/{lang}/hukamnama` and its dated pages in English, Punjabi and French, filled by the API function from a built shell. Every line is read from the server's own corpus and proved against the published hash before it is shown; a day is never shown under another day's date. Previous and next days, breadcrumbs, a correction notice and a link to report a text error.
+- **Feeds, a sitemap and an embed, on the same switch** (#389, #390, #391): Atom and JSON feeds, `/sitemap-hukamnama.xml`, and `/embed/hukamnama`, the one page other sites may frame.
+- **A public Hukamnama API, not yet deployed** (#383, #384, #385, #394): each published day is written as a file and served by an edge Worker, so public reads never reach the process that polls SGPC and sends the push. Its OpenAPI spec is generated from what the two programs really answer, with a guide and a second reference on the wiki.
+- **The Developers page, hidden until launch** (#393): `/{lang}/developers` explains the API, how to check the text, how to show and credit it, and the terms. It is `noindex`, absent from the sitemap and linked from nowhere until launch.
+- **Launch kit** (#403): `robots.txt` and a new `llms.txt` (a plain map of the site with the rules for quoting Gurbani) gain their Hukamnama parts on the launch switch; a search-engine ping after the morning check; the launch runbook.
+- **The Hukamnama service on a staging soak** (#376, #378, #381, #401, #409): deployed to Render with its state backed up, device registration and the APNs sender for the app's optional notification, the shabad's Rahao couplet in the record and the push, and alerts to the owner's phone.
+- **Owner tools and watchdogs for the service** (#397, #398, #402): `correct`, `pause` and `resume`; a production deploy job run from a release tag; a proof before every deploy that each published day still matches the corpus; a morning check that the pages show what the API published.
+- **Decision records** (#399): ADR-0014 (the public API is published once and served from the edge) and ADR-0015 (the English meaning layer may be shown with the daily Hukamnama behind one switch, which is off).
+
+### Changed
+- **Privacy policy** (#400): it said the app makes no network connections and that no device token is created or sent anywhere. It now names the one exception, the optional Hukamnama notification, and says what that sends, what is stored and when it is deleted. In all three languages.
+- **The service behind an edge** (#397): only a request carrying the edge's secret may name its client address; reads have their own rate budget; a stalled connection is dropped.
+- **After a dataset bump** (#402): the service proves its published days in the new corpus and carries on when they are byte-identical, instead of refusing to start.
+
+### Fixed
+- **A shabad that ends inside a longer composition now resolves** (#408): the service held 14 November because Bhagat Kabir's shabad on Ang 692 shares a heading with others in the corpus.
+- **The daily push** (#382): the current day only, with no cancelled or lost pushes.
+- **A no-match hold names the nearest corpus run** (#380), so a held morning can be checked by hand.
+- **The wiki updates itself again** (#396): flaky installs, a skipped generator loop and missing health on deploy.
+
+### Data
+- None. The dataset pin is unchanged.
+
 ## [1.6.4] — 2026-11-09
 
 The engineering wiki is brought up to date with 1.6.3 and now keeps itself in step with the code. Web, wiki and tooling only; no scripture, corpus or dataset change.
