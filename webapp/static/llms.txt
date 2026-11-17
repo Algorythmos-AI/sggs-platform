@@ -16,3 +16,13 @@
 - [Features](https://gurbanisoul.com/en/features): what the app does
 - [Learn](https://gurbanisoul.com/en/learn): short, sourced explanations
 - [Support](https://gurbanisoul.com/en/support) and [Privacy](https://gurbanisoul.com/en/privacy)
+
+## Hukamnama · Sri Harmandir Sahib
+
+The daily Hukamnama from Sri Harmandir Sahib, Amritsar. SGPC publishes the Hukamnama; this site finds the shabad by Ang and shows its text from Sri Guru Granth Sahib Ji. Gurbani Soul is not affiliated with SGPC.
+
+- [Today's Hukamnama](https://gurbanisoul.com/en/hukamnama): also in Punjabi (/pa/hukamnama) and French (/fr/hukamnama); a past day is at /en/hukamnama/YYYY-MM-DD
+- [For developers](https://gurbanisoul.com/en/developers): the free API, how to check the text against its hash, display rules and terms
+- API: https://api.gurbanisoul.com/v1/hukamnama/today (JSON, no key)
+- Feeds: https://gurbanisoul.com/feeds/hukamnama.xml and https://gurbanisoul.com/feeds/hukamnama.json
+- A Hukamnama belongs to its date in Amritsar (UTC+05:30). Call it today's only on that date.

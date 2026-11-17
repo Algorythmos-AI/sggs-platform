@@ -44,8 +44,8 @@ double danda) and resolves it:
 
 | Set | Exact | Held | Wrong |
 |---|---|---|---|
-| All compositions | 4,515 | 9 | **0** |
-| Vaar units (saloks + pauri) | 456 | 15 | **0** |
+| All compositions | 4,519 | 9 | **0** |
+| Vaar units (saloks + pauri) | 462 | 9 | **0** |
 
 The held cases are whole long banis, and pauri units whose `vaar_units.n_lines` stops short. They
 go to the owner.

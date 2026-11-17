@@ -3,9 +3,12 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
-## [1.6.6] — 2026-11-17
+## [1.7.0] — 2026-11-17
 
-The Hukamnama service now serves each shabad with its whole printed heading, and the public API's production edge is in place and hardened. The website's Hukamnama features stay switched off. No scripture, corpus or dataset change.
+The daily Hukamnama from Sri Harmandir Sahib goes live on gurbanisoul.com and as a free public API at `api.gurbanisoul.com`. Every line is read from our own corpus and proved against the published hash before it is shown. The English meaning layer stays off. Version 1.6.6 was prepared but not released; its changes are part of this release. No scripture, corpus or dataset change.
+
+### Added
+- **Hukamnama · Sri Harmandir Sahib, live** (launch switch, this release): `/{lang}/hukamnama` and its dated pages in English, Punjabi and French; the Atom and JSON feeds; `/sitemap-hukamnama.xml`; and `/embed/hukamnama` are now served in production from the public API. The Developers page is listed and indexable and is linked from the footer; `robots.txt` names the Hukamnama sitemap and `llms.txt` gains its Hukamnama section.
 
 ### Changed
 - **The public API's production edge** (#413, #414): `api.gurbanisoul.com` passes `/health` and device registration on to the service through a configured origin; reads are rate-limited at the edge; the service refuses direct calls that did not come through it. The Worker's configuration in the repository now matches what runs.

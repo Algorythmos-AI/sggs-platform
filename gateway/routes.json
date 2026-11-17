@@ -14,6 +14,7 @@
   },
   "production": {
     "api_platform": "vercel",
+    "hukamnama_api": "https://api.gurbanisoul.com",
     "services": []
   }
 }
