@@ -9,6 +9,7 @@
     "features": "Features",
     "watch": "The watch",
     "learn": "Learn",
+    "hukamnama": "Hukamnama",
     "knowledgeBase": "Knowledge Base",
     "support": "Support",
     "privacy": "Privacy",
@@ -89,6 +90,10 @@
     "verse": {
       "cite": "Sri Guru Granth Sahib Ji · Ang {ang}",
       "note": "Shown verbatim from the source edition."
+    },
+    "hukamnama": {
+      "link": "Today's Hukamnama · Sri Harmandir Sahib",
+      "developers": "For developers · Hukamnama API"
     },
     "read": {
       "chapter": "Read",
