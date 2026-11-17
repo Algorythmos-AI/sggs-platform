@@ -92,39 +92,42 @@ class Gateway(unittest.TestCase):
         import hukamnama_sitemap
         self.assertEqual(gg.SITEMAP, hukamnama_sitemap.PATH)
         sitemap = [r for r in VERCEL["rewrites"] if r["source"].startswith("/sitemap")]
-        self.assertEqual([(r["destination"], r["has"][0]["value"]) for r in sitemap], [("/api/svc/all", CFG["staging"]["host"])])
+        # staging by its host, production (launched in 1.7.0) unconditionally
+        self.assertEqual([(r["destination"], r.get("has")) for r in sitemap],
+                         [("/api/svc/all", [{"type": "host", "value": CFG["staging"]["host"]}]), ("/api/svc/all", None)])
         self.assertTrue(re.fullmatch(sitemap[0]["source"], gg.SITEMAP))
         self.assertFalse(re.fullmatch(sitemap[0]["source"], "/sitemap.xml"))             # the site's own sitemap stays static
         rules = [r for r in VERCEL["rewrites"] if r["source"].startswith("/feeds")]
-        self.assertEqual(len(rules), len(gg.FEEDS))
+        self.assertEqual(len(rules), 2 * len(gg.FEEDS))
         for r in rules:
             self.assertEqual(r["destination"], "/api/svc/all")
-            self.assertEqual(r["has"], [{"type": "host", "value": CFG["staging"]["host"]}])
+            self.assertIn(r.get("has"), ([{"type": "host", "value": CFG["staging"]["host"]}], None))
+        self.assertEqual(len([r for r in rules if not r.get("has")]), len(gg.FEEDS))
         sources = [re.compile("^" + r["source"] + "$") for r in rules]
         for path in gg.FEEDS:
             self.assertTrue(any(s.match(path) for s in sources), path)
         for path in ("/feeds/hukamnamaXxml", "/feeds/hukamnama.xml/x", "/feeds/other.xml", "/en/feeds/hukamnama.xml"):
             self.assertFalse(any(s.match(path) for s in sources), path)
         off = copy.deepcopy(CFG)
-        del off["staging"]["hukamnama_api"]
+        del off["staging"]["hukamnama_api"], off["production"]["hukamnama_api"]
         self.assertFalse(any(r["source"].startswith("/feeds") for r in gg.rewrites(off)))
 
     def test_hukamnama_pages_go_to_all_only_where_the_environment_names_the_api(self):
         self.assertTrue(CFG["staging"].get("hukamnama_api"), "staging serves the pages")
+        self.assertEqual(CFG["production"].get("hukamnama_api"), "https://api.gurbanisoul.com", "launched in 1.7.0")
         rules = self._page_rules(VERCEL["rewrites"])
-        self.assertEqual(len(rules), 2)
+        self.assertEqual(len(rules), 4)                      # two for staging by host, two for production
         for r in rules:
             self.assertEqual(r["destination"], "/api/svc/all")
-            self.assertEqual(r["has"], [{"type": "host", "value": CFG["staging"]["host"]}])
-        if not CFG["production"].get("hukamnama_api"):        # until launch: production keeps the static site
-            self.assertFalse(any(not r.get("has") for r in rules))
+            self.assertIn(r.get("has"), ([{"type": "host", "value": CFG["staging"]["host"]}], None))
+        self.assertEqual(len([r for r in rules if not r.get("has")]), 2)
+        dark = copy.deepcopy(CFG)
+        del dark["production"]["hukamnama_api"]               # before launch: production keeps the static site
+        self.assertFalse(any(not r.get("has") for r in self._page_rules(gg.rewrites(dark))))
         off = copy.deepcopy(CFG)
-        del off["staging"]["hukamnama_api"]
+        del off["staging"]["hukamnama_api"], off["production"]["hukamnama_api"]
         self.assertEqual(self._page_rules(gg.rewrites(off)), [])
-        live = copy.deepcopy(CFG)
-        live["production"]["hukamnama_api"] = "https://api.gurbanisoul.com"
-        self.assertEqual(len([r for r in self._page_rules(gg.rewrites(live)) if not r.get("has")]), 2)
-        self.assertEqual(gg.hukamnama_apis(live), {"preview": CFG["staging"]["hukamnama_api"],
+        self.assertEqual(gg.hukamnama_apis(CFG), {"preview": CFG["staging"]["hukamnama_api"],
                                                   "production": "https://api.gurbanisoul.com"})
 
     def test_hukamnama_page_rules_match_exactly_the_paths_the_renderer_serves(self):
@@ -160,9 +163,10 @@ class Gateway(unittest.TestCase):
         sys.path.insert(0, str(ROOT / "webapp"))
         import hukamnama_embed
         self.assertEqual(gg.EMBED, hukamnama_embed.PATH)
-        rule, = [r for r in VERCEL["rewrites"] if r["source"].startswith("/embed")]
-        self.assertEqual((rule["source"], rule["destination"], rule["has"][0]["value"]),
-                         ("/embed/hukamnama", "/api/svc/all", CFG["staging"]["host"]))
+        embeds = [r for r in VERCEL["rewrites"] if r["source"].startswith("/embed")]
+        self.assertEqual([(r["source"], r["destination"], r.get("has")) for r in embeds],
+                         [("/embed/hukamnama", "/api/svc/all", [{"type": "host", "value": CFG["staging"]["host"]}]),
+                          ("/embed/hukamnama", "/api/svc/all", None)])
         site, embed = VERCEL["headers"][0], VERCEL["headers"][1]
         site_re, embed_re = re.compile("^" + site["source"] + "$"), re.compile("^" + embed["source"] + "$")
         for path in ("/", "/en", "/en/hukamnama", "/embed", "/embed/other", "/embedded", "/api/health", "/en/embed/hukamnama",
