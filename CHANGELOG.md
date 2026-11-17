@@ -3,6 +3,16 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.6.6] — 2026-11-17
+
+The Hukamnama service now serves each shabad with its whole printed heading, and the public API's production edge is in place and hardened. The website's Hukamnama features stay switched off. No scripture, corpus or dataset change.
+
+### Changed
+- **The public API's production edge** (#413, #414): `api.gurbanisoul.com` passes `/health` and device registration on to the service through a configured origin; reads are rate-limited at the edge; the service refuses direct calls that did not come through it. The Worker's configuration in the repository now matches what runs.
+
+### Fixed
+- **A Hukamnama keeps its whole printed heading** (#416): a shabad that opens its composition is served from the first line of that composition's heading run in the corpus (raag title, ghar, the invocation, a salok label), whatever the source titles it. 17 November (Ang 604) was served without its two-line heading and was corrected on the running service.
+
 ## [1.6.5] — 2026-11-16
 
 Everything for the daily Hukamnama from Sri Harmandir Sahib on the web and as a public API is in place and switched off: nothing new is routed, linked or indexed in production until the launch switch is set. The privacy policy now describes the optional Hukamnama notification. No scripture, corpus or dataset change.
