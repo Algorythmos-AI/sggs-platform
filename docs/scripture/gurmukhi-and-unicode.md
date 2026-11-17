@@ -4,7 +4,7 @@ description: "The script of the Granth and its signs in Unicode: vowel signs, th
 sidebar:
   order: 5
 verified:
-  commit: 6332e947
+  commit: "6332e947"
   date: "2026-09-25"
 ---
 # Gurmukhi and Unicode

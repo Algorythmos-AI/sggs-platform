@@ -4,7 +4,7 @@ description: "The bards' praise-verses of the first five Gurus on Angs 1385–14
 sidebar:
   order: 4
 verified:
-  commit: 6332e947
+  commit: "6332e947"
   date: "2026-09-25"
 ---
 # The Bhatts and the Swaiyye

@@ -4,7 +4,7 @@ description: "The Roman reading aid beside every line, what it is and is not, an
 sidebar:
   order: 6
 verified:
-  commit: 6332e947
+  commit: "6332e947"
   date: "2026-09-25"
 ---
 # Transliteration and the fold

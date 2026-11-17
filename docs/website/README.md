@@ -15,7 +15,12 @@ The public web property is one Astro static site (`frontend/`) served on the pro
   and Contribute — use the marketing layout (`Marketing.astro`): the product's home, its policy
   pages and the Learn articles. Since 1.6.0 each lives under its language: `/en`, `/en/features`,
   `/en/watch`, `/en/learn/…`, `/en/support`, `/en/privacy`, `/en/contribute`, and the same paths
-  under `/pa` (from 1.6.1) and `/fr` (from 1.6.2). See **Languages** below.
+  under `/pa` (from 1.6.1) and `/fr` (from 1.6.2). See **Languages** below. Once the Hukamnama is
+  launched (`HUKAMNAMA_LIVE`, `src/hukamnama.ts`), the day's Hukamnama page `/{lang}/hukamnama`
+  (server-rendered, [the Hukamnama service](../architecture/hukamnama.md)) is a **Hukamnama** item in
+  `MarketingNav` (desktop row and menu sheet) and in the footer's Product column, and the home page
+  carries one card after the Nitnem chapter, apart from the verse band, that links to it and to the
+  API's page `/{lang}/developers`. Its labels are interface text only, never Gurbani.
 - **The Knowledge Base** — `/library` (its home), `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`,
   `/trail`, `/analytics` (Insights), `/constellation`, `/raag-clock`, `/divergence` — uses
   `Base.astro`: the **Sri Guru Granth Sahib Ji Knowledge Base**, the scholarly study site, with

@@ -4,7 +4,7 @@ description: "The twenty-two ballads inside the raags: pauris by one author with
 sidebar:
   order: 3
 verified:
-  commit: 6332e947
+  commit: "6332e947"
   date: "2026-09-25"
 ---
 # Vaars, saloks and pauris

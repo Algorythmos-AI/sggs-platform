@@ -111,7 +111,8 @@ html.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity .6s
    the same bar: dark glass over the hero, paper glass once scrolled or on solid pages. Only its
    colours change on scroll, so nothing moves or resizes (CLS 0). One breakpoint for every
    language: under 1440px the links collapse into the menu sheet — measured so that the longest
-   (French) row never crowds.
+   (French) row never crowds. From 1600px, where Contribute shows its label, the bar may grow to
+   1560px so the six French links (Hukamnama included) still keep their slack.
    Tints are explicit per surface (no color-mix under same-coloured text: Lightning CSS falls back
    to the plain var). */
 .mnav {
@@ -126,7 +127,7 @@ html.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity .6s
 :root[data-theme="dark"] .mnav.scrolled, :root[data-theme="dark"] .mnav--solid { --nav-tint: rgba(255,255,255,.11); --nav-glass: rgba(23,20,18,.86); }
 .mnav .mnav-in {
   position: relative; isolation: isolate;
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 20px;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px;
   width: 100%; max-width: 1440px; height: 64px; margin: 0 auto; padding: 0 10px 0 20px; border-radius: 999px;
 }
 .mnav .mnav-in::before {
@@ -146,11 +147,12 @@ html.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity .6s
 .mnav a.brand { display: inline-flex; align-items: center; gap: 10px; height: 44px; text-decoration: none; color: inherit; font-family: var(--serif-display); font-size: 22px; font-weight: 600; line-height: 1; letter-spacing: -.01em; white-space: nowrap; }
 .mnav .brand .gm, #mobileMenu .brand .gm { font-size: 26px; line-height: 1; transform: translateY(-1px); }
 .mnav nav.mnav-links { display: flex; justify-content: center; gap: 4px; min-width: 0; }
-.mnav nav.mnav-links a { position: relative; display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 999px; color: inherit; text-decoration: none; font-size: 18px; font-weight: 600; line-height: 1; white-space: nowrap; }
+.mnav nav.mnav-links { --link-pad: 10px; }
+.mnav nav.mnav-links a { position: relative; display: inline-flex; align-items: center; height: 44px; padding: 0 var(--link-pad); border-radius: 999px; color: inherit; text-decoration: none; font-size: 18px; font-weight: 600; line-height: 1; white-space: nowrap; }
 .mnav nav.mnav-links a:hover { background: var(--nav-tint); }
 /* Active page: a tinted pill plus a gold bar under the label (gold as a fill, never as text). */
 .mnav nav.mnav-links a[aria-current] { background: var(--nav-tint); }
-.mnav nav.mnav-links a[aria-current]::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: 5px; height: 3px; border-radius: 3px; background: var(--accent-fill, #FFBC0D); }
+.mnav nav.mnav-links a[aria-current]::after { content: ""; position: absolute; left: var(--link-pad); right: var(--link-pad); bottom: 5px; height: 3px; border-radius: 3px; background: var(--accent-fill, #FFBC0D); }
 .mnav .mnav-right { display: flex; align-items: center; gap: 10px; justify-self: end; }
 .mnav-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 999px; border: 1px solid var(--nav-edge, var(--line)); background: transparent; color: inherit; cursor: pointer; }
 .mnav-icon svg { width: 22px; height: 22px; display: block; }
@@ -198,6 +200,13 @@ html.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity .6s
   .mnav-progress { transition: opacity .3s ease; }
 }
 .burger { display: none; }
+@media (min-width: 1600px) { .mnav .mnav-in { max-width: 1560px; } }
+/* 1440–1599: the narrowest full row. The links sit a little closer (padding 8px, grid gap 12px) so
+   the six French links keep the nav test's 48px of slack in the Linux runners' wider font. */
+@media (min-width: 1440px) and (max-width: 1599px) {
+  .mnav .mnav-in { gap: 12px; }
+  .mnav nav.mnav-links { --link-pad: 8px; }
+}
 @media (max-width: 1599px) {
   /* Below 1600 Contribute collapses to its heart (the label stays its accessible name). */
   .mnav a.mnav-give { width: 44px; padding: 0; }

@@ -99,7 +99,7 @@
     "gurbani-soul-ios": {
       "repository": "Algorythmos-AI/gurbani-soul-ios",
       "ref": "main",
-      "commit": "ff5217d0f02972ae97b26bdd0c71c395aab74e0c",
+      "commit": "b6840ad0eec409c40ec07ddd353cfe9cf08b49e4",
       "alias": "ios",
       "include": [
         "docs/ios/*.md",
@@ -135,8 +135,8 @@
           "sha256": "e5cd7a34e20f905a6b4ca95883f15bf541f08e274f4788a2b2e89d407619e875"
         },
         "docs/ios/app-store-listing.md": {
-          "blob": "99ae412c810bf11c793e317b4ae1ecc24a521bb9",
-          "sha256": "97b34fb8c47b42215fe9820444c088e76f73c9f2db1a36dc6cff026bdd24dcf7"
+          "blob": "671a7c260333a1a27d260f6616fe5739231e4223",
+          "sha256": "7ae806c7ae6aeefab071df5829eef52cea949ea29797a723c8b837307f930e02"
         },
         "docs/ios/device-checklist-1.4.9.md": {
           "blob": "92ad3f95cdb620257ac9cfde22b60427ccf93b2f",
@@ -211,8 +211,8 @@
           "sha256": "cee1944242c0d2575f21967b3d05f31953e239c1b00c465f629f74f572699a28"
         },
         "ios/testflight-builds.json": {
-          "blob": "85c4aefa8a60bfcb34c80706d540ad3a23c165b0",
-          "sha256": "e349f87a8413b5f7fda48c667fb76f65264794d2226cb9305f74b39dea28689c"
+          "blob": "fb742403d69158b9a918065143dac6362dba768f",
+          "sha256": "c5256819358c89bcc85936261b0d396fa20b15e0da5c3d175a14d0208bf8a626"
         },
         "ios/tests/test_ios_gates.py": {
           "blob": "5fdaf586fabf51c235c6fadbb98873ee400894c6",
@@ -243,8 +243,8 @@
           "sha256": "2c059b035782151186942756e80112ea5d942747fed3d582a7ad84d7bc557c68"
         },
         "vendor.lock.json": {
-          "blob": "7662832df1050f13cc003413b2dcf53deb5defc3",
-          "sha256": "6285f655947a2f66e05bd43434b91ef3f9904f42bf23e99cdbb98929d1443088"
+          "blob": "0ddf501664db4875b1cfa359810d8adbcb0f4913",
+          "sha256": "0351386297a4a32b4fab0d72d2ec59c6ac6d5b1be7ed4917427bdd13b8ca82d2"
         }
       }
     }

@@ -39,6 +39,7 @@ import voiceShot from '../../assets/app/iphone-voice-m9-light.png';
 import compareShot from '../../assets/app/iphone-compare-light.png';
 import { localeStaticPaths, type Locale } from "../../i18n/locales";
 import { localizeHref } from "../../i18n/paths";
+import { HUKAMNAMA_LIVE, DEVELOPERS_PATH } from "../../hukamnama";
 import { fmtAng, fmtNumber } from "../../i18n/format";
 import { ENABLED_LOCALES, LOCALES } from "../../i18n/locales";
 import { learnHref, articleLangFor } from "../../i18n/content";
@@ -297,6 +298,20 @@ const softwareApplication = {
     </div>
   </section>
 
+  <!-- 7b · TODAY'S HUKAMNAMA — a plain link to the day's page (/{lang}/hukamnama, server-rendered)
+       and its API's page, once launched (HUKAMNAMA_LIVE). Interface text only: no Gurbani here, and
+       it sits apart from the verse band so the home verse is never read as the Hukamnama. -->
+  {HUKAMNAMA_LIVE && (
+    <section class="sec-thin surface-warm hk-strip">
+      <div class="wrap">
+        <div class="hk-card reveal">
+          <a class="hk-main" href={L("/hukamnama")}><span>{t("home.hukamnama.link")}</span><span class="hk-arrow" aria-hidden="true">→</span></a>
+          <a class="link-more hk-dev" href={L(DEVELOPERS_PATH)} data-astro-prefetch>{t("home.hukamnama.developers")}</a>
+        </div>
+      </div>
+    </section>
+  )}
+
   <!-- 8 · RAAG CLOCK (dark) — a static screenshot only; the live dial lives on /watch -->
   <section class="sec surface-ink" id="story-watch" data-theme="dark" data-chapter="watch">
     <div class="wrap story-grid story-grid--7-5 story--flip">
@@ -486,6 +501,17 @@ const softwareApplication = {
 
   <style>
     #top { scroll-margin-top: 76px; }
+
+    /* 7b · Today's Hukamnama: one quiet bordered row on the Nitnem surface */
+    .hk-strip { padding-top: 0; }
+    .hk-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 24px;
+      padding: 10px 22px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); }
+    .hk-main { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; min-width: 0;
+      color: var(--ink); text-decoration: none; font-family: var(--serif-display); font-size: clamp(18px, 2vw, 22px); font-weight: 600; }
+    .hk-main span:first-child { text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+    .hk-main:hover span:first-child, .hk-main:focus-visible span:first-child { text-decoration-color: var(--accent); }
+    .hk-arrow { color: var(--accent-text); }
+    .hk-dev { font-size: 15px; }
     [data-chapter] { scroll-margin-top: 72px; }
 
     /* 1 · Hero */

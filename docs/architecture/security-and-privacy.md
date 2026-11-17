@@ -83,7 +83,7 @@ Both sites send their headers from `vercel.json`:
   `contents: read`, with `issues: write` only where a workflow files an issue, and
   `contents: write` only for tagging a release.
 - **Scans** (`security.yml`): gitleaks on every change (the required `secrets` check);
-  `npm audit --audit-level=high` for the website and the wiki; bandit, semgrep and actionlint.
+  `npm audit --audit-level=high` for the website and the wiki (dated exceptions only for advisories with no fix, in `scripts/ci/npm-audit-exceptions.json`); bandit, semgrep and actionlint.
   Dependabot proposes npm, Actions and Docker updates weekly.
 - **The dataset is fetched only by pin.** `fetch_dataset.py` downloads the exact object named in
   `dataset.lock.json` and checks its SHA-256 and size; `build_api_functions.py --verify-output`

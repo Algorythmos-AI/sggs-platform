@@ -4,7 +4,7 @@
 // One capsule in every language (dark glass with white text over the hero, paper glass once
 // scrolled or on solid pages — the header's height never changes, so nothing shifts) with a gold
 // reading-progress hairline. Type is large for older readers: 18px Latin, Gurmukhi optically matched,
-// 44px targets. ≥1600 full row · 1440–1599 Contribute shows its heart and the switcher its code ·
+// 44px targets. ≥1600 full row (bar up to 1560px) · 1440–1599 Contribute shows its heart and the switcher its code ·
 // <1440 links/theme/Contribute/languages move into the <dialog> sheet (same breakpoint for every
 // language, so French never crowds) · <420 only brand + menu (the hero's App Store button is on screen). Styles in marketing.css, behaviour in landing.ts.
 // The CTA is a real App Store link only when APP_STORE_LIVE; otherwise a "Coming soon" chip, tagged
@@ -12,8 +12,11 @@
 // Contribute: an outlined button with a small heart — the heart's fill is the site's one use of
 // brand red (--contribute-heart, owner exception; never text, never beside Gurmukhi). Renders only
 // when /contribute has live/test links (CONTRIBUTE_MODE). Privacy lives in the sheet and the footer.
+// Hukamnama: the day's Hukamnama page (/{lang}/hukamnama, server-rendered), listed once it is
+// launched in production (HUKAMNAMA_LIVE, hukamnama.ts). No prefetch: the page is rendered per request.
 import { APP_STORE_URL, APP_STORE_LIVE } from "../site";
 import { CONTRIBUTE_MODE } from "../contribute";
+import { HUKAMNAMA_LIVE } from "../hukamnama";
 import { localeOf, localizeHref } from "../i18n/paths";
 import { useT } from "../i18n/t";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
@@ -39,6 +42,7 @@ const links = [
   { href: L("/features"), label: t("nav.features"), prefetch: true },
   { href: L("/watch"), label: t("nav.watch"), prefetch: true },
   { href: L("/learn"), label: t("nav.learn"), prefetch: true },
+  ...(HUKAMNAMA_LIVE ? [{ href: L("/hukamnama"), label: t("nav.hukamnama"), prefetch: false }] : []),
   { href: "/search", label: t("nav.knowledgeBase") },
   { href: L("/support"), label: t("nav.support"), prefetch: true },
 ];
