@@ -14,8 +14,9 @@ server or straight from a browser. It is not the Knowledge Base API described on
 of this section: it has its own host, its own version and [its own reference](hukamnama/reference/).
 
 > [!NOTE]
-> The host answers from the day the Hukamnama is launched on gurbanisoul.com. Until then this page
-> and the reference describe what the code serves, proved by its tests, not a live service.
+> Live since 1.7.0 (17 November 2026), when the Hukamnama launched on gurbanisoul.com. Reads are
+> rate-limited per address at the edge (120 a minute); `/health` and device registration pass
+> through to the service.
 
 Each day is located by Ang from the Hukamnama SGPC publishes. Every line is then read from the
 verbatim Sri Guru Granth Sahib Ji corpus and proved against a hash before it is served. SGPC's page
