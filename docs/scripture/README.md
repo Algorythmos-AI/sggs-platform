@@ -4,7 +4,7 @@ description: "A primer for engineers and students new to Sri Guru Granth Sahib J
 sidebar:
   order: 0
 verified:
-  commit: 6332e947
+  commit: "6332e947"
   date: "2026-09-25"
 ---
 # Scripture 101
