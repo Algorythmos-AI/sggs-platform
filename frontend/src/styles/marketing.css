@@ -201,6 +201,12 @@ html.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity .6s
 }
 .burger { display: none; }
 @media (min-width: 1600px) { .mnav .mnav-in { max-width: 1560px; } }
+/* 1440–1599: the narrowest full row. The links sit a little closer (padding 8px, grid gap 12px) so
+   the six French links keep the nav test's 48px of slack in the Linux runners' wider font. */
+@media (min-width: 1440px) and (max-width: 1599px) {
+  .mnav .mnav-in { gap: 12px; }
+  .mnav nav.mnav-links { --link-pad: 8px; }
+}
 @media (max-width: 1599px) {
   /* Below 1600 Contribute collapses to its heart (the label stays its accessible name). */
   .mnav a.mnav-give { width: 44px; padding: 0; }
