@@ -25,7 +25,9 @@ the owner; a late Hukamnama is acceptable and a wrong one is not.
    **Amritsar** date (`clock.amritsar_date`; IST is a fixed UTC+05:30 offset).
 2. Its verse words equal, word for word, a run of consecutive corpus lines that starts on a verse,
    lies within one Ang of SGPC's Ang, and ends where a composition ends (the next line is a heading
-   or a new `comp_id`). There is no fuzzy tier.
+   or a new `comp_id`). There is no fuzzy tier. When that verse opens its composition, the served
+   range starts at the composition's printed heading run in the corpus (raag title, ghar, `ੴ`, a
+   salok label: up to 4 lines, same `comp_id`), whatever SGPC titles it.
 3. The same resolution has been seen in an unbroken run of polls lasting at least 2 minutes, so a
    page saved half-way never publishes.
 4. The sgpc.net Mukhwak marquee, if it already shows today, agrees (Ang + opening words). If it

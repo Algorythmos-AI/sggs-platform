@@ -2,7 +2,7 @@ import itertools
 import unittest
 from datetime import date
 
-from hukamnama.corpus import (RAHAO_MAX_LINES, _lines, closes_shabad, NoMatch, Resolution, agrees, lines_in_range, open_ro, rahao_block,
+from hukamnama.corpus import (RAHAO_MAX_LINES, _lines, closes_shabad, heading_run_start, NoMatch, Resolution, agrees, lines_in_range, open_ro, rahao_block,
                               range_sha256, resolution_for_range, resolve, scripture_sha256)
 from hukamnama.locate import words
 from hukamnama.sources import Candidate, parse_hs, parse_mukhwak
@@ -87,10 +87,41 @@ class ResolverTests(unittest.TestCase):
         rng = lines_in_range(self.con, *TODAY)
         self.assertIsInstance(resolve(self.con, candidate(900, None, " ".join(x.gurmukhi for x in rng[1:]))), NoMatch)
 
-    def test_a_heading_that_differs_is_left_out_not_guessed(self):
+    def test_the_heading_comes_from_the_corpus_whatever_the_source_titles_it(self):
         rng = lines_in_range(self.con, *TODAY)
-        r = resolve(self.con, candidate(673, "ਧਨਾਸਰੀ ਮਹਲਾ ੪॥", " ".join(x.gurmukhi for x in rng[1:])))
-        self.assertEqual((r.first_line_id, r.heading_included), (29238, False))
+        body = " ".join(x.gurmukhi for x in rng[1:])
+        for title in ("ਧਨਾਸਰੀ ਮਹਲਾ ੪॥", None):
+            r = resolve(self.con, candidate(673, title, body))
+            self.assertEqual((r.first_line_id, r.heading_included), (29237, True), title)
+
+    def test_a_two_line_heading_run_is_served_whole(self):
+        """17 Nov 2026, Ang 604: ਸੋਰਠਿ ਮਹਲਾ ੪ ਘਰੁ ੧ then ੴ ਸਤਿਗੁਰ ਪ੍ਰਸਾਦਿ ॥ open the shabad. The line
+        just before the first verse is the ੴ, so a title match alone served no heading at all."""
+        body = " ".join(x.gurmukhi for x in lines_in_range(self.con, 26383, 26396))
+        r = resolve(self.con, candidate(604, "ਸੋਰਠਿ ਮਹਲਾ ੪॥", body, day=date(2026, 11, 17)))
+        self.assertEqual((r.first_line_id, r.last_line_id, r.opening_line_id), (26381, 26396, 26383))
+        self.assertTrue(r.heading_included)
+        self.assertEqual([x.gurmukhi for x in lines_in_range(self.con, 26381, 26382)],
+                         ["ਸੋਰਠਿ ਮਹਲਾ ੪ ਘਰੁ ੧", "ੴ ਸਤਿਗੁਰ ਪ੍ਰਸਾਦਿ ॥"])
+
+    def test_a_later_shabad_under_one_heading_gets_no_heading(self):
+        """Several shabads can share one heading and comp_id (Bhagat bani); only the first opens it."""
+        rows = [r for r in _lines(self.con, "WHERE ang BETWEEN 690 AND 694 ORDER BY id", ())]
+        starts = [rows[i] for i in range(1, len(rows))
+                  if not rows[i].is_header and closes_shabad(rows[i - 1].gurmukhi)
+                  and rows[i - 1].comp_id == rows[i].comp_id]
+        self.assertTrue(starts)
+        for verse in starts:
+            self.assertEqual(heading_run_start(self.con, verse), verse.id, verse.id)
+
+    def _heading_start(self, verse):
+        """Independent of the resolver: walk back over heading lines of the verse's composition."""
+        first = verse.id
+        while True:
+            prev = _lines(self.con, "WHERE id = ?", (first - 1,))
+            if not prev or not prev[0].is_header or prev[0].comp_id != verse.comp_id:
+                return first
+            first -= 1
 
     def test_explicit_range_rejects_gaps_and_nonsense(self):
         for a, b in ((10, 5), (1, 1000), (60_000, 61_000)):
@@ -140,7 +171,7 @@ class ResolverTests(unittest.TestCase):
                     a, b = rows[start], x
                     r = resolve(self.con, candidate(a.ang, None, self._text(a.id, b.id)))
                     if isinstance(r, Resolution):
-                        if (r.first_line_id, r.last_line_id) == (a.id, b.id):
+                        if (r.first_line_id, r.last_line_id) == (self._heading_start(a), b.id):
                             exact += 1
                         else:
                             wrong += 1
@@ -203,7 +234,7 @@ class ResolverTests(unittest.TestCase):
                 continue
             title = sgpc_style(grp[k - 1][4]).replace(" ॥", "॥") if k else None
             r = resolve(self.con, candidate(grp[k][2], title, " ".join(x[4] for x in grp[k:])))
-            want_first = grp[k - 1][0] if k else grp[k][0]
+            want_first = grp[0][0]          # the composition's whole printed heading run
             if isinstance(r, NoMatch):
                 nomatch += 1
             elif (r.first_line_id, r.last_line_id) == (want_first, grp[-1][0]):
@@ -236,7 +267,7 @@ class ResolverTests(unittest.TestCase):
             r = resolve(self.con, candidate(rng[k].ang, title, " ".join(x.gurmukhi for x in rng[k:])))
             if isinstance(r, NoMatch):
                 held += 1
-            elif (r.first_line_id, r.last_line_id) == ((rng[k - 1].id if k else rng[k].id), last):
+            elif (r.first_line_id, r.last_line_id) == (self._heading_start(rng[k]), last):
                 exact += 1
             else:
                 wrong.append((vid, first, last, r.first_line_id, r.last_line_id))

@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://gurbanisoul.com/sitemap.xml
+Sitemap: https://gurbanisoul.com/sitemap-hukamnama.xml

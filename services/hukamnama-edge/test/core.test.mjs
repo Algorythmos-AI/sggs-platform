@@ -288,6 +288,48 @@ test("device registration and /health pass to the service with the origin secret
   assert.equal(env.BUCKET.reads.length, 0);
 });
 
+test("with ORIGIN_URL, device registration and /health go to the service's own origin", async () => {
+  const seen = [];
+  const env = {
+    BUCKET: bucket([]), ORIGIN_SECRET: "s3", ORIGIN_URL: "https://sggs-hukamnama-prod.onrender.com",
+    ORIGIN_FETCH: async (req) => { seen.push(req); return new Response('{"ok":true}', { status: 200 }); },
+  };
+  const token = "ab".repeat(32);
+  const put = await handle(new Request(`https://api.gurbanisoul.com/v1/devices/${token}`, {
+    method: "PUT", body: '{"env":"production","mode":"asap"}', headers: { "CF-Connecting-IP": "203.0.113.7" },
+  }), env, AFTER);
+  assert.equal(put.status, 200);
+  assert.equal(seen[0].url, `https://sggs-hukamnama-prod.onrender.com/v1/devices/${token}`);
+  assert.equal(seen[0].method, "PUT");
+  assert.equal(await seen[0].text(), '{"env":"production","mode":"asap"}');
+  assert.equal(seen[0].headers.get("X-Origin-Auth"), "s3");
+  assert.equal(seen[0].headers.get("X-Client-IP"), "203.0.113.7");
+  assert.equal(seen[0].redirect, "manual");
+  await handle(new Request("https://api.gurbanisoul.com/health?x=1"), env, AFTER);
+  assert.equal(seen[1].url, "https://sggs-hukamnama-prod.onrender.com/health?x=1");
+  assert.equal(seen[1].method, "GET");
+  await handle(new Request(`https://api.gurbanisoul.com/v1/devices/${token}`, { method: "DELETE" }), env, AFTER);
+  assert.equal(seen[2].method, "DELETE");
+  // a trailing slash on the setting is the same origin
+  await handle(new Request("https://api.gurbanisoul.com/health"), { ...env, ORIGIN_URL: "https://sggs-hukamnama-prod.onrender.com/" }, AFTER);
+  assert.equal(seen[3].url, "https://sggs-hukamnama-prod.onrender.com/health");
+  // reads never go to the service, whatever is configured
+  await get("/v1/hukamnama/today", env);
+  assert.equal(seen.length, 4);
+});
+
+test("an ORIGIN_URL that is not exactly an https origin is refused, and nothing is sent", async () => {
+  let called = 0;
+  for (const bad of ["http://sggs-hukamnama-prod.onrender.com", "https://example.com/path", "https://example.com/?a=1",
+    "https://user:pw@example.com", "not a url", "javascript:alert(1)"]) {
+    const env = { BUCKET: bucket([]), ORIGIN_URL: bad, ORIGIN_FETCH: async () => { called += 1; return new Response("x"); } };
+    const res = await handle(new Request("https://api.gurbanisoul.com/health"), env, AFTER);
+    assert.equal(res.status, 503, bad);
+    assert.equal((await res.json()).code, "unavailable", bad);
+  }
+  assert.equal(called, 0);
+});
+
 test("a forged origin secret is dropped when none is configured", async () => {
   const seen = [];
   const env = { BUCKET: bucket([]), ORIGIN_FETCH: async (req) => { seen.push(req); return new Response("{}"); } };

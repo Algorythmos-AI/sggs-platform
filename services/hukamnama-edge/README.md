@@ -37,11 +37,20 @@ Anything else is 404 and never reaches the service.
 - **CORS** is open (`*`) on the reads only. Passed-through requests get no CORS headers here.
 - **Errors** are `{"error": "<text>", "code": "<slug>", "request_id": "…"}`. `error` stays a
   plain string.
+- **Where passed-through requests go.** `/health` and `/v1/devices/*` go to `ORIGIN_URL` (a
+  plain variable: the service's own https origin, for example its `onrender.com` address) when it
+  is set, with the path and query kept. That is required when the Worker owns its hostname as a
+  Custom Domain, as `api.gurbanisoul.com` does: nothing sits behind that hostname, so forwarding to
+  it fails with 522. Without `ORIGIN_URL` they go to the same URL, which suits a Worker on a route
+  in front of the service. A value that is not exactly an https origin answers 503 and sends
+  nothing.
 - **Origin secret.** Passed-through requests carry `X-Origin-Auth` from the `ORIGIN_SECRET`
-  secret; a value sent by the caller is always replaced. (The service does not check it yet.)
-- **Rate limit.** When a `RATE_LIMITER` binding is present, reads are limited per client address
-  and answer 429 with `Retry-After`. The binding is not configured in `wrangler.toml` yet: check
-  the current Cloudflare documentation for its configuration before enabling it.
+  secret, and `X-Client-IP` from the address Cloudflare saw; values sent by the caller are always
+  replaced. The service believes `X-Client-IP` only with the secret (`HUKAMNAMA_ORIGIN_SECRET`).
+- **Rate limit.** The `RATE_LIMITER` binding limits reads per client address (`CF-Connecting-IP`)
+  to 120 a minute and answers 429 with `Retry-After`. Cloudflare counts per location and
+  approximately: a burst of 300 requests from one address on 2026-11-16 got 235 answers and 65
+  429s. Without the binding the Worker does not limit.
 
 ## Run the tests
 

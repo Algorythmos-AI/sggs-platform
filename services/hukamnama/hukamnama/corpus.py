@@ -2,6 +2,7 @@
 
 A match means the candidate's verse words equal, word for word under the locate key, a run of
 consecutive corpus lines that starts with a verse (not a heading) and ends on a line boundary.
+The served range then gains the shabad's printed heading run from the corpus, when it opens one.
 There is no fuzzy tier: anything less than exact is ``NoMatch``, and the engine holds the day for
 the owner. The served text is the corpus lines themselves, hashed so the phone can prove it holds
 the same bytes (``range_sha256``) from the same corpus (``scripture_sha256``).
@@ -36,7 +37,7 @@ class Line:
 @dataclass(frozen=True)
 class Resolution:
     ang: int                    # the Ang of the first verse, as printed in our corpus (the citation)
-    first_line_id: int          # includes the heading when the source's heading is the line before
+    first_line_id: int          # includes the printed heading run when the shabad opens its composition
     last_line_id: int
     comp_id: int
     opening_line_id: int
@@ -190,11 +191,31 @@ def resolve(con: sqlite3.Connection, cand: Candidate) -> Resolution | NoMatch:
         # the last line closes a numbered shabad inside a longer composition (॥੨॥੩॥: 14 Nov 2026,
         # Bhagat Kabir on Ang 692, comp 2743 holds several shabads under one heading)
         return NoMatch(f"source ends mid-composition at line {last.id} (incomplete page?)")
-    first = window[i].id
-    if cand.title and i > 0 and window[i - 1].is_header and window[i - 1].id == first - 1 \
+    first = heading_run_start(con, window[i])
+    if first == window[i].id and cand.title and i > 0 and window[i - 1].is_header \
+            and window[i - 1].id == first - 1 \
             and words(window[i - 1].gurmukhi, keep_numbers=True) == words(cand.title, keep_numbers=True):
-        first = window[i - 1].id
+        first = window[i - 1].id      # a heading filed under another composition id, named by the source
     return resolution_for_range(con, first, window[j].id)
+
+
+HEADING_RUN_MAX = 4     # the longest printed heading run: raag/title, ghar, ੴ invocation, a label
+
+
+def heading_run_start(con: sqlite3.Connection, verse: Line) -> int:
+    """Where the printed heading of the shabad that ``verse`` opens starts: the run of heading lines
+    directly before it that share its ``comp_id`` (the corpus files a composition's heading run under
+    the composition it opens). A verse that does not open its composition, such as a later shabad
+    under one Bhagat heading, has no such run and keeps its own id. The heading comes from the corpus,
+    never from the source's title: 17 Nov 2026, Ang 604, the run is ਸੋਰਠਿ ਮਹਲਾ ੪ ਘਰੁ ੧ + ੴ."""
+    before = _lines(con, "WHERE id BETWEEN ? AND ? ORDER BY id DESC",
+                    (verse.id - HEADING_RUN_MAX, verse.id - 1))
+    first, want = verse.id, verse.id - 1
+    for x in before:
+        if x.id != want or not x.is_header or x.comp_id != verse.comp_id:
+            break
+        first, want = x.id, x.id - 1
+    return first
 
 
 def _nearest(cand: Candidate, window: list[Line], lw: list[list[str]], target: list[str]) -> NearMatch | None:

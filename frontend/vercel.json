@@ -641,6 +641,30 @@
       "destination": "/api/svc/all"
     },
     {
+      "source": "/(en|pa|fr)/hukamnama",
+      "destination": "/api/svc/all"
+    },
+    {
+      "source": "/(en|pa|fr)/hukamnama/(\\d\\d\\d\\d-\\d\\d-\\d\\d)",
+      "destination": "/api/svc/all"
+    },
+    {
+      "source": "/feeds/hukamnama\\.xml",
+      "destination": "/api/svc/all"
+    },
+    {
+      "source": "/feeds/hukamnama\\.json",
+      "destination": "/api/svc/all"
+    },
+    {
+      "source": "/sitemap-hukamnama\\.xml",
+      "destination": "/api/svc/all"
+    },
+    {
+      "source": "/embed/hukamnama",
+      "destination": "/api/svc/all"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/svc/all"
     },
