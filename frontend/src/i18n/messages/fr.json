@@ -9,6 +9,7 @@
     "features": "Fonctionnalités",
     "watch": "Les veilles",
     "learn": "Comprendre",
+    "hukamnama": "Hukamnama",
     "knowledgeBase": "Base de connaissances",
     "support": "Assistance",
     "privacy": "Confidentialité",
@@ -89,6 +90,10 @@
     "verse": {
       "cite": "Sri Guru Granth Sahib Ji · Ang {ang}",
       "note": "Présenté à la lettre, d’après l’édition source."
+    },
+    "hukamnama": {
+      "link": "Hukamnama du jour · Sri Harmandir Sahib",
+      "developers": "Pour les développeurs · API Hukamnama"
     },
     "read": {
       "chapter": "Lire",
