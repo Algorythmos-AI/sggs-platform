@@ -18,7 +18,7 @@ verified:
 | `web-ci · frontend` | Astro builds (`npm run build`, which also checks every share card); `pahar` vectors pass (`npm run test:pahar`); the **language rules** pass (`npm run test:i18n`: `locales.json` is valid, URLs localise and strip as specified, the generated redirects, every message parses and renders, values are never markup, French plurals and spacing, the pseudo-locale); the redirects in `frontend/vercel.json` equal a regeneration from `locales.json` (`node scripts/gen-i18n-redirects.mjs --check`); **every enabled language is complete, current and reviewed** (`node scripts/i18n-status.mjs`: no missing, stale or extra key, tags equal to the English, every message valid ICU, and a review record whose sha256 matches the catalog; a broken catalog of a draft language fails too); **no interface English outside the message files** (`npm run build:pseudo`, then `scripts/ci/check_i18n_coverage.py dist-pseudo` finds any visible text or accessible name on a covered page that did not come from the catalog, Gurmukhi, transliteration and formatted values exempt); **every drafted language still builds** (`npm run build:preview`, `PUBLIC_I18N_PREVIEW=all`, never deployed); **report-only:** the committed `webapp/static` equals the build's text assets byte for byte (`scripts/ci/check_static_fresh.py` — a warning, not yet a gate) | Node 22 |
 | `scripture-integrity` | dataset pin: `dataset.lock.json` ↔ `contract/_meta.json`, and sggs-data publishes that object at the pinned commit; the installed DB passes `quick_check` with 60,658 lines over Angs 1–1430 (the scripture gates themselves run in sggs-data) | pinned DB |
 | `version-consistency` | all 5 platform version strings unified (the dataset versions in sggs-data; the iOS app keeps its own match); `main` PRs come from `integration`/`hotfix` | — |
-| `security` | gitleaks; bandit; semgrep OSS; actionlint; **blocking** `npm audit --audit-level=high` on `frontend/` and `docs-site/` (job `deps`) | — |
+| `security` | gitleaks; bandit; semgrep OSS; actionlint; **blocking** `npm audit --audit-level=high` on `frontend/` and `docs-site/` (job `deps`, `scripts/ci/npm_audit_gate.py`) | — |
 | `pr-hygiene` | conventional-commit PR title | — |
 | `e2e · playwright` | Ang 712 heading smoke, search → panel heading, axe WCAG (serious and critical) on `/`, `/search`, `/features`, `/watch` and `/learn`; the Knowledge Base shell on every KB route and the 404 page (`frontend/e2e/kb-shell.spec.ts`): unique ids, a viewport that still pinch-zooms, and axe in the light and the dark theme against a per-page list of known violations that can only shrink; sideways scroll on a 375 px phone is measured and **reported as a warning** — the Knowledge Base sets its Latin text in the system font, so that baseline is per platform, enforced on macOS today and on the Linux runners once a Linux baseline is recorded in the spec. One job, two steps: the desktop project (Chromium), then the phone project (iPhone 13, WebKit) | serve.py + pinned DB |
 | `e2e · kb-lighthouse` (report-only, never blocks) | Lighthouse with mobile emulation on `/search`, `/reader?ang=1` and `/nitnem`, served by `serve.py`; three runs each, no assertions (`frontend/.lighthouserc.json`); the reports are the `kb-lighthouse` artifact | serve.py + pinned DB, Chrome |
@@ -56,6 +56,14 @@ Run the no-PDF subset locally with `make ci`.
 (2026-09-20): a new high/critical advisory in `frontend/package-lock.json` fails `security · deps`.
 Fix it with `npm audit fix` (never `--force` blind — read the migration notes), rebuild, and
 re-sync `webapp/static/`; do not re-add `|| true`.
+
+The job runs `scripts/ci/npm_audit_gate.py`, which fails closed (an audit it cannot read is a
+failure) and lets through only an advisory listed in `scripts/ci/npm-audit-exceptions.json`: one
+GHSA id in one package, for named projects, with the reason it is not exploitable here and an
+expiry at most 45 days out. Only an advisory with **no patched release** may be listed; on expiry
+the job fails again until it is upgraded away or re-checked. The first entry (2026-11-18) is the
+picomatch ReDoS GHSA-fc5q-39xc-vjpf, which affects every published release and reaches both trees
+only through the build toolchain.
 
 ## Deploy pipeline
 `deploy-production` (push to `main`) waits for the required checks above **plus `playwright`**

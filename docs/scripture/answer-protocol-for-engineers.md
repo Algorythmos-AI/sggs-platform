@@ -4,7 +4,7 @@ description: "The eight rules for answering a Gurbani question from this knowled
 sidebar:
   order: 7
 verified:
-  commit: 6332e947
+  commit: "6332e947"
   date: "2026-09-25"
 ---
 # The Answer Protocol for engineers

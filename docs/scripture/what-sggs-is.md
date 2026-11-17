@@ -4,7 +4,7 @@ description: "The scripture and eternal Guru of the Sikhs: what it is, the editi
 sidebar:
   order: 1
 verified:
-  commit: 6332e947
+  commit: "6332e947"
   date: "2026-09-25"
 ---
 # What Sri Guru Granth Sahib Ji is
