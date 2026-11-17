@@ -88,7 +88,7 @@ verse bodies. There is **no fuzzy tier**. A day publishes automatically only whe
    numbered shabad (a marker with two or more numbers, such as ॥੨॥੩॥) inside a longer one, as
    where Bhagat bani keeps several shabads under one heading. When the first verse opens its
    composition, the served range starts at that composition's printed heading run in the corpus
-   (up to 4 heading lines with the same `comp_id`, such as ਸੋਰਠਿ ਮਹਲਾ ੪ ਘਰੁ ੧ and ੴ), never at
+   (up to 4 heading lines with the same `comp_id`, such as `ਸੋਰਠਿ ਮਹਲਾ ੪ ਘਰੁ ੧` and `ੴ`), never at
    SGPC's title.
 3. The same resolution has been seen in an unbroken run of polls for at least 2 minutes, so a page
    saved half-way never publishes.
