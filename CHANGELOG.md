@@ -3,6 +3,21 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.7.1] — 2026-11-18
+
+The Hukamnama is now linked from every page of gurbanisoul.com, and its developer API from the home page. The dependency audit is clean again. No scripture, corpus or dataset change.
+
+### Added
+- **Hukamnama links** (#423): a "Hukamnama" item in the top bar (desktop and phone menu) and the footer, and a home-page card, "Today's Hukamnama · Sri Harmandir Sahib", with a second link, "For developers · Hukamnama API", in English, Punjabi and French. The Punjabi and French strings were approved by the owner.
+- **IndexNow key file** (#421) at the site root, so search engines can be told when a new day is published.
+
+### Changed
+- **Navigation spacing**: link padding and gaps in the top bar are slightly narrower so the six French items fit at every tested width (320–1920px).
+- **Wiki** (#424): sibling docs pins bumped.
+
+### Fixed
+- **Dependency audit** (#425): Astro 7.4.12, fast-xml-parser 5.12.1 and satori 0.33.5 clear the new advisories; the `deps` gate now reads dated exceptions, with one for picomatch (no patched release; build tooling only) that expires 2026-12-18.
+
 ## [1.7.0] — 2026-11-17
 
 The daily Hukamnama from Sri Harmandir Sahib goes live on gurbanisoul.com and as a free public API at `api.gurbanisoul.com`. Every line is read from our own corpus and proved against the published hash before it is shown. The English meaning layer stays off. Version 1.6.6 was prepared but not released; its changes are part of this release. No scripture, corpus or dataset change.
