@@ -74,7 +74,11 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version-file: ".nvmrc"
-      - working-directory: frontend
-        run: npm audit --audit-level=high
-      - working-directory: docs-site
-        run: npm audit --audit-level=high
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+      # npm audit --audit-level=high on both lockfiles; fails closed if the audit cannot be read.
+      # The only advisories it lets through are dated, per-package entries in
+      # scripts/ci/npm-audit-exceptions.json for advisories with no patched release.
+      - name: npm audit (frontend, docs-site)
+        run: python3 scripts/ci/npm_audit_gate.py frontend docs-site

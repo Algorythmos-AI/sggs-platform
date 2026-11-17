@@ -1,0 +1,15 @@
+{
+  "about": "Advisories the security · deps gate (scripts/ci/npm_audit_gate.py) lets through. Only an advisory with NO patched release may be listed; anything with a fix is upgraded instead. One entry is one GHSA id in one package, for the projects named, with the reason it cannot be exploited here and an expiry at most 45 days after it was added. On expiry the gate fails again: look upstream for a fixed release, upgrade (an npm `overrides` pin if a dependent lags), and delete the entry; renew it only with a fresh check written into `reason`.",
+  "exceptions": [
+    {
+      "id": "GHSA-fc5q-39xc-vjpf",
+      "package": "picomatch",
+      "projects": ["frontend", "docs-site"],
+      "severity": "high",
+      "added": "2026-11-18",
+      "expires": "2026-12-18",
+      "reason": "ReDoS through single-branch repeated extglobs (+(*), +(*a)). The advisory covers every release up to 4.0.7, the latest published, and lists no patched version, so neither an upgrade nor an overrides pin exists. picomatch (4.0.7, and 2.3.2 under anymatch) reaches both trees only through the build toolchain: astro, vite, tinyglobby/fdir, unstorage/anymatch, @astrojs/internal-helpers and @astrojs/check. Both sites build to static files (frontend: output 'static', no adapter; docs-site: Starlight static, no adapter) and nothing from node_modules runs in production: the website is served by the Python API from webapp/static and the wiki from Vercel's static CDN. The only glob patterns picomatch ever compiles come from this repository's own config and source at build time, never from a visitor, so an attacker has no way to supply the crafted pattern the attack needs.",
+      "review": "Upgrade picomatch (and drop this entry) as soon as a release later than 4.0.7 fixes GHSA-fc5q-39xc-vjpf; `npm view picomatch versions` and the advisory page tell."
+    }
+  ]
+}
