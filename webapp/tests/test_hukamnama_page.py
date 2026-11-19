@@ -505,3 +505,110 @@ class DaysAround(Base):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+# -- the month archive, "also the Hukamnama on", share (a shell built with their strings) ----------
+NEW_STRINGS = {"month_title": "Hukamnama, {month} {y} · Sri Harmandir Sahib (Golden Temple)", "month_h1": "Hukamnama, {month} {y}",
+               "month_description": "Every Hukamnama in {month} {y}.", "month_empty": "None yet for this month.",
+               "month_ang": "Ang {ang}", "month_link": "Every Hukamnama of {month} {y}",
+               "also_on": "This shabad was also the Hukamnama on {dates}.",
+               "share_heading": "Hukamnama · Sri Harmandir Sahib, Amritsar · {date}"}
+NEW_BLOCKS = ('__HK_IF_ALSO__<p class="hk-also">__HK_ALSO__</p>__HK_ENDIF__'
+              '__HK_IF_SHARE__<div class="hk-share" data-heading="__HK_SHARE_HEADING__" data-cite="__HK_SHARE_CITE__" '
+              'data-url="__HK_SHARE_URL__"><a class="hk-share-wa" href="__HK_SHARE_WA__">WhatsApp</a></div>__HK_ENDIF__'
+              '__HK_IF_MONTHLINK__<p class="hk-monthlink"><a href="__HK_MONTH_HREF__">__HK_MONTH_LINK__</a></p>__HK_ENDIF__')
+MONTH_BLOCK = ('__HK_IF_MONTH__<section class="hk-month">__HK_IF_MONTH_DAYS__<ol>__HK_MONTH_LIST__</ol>__HK_ENDIF__'
+               '__HK_IF_MONTH_EMPTY__<p class="hk-status">__HK_MONTH_EMPTY__</p>__HK_ENDIF__'
+               '__HK_IF_MONTHS__<p class="hk-days">__HK_IF_MPREV__<a rel="prev" href="__HK_MPREV_HREF__">__HK_MPREV_LABEL__</a>__HK_ENDIF__'
+               '__HK_IF_MNEXT__<a rel="next" href="__HK_MNEXT_HREF__">__HK_MNEXT_LABEL__</a>__HK_ENDIF__</p>__HK_ENDIF__</section>__HK_ENDIF__')
+DEC = datetime(2026, 12, 2, 2, 0, tzinfo=timezone.utc)          # 07:30 IST, 2 Dec
+
+
+class MonthAndShare(Base):
+    def setUp(self):
+        super().setUp()
+        with open(FIXTURE, encoding='utf-8') as f:
+            shell = f.read()
+        import json
+        m = re.search(r'(<script type="application/json" id="hk-strings">)(.*?)(</script>)', shell, re.S)
+        strings = json.loads(m.group(2)); strings.update(NEW_STRINGS)
+        shell = shell[:m.start(2)] + json.dumps(strings, ensure_ascii=False) + shell[m.end(2):]
+        shell = shell.replace('__HK_IF_DAYS__', NEW_BLOCKS + '__HK_IF_DAYS__', 1).replace('</body>', MONTH_BLOCK + '</body>')
+        with open(os.path.join(self.tmp, 'en.html'), 'w', encoding='utf-8') as f:
+            f.write(shell)
+
+    def index_with(self, fake, **angs):
+        fake.index = {'days': [{'amritsar_date': d, 'published_at': r.get('published_at'), 'ang': angs.get(d, 680),
+                                'range_sha256': r['range_sha256'], 'raag': '<b>NOT PROVEN</b>'}
+                               for d, r in fake.days.items()]}
+
+    def test_a_month_lists_its_days_newest_first_by_date_and_ang_only(self):
+        fake = self.api(days={'2026-11-11': record('2026-11-11'), '2026-11-12': record('2026-11-12', R673),
+                              '2026-12-01': record('2026-12-01')})
+        self.index_with(fake, **{'2026-11-12': 673})
+        status, html_, cache = self.page('2026-11', now=DEC)
+        self.assertEqual((status, cache), (200, 'public, max-age=300, s-maxage=600'))
+        self.assertIn('<title>Hukamnama, November 2026 · Sri Harmandir Sahib (Golden Temple)</title>', html_)
+        links = re.findall(r'<li><a href="([^"]+)"><time datetime="[^"]+">([^<]+)</time></a>(?:<span class="hk-month-ang">([^<]+)</span>)?</li>', html_)
+        self.assertEqual(links, [('/en/hukamnama/2026-11-12', '12 November 2026', 'Ang 673'),
+                                 ('/en/hukamnama/2026-11-11', '11 November 2026', 'Ang 680')])
+        self.assertNotIn('NOT PROVEN', html_)                 # the index's text never reaches the page
+        self.assertNotIn('hk-gm', html_)                      # nor any scripture: the day pages show it
+        self.assertIn('rel="next" href="/en/hukamnama/2026-12">December 2026', html_)
+        self.assertNotIn('rel="prev"', html_)
+        self.assertIn('content="index, follow"', html_)
+        self.assertIn('<link rel="canonical" href="https://gurbanisoul.com/en/hukamnama/2026-11">', html_)
+        import json
+        ld = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', html_, re.S).group(1))
+        self.assertEqual(ld[0]['@type'], 'CollectionPage')
+        self.assertEqual([i['url'] for i in ld[0]['mainEntity']['itemListElement']],
+                         ['https://gurbanisoul.com/en/hukamnama/2026-11-12', 'https://gurbanisoul.com/en/hukamnama/2026-11-11'])
+        self.assertEqual(ld[1]['itemListElement'][-1]['name'], 'November 2026')
+        self.assertEqual(fake.calls, [])                      # only the index was asked: no day record
+
+    def test_a_month_without_days_is_noindex_and_months_outside_the_archive_are_404(self):
+        fake = self.api(days={'2026-11-11': record('2026-11-11')})
+        self.index_with(fake)
+        status, html_, _ = self.page('2026-12', now=DEC)
+        self.assertEqual(status, 200)
+        self.assertIn('None yet for this month.', html_)
+        self.assertIn('content="noindex, follow"', html_)
+        self.assertIn('rel="prev" href="/en/hukamnama/2026-11">November 2026', html_)
+        for arg in ('2027-01', '2026-10', '2026-13', '2026-00'):
+            self.assertEqual(self.page(arg, now=DEC)[0], 404, arg)
+
+    def test_a_month_page_is_404_with_a_shell_built_before_month_pages(self):
+        shutil.copy(FIXTURE, os.path.join(self.tmp, 'en.html'))
+        hp.reset()
+        fake = self.api(days={'2026-11-11': record('2026-11-11')})
+        self.index_with(fake)
+        self.assertEqual(self.page('2026-11', now=DEC)[0], 404)
+        status, html_, _ = self.page('2026-11-11', now=DEC)       # the day page renders as before
+        self.assertEqual(status, 200)
+        self.assertNotIn('hk-share', html_)
+
+    def test_the_same_shabad_on_earlier_dates_is_named_and_later_ones_are_not(self):
+        fake = self.api(days={'2026-11-11': record('2026-11-11'), '2026-11-12': record('2026-11-12', R673),
+                              '2026-11-16': record('2026-11-16'), '2026-11-20': record('2026-11-20')})
+        self.index_with(fake)
+        now = datetime(2026, 11, 20, 2, 0, tzinfo=timezone.utc)
+        html_ = self.page('2026-11-16', now=now)[1]
+        self.assertIn('<p class="hk-also">This shabad was also the Hukamnama on '
+                      '<a href="/en/hukamnama/2026-11-11">11 November 2026</a>.</p>', html_)
+        self.assertNotIn('hk-also', self.page('2026-11-12', now=now)[1])
+        self.assertIn('2026-11-16">16 November 2026</a>', self.page('2026-11-20', now=now)[1])
+        self.assertNotIn('hk-also', self.page('2026-11-11', now=now)[1])     # the first time it was read
+
+    def test_share_carries_the_days_own_date_citation_and_link(self):
+        fake = self.api(days={'2026-11-10': record('2026-11-10')}, latest='2026-11-10')
+        self.index_with(fake)
+        html_ = self.page(now=BEFORE)[1]                                        # the 'latest' view, before 05:30 IST
+        self.assertIn('data-heading="Hukamnama · Sri Harmandir Sahib, Amritsar · 10 November 2026"', html_)
+        self.assertIn('data-cite="Sri Guru Granth Sahib Ji · Ang 680"', html_)
+        self.assertIn('data-url="https://gurbanisoul.com/en/hukamnama/2026-11-10"', html_)
+        wa = re.search(r'class="hk-share-wa" href="([^"]+)"', html_).group(1)
+        from urllib.parse import unquote
+        self.assertEqual(unquote(wa.replace('&amp;', '&')),
+                         'https://wa.me/?text=Hukamnama · Sri Harmandir Sahib, Amritsar · 10 November 2026\n'
+                         'Sri Guru Granth Sahib Ji · Ang 680\nhttps://gurbanisoul.com/en/hukamnama/2026-11-10')
+        self.assertIn('<a href="/en/hukamnama/2026-11">Every Hukamnama of November 2026</a>', html_)

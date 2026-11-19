@@ -681,7 +681,19 @@
     "permalink": "Lien permanent pour ce jour",
     "sgpc": "Sens, audio et katha sur la page du SGPC",
     "credit": "Repéré par Ang à partir du Hukamnama publié par le SGPC. Chaque ligne vient de Sri Guru Granth Sahib Ji, mot pour mot. Gurbani Soul n’est pas affilié au SGPC.",
-    "verifyNote": "Chaque ligne est lue dans le même texte que la Base de connaissances et comparée au relevé publié avant d’être affichée."
+    "verifyNote": "Chaque ligne est lue dans le même texte que la Base de connaissances et comparée au relevé publié avant d’être affichée.",
+    "monthTitle": "Hukamnama, {month} {y} · Sri Harmandir Sahib (Temple d’Or)",
+    "monthH1": "Hukamnama, {month} {y}",
+    "monthDescription": "Chaque Hukamnama de Sri Harmandir Sahib (Temple d’Or), Amritsar, en {month} {y}, avec son Ang dans Sri Guru Granth Sahib Ji.",
+    "monthEmpty": "Aucun Hukamnama n’a encore été publié pour ce mois.",
+    "monthAng": "Ang {ang}",
+    "monthLink": "Tous les Hukamnamas de {month} {y}",
+    "alsoOn": "Ce shabad a aussi été le Hukamnama du {dates}.",
+    "share": "Partager",
+    "shareWhatsApp": "Partager sur WhatsApp",
+    "shareCopy": "Copier le shabad",
+    "shareCopied": "Copié",
+    "shareHeading": "Hukamnama · Sri Harmandir Sahib, Amritsar · {date}"
   },
   "developers": {
     "metaTitle": "API Hukamnama pour les développeurs · Gurbani Soul",
