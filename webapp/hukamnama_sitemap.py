@@ -45,21 +45,22 @@ def _lastmod(day):
     return day['date'].isoformat()
 
 
-def build(days, langs):
-    """The sitemap for these published days (oldest first) and languages."""
+def build(days, langs, month_langs=()):
+    """The sitemap for these published days (oldest first) and languages; ``month_langs`` are the
+    languages whose shell has the month archive (/{lang}/hukamnama/YYYY-MM), listed per month."""
     e = html.escape
     out = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">']
 
-    def url(suffix, lastmod, changefreq, priority):
-        for lang in langs:
+    def url(suffix, lastmod, changefreq, priority, among=langs):
+        for lang in among:
             out.append('  <url>')
             out.append(f'    <loc>{e(hp.SITE)}/{lang}/hukamnama{suffix}</loc>')
             if lastmod:
                 out.append(f'    <lastmod>{e(lastmod)}</lastmod>')
             out.append(f'    <changefreq>{changefreq}</changefreq>')
             out.append(f'    <priority>{priority}</priority>')
-            for other in langs:
+            for other in among:
                 out.append(f'    <xhtml:link rel="alternate" hreflang="{other}" href="{e(hp.SITE)}/{other}/hukamnama{suffix}"/>')
             out.append(f'    <xhtml:link rel="alternate" hreflang="x-default" href="{e(hp.SITE)}/"/>')
             out.append('  </url>')
@@ -68,6 +69,12 @@ def build(days, langs):
     url('', _lastmod(newest[0]) if newest else None, 'daily', '0.9')
     for day in newest:
         url('/' + day['date'].isoformat(), _lastmod(day), 'yearly', '0.6')
+    if month_langs:
+        latest = {}
+        for day in days:                                # oldest first: the last one seen is the month's newest
+            latest[day['date'].strftime('%Y-%m')] = day
+        for month in sorted(latest, reverse=True):
+            url('/' + month, _lastmod(latest[month]), 'monthly', '0.5', among=list(month_langs))
     out.append('</urlset>')
     return '\n'.join(out) + '\n'
 
@@ -83,7 +90,8 @@ def sitemap_for(now):
         days = hp.published_days(hp.amritsar_now(now).date())
     except hp.Unavailable:
         return 503, None, 'no-store'
-    return 200, build(days, langs), CACHE
+    month_langs = [lang for lang in langs if all((hp.load_shell(lang) or ('', {}))[1].get(k) for k in hp.MONTH_KEYS)]
+    return 200, build(days, langs, month_langs), CACHE
 
 
 def respond(handler, url_path, now=None):
@@ -110,6 +118,7 @@ def respond(handler, url_path, now=None):
     handler.send_header('Content-Type', 'application/xml; charset=utf-8' if body is not None else 'text/plain; charset=utf-8')
     handler.send_header('Content-Length', str(len(raw)))
     handler.send_header('Cache-Control', cache)
+    handler.send_header('Vercel-Cache-Tag', hp.CACHE_TAG)
     if etag:
         handler.send_header('ETag', etag)
     if status == 503:

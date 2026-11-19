@@ -230,7 +230,11 @@ pull request or dispatch the workflow.
 The browsers and fonts the docs jobs and `e2e` need are installed by
 `scripts/ci/install_browsers.sh`, which skips packages the runner already has and retries the
 network four times. Before it, a few minutes without the Ubuntu mirrors turned #392's `docs` check
-red (apt exit 100) and kept `e2e · playwright` retrying for two hours.
+red (apt exit 100) and kept `e2e · playwright` retrying for two hours. Apt itself waits up to five
+minutes for the dpkg lock and retries each mirror (`/etc/apt/apt.conf.d/80sggs-ci`), every attempt
+first waits for an apt or dpkg still running, and the system packages are installed apart from the
+browsers: on 2026-11-19 an `apt-get` left running by a timed-out attempt held the lock, so every
+retry of #434's `playwright` failed at once.
 
 ### The docs-impact check
 

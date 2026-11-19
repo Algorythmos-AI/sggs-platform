@@ -108,6 +108,10 @@ automatic publish. The service never applies the change.
 - **The source flickered and the published range is right:** do nothing; the alert stays on that
   day's `/health` and the dead-man issue.
 
+Whatever you change on a published day (`correct`, `hold`, `pause`), the service clears the
+website's CDN copy itself when the purge is configured. A `cdn_purge_failed` alert means it could
+not: clear it by hand with `vercel cache dangerously-delete --tag hukamnama` on the web project.
+
 Close the day's dead-man issue with a line saying what you decided.
 
 ## Other alerts

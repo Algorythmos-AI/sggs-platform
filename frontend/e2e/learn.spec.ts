@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { LEARN_SLUGS } from '../src/routes';
 
-// The Learn section (PR3): /learn index, the eight articles, RSS and per-article OG cards.
-test('learn index lists the eight articles @smoke', async ({ page }) => {
+// The Learn section (PR3): /learn index, the articles, RSS and per-article OG cards.
+test('learn index lists every article @smoke', async ({ page }) => {
   const res = await page.goto('/en/learn');
   expect(res?.status()).toBe(200);
   await expect(page.locator('h1')).toContainText('Learn');
-  await expect(page.locator('.learn-card')).toHaveCount(8);
+  await expect(page.locator('.learn-card')).toHaveCount(LEARN_SLUGS.length);
 });
 
 test('an article renders verbatim, cited and labelled @smoke', async ({ page }) => {

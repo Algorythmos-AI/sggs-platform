@@ -3,6 +3,23 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.7.2] — 2026-11-20
+
+The Hukamnama gains a month archive, a share button and pages that explain how each day is found and checked. A Vaar day whose SGPC page prints its salok and pauri labels inside the verses is now resolved instead of held. No scripture, corpus or dataset change.
+
+### Added
+- **Hukamnama month archive** (#434): `/{lang}/hukamnama/YYYY-MM` lists the month's published days, newest first, each linked by its date and cited by its Ang, and is in the Hukamnama sitemap. Day pages say when the same shabad was also the Hukamnama on earlier dates, and gain a share button (WhatsApp and the device's share sheet) that sends the whole shabad, its citation and the link. The Punjabi and French strings were approved by the owner.
+- **How the Hukamnama is found and checked** (#433): the Learn article now separates the Hukamnama from Sri Harmandir Sahib from the app's Hukam of the day, with a methodology page and a public corrections log.
+- **Hukamnama in the Knowledge Base** (#431): a Hukamnama link in the Knowledge Base's Read row and footer.
+- **CDN purge after a correction** (#432): when a published day is corrected, the service clears the site's cached pages, feeds, embed and sitemap, then once more after the function caches expire, so the corrected text appears at once. A failed purge raises an alert and never stops publishing.
+
+### Fixed
+- **Vaar days that print their labels** (#430, issue #429): on 19 November (Ang 849, Bilaval ki Vaar Mahala 4) SGPC printed the salok and pauri labels inside the verse block, and no run of corpus lines could start on a label, so the day was held. A run may now open on a printed label, while the whole page must still equal the corpus word for word. A `held_veto` alert now names the differing word.
+- **Browser install in CI** (#435): a timed-out attempt no longer leaves an `apt-get` holding the package lock, which had failed every retry on several pull requests.
+
+### Changed
+- **Wiki** (#428): sibling docs pins bumped.
+
 ## [1.7.1] — 2026-11-18
 
 The Hukamnama is now linked from every page of gurbanisoul.com, and its developer API from the home page. The dependency audit is clean again. No scripture, corpus or dataset change.

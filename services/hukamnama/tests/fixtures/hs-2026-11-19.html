@@ -1,0 +1,453 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGPC</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- Bootstrap & FontAwesome -->
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" type="352c4eadf6780936b36f533e-text/javascript"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <style>
+     img:hover{
+      transform: scale(1.1);
+      transition: all 0.3s ease-in-out;
+    }
+    /* 🌟 General Styles */
+    body {
+      font-family: "Arial", sans-serif;
+      
+      padding-top: 0px;
+      /* Adjusted to prevent overlap with navbar */
+    }
+
+    /* 🟣 Navbar Styling */
+    .navbar {
+      background: linear-gradient(135deg, rgba(255, 140, 0, 0.8), #000000, #00008b);
+      font-size: 18px;
+      font-weight: bold;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1050;
+      padding: 12px 0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Ensure full width */
+    .navbar .container {
+      max-width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* 🔗 Navbar Links */
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      padding: 12px 20px;
+      transition: color 0.3s ease-in-out;
+    }
+
+    .navbar a:hover,
+    .navbar-nav .nav-link.active {
+      color: #ffcc00;
+    }
+
+    /* Enhanced active link styling */
+    .navbar-nav .nav-link.active {
+      color: #ffcc00 ;
+       /* Slight background highlight */
+      border-radius: 5px; /* Rounded corners */
+    }
+
+    /* Add margin between navbar items */
+    .navbar-nav .nav-item {
+      margin: 0 15px;
+      /* Adjust as needed */
+    }
+
+    /* Ensure links are properly spaced */
+    .navbar-nav .nav-link {
+      padding: 12px 20px;
+      /* Adds even spacing around links */
+    }
+
+    /* 🎭 Navbar Toggler */
+    .navbar-toggler {
+      border: none;
+      outline: none;
+    }
+
+    /* 📱 Responsive Adjustments */
+    @media (max-width: 991px) {
+      .navbar-nav {
+        text-align: center;
+      }
+
+      .navbar-nav .nav-link {
+        display: block;
+        padding: 12px;
+      }
+    }
+
+    /* 🏠 Home Icon */
+    .home-icon {
+      font-size: 22px;
+      
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      padding: 8px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .home-icon:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* 📜 Footer Styling */
+    .footer {
+      background: linear-gradient(135deg, black, #001f3f, rgb(90, 72, 2), #00008b);
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      text-align: center;
+      padding: 15px;
+      margin-top: 40px;
+    }
+  </style>
+
+  <script type="352c4eadf6780936b36f533e-text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      let navbar = document.getElementById("navbarNavDropdown");
+      let toggler = document.querySelector(".navbar-toggler");
+
+      // Toggle navbar on toggler button click
+      toggler.addEventListener("click", function () {
+        let bsCollapse = new bootstrap.Collapse(navbar, {
+          toggle: true // Ensure it toggles instead of just hiding
+        });
+      });
+
+      // Close navbar when clicking outside (only when open)
+      document.addEventListener("click", function (event) {
+        if (!navbar.contains(event.target) && !toggler.contains(event.target)) {
+          let bsCollapse = new bootstrap.Collapse(navbar, {
+            toggle: false
+          });
+          bsCollapse.hide();
+        }
+      });
+
+      // Close navbar when clicking on any menu item
+      document.querySelectorAll(".nav-link").forEach(item => {
+        item.addEventListener("click", function () {
+          let bsCollapse = new bootstrap.Collapse(navbar, {
+            toggle: false
+          });
+          bsCollapse.hide();
+        });
+      });
+    });
+
+    function redirectToSGPC(event) {
+      event.preventDefault(); // Prevent immediate navigation
+      let userConfirmed = confirm("You will be redirected to SGPC.net. Do you want to continue?");
+      if (userConfirmed) {
+        window.location.href = "https://sgpc.net/";
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; redirectToSGPC(event)" data-cf-modified-352c4eadf6780936b36f533e-="">
+        <img src="https://hs.sgpc.net/logo-sgpc.png" style="width: auto;height: 50px" alt="SGPC Logo" class="nav-logo">
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-center" id="navbarNavDropdown">
+        <ul class="navbar-nav text-center">
+          <li class="nav-item">
+            <a class="nav-link active" href="index.php">ਹੁਕਮਨਾਮਾ ਸਾਹਿਬ</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " href="hspdf.php">ਹੁਕਮਨਾਮਾ ਸਾਹਿਬ (PDF)</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " href="archiveView.php">ਹੁਕਮਨਾਮਾ ARCHIVES</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " href="sangrand.php">ਸੰਗਰਾਂਦ ਹੁਕਮਨਾਮਾ</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " href="apps.php">SGPC Apps</a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="352c4eadf6780936b36f533e-|49" defer></script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5cea00bacd10fe5',t:'MTc5NTA4NTEyNA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5cea00bacd10fe5',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+</html>
+<link rel="stylesheet" type="text/css" href="includes/style.css?v=1792212975" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400..800&display=swap" />
+
+<div class="container sangrandBackground" id="details">
+    <div class="text-center">
+        <h2 class="hukamnama-title">ਮੁੱਖਵਾਕ</h2>
+        <h2 class="hukamnama-title">ਸੱਚਖੰਡ ਸ੍ਰੀ ਹਰਿਮੰਦਰ ਸਾਹਿਬ, ਸ੍ਰੀ ਅੰਮ੍ਰਿਤਸਰ</h2>
+
+    </div>
+
+    
+    
+        <!-- ✅ Date and Time -->
+        <div class="text-center">
+            <p class="fs-5 customDate"><strong>
+                19-11-2026  05:30 AM            </strong></p>
+        </div>
+
+        <!-- ✅ Audio Section -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6 d-flex justify-content-center">
+                <div class="audio-card text-center w-100 px-2">
+                    <label class="audio-label">🎵 Hukamnama Audio</label>
+                    <audio class="audio-player w-100" src="https://hs.sgpc.net/hukamnamaaudio/SGPCNET191126.mp3"
+                        controls></audio>
+                </div>
+            </div>
+            <div class="col-md-6 d-flex justify-content-center">
+                <div class="audio-card text-center w-100 px-2">
+                    <label class="audio-label">🎵 Katha Audio</label>
+                    <audio class="audio-player w-100" src="https://hs.sgpc.net/kathaaudio/katha191126.mp3"
+                        controls></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ Gurmukhi -->
+        <div class="hukamnama-card mt-4">
+            <h4 class="hukamnama-title">ਬਿਲਾਵਲੁ ਕੀ ਵਾਰ ਮਹਲਾ ੪</h4>
+            <h5 class="hukamnama-subtitle">ੴ ਸਤਿਗੁਰ ਪ੍ਰਸਾਦਿ ॥</h5>
+            <p class="hukamnama-text">ਸਲੋਕ ਮਃ ੪ ॥ ਹਰਿ ਉਤਮੁ ਹਰਿ ਪ੍ਰਭੁ ਗਾਵਿਆ ਕਰਿ ਨਾਦੁ ਬਿਲਾਵਲੁ ਰਾਗੁ ॥ ਉਪਦੇਸੁ ਗੁਰੂ ਸੁਣਿ ਮੰਨਿਆ ਧੁਰਿ ਮਸਤਕਿ ਪੂਰਾ ਭਾਗੁ ॥ ਸਭ ਦਿਨਸੁ ਰੈਣਿ ਗੁਣ ਉਚਰੈ ਹਰਿ ਹਰਿ ਹਰਿ ਉਰਿ ਲਿਵ ਲਾਗੁ ॥ ਸਭੁ ਤਨੁ ਮਨੁ ਹਰਿਆ ਹੋਇਆ ਮਨੁ ਖਿੜਿਆ ਹਰਿਆ ਬਾਗੁ ॥ ਅਗਿਆਨੁ ਅੰਧੇਰਾ ਮਿਟਿ ਗਇਆ ਗੁਰ ਚਾਨਣੁ ਗਿਆਨੁ ਚਰਾਗੁ ॥ ਜਨੁ ਨਾਨਕੁ ਜੀਵੈ ਦੇਖਿ ਹਰਿ ਇਕ ਨਿਮਖ ਘੜੀ ਮੁਖਿ ਲਾਗੁ ॥੧॥ ਮਃ ੩ ॥ ਬਿਲਾਵਲੁ ਤਬ ਹੀ ਕੀਜੀਐ ਜਬ ਮੁਖਿ ਹੋਵੈ ਨਾਮੁ ॥ ਰਾਗ ਨਾਦ ਸਬਦਿ ਸੋਹਣੇ ਜਾ ਲਾਗੈ ਸਹਜਿ ਧਿਆਨੁ ॥ ਰਾਗ ਨਾਦ ਛੋਡਿ ਹਰਿ ਸੇਵੀਐ ਤਾ ਦਰਗਹ ਪਾਈਐ ਮਾਨੁ ॥ ਨਾਨਕ ਗੁਰਮੁਖਿ ਬ੍ਰਹਮੁ ਬੀਚਾਰੀਐ ਚੂਕੈ ਮਨਿ ਅਭਿਮਾਨੁ ॥੨॥ ਪਉੜੀ ॥ ਤੂ ਹਰਿ ਪ੍ਰਭੁ ਆਪਿ ਅਗੰਮੁ ਹੈ ਸਭਿ ਤੁਧੁ ਉਪਾਇਆ ॥ ਤੂ ਆਪੇ ਆਪਿ ਵਰਤਦਾ ਸਭੁ ਜਗਤੁ ਸਬਾਇਆ ॥ ਤੁਧੁ ਆਪੇ ਤਾੜੀ ਲਾਈਐ ਆਪੇ ਗੁਣ ਗਾਇਆ ॥ ਹਰਿ ਧਿਆਵਹੁ ਭਗਤਹੁ ਦਿਨਸੁ ਰਾਤਿ ਅੰਤਿ ਲਏ ਛਡਾਇਆ ॥ ਜਿਨਿ ਸੇਵਿਆ ਤਿਨਿ ਸੁਖੁ ਪਾਇਆ ਹਰਿ ਨਾਮਿ ਸਮਾਇਆ ॥੧॥</p>
+            <p class="customDate"><strong>ਵੀਰਵਾਰ, ੪ ਮੱਘਰ (ਸੰਮਤ ੫੫੮ ਨਾਨਕਸ਼ਾਹੀ) </strong></p>
+            <p class="customDate"><strong> (ਅੰਗ: ੮੪੯)</strong></p> <!-- 🔁 Add this -->
+        </div><br>
+
+        <!-- ✅ Punjabi Explanation -->
+        <div class="hukamnama-card2">
+            <h4 class="hukamnama-title">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</h4>
+            <p class="hukamnama-text">ਸਲੋਕ ਮਃ ੪ ॥ ਹੇ ਭਾਈ! (ਪਿਛਲੇ ਕੀਤੇ ਕਰਮਾਂ ਅਨੁਸਾਰ) ਜਿਸ ਮਨੁੱਖ ਦੇ ਮੱਥੇ ਉਤੇ ਧੁਰ ਤੋਂ ਹੀ ਪੂਰਨ ਭਾਗ ਹੈ, (ਜਿਸ ਦੇ ਹਿਰਦੇ ਵਿਚ ਪੂਰਨ ਭਲੇ ਸੰਸਕਾਰਾਂ ਦਾ ਲੇਖ ਉੱਘੜਦਾ ਹੈ) ਉਸ ਨੇ ਗੁਰੂ ਦਾ ਸ਼ਬਦ-ਰੂਪ ਬਿਲਾਵਲ ਰਾਗ ਉਚਾਰ ਕੇ ਸਭ ਤੋਂ ਸ੍ਰੇਸ਼ਟ ਪਰਮਾਤਮਾ ਦੇ ਗੁਣ ਗਾਏ ਹਨ, ਉਸ ਨੇ ਸਤਿਗੁਰੂ ਦਾ ਉਪਦੇਸ਼ ਸੁਣ ਕੇ ਹਿਰਦੇ ਵਿਚ ਵਸਾਇਆ ਹੈ । ਉਹ ਮਨੁੱਖ ਸਾਰਾ ਦਿਨ ਤੇ ਸਾਰੀ ਰਾਤ (ਅੱਠੇ ਪਹਿਰ) ਪਰਮਾਤਮਾ ਦੇ ਗੁਣ ਗਾਂਦਾ ਹੈ (ਕਿਉਂਕਿ ਉਸ ਦੇ) ਹਿਰਦੇ ਵਿਚ ਪਰਮਾਤਮਾ ਦੀ ਯਾਦ ਦੀ ਲਗਨ ਲੱਗੀ ਰਹਿੰਦੀ ਹੈ । ਉਸ ਦਾ ਸਾਰਾ ਤਨ ਸਾਰਾ ਮਨ ਹਰਾ-ਭਰਾ ਹੋ ਜਾਂਦਾ ਹੈ (ਆਤਮਕ ਜੀਵਨ ਦੇ ਰਸ ਨਾਲ ਭਰ ਜਾਂਦਾ ਹੈ), ਉਸ ਦਾ ਮਨ (ਇਉਂ) ਖਿੜ ਪੈਂਦਾ ਹੈ (ਜਿਵੇਂ) ਹਰਾ ਹੋਇਆ ਹੋਇਆ ਬਾਗ਼ ਹੈ । ਗੁਰੂ ਦੀ ਦਿੱਤੀ ਹੋਈ ਆਤਮਕ ਜੀਵਨ ਦੀ ਸੂਝ (ਉਸ ਦੇ ਅੰਦਰ, ਮਾਨੋ) ਦੀਵਾ ਰੌਸ਼ਨੀ ਕਰ ਦੇਂਦਾ ਹੈ (ਜਿਸ ਦੀ ਬਰਕਤ ਨਾਲ ਉਸ ਦੇ ਅੰਦਰੋਂ) ਆਤਮਕ ਜੀਵਨ ਵਲੋਂ ਬੇ-ਸਮਝੀ (ਦਾ) ਹਨੇਰਾ ਮਿਟ ਜਾਂਦਾ ਹੈ । ਹੇ ਹਰੀ! (ਤੇਰਾ) ਦਾਸ ਨਾਨਕ (ਅਜੇਹੇ ਗੁਰਮੁਖਿ ਮਨੁੱਖ ਨੂੰ) ਵੇਖ ਕੇ ਆਤਮਕ ਜੀਵਨ ਹਾਸਲ ਕਰਦਾ ਹੈ (ਤੇ, ਚਾਹੁੰਦਾ ਹੈ ਕਿ) ਭਾਵੇਂ ਇਕ ਪਲ-ਭਰ ਹੀ ਉਸ ਦਾ ਦਰਸ਼ਨ ਹੋਵੇ ।੧। ਹੇ ਭਾਈ! ਪੂਰਨ ਆਤਮਕ ਆਨੰਦ ਤਦੋਂ ਹੀ ਮਾਣਿਆ ਜਾ ਸਕਦਾ ਹੈ, ਜਦੋਂ ਪਰਮਾਤਮਾ ਦਾ ਨਾਮ (ਮਨੁੱਖ ਦੇ) ਮੂੰਹ ਵਿਚ ਟਿਕਦਾ ਹੈ । ਹੇ ਭਾਈ! ਰਾਗ ਤੇ ਨਾਦ (ਭੀ) ਗੁਰੂ ਦੇ ਸ਼ਬਦ ਦੀ ਰਾਹੀਂ ਤਦੋਂ ਹੀ ਸੋਹਣੇ ਲੱਗਦੇ ਹਨ ਜਦੋਂ (ਸ਼ਬਦ ਦੀ ਬਰਕਤ ਨਾਲ ਮਨੁੱਖ ਦੀ) ਸੁਰਤਿ ਆਤਮਕ ਅਡੋਲਤਾ ਵਿਚ ਟਿਕੀ ਰਹਿੰਦੀ ਹੈ । ਹੇ ਭਾਈ! (ਸੰਸਾਰਕ) ਰਾਗ ਰੰਗ (ਦਾ ਰਸ) ਛੱਡ ਕੇ ਪਰਮਾਤਮਾ ਦੀ ਭਗਤੀ ਕਰਨੀ ਚਾਹੀਦੀ ਹੈ, ਤਦੋਂ ਹੀ ਪਰਮਾਤਮਾ ਦੀ ਹਜ਼ੂਰੀ ਵਿਚ ਆਦਰ ਮਿਲਦਾ ਹੈ । ਹੇ ਨਾਨਕ! (ਆਖ—) ਜੇ ਗੁਰੂ ਦੇ ਸਨਮੁਖ ਹੋ ਕੇ ਪਰਮਾਤਮਾ ਦੀ ਯਾਦ ਮਨ ਵਿਚ ਟਿਕਾਈਏ, ਤਾਂ ਮਨ ਵਿਚ (ਟਿਕਿਆ ਹੋਇਆ) ਅਹੰਕਾਰ ਦੂਰ ਹੋ ਜਾਂਦਾ ਹੈ ।੨। ਹੇ ਹਰੀ! ਤੂੰ ਆਪ ਹੀ (ਸਭ ਜੀਵਾਂ ਦਾ) ਮਾਲਕ ਹੈਂ, ਸਾਰੇ ਜੀਵ ਤੂੰ ਹੀ ਪੈਦਾ ਕੀਤੇ ਹੋਏ ਹਨ, ਪਰ ਤੂੰ ਜੀਵਾਂ ਦੀ ਪਹੁੰਚ ਤੋਂ ਪਰੇ ਹੈਂ । (ਇਹ ਜੋ) ਸਾਰਾ ਜਗਤ (ਦਿੱਸ ਰਿਹਾ) ਹੈ (ਇਸ ਵਿਚ ਹਰ ਥਾਂ) ਤੂੰ ਆਪ ਹੀ ਆਪ ਵਿਆਪਕ ਹੈਂ! (ਸਾਰੇ ਜੀਵਾਂ ਵਿਚ ਵਿਆਪਕ ਹੋ ਕੇ) ਸਮਾਧੀ ਭੀ ਤੂੰ ਆਪ ਹੀ ਲਾ ਰਿਹਾ ਹੈਂ, ਤੇ (ਆਪਣੇ) ਗੁਣ ਭੀ ਤੂੰ ਆਪ ਹੀ ਗਾ ਰਿਹਾ ਹੈਂ । ਹੇ ਸੰਤ ਜਨੋ! ਦਿਨ ਰਾਤ (ਹਰ ਵੇਲੇ) ਪਰਮਾਤਮਾ ਦਾ ਧਿਆਨ ਧਰਿਆ ਕਰੋ, ਉਹ ਪਰਮਾਤਮਾ ਹੀ ਅੰਤ ਵਿਚ ਬਚਾਂਦਾ ਹੈ । ਜਿਸ (ਭੀ) ਮਨੁੱਖ ਨੇ ਉਸ ਦੀ ਸੇਵਾ-ਭਗਤੀ ਕੀਤੀ, ਉਸ ਨੇ (ਹੀ) ਸੁਖ ਪ੍ਰਾਪਤ ਕੀਤਾ, (ਕਿਉਂਕਿ ਉਹ ਸਦਾ) ਪਰਮਾਤਮਾ ਦੇ ਨਾਮ ਵਿਚ ਲੀਨ ਰਹਿੰਦਾ ਹੈ ।੧।</p>
+        </div><br>
+
+        <!-- ✅ English Translation -->
+        <!-- ✅ English Translation -->
+        <div class="hukamnama-card2 english-card">
+
+            <h4 class="hukamnama-title" style="font-size: 30px;">
+                English Translation
+            </h4>
+
+            <h5 class="hukamnama-title">
+                VAAR OF BILAAVAL, FOURTH MEHL:            </h5>
+
+            <h6 class="hukamnama-subtitle">
+                ONE UNIVERSAL CREATOR GOD.  BY THE GRACE OF THE TRUE GURU:            </h6>
+
+            <p class="hukamnama-text">
+                SHALOK, FOURTH MEHL:  I sing of the sublime Lord, the Lord God, in the melody of Raag Bilaaval. Hearing the Guru’s Teachings, I obey them; this is the pre-ordained destiny written upon my forehead. All day and night, I chant the Glorious Praises of the Lord, Har, Har, Har; within my heart, I am lovingly attuned to Him. My body and mind are totally rejuvenated, and the garden of my mind has blossomed forth in lush abundance. The darkness of ignorance has been dispelled, with the light of the lamp of the Guru’s wisdom. Servant Nanak lives by beholding the Lord. Let me behold Your face, for a moment, even an instant!  || 1 ||   THIRD MEHL:  Be happy and sing in Bilaaval, when the Naam, the Name of the Lord, is in your mouth. The melody and music, and the Word of the Shabad are beautiful, when one focuses his meditation on the celestial Lord. So leave behind the melody and music, and serve the Lord; then, you shall obtain honor in the Court of the Lord. O Nanak, as Gurmukh, contemplate God, and rid your mind of egotistical pride.  || 2 ||   PAUREE:  O Lord God, You Yourself are inaccessible; You formed everything. You Yourself are totally permeating and pervading the entire universe. You Yourself are absorbed in the state of deep meditation; You Yourself sing Your Glorious Praises. Meditate on the Lord, O devotees, day and night; He shall deliver you in the end. Those who serve the Lord, find peace; they are absorbed in the Name of the Lord.  || 1 ||            </p>
+
+            <p class="customDate">
+                <strong>Thursday, 4th Maghar (Samvat 558 Nanakshahi) </strong>
+            </p>
+
+            <p class="customDate">
+                <strong>(Page: 849)</strong>
+            </p>
+
+        </div>
+
+        <!-- ✅ PDF Section — generated live from the content shown above -->
+        <div class="pdf-section text-center mt-4">
+            <script type="application/json"
+                id="hukamnamaPdfData">{"date":"2026-11-19","ang":"849","hukamnama_time":"05:30:00","gheading1":"ਬਿਲਾਵਲੁ ਕੀ ਵਾਰ ਮਹਲਾ ੪","gheading2":"ੴ ਸਤਿਗੁਰ ਪ੍ਰਸਾਦਿ ॥","ghukamnama":"ਸਲੋਕ ਮਃ ੪ ॥ ਹਰਿ ਉਤਮੁ ਹਰਿ ਪ੍ਰਭੁ ਗਾਵਿਆ ਕਰਿ ਨਾਦੁ ਬਿਲਾਵਲੁ ਰਾਗੁ ॥ ਉਪਦੇਸੁ ਗੁਰੂ ਸੁਣਿ ਮੰਨਿਆ ਧੁਰਿ ਮਸਤਕਿ ਪੂਰਾ ਭਾਗੁ ॥ ਸਭ ਦਿਨਸੁ ਰੈਣਿ ਗੁਣ ਉਚਰੈ ਹਰਿ ਹਰਿ ਹਰਿ ਉਰਿ ਲਿਵ ਲਾਗੁ ॥ ਸਭੁ ਤਨੁ ਮਨੁ ਹਰਿਆ ਹੋਇਆ ਮਨੁ ਖਿੜਿਆ ਹਰਿਆ ਬਾਗੁ ॥ ਅਗਿਆਨੁ ਅੰਧੇਰਾ ਮਿਟਿ ਗਇਆ ਗੁਰ ਚਾਨਣੁ ਗਿਆਨੁ ਚਰਾਗੁ ॥ ਜਨੁ ਨਾਨਕੁ ਜੀਵੈ ਦੇਖਿ ਹਰਿ ਇਕ ਨਿਮਖ ਘੜੀ ਮੁਖਿ ਲਾਗੁ ॥੧॥ ਮਃ ੩ ॥ ਬਿਲਾਵਲੁ ਤਬ ਹੀ ਕੀਜੀਐ ਜਬ ਮੁਖਿ ਹੋਵੈ ਨਾਮੁ ॥ ਰਾਗ ਨਾਦ ਸਬਦਿ ਸੋਹਣੇ ਜਾ ਲਾਗੈ ਸਹਜਿ ਧਿਆਨੁ ॥ ਰਾਗ ਨਾਦ ਛੋਡਿ ਹਰਿ ਸੇਵੀਐ ਤਾ ਦਰਗਹ ਪਾਈਐ ਮਾਨੁ ॥ ਨਾਨਕ ਗੁਰਮੁਖਿ ਬ੍ਰਹਮੁ ਬੀਚਾਰੀਐ ਚੂਕੈ ਮਨਿ ਅਭਿਮਾਨੁ ॥੨॥ ਪਉੜੀ ॥ ਤੂ ਹਰਿ ਪ੍ਰਭੁ ਆਪਿ ਅਗੰਮੁ ਹੈ ਸਭਿ ਤੁਧੁ ਉਪਾਇਆ ॥ ਤੂ ਆਪੇ ਆਪਿ ਵਰਤਦਾ ਸਭੁ ਜਗਤੁ ਸਬਾਇਆ ॥ ਤੁਧੁ ਆਪੇ ਤਾੜੀ ਲਾਈਐ ਆਪੇ ਗੁਣ ਗਾਇਆ ॥ ਹਰਿ ਧਿਆਵਹੁ ਭਗਤਹੁ ਦਿਨਸੁ ਰਾਤਿ ਅੰਤਿ ਲਏ ਛਡਾਇਆ ॥ ਜਿਨਿ ਸੇਵਿਆ ਤਿਨਿ ਸੁਖੁ ਪਾਇਆ ਹਰਿ ਨਾਮਿ ਸਮਾਇਆ ॥੧॥","ghukamnamadesc":"ਸਲੋਕ ਮਃ ੪ ॥ ਹੇ ਭਾਈ! (ਪਿਛਲੇ ਕੀਤੇ ਕਰਮਾਂ ਅਨੁਸਾਰ) ਜਿਸ ਮਨੁੱਖ ਦੇ ਮੱਥੇ ਉਤੇ ਧੁਰ ਤੋਂ ਹੀ ਪੂਰਨ ਭਾਗ ਹੈ, (ਜਿਸ ਦੇ ਹਿਰਦੇ ਵਿਚ ਪੂਰਨ ਭਲੇ ਸੰਸਕਾਰਾਂ ਦਾ ਲੇਖ ਉੱਘੜਦਾ ਹੈ) ਉਸ ਨੇ ਗੁਰੂ ਦਾ ਸ਼ਬਦ-ਰੂਪ ਬਿਲਾਵਲ ਰਾਗ ਉਚਾਰ ਕੇ ਸਭ ਤੋਂ ਸ੍ਰੇਸ਼ਟ ਪਰਮਾਤਮਾ ਦੇ ਗੁਣ ਗਾਏ ਹਨ, ਉਸ ਨੇ ਸਤਿਗੁਰੂ ਦਾ ਉਪਦੇਸ਼ ਸੁਣ ਕੇ ਹਿਰਦੇ ਵਿਚ ਵਸਾਇਆ ਹੈ । ਉਹ ਮਨੁੱਖ ਸਾਰਾ ਦਿਨ ਤੇ ਸਾਰੀ ਰਾਤ (ਅੱਠੇ ਪਹਿਰ) ਪਰਮਾਤਮਾ ਦੇ ਗੁਣ ਗਾਂਦਾ ਹੈ (ਕਿਉਂਕਿ ਉਸ ਦੇ) ਹਿਰਦੇ ਵਿਚ ਪਰਮਾਤਮਾ ਦੀ ਯਾਦ ਦੀ ਲਗਨ ਲੱਗੀ ਰਹਿੰਦੀ ਹੈ । ਉਸ ਦਾ ਸਾਰਾ ਤਨ ਸਾਰਾ ਮਨ ਹਰਾ-ਭਰਾ ਹੋ ਜਾਂਦਾ ਹੈ (ਆਤਮਕ ਜੀਵਨ ਦੇ ਰਸ ਨਾਲ ਭਰ ਜਾਂਦਾ ਹੈ), ਉਸ ਦਾ ਮਨ (ਇਉਂ) ਖਿੜ ਪੈਂਦਾ ਹੈ (ਜਿਵੇਂ) ਹਰਾ ਹੋਇਆ ਹੋਇਆ ਬਾਗ਼ ਹੈ । ਗੁਰੂ ਦੀ ਦਿੱਤੀ ਹੋਈ ਆਤਮਕ ਜੀਵਨ ਦੀ ਸੂਝ (ਉਸ ਦੇ ਅੰਦਰ, ਮਾਨੋ) ਦੀਵਾ ਰੌਸ਼ਨੀ ਕਰ ਦੇਂਦਾ ਹੈ (ਜਿਸ ਦੀ ਬਰਕਤ ਨਾਲ ਉਸ ਦੇ ਅੰਦਰੋਂ) ਆਤਮਕ ਜੀਵਨ ਵਲੋਂ ਬੇ-ਸਮਝੀ (ਦਾ) ਹਨੇਰਾ ਮਿਟ ਜਾਂਦਾ ਹੈ । ਹੇ ਹਰੀ! (ਤੇਰਾ) ਦਾਸ ਨਾਨਕ (ਅਜੇਹੇ ਗੁਰਮੁਖਿ ਮਨੁੱਖ ਨੂੰ) ਵੇਖ ਕੇ ਆਤਮਕ ਜੀਵਨ ਹਾਸਲ ਕਰਦਾ ਹੈ (ਤੇ, ਚਾਹੁੰਦਾ ਹੈ ਕਿ) ਭਾਵੇਂ ਇਕ ਪਲ-ਭਰ ਹੀ ਉਸ ਦਾ ਦਰਸ਼ਨ ਹੋਵੇ ।੧। ਹੇ ਭਾਈ! ਪੂਰਨ ਆਤਮਕ ਆਨੰਦ ਤਦੋਂ ਹੀ ਮਾਣਿਆ ਜਾ ਸਕਦਾ ਹੈ, ਜਦੋਂ ਪਰਮਾਤਮਾ ਦਾ ਨਾਮ (ਮਨੁੱਖ ਦੇ) ਮੂੰਹ ਵਿਚ ਟਿਕਦਾ ਹੈ । ਹੇ ਭਾਈ! ਰਾਗ ਤੇ ਨਾਦ (ਭੀ) ਗੁਰੂ ਦੇ ਸ਼ਬਦ ਦੀ ਰਾਹੀਂ ਤਦੋਂ ਹੀ ਸੋਹਣੇ ਲੱਗਦੇ ਹਨ ਜਦੋਂ (ਸ਼ਬਦ ਦੀ ਬਰਕਤ ਨਾਲ ਮਨੁੱਖ ਦੀ) ਸੁਰਤਿ ਆਤਮਕ ਅਡੋਲਤਾ ਵਿਚ ਟਿਕੀ ਰਹਿੰਦੀ ਹੈ । ਹੇ ਭਾਈ! (ਸੰਸਾਰਕ) ਰਾਗ ਰੰਗ (ਦਾ ਰਸ) ਛੱਡ ਕੇ ਪਰਮਾਤਮਾ ਦੀ ਭਗਤੀ ਕਰਨੀ ਚਾਹੀਦੀ ਹੈ, ਤਦੋਂ ਹੀ ਪਰਮਾਤਮਾ ਦੀ ਹਜ਼ੂਰੀ ਵਿਚ ਆਦਰ ਮਿਲਦਾ ਹੈ । ਹੇ ਨਾਨਕ! (ਆਖ—) ਜੇ ਗੁਰੂ ਦੇ ਸਨਮੁਖ ਹੋ ਕੇ ਪਰਮਾਤਮਾ ਦੀ ਯਾਦ ਮਨ ਵਿਚ ਟਿਕਾਈਏ, ਤਾਂ ਮਨ ਵਿਚ (ਟਿਕਿਆ ਹੋਇਆ) ਅਹੰਕਾਰ ਦੂਰ ਹੋ ਜਾਂਦਾ ਹੈ ।੨। ਹੇ ਹਰੀ! ਤੂੰ ਆਪ ਹੀ (ਸਭ ਜੀਵਾਂ ਦਾ) ਮਾਲਕ ਹੈਂ, ਸਾਰੇ ਜੀਵ ਤੂੰ ਹੀ ਪੈਦਾ ਕੀਤੇ ਹੋਏ ਹਨ, ਪਰ ਤੂੰ ਜੀਵਾਂ ਦੀ ਪਹੁੰਚ ਤੋਂ ਪਰੇ ਹੈਂ । (ਇਹ ਜੋ) ਸਾਰਾ ਜਗਤ (ਦਿੱਸ ਰਿਹਾ) ਹੈ (ਇਸ ਵਿਚ ਹਰ ਥਾਂ) ਤੂੰ ਆਪ ਹੀ ਆਪ ਵਿਆਪਕ ਹੈਂ! (ਸਾਰੇ ਜੀਵਾਂ ਵਿਚ ਵਿਆਪਕ ਹੋ ਕੇ) ਸਮਾਧੀ ਭੀ ਤੂੰ ਆਪ ਹੀ ਲਾ ਰਿਹਾ ਹੈਂ, ਤੇ (ਆਪਣੇ) ਗੁਣ ਭੀ ਤੂੰ ਆਪ ਹੀ ਗਾ ਰਿਹਾ ਹੈਂ । ਹੇ ਸੰਤ ਜਨੋ! ਦਿਨ ਰਾਤ (ਹਰ ਵੇਲੇ) ਪਰਮਾਤਮਾ ਦਾ ਧਿਆਨ ਧਰਿਆ ਕਰੋ, ਉਹ ਪਰਮਾਤਮਾ ਹੀ ਅੰਤ ਵਿਚ ਬਚਾਂਦਾ ਹੈ । ਜਿਸ (ਭੀ) ਮਨੁੱਖ ਨੇ ਉਸ ਦੀ ਸੇਵਾ-ਭਗਤੀ ਕੀਤੀ, ਉਸ ਨੇ (ਹੀ) ਸੁਖ ਪ੍ਰਾਪਤ ਕੀਤਾ, (ਕਿਉਂਕਿ ਉਹ ਸਦਾ) ਪਰਮਾਤਮਾ ਦੇ ਨਾਮ ਵਿਚ ਲੀਨ ਰਹਿੰਦਾ ਹੈ ।੧।","gfooter1":"ਵੀਰਵਾਰ, ੪ ਮੱਘਰ (ਸੰਮਤ ੫੫੮ ਨਾਨਕਸ਼ਾਹੀ) ","gfooter2":" (ਅੰਗ: ੮੪੯)","eheading1":"VAAR OF BILAAVAL, FOURTH MEHL:","eheading2":"ONE UNIVERSAL CREATOR GOD.  BY THE GRACE OF THE TRUE GURU:","ehukamnamadesc":"SHALOK, FOURTH MEHL:  I sing of the sublime Lord, the Lord God, in the melody of Raag Bilaaval. Hearing the Guru’s Teachings, I obey them; this is the pre-ordained destiny written upon my forehead. All day and night, I chant the Glorious Praises of the Lord, Har, Har, Har; within my heart, I am lovingly attuned to Him. My body and mind are totally rejuvenated, and the garden of my mind has blossomed forth in lush abundance. The darkness of ignorance has been dispelled, with the light of the lamp of the Guru’s wisdom. Servant Nanak lives by beholding the Lord. Let me behold Your face, for a moment, even an instant!  || 1 ||   THIRD MEHL:  Be happy and sing in Bilaaval, when the Naam, the Name of the Lord, is in your mouth. The melody and music, and the Word of the Shabad are beautiful, when one focuses his meditation on the celestial Lord. So leave behind the melody and music, and serve the Lord; then, you shall obtain honor in the Court of the Lord. O Nanak, as Gurmukh, contemplate God, and rid your mind of egotistical pride.  || 2 ||   PAUREE:  O Lord God, You Yourself are inaccessible; You formed everything. You Yourself are totally permeating and pervading the entire universe. You Yourself are absorbed in the state of deep meditation; You Yourself sing Your Glorious Praises. Meditate on the Lord, O devotees, day and night; He shall deliver you in the end. Those who serve the Lord, find peace; they are absorbed in the Name of the Lord.  || 1 ||","efooter1":"Thursday, 4th Maghar (Samvat 558 Nanakshahi) ","efooter2":"(Page: 849)"}</script>
+
+            <a href="#" class="pdf-button" data-hukamnama-pdf="hukamnamaPdfData">
+                📜 Download &amp; View Hukamnama PDF
+            </a>
+
+        </div>
+
+    </div>
+
+<script src="assets/js/html2pdf.bundle.min.js?v=1788841532" type="352c4eadf6780936b36f533e-text/javascript"></script>
+<script src="assets/js/hukamnama-pdf.js?v=1793610724" type="352c4eadf6780936b36f533e-text/javascript"></script>
+
+<!-- ===================== FOOTER (ISOLATED & NAVBAR-SAFE) ===================== -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<footer class="sgpc-footer text-center">
+  <div class="container">
+    <div class="sgpc-footer-content">
+      <p class="sgpc-footer-text">
+        Under Design & Development by Internet Department | ©
+        <strong>SGPC</strong>
+      </p>
+
+      <div class="sgpc-social-icons">
+        <a href="https://www.facebook.com/sgpcamritsar.org" target="_blank"
+           class="fab fa-facebook" aria-label="Facebook"></a>
+
+        <a href="https://www.instagram.com/sgpc_amritsar/" target="_blank"
+           class="fab fa-instagram sgpc-insta" aria-label="Instagram"></a>
+
+        <a href="https://twitter.com/sgpcamritsar" target="_blank"
+           class="fab fa-twitter" aria-label="Twitter"></a>
+
+        <a href="https://www.youtube.com/c/SGPCAmritsar-official" target="_blank"
+           class="fab fa-youtube sgpc-yt" aria-label="YouTube"></a>
+
+        <a href="https://t.me/sgpc_amritsar" target="_blank"
+           class="fab fa-telegram sgpc-telegram" aria-label="Telegram"></a>
+
+        <a href="https://whatsapp.com/channel/0029VaEcc9NKQuJBzhIg7h26" target="_blank"
+           class="fab fa-whatsapp" aria-label="WhatsApp"></a>
+
+        <a href="apps.php" target="_blank"
+           class="fab fa-google-play sgpc-playstore" aria-label="Google Play"></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> -->
+
+<!-- ✅ Prevent Multiple Audio Playback -->
+<script type="352c4eadf6780936b36f533e-text/javascript">
+  document.addEventListener('play', function (e) {
+    var audios = document.getElementsByTagName('audio');
+    for (var i = 0, len = audios.length; i < len; i++) {
+      if (audios[i] !== e.target) {
+        audios[i].pause();
+      }
+    }
+  }, true);
+</script>
+
+<!-- ✅ Footer Styling -->
+<style>
+/* ===================== SGPC FOOTER ONLY ===================== */
+.sgpc-footer {
+  background: linear-gradient(135deg, #003092, #ff8c00);
+  padding: 20px 0;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+  margin-top: 40px;
+}
+
+.sgpc-footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.sgpc-footer-text {
+  color: #FFF085;
+  font-size: 14px;
+  margin: 0;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.sgpc-footer-text:hover {
+  color: #ffcc00;
+  transform: scale(1.05);
+}
+
+/* Icons base (fully scoped) */
+.sgpc-footer .sgpc-social-icons a {
+  color: #FFF085;
+  font-size: 32px;
+  margin: 0 15px;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.sgpc-footer .sgpc-social-icons a:hover {
+  transform: scale(1.3);
+}
+
+/* Solid brand colors */
+.sgpc-footer .fa-facebook:hover { color: #1877F2; }
+.sgpc-footer .fa-twitter:hover { color: #1DA1F2; }
+.sgpc-footer .fa-whatsapp:hover { color: #25D366; }
+.sgpc-footer .sgpc-telegram:hover { color: #229ED9;}
+
+/* Instagram (gradient + white) */
+.sgpc-footer .sgpc-insta:hover {
+  background: radial-gradient(circle at 30% 30%,
+    #ffffff 0%,
+    #fdf497 12%,
+    #fd5949 40%,
+    #d6249f 65%,
+    #285AEB 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Telegram (blue + white) 
+.sgpc-footer .sgpc-telegram:hover {
+  background: linear-gradient(135deg,
+    #ffffff 0%,
+    #229ED9 45%,
+    #0088CC 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+} */
+
+/* YouTube (red + white) */
+.sgpc-footer .sgpc-yt:hover {
+  background: linear-gradient(135deg,
+    #ffffff 0%,
+    #FF0000 45%,
+    #CC0000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Google Play (multi-color) */
+.sgpc-footer .sgpc-playstore:hover {
+  background: linear-gradient(45deg,
+    #00A0FF,
+    #00E676,
+    #FFD700,
+    #FF3D00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+  .sgpc-footer .sgpc-social-icons a {
+    font-size: 26px;
+    margin: 0 10px;
+  }
+}
+</style>
+<!-- ===================== END FOOTER ===================== -->

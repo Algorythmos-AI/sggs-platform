@@ -16,12 +16,18 @@
   "HUKAMNAMA_DB": "The scripture database the Hukamnama service reads (default `db/sggs.sqlite`); the same as its `--db` option.",
   "HUKAMNAMA_ENV": "`staging` (the default) or `production`: the environment name the Hukamnama service puts in its phone alerts' titles.",
   "HUKAMNAMA_MEANING": "`on` adds the English translation (Dr. Sant Singh Khalsa) to the Hukamnama service's public snapshot as a separate, labelled layer (`lines[].en` and `translation`); anything else (the default) leaves it out, and switching it off removes it from the files on the next sync. The Gurmukhi is identical either way.",
+  "HUKAMNAMA_ORIGIN_REQUIRED": "`on` makes the Hukamnama service answer `403` on `/v1/*` to any request without the edge's secret (`/health` stays open). Anything else (the default) leaves direct calls allowed. Needs `HUKAMNAMA_ORIGIN_SECRET`.",
+  "HUKAMNAMA_ORIGIN_SECRET": "The secret the edge Worker sends in `X-Origin-Auth`. When set, the Hukamnama service believes a request's client address (`X-Client-IP`) only with it, and limits every other request by its socket's own address. Set the same value on the Worker (`ORIGIN_SECRET`). Never committed.",
   "HUKAMNAMA_PUBLIC_ACCESS_KEY_ID": "The access key id of an R2 API token scoped to the public snapshot bucket only (Object Read & Write). Not the backup's token.",
   "HUKAMNAMA_PUBLIC_BUCKET": "The R2 bucket the Hukamnama service writes its public snapshot to, for the edge Worker to serve (unset: no bucket). Needs `HUKAMNAMA_R2_ENDPOINT` and the two `HUKAMNAMA_PUBLIC_…` keys; with any of them missing the service refuses to start.",
   "HUKAMNAMA_PUBLIC_DIR": "Where the Hukamnama service writes its public snapshot: one file per published day plus an index, rewritten when a day is published, corrected or held (unset: no snapshot); the same as `serve --public-dir`.",
   "HUKAMNAMA_PUBLIC_SECRET_ACCESS_KEY": "The secret of that R2 API token. Set only in the host's environment (Render); never in the repository or a log.",
   "HUKAMNAMA_SEND": "`on` makes the Hukamnama service push each published Hukamnama to registered devices through APNs; anything else (the default) keeps sending off. With `on` and no usable APNs key the service refuses to start.",
   "HUKAMNAMA_STATE": "The Hukamnama service's own state database: each day's fetched Hukamnama, the gate's decision and the audit trail (default `hukamnama-state.sqlite`); the same as its `--state` option.",
+  "HUKAMNAMA_VERCEL_PROJECT": "The id or name of the Vercel project whose CDN copy of the Hukamnama pages the service purges (see `HUKAMNAMA_VERCEL_PURGE_TOKEN`).",
+  "HUKAMNAMA_VERCEL_PURGE_TOKEN": "A Vercel access token for the web project's team, used only to delete the `hukamnama` cache tag from the CDN after a published Hukamnama day is corrected or withdrawn. Set only in the host's environment (Render); never in the repo. With `HUKAMNAMA_VERCEL_PROJECT` and `HUKAMNAMA_VERCEL_TEAM`; with any of the three missing the service refuses to start (all unset: no purge).",
+  "HUKAMNAMA_VERCEL_TARGET": "Which of the project's environments the CDN purge clears: `production` or `preview` (unset: Vercel's default).",
+  "HUKAMNAMA_VERCEL_TEAM": "The Vercel team id of that project (see `HUKAMNAMA_VERCEL_PURGE_TOKEN`).",
   "LITESTREAM_SHA256": "Build-time only, from the Hukamnama Dockerfile's build arg: the sha256 of that Litestream release archive, copied from the release's `checksums.txt`; the image build fails on a mismatch.",
   "LITESTREAM_VERSION": "Build-time only, from the Hukamnama Dockerfile's build arg: the Litestream release the image installs for the state backup to R2. Bumped together with `LITESTREAM_SHA256`.",
   "PORT": "The port to listen on, set by the host (Render, a container platform). The API prefers it to `SGGS_PORT`; the Hukamnama service defaults to 8080 without it.",
@@ -46,7 +52,5 @@
   "VERCEL_ENV": "Set by Vercel itself in every deployment (`production`, `preview` or `development`); never set by hand. The generated `all` function reads it to choose the Hukamnama API of the environment it runs in (`hukamnama_api` in `gateway/routes.json`; staging is a preview deployment).",
   "VERCEL_ORG_ID": "The Vercel team the API calls of `scripts/ci/vercel_api.py` are made in; required with `VERCEL_TOKEN`.",
   "VERCEL_PROJECT_ID": "The Vercel project `scripts/ci/vercel_api.py has-production` asks about.",
-  "VERCEL_TOKEN": "A Vercel API token for `scripts/ci/vercel_api.py` (which deployment serves a domain, a deployment's target, whether a project has a production deployment).",
-  "HUKAMNAMA_ORIGIN_SECRET": "The secret the edge Worker sends in `X-Origin-Auth`. When set, the Hukamnama service believes a request's client address (`X-Client-IP`) only with it, and limits every other request by its socket's own address. Set the same value on the Worker (`ORIGIN_SECRET`). Never committed.",
-  "HUKAMNAMA_ORIGIN_REQUIRED": "`on` makes the Hukamnama service answer `403` on `/v1/*` to any request without the edge's secret (`/health` stays open). Anything else (the default) leaves direct calls allowed. Needs `HUKAMNAMA_ORIGIN_SECRET`."
+  "VERCEL_TOKEN": "A Vercel API token for `scripts/ci/vercel_api.py` (which deployment serves a domain, a deployment's target, whether a project has a production deployment)."
 }

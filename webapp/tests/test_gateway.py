@@ -116,11 +116,11 @@ class Gateway(unittest.TestCase):
         self.assertTrue(CFG["staging"].get("hukamnama_api"), "staging serves the pages")
         self.assertEqual(CFG["production"].get("hukamnama_api"), "https://api.gurbanisoul.com", "launched in 1.7.0")
         rules = self._page_rules(VERCEL["rewrites"])
-        self.assertEqual(len(rules), 4)                      # two for staging by host, two for production
+        self.assertEqual(len(rules), 6)                      # today, a day, a month: for staging by host and for production
         for r in rules:
             self.assertEqual(r["destination"], "/api/svc/all")
             self.assertIn(r.get("has"), ([{"type": "host", "value": CFG["staging"]["host"]}], None))
-        self.assertEqual(len([r for r in rules if not r.get("has")]), 2)
+        self.assertEqual(len([r for r in rules if not r.get("has")]), 3)
         dark = copy.deepcopy(CFG)
         del dark["production"]["hukamnama_api"]               # before launch: production keeps the static site
         self.assertFalse(any(not r.get("has") for r in self._page_rules(gg.rewrites(dark))))
@@ -136,8 +136,10 @@ class Gateway(unittest.TestCase):
         import hukamnama_page
         sources = [re.compile("^" + r["source"] + "$") for r in self._page_rules(VERCEL["rewrites"])]
         langs = gg.languages()
-        yes = [f"/{l}/hukamnama" for l in langs] + [f"/{l}/hukamnama/2026-11-11" for l in langs]
-        no = ["/de/hukamnama", "/hukamnama", "/en/hukamnama/hk-shell", "/en/hukamnama/2026-11", "/en/hukamnama/2026-11-11/x",
+        yes = [f"/{l}/hukamnama" for l in langs] + [f"/{l}/hukamnama/2026-11-11" for l in langs] + \
+            [f"/{l}/hukamnama/2026-11" for l in langs]             # the month archive
+        no = ["/de/hukamnama", "/hukamnama", "/en/hukamnama/hk-shell", "/en/hukamnama/2026-1", "/en/hukamnama/2026-11-11/x",
+              "/en/hukamnama/2026", "/en/hukamnama/202611",
               "/en/hukamnamas", "/en/learn/what-is-a-hukamnama", "/api/en/hukamnama", "/en/hukamnama/20261111"]
         for path in yes:
             self.assertTrue(any(s.match(path) for s in sources), path)

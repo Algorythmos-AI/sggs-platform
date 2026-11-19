@@ -122,6 +122,21 @@ class Listing(Base):
         self.assertIn('https://gurbanisoul.com/en/hukamnama/2026-12-10', locs)      # the newest are the ones kept
 
 
+    def test_months_are_listed_for_languages_whose_shell_has_the_archive(self):
+        from datetime import date
+        days = [{'date': date(2026, 11, 11), 'published_at': '2026-11-11T00:25:03+00:00'},
+                {'date': date(2026, 11, 18), 'published_at': '2026-11-18T00:22:48+00:00'},
+                {'date': date(2026, 12, 1), 'published_at': None}]
+        root = ET.fromstring(hs.build(days, ['en', 'pa'], ['en']).encode('utf-8'))
+        urls = {u.find(SM + 'loc').text: u for u in root.findall(SM + 'url')}
+        self.assertIn('https://gurbanisoul.com/en/hukamnama/2026-11', urls)
+        self.assertIn('https://gurbanisoul.com/en/hukamnama/2026-12', urls)
+        self.assertNotIn('https://gurbanisoul.com/pa/hukamnama/2026-11', urls)    # its shell predates the archive
+        self.assertEqual(urls['https://gurbanisoul.com/en/hukamnama/2026-11'].find(SM + 'lastmod').text,
+                         '2026-11-18T00:22:48+00:00')                               # the month's newest day
+        self.assertEqual(ET.fromstring(hs.build(days, ['en']).encode('utf-8')).findall(SM + 'url').__len__(), 4)
+
+
 class Failure(Base):
     def test_off_without_the_api_or_without_any_shell(self):
         self.api()
@@ -162,6 +177,7 @@ class Http(Base):
         self.assertEqual((r.status, r.getheader('Content-Type'), r.getheader('Cache-Control')),
                          (200, 'application/xml; charset=utf-8', hs.CACHE))
         self.assertTrue(body.startswith(b'<?xml'))
+        self.assertEqual(r.getheader('Vercel-Cache-Tag'), 'hukamnama')
         r2, body2 = self.get(hs.PATH, {'If-None-Match': r.getheader('ETag')})
         self.assertEqual((r2.status, body2), (304, b''))
         self.assertEqual(self.get(hs.PATH, method='HEAD')[1], b'')

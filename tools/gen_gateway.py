@@ -16,7 +16,7 @@ Every CI deployment carries all six; gateway/routes.json decides, per environmen
     and /healthz go to `all`. /readyz?svc=<context> reaches that context's readiness check.
   * api_platform "render": every /api path is proxied to the Render origin in "api" (the single API).
   * "hukamnama_api" (Vercel functions only): the origin of the public Hukamnama API. Where it is
-    set, /{lang}/hukamnama and /{lang}/hukamnama/YYYY-MM-DD (the only pages a function renders,
+    set, /{lang}/hukamnama, /{lang}/hukamnama/YYYY-MM-DD and /YYYY-MM (the only pages a function renders,
     webapp/hukamnama_page.py), the feeds /feeds/hukamnama.xml and .json (webapp/hukamnama_feed.py)
     /sitemap-hukamnama.xml (webapp/hukamnama_sitemap.py) and /embed/hukamnama, the page other
     sites frame (webapp/hukamnama_embed.py), go to `all`, which is told that origin (build_api_functions.py).
@@ -148,6 +148,7 @@ def rewrites(cfg: dict) -> list[dict]:
             lang = "(" + "|".join(languages()) + ")"
             add(f"/{lang}/hukamnama", f"/{FN_DIR}/all", host)
             add(f"/{lang}/hukamnama/(\\d\\d\\d\\d-\\d\\d-\\d\\d)", f"/{FN_DIR}/all", host)
+            add(f"/{lang}/hukamnama/(\\d\\d\\d\\d-\\d\\d)", f"/{FN_DIR}/all", host)   # the month archive
             for document in FEEDS + (SITEMAP, EMBED):
                 add(document.replace(".", "\\."), f"/{FN_DIR}/all", host)
         add("/api/(.*)", f"/{FN_DIR}/all", host)

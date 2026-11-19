@@ -104,7 +104,7 @@ The Gurbani Soul pages make no API calls.
 
 ### The Hukamnama pages: filled by the server (staging only)
 
-`/{lang}/hukamnama` and `/{lang}/hukamnama/YYYY-MM-DD` are the one exception to "every page is a
+`/{lang}/hukamnama`, `/{lang}/hukamnama/YYYY-MM-DD` and the month archive `/{lang}/hukamnama/YYYY-MM` are the one exception to "every page is a
 static file". The day's shabad has to be in the first bytes a crawler or a share card reads, and it
 changes each morning, so `webapp/hukamnama_page.py` fills a page **shell** (built by the site, one
 per language) with the day's record. Nothing is fetched in the browser.
@@ -183,6 +183,25 @@ language every morning, so they have their own, `/sitemap-hukamnama.xml`, built 
 - After a deploy `verify_functions.py` requires a whole sitemap from `all` that lists each
   language's page.
 
+### The month archive, "also the Hukamnama on", and share
+
+- `/{lang}/hukamnama/YYYY-MM` (same function, same routing) lists the month's published days,
+  newest first, each a link labelled with its date and cited by its Ang number. Only dates, Ang
+  numbers and range hashes are read from the index; the day pages prove and show the lines. Its
+  JSON-LD is a `CollectionPage` with an `ItemList`, plus the breadcrumb to the month. A month with
+  no day yet is `noindex`; a month before November 2026 or after the Amritsar month is 404, and so
+  is any month with a shell built before month pages existed. The sitemap lists each month for
+  languages whose shell has the archive, and `verify_functions.py` checks this month's English page.
+- A day page names the earlier published dates whose `range_sha256` equals its own ("This shabad was
+  also the Hukamnama on …"). A shabad published again with a different heading run hashes
+  differently and is not listed. The page also links to its month.
+- Share: the system share sheet where there is one, a WhatsApp link, and copy. The text is the day's
+  heading with its own date, the Gurmukhi lines read from the page's own `data-gm` attributes
+  (never fetched again), the citation and the permalink. Without script, or when the full text would
+  make a WhatsApp link longer than 8000 characters, the link carries only the heading, citation and
+  permalink. This is the shell's one inline script (the site's CSP allows inline scripts).
+- Every string these use is optional in the renderer, so an older shell still renders its day pages.
+
 ### The Hukamnama embed
 
 `/embed/hukamnama?lang=en&theme=auto` is a small page for another site to show in an `<iframe>`
@@ -251,6 +270,9 @@ What the renderer guarantees:
 - Every value is HTML-escaped; the JSON-LD cannot close its `<script>`.
 - Today's page is never cached past Amritsar midnight; a dated page is cached for a day; a page
   with no Hukamnama is `noindex`.
+- Every Hukamnama response (pages, feeds, embed, sitemap) carries `Vercel-Cache-Tag: hukamnama`.
+  When a published day is corrected or withdrawn, the Hukamnama service deletes that tag from the
+  CDN (and again 6 minutes later, after a warm function's 5-minute memo of a past day has expired).
 - If the API is unreachable, a day already proven on this server is still served; anything else
   is 503 with `Retry-After`, and the API is not asked again for 10 seconds.
 

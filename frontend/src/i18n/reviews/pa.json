@@ -1,10 +1,10 @@
 {
   "lang": "pa",
   "reviewer": "Sam Kalaliya (owner, Algorythmos Pty Ltd)",
-  "date": "2026-11-18",
-  "catalogSha256": "86191a988cbe52136411875f89b2085c68b1f063296d392c715e3cfd6f993bc8",
+  "date": "2026-11-19",
+  "catalogSha256": "66963fc6f45b84dc6bd6ec0ef92cc5e30674bf1bbe1802a554f5a02e43f4f87c",
   "gates": {
-    "G-PA": "signed 2026-11-06: native-speaker polish (PR #356) read and approved by the owner; first signed 2026-11-05 on the rendered /pa pages; the 22 Hukamnama page strings (hukamnama.*) approved by the owner 2026-11-11 from the review sheet and the rendered /pa page; the 57 Developers page strings (developers.*, footer.developers) approved by the owner 2026-11-12 from the review sheet; the three privacy strings on the Hukamnama notification (privacy.theAppMakesNo, privacy.remindersAreOptionalLocal, privacy.hukamnamaNotification) approved by the owner 2026-11-12 from the review sheet; the correction notice (hukamnama.corrected) approved by the owner 2026-11-12; the three Hukamnama link strings (nav.hukamnama, home.hukamnama.link, home.hukamnama.developers) approved by the owner 2026-11-18 from the review sheet and the rendered pages",
+    "G-PA": "signed 2026-11-06: native-speaker polish (PR #356) read and approved by the owner; first signed 2026-11-05 on the rendered /pa pages; the 22 Hukamnama page strings (hukamnama.*) approved by the owner 2026-11-11 from the review sheet and the rendered /pa page; the 57 Developers page strings (developers.*, footer.developers) approved by the owner 2026-11-12 from the review sheet; the three privacy strings on the Hukamnama notification (privacy.theAppMakesNo, privacy.remindersAreOptionalLocal, privacy.hukamnamaNotification) approved by the owner 2026-11-12 from the review sheet; the correction notice (hukamnama.corrected) approved by the owner 2026-11-12; the three Hukamnama link strings (nav.hukamnama, home.hukamnama.link, home.hukamnama.developers) approved by the owner 2026-11-18 from the review sheet and the rendered pages; the 12 Hukamnama month-archive and share strings (hukamnama.month*, hukamnama.alsoOn, hukamnama.share*) approved by the owner 2026-11-19 from the review sheet",
     "G4": "Privacy and Contribute approved by the owner for Algorythmos Pty Ltd (Privacy wording re-read 2026-11-06); no external counsel review; the Hukamnama notification wording approved by the owner 2026-11-12"
   },
   "decisions": {

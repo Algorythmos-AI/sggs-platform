@@ -25,6 +25,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -78,9 +79,9 @@ def check_ready(base: str, name: str, contexts: list[str], commit: str) -> str |
     return None
 
 
-def check_page(base: str, lang: str) -> tuple[str | None, str | None]:
-    """(problem, warning) for one language's Hukamnama page."""
-    url = f"{base}/{lang}/hukamnama"
+def check_page(base: str, lang: str, suffix: str = "") -> tuple[str | None, str | None]:
+    """(problem, warning) for one language's Hukamnama page (``suffix`` "/YYYY-MM": its month archive)."""
+    url = f"{base}/{lang}/hukamnama{suffix}"
     status, svc, raw = get(url)
     if status == 503 and svc == "all":
         return None, f"{url}: HTTP 503 from the function (the Hukamnama API is unreachable, or the day did not prove)"
@@ -184,6 +185,9 @@ def main(argv=None) -> int:
             failures.append(name)
     if env.get("hukamnama_api"):
         checks = [(f"/{lang}/hukamnama", "a filled page", lambda lang=lang: check_page(base, lang)) for lang in languages()]
+        month = "/" + datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime("%Y-%m")   # the Amritsar month
+        checks += [(f"/{languages()[0]}/hukamnama{month}", "a filled month page",
+                    lambda: check_page(base, languages()[0], month))]
         checks += [(path, "a whole feed", lambda path=path: check_feed(base, path)) for path in FEEDS]
         checks += [(SITEMAP, "a whole sitemap", lambda: check_sitemap(base))]
         checks += [(EMBED, "the one framable page (the site still forbids framing)", lambda: check_embed(base))]
