@@ -177,6 +177,25 @@ class PublicTests(unittest.TestCase):
         pub.sync()
         self.assertEqual(calls, [1, 1])
 
+    def test_a_second_purge_follows_once_a_warm_function_memo_has_expired(self):
+        from unittest import mock
+        from hukamnama import clock
+        from hukamnama.public import PURGE_AGAIN_AFTER
+        calls = []
+        self.publish(D8)
+        pub = self.publisher(purge=lambda: calls.append(1))
+        pub.sync()
+        t0 = clock.utcnow()
+        with mock.patch.object(clock, "utcnow", lambda: t0):
+            self.publish(D8, OTHER, overwrite=True)
+            pub.sync()
+            pub.sync()                                       # too soon: nothing more
+        self.assertEqual(calls, [1])
+        with mock.patch.object(clock, "utcnow", lambda: t0 + PURGE_AGAIN_AFTER):
+            pub.sync()
+            pub.sync()                                       # once only
+        self.assertEqual(calls, [1, 1])
+
     def test_a_failed_purge_alerts_and_never_stops_publishing(self):
         def boom():
             raise OSError("HTTP 403")
