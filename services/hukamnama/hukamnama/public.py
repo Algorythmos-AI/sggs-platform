@@ -28,7 +28,7 @@ import json
 import logging
 import os
 import sqlite3
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from . import clock
 from .api import day_record
@@ -42,6 +42,10 @@ TERMS_URL = f"{SITE}/en/developers#terms"
 PREFIX = "v1/hukamnama/"
 INDEX = PREFIX + "index.json"
 META = "public:"                      # store.meta key prefix: public:<path> -> sha256 of what was written
+PURGE_AGAIN = "cdn_purge_again_at"    # store.meta: when the second purge after a change is due
+# A warm web function keeps a day it proved for up to 5 minutes (webapp/hukamnama_page.py FRESH_PAST)
+# and may put that old copy back in the CDN right after the first purge; the second one clears it.
+PURGE_AGAIN_AFTER = timedelta(minutes=6)
 MAX_LINES = 400                       # the same bound the phone enforces (HukamnamaEntry.maxRangeLines)
 TRANSLATION = {"lang": "en", "translator": "Dr. Sant Singh Khalsa", "source": "ssk-shabados"}
 
@@ -152,8 +156,10 @@ class DirSink:
 class Publisher:
     """Keeps the sink equal to the store's published days. ``sync`` is idempotent and cheap when
     nothing changed, so it runs after every poll and once, in full, at start."""
-    def __init__(self, store: Store, con: sqlite3.Connection, fingerprint: str, sink, *, meaning: bool = False) -> None:
+    def __init__(self, store: Store, con: sqlite3.Connection, fingerprint: str, sink, *, meaning: bool = False,
+                 purge=None) -> None:
         self.store, self.con, self.fingerprint, self.sink, self.meaning = store, con, fingerprint, sink, meaning
+        self.purge = purge                  # purge.VercelPurge or None: clears the site's CDN copy
         self._full_sync_due = True          # the first sync_safely rewrites everything (see there)
 
     def desired(self) -> tuple[dict[str, bytes], list[str]]:
@@ -186,26 +192,61 @@ class Publisher:
         """Write what changed, delete what is no longer published. ``force`` rewrites everything
         (used at start, so an emptied sink is refilled)."""
         objects, skipped = self.desired()
-        written, deleted = [], []
+        written, deleted, changed = [], [], []
         # day files first, the index last: a reader of the index never finds a day that is not there yet
         for key in sorted(objects, key=lambda k: (k == INDEX, k)):
             digest = hashlib.sha256(objects[key]).hexdigest()
-            if not force and self.store.get_meta(META + key) == digest:
+            prev = self.store.get_meta(META + key)
+            if not force and prev == digest:
                 continue
             self.sink.put(key, objects[key])
             self.store.set_meta(META + key, digest)
             written.append(key)
+            if key != INDEX and prev is not None and prev != digest:
+                changed.append(key)         # a day already out there now reads differently (corrected)
         for key in self.store.meta_keys(META):
             path = key[len(META):]
             if path not in objects:
                 self.sink.delete(path)
                 self.store.del_meta(key)
                 deleted.append(path)
+        if changed or deleted:
+            self._purge(changed + deleted)
+        else:
+            self._purge_again_if_due()
         for s in skipped:
             log.error("public snapshot skipped, %s", s)
         if written or deleted:
             log.info("public snapshot: wrote %d, deleted %d", len(written), len(deleted))
         return {"written": written, "deleted": deleted, "skipped": skipped}
+
+    def _purge(self, paths: list[str]) -> None:
+        """A published day changed or was withdrawn: clear the site's cached copies (purge.py). New
+        days need nothing: the pages that show them are cached for seconds."""
+        if self.purge is None:
+            return
+        try:
+            self.purge()
+            log.info("CDN purge after %s", ", ".join(paths))
+            self.store.set_meta(PURGE_AGAIN, (clock.utcnow() + PURGE_AGAIN_AFTER).isoformat())
+        except Exception as e:                  # never stop publishing; the dead-man check reports it
+            log.exception("CDN purge failed")
+            now = clock.utcnow()            # filed under today: the dead-man check reads today's alerts
+            self.store.alert(clock.amritsar_date(now), "cdn_purge_failed",
+                             f"{', '.join(paths)[:120]}: {type(e).__name__}: {str(e)[:160]}", now)
+
+    def _purge_again_if_due(self) -> None:
+        due = self.store.get_meta(PURGE_AGAIN)
+        if self.purge is None or not due or clock.utcnow() < datetime.fromisoformat(due):
+            return
+        try:
+            self.purge()
+            self.store.del_meta(PURGE_AGAIN)
+            log.info("CDN purge, second pass")
+        except Exception as e:                  # kept due: the next sync tries again
+            log.exception("CDN purge (second pass) failed")
+            now = clock.utcnow()
+            self.store.alert(clock.amritsar_date(now), "cdn_purge_failed", f"second pass: {type(e).__name__}: {str(e)[:160]}", now)
 
     def sync_safely(self) -> None:
         """For the poll loop: publishing files must never stop polling or sending.

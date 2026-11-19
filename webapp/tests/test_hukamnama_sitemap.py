@@ -177,6 +177,7 @@ class Http(Base):
         self.assertEqual((r.status, r.getheader('Content-Type'), r.getheader('Cache-Control')),
                          (200, 'application/xml; charset=utf-8', hs.CACHE))
         self.assertTrue(body.startswith(b'<?xml'))
+        self.assertEqual(r.getheader('Vercel-Cache-Tag'), 'hukamnama')
         r2, body2 = self.get(hs.PATH, {'If-None-Match': r.getheader('ETag')})
         self.assertEqual((r2.status, body2), (304, b''))
         self.assertEqual(self.get(hs.PATH, method='HEAD')[1], b'')

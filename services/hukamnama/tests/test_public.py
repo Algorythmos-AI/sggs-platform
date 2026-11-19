@@ -159,6 +159,58 @@ class PublicTests(unittest.TestCase):
         self.assertEqual(sorted(pub.sync()["written"]), ["v1/hukamnama/2026-11-08.json", INDEX])
         self.assertEqual(self.read("v1/hukamnama/2026-11-08.json")["ang"], 680)
 
+    # -- CDN purge (purge.py) -----------------------------------------------------------------
+    def test_a_correction_or_a_withdrawal_purges_the_site_cache_and_a_new_day_does_not(self):
+        calls = []
+        self.publish(D8)
+        pub = self.publisher(purge=lambda: calls.append(1))
+        pub.sync(force=True)                       # the start: everything written, nothing changed
+        self.publish(D9, OTHER)
+        pub.sync()                                 # a new day
+        self.assertEqual(calls, [])
+        self.publish(D8, OTHER, overwrite=True)    # `correct`
+        pub.sync()
+        self.assertEqual(calls, [1])
+        pub.sync()                                 # nothing changed since
+        self.assertEqual(calls, [1])
+        self.store.hold(D9, NOW, "owner", "wrong shabad", overwrite=True)
+        pub.sync()
+        self.assertEqual(calls, [1, 1])
+
+    def test_a_second_purge_follows_once_a_warm_function_memo_has_expired(self):
+        from unittest import mock
+        from hukamnama import clock
+        from hukamnama.public import PURGE_AGAIN_AFTER
+        calls = []
+        self.publish(D8)
+        pub = self.publisher(purge=lambda: calls.append(1))
+        pub.sync()
+        t0 = clock.utcnow()
+        with mock.patch.object(clock, "utcnow", lambda: t0):
+            self.publish(D8, OTHER, overwrite=True)
+            pub.sync()
+            pub.sync()                                       # too soon: nothing more
+        self.assertEqual(calls, [1])
+        with mock.patch.object(clock, "utcnow", lambda: t0 + PURGE_AGAIN_AFTER):
+            pub.sync()
+            pub.sync()                                       # once only
+        self.assertEqual(calls, [1, 1])
+
+    def test_a_failed_purge_alerts_and_never_stops_publishing(self):
+        def boom():
+            raise OSError("HTTP 403")
+        self.publish(D8)
+        pub = self.publisher(purge=boom)
+        pub.sync()
+        self.publish(D8, OTHER, overwrite=True)
+        with self.assertLogs("hukamnama", level="ERROR"):
+            r = pub.sync()
+        self.assertIn("v1/hukamnama/2026-11-08.json", r["written"])
+        self.assertEqual(self.read("v1/hukamnama/2026-11-08.json")["ang"], 680)
+        from hukamnama import clock
+        kinds = [a["kind"] for a in self.store.alerts(clock.amritsar_date(clock.utcnow()))]
+        self.assertIn("cdn_purge_failed", kinds)
+
     def test_a_day_the_owner_holds_is_withdrawn(self):
         self.publish(D8)
         self.publish(D9, OTHER)

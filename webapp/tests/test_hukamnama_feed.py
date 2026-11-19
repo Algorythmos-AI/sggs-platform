@@ -269,6 +269,7 @@ class Http(Base):
             self.assertEqual((r.status, r.getheader('Content-Type')), (200, ctype))
             self.assertTrue(body.startswith(start))
             self.assertEqual(r.getheader('Cache-Control'), hf.CACHE)
+            self.assertEqual(r.getheader('Vercel-Cache-Tag'), 'hukamnama')
             self.assertEqual(r.getheader('Access-Control-Allow-Origin'), '*')
             self.assertEqual(r.getheader('X-Content-Type-Options'), 'nosniff')
             r2, body2 = self.get(path, {'If-None-Match': r.getheader('ETag')})

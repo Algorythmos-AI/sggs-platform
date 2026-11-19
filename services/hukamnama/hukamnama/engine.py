@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 from typing import Callable
 
 from . import clock
-from .corpus import NoMatch, Resolution, agrees, resolve
+from .corpus import NoMatch, Resolution, agrees, disagreement, resolve
 from .sources import HS_URL, MUKHWAK_URL, Candidate, Fetched, ParseError, fetch, parse_hs, parse_mukhwak
 from .store import Store
 
@@ -134,7 +134,7 @@ class Engine:
         if veto is not None:
             self.store.observe(day, "mukhwak", now, "candidate", cand_key=veto.key(), structure=veto.structure)
             if not agrees(res, veto, self.con):
-                reason = f"sgpc.net disagrees: hs Ang {res.ang}, sgpc.net Ang {veto.ang}"
+                reason = f"sgpc.net disagrees: {disagreement(res, veto, self.con)}"
                 self.store.hold(day, now, "auto", reason)
                 self._alert(day, "held_veto", reason, now)
                 return TickResult("held", reason)

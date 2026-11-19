@@ -9,6 +9,7 @@ import Seo from '../components/Seo.astro';
 import { normPath } from '../routes';
 import { APP_STORE_URL, APP_STORE_LIVE } from '../site';
 import { CONTRIBUTE_MODE } from '../contribute';
+import { HUKAMNAMA_LIVE } from '../hukamnama';
 import kbThemes from '../generated/kb-themes.json';
 export interface Props { title?: string; description?: string; heading?: string | false; }
 const {
@@ -34,7 +35,9 @@ const PLACES = [
     icon: 'M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z' },
   { id: 'read', label: 'Read', href: '/reader', paths: ['/reader', '/nitnem', '/browse'],
     icon: 'M5 5h9a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h9',
-    pages: [{ href: '/reader', label: 'Reader' }, { href: '/nitnem', label: 'Nitnem' }, { href: '/browse', label: 'Index' }] },
+    pages: [{ href: '/reader', label: 'Reader' }, { href: '/nitnem', label: 'Nitnem' }, { href: '/browse', label: 'Index' },
+            // the day's Hukamnama (a marketing-site page, rendered per request: no prefetch), once launched
+            ...(HUKAMNAMA_LIVE ? [{ href: '/en/hukamnama', label: 'Hukamnama', prefetch: false }] : [])] },
   { id: 'search', label: 'Search', href: '/search', paths: ['/search'],
     icon: 'M5 11a6 6 0 1 0 12 0a6 6 0 1 0-12 0zM20 20l-4.5-4.5' },
   { id: 'explore', label: 'Explore', href: '/themes',
@@ -109,7 +112,7 @@ const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri 
     {subnav && (
       <nav class="kb-sub" aria-label={`${place.label}: pages`}>
         {subnav.map((pg) => (
-          <a href={pg.href} data-path={pg.href} class:list={[subCurrent(pg.href) && 'on']} aria-current={subCurrent(pg.href)} data-astro-prefetch>{pg.label}</a>
+          <a href={pg.href} data-path={pg.href} class:list={[subCurrent(pg.href) && 'on']} aria-current={subCurrent(pg.href)} data-astro-prefetch={pg.prefetch === false ? undefined : true}>{pg.label}</a>
         ))}
       </nav>
     )}
@@ -119,7 +122,7 @@ const pageName = heading === false ? '' : (heading ?? title.replace(/^ੴ\s*Sri 
     {pageName && <h1 class="page-title">{pageName}</h1>}
     <slot />
   </main>
-  <footer class="kb-foot">Scripture is shown verbatim from your edition with its Ang. Transliteration is a mechanical reading aid, not the scripture. · <span class="gm" lang="pa">ਧੁਰ ਕੀ ਬਾਣੀ</span><span id="ver"></span> · {APP_STORE_LIVE ? <a href={APP_STORE_URL} aria-label="Get Gurbani Soul for iPhone and iPad on the App Store">Gurbani Soul for iPhone</a> : <a href="/en">Gurbani Soul app</a>} · <a href="/en/support">Support</a> · <a href="/en/privacy">Privacy</a>{CONTRIBUTE_MODE !== 'off' && <Fragment> · <a href="/en/contribute">Contribute</a></Fragment>}</footer>
+  <footer class="kb-foot">Scripture is shown verbatim from your edition with its Ang. Transliteration is a mechanical reading aid, not the scripture. · <span class="gm" lang="pa">ਧੁਰ ਕੀ ਬਾਣੀ</span><span id="ver"></span> · {APP_STORE_LIVE ? <a href={APP_STORE_URL} aria-label="Get Gurbani Soul for iPhone and iPad on the App Store">Gurbani Soul for iPhone</a> : <a href="/en">Gurbani Soul app</a>} · <a href="/en/support">Support</a> · <a href="/en/privacy">Privacy</a>{HUKAMNAMA_LIVE && <Fragment> · <a href="/en/hukamnama">Hukamnama</a></Fragment>}{CONTRIBUTE_MODE !== 'off' && <Fragment> · <a href="/en/contribute">Contribute</a></Fragment>}</footer>
   <nav class="kb-tabs" aria-label="Places">
     {PLACES.map((p) => (
       <a href={p.href} data-place={p.id} class:list={[place?.id === p.id && 'on']} data-astro-prefetch="tap"

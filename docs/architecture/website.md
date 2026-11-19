@@ -270,6 +270,9 @@ What the renderer guarantees:
 - Every value is HTML-escaped; the JSON-LD cannot close its `<script>`.
 - Today's page is never cached past Amritsar midnight; a dated page is cached for a day; a page
   with no Hukamnama is `noindex`.
+- Every Hukamnama response (pages, feeds, embed, sitemap) carries `Vercel-Cache-Tag: hukamnama`.
+  When a published day is corrected or withdrawn, the Hukamnama service deletes that tag from the
+  CDN (and again 6 minutes later, after a warm function's 5-minute memo of a past day has expired).
 - If the API is unreachable, a day already proven on this server is still served; anything else
   is 503 with `Retry-After`, and the API is not asked again for 10 seconds.
 
