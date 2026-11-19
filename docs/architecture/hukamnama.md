@@ -37,6 +37,7 @@ backups are in [the service runbook](../process/runbooks/hukamnama-service.md); 
 | Edge Worker (`services/hukamnama-edge`) for `api.gurbanisoul.com` | Deployed 2026-11-16 as `hukamnama-edge`, with `api.gurbanisoul.com` as its Custom Domain, reading `hukamnama-public`. Reads answer; it serves nothing until production publishes a day. `/health` and device registration reach the service through `ORIGIN_URL` with the shared `ORIGIN_SECRET`; reads are limited to 120 a minute per address. The production service refuses direct `/v1` calls (`HUKAMNAMA_ORIGIN_REQUIRED=on`). |
 | Website pages, feeds, sitemap and embed | In the code (#386–#391); routed **on staging only**, where they read `api-staging.gurbanisoul.com` ([the website](website.md#the-hukamnama-pages-filled-by-the-server-staging-only)). Production keeps those paths off until launch. |
 | Developers page and the OpenAPI spec | In the code (#393, #394); the spec is `contract/hukamnama.openapi.json`, generated. |
+| Website CDN purge | In the code (#432): after a published day changes or is withdrawn, the publisher deletes the `hukamnama` cache tag from Vercel's CDN, then once more 6 minutes later. On when `HUKAMNAMA_VERCEL_PURGE_TOKEN`, `HUKAMNAMA_VERCEL_PROJECT` and `HUKAMNAMA_VERCEL_TEAM` are set on the service. |
 | Planned, not built | The R2 copy of the fetch archive. |
 
 ## The flow
