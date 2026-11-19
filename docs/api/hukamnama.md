@@ -100,6 +100,9 @@ carries `corrected_at`, and its `range_sha256` and lines are the corrected ones;
 stays the time of the first publication. The index carries `corrected_at` for the day too, and the
 website's feeds show the day as an updated entry. A client that keeps days should compare
 `range_sha256` (or send `If-None-Match`) rather than assume a published day never changes.
+The API's answers are not cached at the edge, so a correction is visible at once; a browser may
+keep a past day for its `max-age` (one hour). The website's cached pages are cleared by the
+service after the correction.
 
 ## When the service is paused
 

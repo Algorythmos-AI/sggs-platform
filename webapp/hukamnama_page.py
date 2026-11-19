@@ -52,7 +52,12 @@ EARLIEST = date(2026, 11, 1)                          # no Hukamnama page exists
 NOT_TODAY_AFTER = 14                                  # IST hour after which "not published today" is said
 MAX_LINES = 400
 FETCH_TIMEOUT = 2.0
-FRESH_TODAY, FRESH_PAST, FRESH_PENDING, NEGATIVE = 60.0, 3600.0, 20.0, 10.0   # memo lifetimes (seconds)
+FRESH_TODAY, FRESH_PAST, FRESH_PENDING, NEGATIVE = 60.0, 300.0, 20.0, 10.0   # memo lifetimes (seconds)
+# Every Hukamnama response (pages, feeds, embed, sitemap) carries this Vercel cache tag. After the
+# service corrects or withdraws a published day it deletes the tag from the CDN
+# (services/hukamnama/hukamnama/purge.py), so a corrected day is not served from the cache for the
+# rest of its s-maxage. A warm function instance re-asks the API within FRESH_PAST.
+CACHE_TAG = 'hukamnama'
 
 PATH_RE = re.compile(r'^/([a-z]{2})/hukamnama(?:/(\d{4}-\d{2}-\d{2}))?/?$')
 HEX64 = re.compile(r'^[0-9a-f]{64}$')
@@ -514,6 +519,7 @@ def respond(handler, url_path, now=None):
     handler.send_header('Content-Type', 'text/html; charset=utf-8')
     handler.send_header('Content-Length', str(len(raw)))
     handler.send_header('Cache-Control', cache)
+    handler.send_header('Vercel-Cache-Tag', CACHE_TAG)
     if etag:
         handler.send_header('ETag', etag)
     if status == 503:

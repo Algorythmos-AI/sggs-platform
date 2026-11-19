@@ -213,6 +213,7 @@ class Http(Base):
     def test_etag_head_and_unavailable(self):
         fake = self.api(days={self.today(): record(self.today())})
         r, _ = self.get('/embed/hukamnama')
+        self.assertEqual(r.getheader('Vercel-Cache-Tag'), 'hukamnama')
         r2, body2 = self.get('/embed/hukamnama', {'If-None-Match': r.getheader('ETag')})
         self.assertEqual((r2.status, body2), (304, b''))
         self.assertEqual(self.get('/embed/hukamnama', method='HEAD')[1], b'')

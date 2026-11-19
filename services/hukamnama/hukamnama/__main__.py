@@ -235,7 +235,9 @@ def _publisher(store, con, fingerprint: str, out: str | None, env=os.environ):
     if not sinks:
         return None
     sink = sinks[0] if len(sinks) == 1 else MultiSink(*sinks)
-    return Publisher(store, con, fingerprint, sink, meaning=os.environ.get("HUKAMNAMA_MEANING", "off") == "on")
+    from .purge import from_env as purge_from_env
+    return Publisher(store, con, fingerprint, sink, meaning=os.environ.get("HUKAMNAMA_MEANING", "off") == "on",
+                     purge=purge_from_env(env))
 
 
 def _apns_from_env():

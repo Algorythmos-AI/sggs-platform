@@ -110,6 +110,7 @@ def respond(handler, url_path, now=None):
     handler.send_header('Content-Type', 'application/xml; charset=utf-8' if body is not None else 'text/plain; charset=utf-8')
     handler.send_header('Content-Length', str(len(raw)))
     handler.send_header('Cache-Control', cache)
+    handler.send_header('Vercel-Cache-Tag', hp.CACHE_TAG)
     if etag:
         handler.send_header('ETag', etag)
     if status == 503:
