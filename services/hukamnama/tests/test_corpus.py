@@ -2,7 +2,7 @@ import itertools
 import unittest
 from datetime import date
 
-from hukamnama.corpus import (RAHAO_MAX_LINES, _lines, closes_shabad, heading_run_start, NoMatch, Resolution, agrees, lines_in_range, open_ro, rahao_block,
+from hukamnama.corpus import (RAHAO_MAX_LINES, _lines, closes_shabad, heading_run_start, NoMatch, Resolution, agrees, disagreement, lines_in_range, open_ro, rahao_block,
                               range_sha256, resolution_for_range, resolve, scripture_sha256)
 from hukamnama.locate import words
 from hukamnama.sources import Candidate, parse_hs, parse_mukhwak
@@ -72,6 +72,17 @@ class ResolverTests(unittest.TestCase):
         self.assertTrue(agrees(r, veto("ਹਰਿ ਉਤਮੁ ਹਰਿ ਪ੍ਰਭੁ ਗਾਵਿਆ ਕਰਿ ਨਾਦੁ ਬਿਲਾਵਲੁ ਰਾਗੁ ॥"), self.con))
         self.assertFalse(agrees(r, veto("ਤੂ ਹਰਿ ਪ੍ਰਭੁ ਆਪਿ ਅਗੰਮੁ ਹੈ ਸਭਿ ਤੁਧੁ ਉਪਾਇਆ ॥"), self.con))
         self.assertFalse(agrees(r, veto("ਸਲੋਕ ਮਃ ੪ ॥ ਹਰਿ ਉਤਮੁ ਹਰਿ ਪ੍ਰਭੁ ਗਾਇਆ ਕਰਿ ਨਾਦੁ ਬਿਲਾਵਲੁ ਰਾਗੁ ॥"), self.con))
+
+    def test_a_veto_names_the_word_it_disagrees_on(self):
+        """#406: a held_veto alert said only "hs Ang 682, sgpc.net Ang 682". It now names the word."""
+        r = resolve(self.con, parse_hs(fixture("hs-2026-11-19.html")))
+        day = date(2026, 11, 19)
+        v = Candidate("mukhwak", day, 849, None, tuple(words("ਹਰਿ ਉਤਮੁ ਹਰਿ ਪ੍ਰਭੁ ਗਾਇਆ ਕਰਿ ਨਾਦੁ ਬਿਲਾਵਲੁ ਰਾਗੁ")), "x")
+        self.assertFalse(agrees(r, v, self.con))
+        self.assertEqual(disagreement(r, v, self.con),
+                         "same Ang 849; sgpc.net opening word 5/9 ਗਾਇਆ vs ਗਾਵਿਆ (corpus line 36198+)")
+        far = Candidate("mukhwak", day, 700, None, v.body_words, "x")
+        self.assertEqual(disagreement(r, far, self.con), "hs Ang 849, sgpc.net Ang 700")
 
     def test_one_changed_word_is_no_match(self):
         c = parse_hs(fixture("hs-2026-11-09.html"))

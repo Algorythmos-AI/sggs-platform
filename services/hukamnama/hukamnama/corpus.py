@@ -269,3 +269,22 @@ def agrees(res: Resolution, veto: Candidate, con: sqlite3.Connection) -> bool:
         if body[:len(want)] == want:
             return True
     return False
+
+
+def disagreement(res: Resolution, veto: Candidate, con: sqlite3.Connection) -> str:
+    """Why a veto does not agree, in words the owner can check: the Ang, or the first word where
+    the marquee's opening and the range's opening verse part (#406: 13 Nov 2026 held with both
+    sources on Ang 682 and no words recorded)."""
+    if not (veto.ang - ANG_SLACK_BEFORE <= res.ang <= veto.ang + ANG_SLACK_AFTER):
+        return f"hs Ang {res.ang}, sgpc.net Ang {veto.ang}"
+    want = list(veto.body_words)
+    body: list[str] = []
+    for x in lines_in_range(con, res.opening_line_id, res.last_line_id):
+        body.extend(words(x.gurmukhi))
+        if len(body) >= len(want):
+            break
+    for k, (a, b) in enumerate(zip(want, body)):
+        if a != b:
+            return (f"same Ang {veto.ang}; sgpc.net opening word {k + 1}/{len(want)} {a} vs {b} "
+                    f"(corpus line {res.opening_line_id}+)")
+    return f"same Ang {veto.ang}; sgpc.net opening has {len(want)} words, the range {len(body)}"
