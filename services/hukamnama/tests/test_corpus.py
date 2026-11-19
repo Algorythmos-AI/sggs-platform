@@ -81,6 +81,9 @@ class ResolverTests(unittest.TestCase):
         self.assertFalse(agrees(r, v, self.con))
         self.assertEqual(disagreement(r, v, self.con),
                          "same Ang 849; sgpc.net opening word 5/9 ਗਾਇਆ vs ਗਾਵਿਆ (corpus line 36198+)")
+        lab = Candidate("mukhwak", day, 849, None, tuple(words("ਸਲੋਕ ਮਃ ੪ ॥ ਹਰਿ ਉਤਮੁ ਹਰਿ ਪ੍ਰਭੁ ਗਾਇਆ ਕਰਿ")), "x")
+        self.assertEqual(disagreement(r, lab, self.con),        # diffed from the label, as agrees() reads it
+                         "same Ang 849; sgpc.net opening word 7/8 ਗਾਇਆ vs ਗਾਵਿਆ (corpus line 36197+)")
         far = Candidate("mukhwak", day, 700, None, v.body_words, "x")
         self.assertEqual(disagreement(r, far, self.con), "hs Ang 849, sgpc.net Ang 700")
 

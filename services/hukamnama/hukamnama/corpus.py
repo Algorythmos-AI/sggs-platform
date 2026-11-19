@@ -278,13 +278,21 @@ def disagreement(res: Resolution, veto: Candidate, con: sqlite3.Connection) -> s
     if not (veto.ang - ANG_SLACK_BEFORE <= res.ang <= veto.ang + ANG_SLACK_AFTER):
         return f"hs Ang {res.ang}, sgpc.net Ang {veto.ang}"
     want = list(veto.body_words)
-    body: list[str] = []
-    for x in lines_in_range(con, res.opening_line_id, res.last_line_id):
-        body.extend(words(x.gurmukhi))
-        if len(body) >= len(want):
+    rng = lines_in_range(con, res.first_line_id, res.last_line_id)
+    best: tuple[int, int, list[str]] | None = None      # (agreeing words, start line id, words)
+    for k, x in enumerate(rng):                          # the same starts agrees() tries
+        if x.id > res.opening_line_id:
             break
-    for k, (a, b) in enumerate(zip(want, body)):
-        if a != b:
-            return (f"same Ang {veto.ang}; sgpc.net opening word {k + 1}/{len(want)} {a} vs {b} "
-                    f"(corpus line {res.opening_line_id}+)")
+        body: list[str] = []
+        for y in rng[k:]:
+            body.extend(words(y.gurmukhi))
+            if len(body) >= len(want):
+                break
+        n = next((i for i, (a, b) in enumerate(zip(want, body)) if a != b), min(len(want), len(body)))
+        if best is None or n > best[0]:
+            best = (n, x.id, body)
+    n, start, body = best
+    if n < min(len(want), len(body)):
+        return (f"same Ang {veto.ang}; sgpc.net opening word {n + 1}/{len(want)} {want[n]} vs {body[n]} "
+                f"(corpus line {start}+)")
     return f"same Ang {veto.ang}; sgpc.net opening has {len(want)} words, the range {len(body)}"
