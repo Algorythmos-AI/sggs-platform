@@ -1,7 +1,8 @@
 """The fidelity gate: map a source candidate onto corpus lines, exactly or not at all.
 
 A match means the candidate's verse words equal, word for word under the locate key, a run of
-consecutive corpus lines that starts with a verse (not a heading) and ends on a line boundary.
+consecutive corpus lines that ends on a line boundary. It starts on a verse, or on a printed
+label line (ਸਲੋਕ ਮਃ ੪ ॥, ਪਉੜੀ ॥) when the source prints the label among the verses.
 The served range then gains the shabad's printed heading run from the corpus, when it opens one.
 There is no fuzzy tier: anything less than exact is ``NoMatch``, and the engine holds the day for
 the owner. The served text is the corpus lines themselves, hashed so the phone can prove it holds
@@ -163,10 +164,13 @@ def resolve(con: sqlite3.Connection, cand: Candidate) -> Resolution | NoMatch:
     lw = [words(x.gurmukhi) for x in window]
     matches: list[tuple[int, int]] = []
     for i, start in enumerate(window):
-        if start.is_header or not (cand.ang - ANG_SLACK_BEFORE <= start.ang <= cand.ang + ANG_SLACK_AFTER):
+        if not (cand.ang - ANG_SLACK_BEFORE <= start.ang <= cand.ang + ANG_SLACK_AFTER):
             continue
         if not lw[i] or lw[i][0] != target[0]:
             continue
+        # A run may open on a printed label line when the source prints it inside the verses: a
+        # Vaar unit on hs.sgpc.net reads ਸਲੋਕ ਮਃ ੪ ॥ … ਮਃ ੩ ॥ … ਪਉੜੀ ॥ … (19 Nov 2026, Ang 849),
+        # and the corpus files each label as a heading line. Every word still has to match.
         acc: list[str] = []
         j = i
         while j < len(window) and len(acc) < len(target):
@@ -224,7 +228,7 @@ def _nearest(cand: Candidate, window: list[Line], lw: list[list[str]], target: l
     nothing that close, gives None: a diagnosis must never point at the wrong shabad either."""
     best: list[tuple[int, int, int, tuple]] = []
     for i, start in enumerate(window):
-        if start.is_header or not (cand.ang - ANG_SLACK_BEFORE <= start.ang <= cand.ang + ANG_SLACK_AFTER):
+        if not lw[i] or not (cand.ang - ANG_SLACK_BEFORE <= start.ang <= cand.ang + ANG_SLACK_AFTER):
             continue
         acc: list[str] = []
         j = i
@@ -251,10 +255,17 @@ def agrees(res: Resolution, veto: Candidate, con: sqlite3.Connection) -> bool:
     """Does a veto source (the sgpc.net marquee: Ang + opening words) agree with a resolution?"""
     if not (veto.ang - ANG_SLACK_BEFORE <= res.ang <= veto.ang + ANG_SLACK_AFTER):
         return False
-    rng = lines_in_range(con, res.opening_line_id, res.last_line_id)
-    body: list[str] = []
-    for x in rng:
-        body.extend(words(x.gurmukhi))
-        if len(body) >= len(veto.body_words):
-            break
-    return body[:len(veto.body_words)] == list(veto.body_words)
+    rng = lines_in_range(con, res.first_line_id, res.last_line_id)
+    want = list(veto.body_words)
+    # The marquee drops its heading up to the first ॥ and keeps the rest, so its opening can begin
+    # on any printed heading line of the range (ਸਲੋਕ ਮਃ ੪ ॥ in a Vaar) or on the first verse.
+    starts = [k for k, x in enumerate(rng) if x.id <= res.opening_line_id]
+    for k in starts:
+        body: list[str] = []
+        for x in rng[k:]:
+            body.extend(words(x.gurmukhi))
+            if len(body) >= len(want):
+                break
+        if body[:len(want)] == want:
+            return True
+    return False

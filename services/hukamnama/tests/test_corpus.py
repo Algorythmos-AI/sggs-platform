@@ -42,6 +42,37 @@ class ResolverTests(unittest.TestCase):
         other = resolve(self.con, self._comp_candidate(2668))
         self.assertFalse(agrees(other, parse_mukhwak(fixture("sgpc-home-2026-11-09.html")), self.con))
 
+    def test_the_19_nov_vaar_page_with_its_labels_resolves(self):
+        """hs.sgpc.net on 19 Nov 2026 (Ang 849, Bilaval ki Vaar M4, first pauri) prints the labels
+        ਸਲੋਕ ਮਃ ੪ ॥ / ਮਃ ੩ ॥ / ਪਉੜੀ ॥ among the verses; the corpus files them as heading lines. The day
+        was held (#429) because a run could only open on a verse. It now resolves to the unit with
+        the Vaar's printed heading run, and every served byte is the corpus line."""
+        r = resolve(self.con, parse_hs(fixture("hs-2026-11-19.html")))
+        self.assertIsInstance(r, Resolution)
+        self.assertEqual((r.first_line_id, r.last_line_id, r.opening_line_id, r.ang), (36195, 36214, 36198, 849))
+        self.assertTrue(r.heading_included)
+        rng = lines_in_range(self.con, 36195, 36214)
+        self.assertEqual([x.gurmukhi for x in rng[:3]], ["ਬਿਲਾਵਲ ਕੀ ਵਾਰ ਮਹਲਾ ੪", "ੴ ਸਤਿਗੁਰ ਪ੍ਰਸਾਦਿ ॥", "ਸਲੋਕ ਮਃ ੪ ॥"])
+        self.assertEqual(r.range_sha256, range_sha256([x.gurmukhi for x in rng]))
+        # one changed word anywhere, labels included, is still no match
+        c = parse_hs(fixture("hs-2026-11-19.html"))
+        for k in (0, 1, 40, len(c.body_words) - 1):
+            body = list(c.body_words); body[k] = body[k] + "ਾ"
+            self.assertIsInstance(resolve(self.con, Candidate("hs", c.amritsar_date, c.ang, c.title, tuple(body), "x")),
+                                  NoMatch, k)
+
+    def test_the_veto_may_open_on_a_printed_label(self):
+        """sgpc.net's marquee for 19 Nov reads ਸਲੋਕ ਮਃ ੪ ॥ ਹਰਿ ਉਤਮੁ … after its heading: it agrees.
+        An opening taken from later in the range does not."""
+        r = resolve(self.con, parse_hs(fixture("hs-2026-11-19.html")))
+        day = date(2026, 11, 19)
+        def veto(text):
+            return Candidate("mukhwak", day, 849, None, tuple(words(text)), "x")
+        self.assertTrue(agrees(r, veto("ਸਲੋਕ ਮਃ ੪ ॥ ਹਰਿ ਉਤਮੁ ਹਰਿ ਪ੍ਰਭੁ ਗਾਵਿਆ ਕਰਿ ਨਾਦੁ ਬਿਲਾਵਲੁ ਰਾਗੁ ॥"), self.con))
+        self.assertTrue(agrees(r, veto("ਹਰਿ ਉਤਮੁ ਹਰਿ ਪ੍ਰਭੁ ਗਾਵਿਆ ਕਰਿ ਨਾਦੁ ਬਿਲਾਵਲੁ ਰਾਗੁ ॥"), self.con))
+        self.assertFalse(agrees(r, veto("ਤੂ ਹਰਿ ਪ੍ਰਭੁ ਆਪਿ ਅਗੰਮੁ ਹੈ ਸਭਿ ਤੁਧੁ ਉਪਾਇਆ ॥"), self.con))
+        self.assertFalse(agrees(r, veto("ਸਲੋਕ ਮਃ ੪ ॥ ਹਰਿ ਉਤਮੁ ਹਰਿ ਪ੍ਰਭੁ ਗਾਇਆ ਕਰਿ ਨਾਦੁ ਬਿਲਾਵਲੁ ਰਾਗੁ ॥"), self.con))
+
     def test_one_changed_word_is_no_match(self):
         c = parse_hs(fixture("hs-2026-11-09.html"))
         body = list(c.body_words); body[5] = "ਗੁਨ"
@@ -248,6 +279,13 @@ class ResolverTests(unittest.TestCase):
     def test_every_vaar_unit_resolves_to_itself_or_to_nothing(self):
         """A Vaar Hukamnama is the saloks before a pauri plus the pauri: several comp_ids. Each of the
         Granth's pauri units, written SGPC-style, resolves to exactly its lines or to NoMatch."""
+        for labels in (False, True):
+            with self.subTest(labels=labels):
+                self._vaar_units(labels)
+
+    def _vaar_units(self, labels: bool):
+        """``labels``: SGPC prints the unit's label lines (ਸਲੋਕ ਮਃ ੪ ॥ …) at the head of the verses,
+        as hs.sgpc.net did on 19 Nov 2026; the title is the heading line before them."""
         units = list(self.con.execute("SELECT vaar_id, kind, first_line_id, n_lines FROM vaar_units "
                                       "ORDER BY vaar_id, seq"))
         exact = held = 0
@@ -263,15 +301,20 @@ class ResolverTests(unittest.TestCase):
             start = None
             rng = lines_in_range(self.con, first, last)
             k = next(i for i, x in enumerate(rng) if not x.is_header)
-            title = sgpc_style(rng[k - 1].gurmukhi).replace(" ॥", "॥") if k else None
-            r = resolve(self.con, candidate(rng[k].ang, title, " ".join(x.gurmukhi for x in rng[k:])))
+            b = k
+            if labels:      # the label run right before the first verse, under the unit's own comp_id
+                while b > 0 and rng[b - 1].is_header and rng[b - 1].comp_id == rng[k].comp_id \
+                        and words(rng[b - 1].gurmukhi)[:1] in (["ਸਲੋਕ"], ["ਮਃ"], ["ਪਉੜੀ"]):
+                    b -= 1
+            title = sgpc_style(rng[b - 1].gurmukhi).replace(" ॥", "॥") if b else None
+            r = resolve(self.con, candidate(rng[b].ang, title, " ".join(x.gurmukhi for x in rng[b:])))
             if isinstance(r, NoMatch):
                 held += 1
             elif (r.first_line_id, r.last_line_id) == (self._heading_start(rng[k]), last):
                 exact += 1
             else:
                 wrong.append((vid, first, last, r.first_line_id, r.last_line_id))
-        print(f"\n  Vaar units: {exact} exact, {held} held, {len(wrong)} wrong")
+        print(f"\n  Vaar units (labels={labels}): {exact} exact, {held} held, {len(wrong)} wrong")
         self.assertEqual(wrong, [])
         self.assertGreaterEqual(exact, 450)
 
