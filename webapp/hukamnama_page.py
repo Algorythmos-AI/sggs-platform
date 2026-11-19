@@ -39,6 +39,7 @@ import re
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import date, datetime, timedelta, timezone
 
@@ -59,7 +60,9 @@ FRESH_TODAY, FRESH_PAST, FRESH_PENDING, NEGATIVE = 60.0, 300.0, 20.0, 10.0   # m
 # rest of its s-maxage. A warm function instance re-asks the API within FRESH_PAST.
 CACHE_TAG = 'hukamnama'
 
-PATH_RE = re.compile(r'^/([a-z]{2})/hukamnama(?:/(\d{4}-\d{2}-\d{2}))?/?$')
+PATH_RE = re.compile(r'^/([a-z]{2})/hukamnama(?:/(\d{4}-\d{2}-\d{2}|\d{4}-\d{2}))?/?$')
+MONTH_KEYS = ('month_title', 'month_h1', 'month_description', 'month_empty', 'month_ang')   # a month page needs these
+WA_MAX = 8000          # the longest WhatsApp link the page builds itself (the script may lengthen it)
 HEX64 = re.compile(r'^[0-9a-f]{64}$')
 # An innermost block (one holding no other block); applied until none is left, so blocks may nest.
 IF_RE = re.compile(r'__HK_IF_([A-Z0-9]+(?:_[A-Z0-9]+)*)__((?:(?!__HK_IF_).)*?)__HK_ENDIF__', re.S)
@@ -257,8 +260,12 @@ def _fetch_days(today):
         except (AttributeError, TypeError, ValueError):
             continue
         if EARLIEST <= d <= today:           # never a day ahead of the Amritsar date, whatever is listed
-            at = x.get('published_at')
-            days[d] = {'date': d, 'published_at': at if isinstance(at, str) else None}
+            at, ang, digest = x.get('published_at'), x.get('ang'), x.get('range_sha256')
+            days[d] = {'date': d, 'published_at': at if isinstance(at, str) else None,
+                       # the Ang number and the range hash, never any text: the month list cites a
+                       # day by its Ang, and two days with one hash are the same shabad
+                       'ang': ang if type(ang) is int and 1 <= ang <= 1430 else None,
+                       'range_sha256': digest if isinstance(digest, str) and HEX64.match(digest) else None}
     return [days[d] for d in sorted(days)]
 
 
@@ -300,6 +307,27 @@ def neighbours(day, today):
         return None, None
     before, after = [d for d in dates if d < day], [d for d in dates if d > day]
     return (before[-1] if before else None), (after[0] if after else None)
+
+
+def also_on(day, today):
+    """The earlier published dates whose range hash equals this day's: the same lines, so the same
+    shabad. A shabad published again with a different heading run hashes differently and is not
+    found. () when the list of dates is not available."""
+    try:
+        days = published_days(today)
+    except Unavailable:
+        return ()
+    return tuple(x['date'] for x in days if x['date'] < day['date'] and x['range_sha256'] == day['range_sha256'])
+
+
+def month_days(first, today):
+    """(the published days of the month that starts on ``first``, the months before and after it
+    that have any). Raises ``Unavailable`` when the list of dates is not available."""
+    days = published_days(today)
+    inside = [x for x in days if (x['date'].year, x['date'].month) == (first.year, first.month)]
+    before = [x['date'] for x in days if x['date'] < first]
+    after = [x['date'] for x in days if (x['date'].year, x['date'].month) > (first.year, first.month)]
+    return inside, (before[-1].replace(day=1) if before else None), (after[0].replace(day=1) if after else None)
 
 
 def reset():
@@ -350,6 +378,60 @@ def _lines_html(day, strings):
     return ''.join(out)
 
 
+def _month_jsonld(lang, canonical, title, description, items, name, month_label):
+    """A month page: a CollectionPage whose ItemList is its days (each a link with its date), and
+    the breadcrumb trail site → Hukamnama → the month."""
+    page = {'@context': 'https://schema.org', '@type': 'CollectionPage', 'url': canonical, 'name': title,
+            'description': description, 'inLanguage': lang,
+            'isPartOf': {'@type': 'WebSite', 'name': 'Gurbani Soul', 'url': SITE + '/'},
+            'mainEntity': {'@type': 'ItemList', 'numberOfItems': len(items),
+                           'itemListElement': [{'@type': 'ListItem', 'position': i, 'url': url, 'name': label}
+                                               for i, (url, label) in enumerate(items, 1)]}}
+    out = [page]
+    if name:
+        trail = [('Gurbani Soul', f'{SITE}/{lang}'), (name, f'{SITE}/{lang}/hukamnama'), (month_label, canonical)]
+        out.append({'@context': 'https://schema.org', '@type': 'BreadcrumbList',
+                    'itemListElement': [{'@type': 'ListItem', 'position': i, 'name': n, 'item': url}
+                                        for i, (n, url) in enumerate(trail, 1)]})
+    return json.dumps(out, ensure_ascii=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
+
+
+def render_month(shell, strings, lang, *, first, days, around, path):
+    """The month page: its published days, newest first, each a link labelled with its date and
+    cited by its Ang number (no text: the day's own page proves and shows its lines)."""
+    e = html.escape
+    canonical = SITE + path
+    m = {'month': strings['months'][first.month - 1], 'y': first.year}
+    label = _fmt('{month} {y}', **m)
+    title, h1 = _fmt(strings['month_title'], **m), _fmt(strings['month_h1'], **m)
+    description = _fmt(strings['month_description'], **m)
+    rows, items = [], []
+    for x in sorted(days, key=lambda x: x['date'], reverse=True):
+        href = f'/{lang}/hukamnama/{x["date"].isoformat()}'
+        text = _date_text(strings, x['date'])
+        ang = f'<span class="hk-month-ang">{e(_fmt(strings["month_ang"], ang=x["ang"]))}</span>' if x['ang'] else ''
+        rows.append(f'<li><a href="{e(href, quote=True)}"><time datetime="{x["date"].isoformat()}">{e(text)}</time></a>{ang}</li>')
+        items.append((SITE + href, text))
+    mlabel = {k: _fmt('{month} {y}', month=strings['months'][d.month - 1], y=d.year) if d else ''
+              for k, d in zip(('MPREV', 'MNEXT'), around)}
+    flags = {'MONTH': True, 'MONTH_DAYS': bool(rows), 'MONTH_EMPTY': not rows,
+             'MPREV': bool(around[0]), 'MNEXT': bool(around[1]), 'MONTHS': bool(around[0] or around[1])}
+    values = {
+        'TITLE': e(title), 'H1': e(h1), 'DESCRIPTION': e(description, quote=True),
+        'CANONICAL': e(canonical, quote=True), 'SUFFIX': e(f'/{first.strftime("%Y-%m")}', quote=True),
+        'ROBOTS': 'index, follow' if rows else 'noindex, follow',
+        'MONTH_LIST': ''.join(rows), 'MONTH_EMPTY': e(strings['month_empty']),
+        'MPREV_HREF': e(f'/{lang}/hukamnama/{around[0].strftime("%Y-%m")}', quote=True) if around[0] else '',
+        'MNEXT_HREF': e(f'/{lang}/hukamnama/{around[1].strftime("%Y-%m")}', quote=True) if around[1] else '',
+        'MPREV_LABEL': e(mlabel['MPREV']), 'MNEXT_LABEL': e(mlabel['MNEXT']),
+        'JSONLD': _month_jsonld(lang, canonical, title, description, items, strings.get('name'), label),
+    }
+    out, n = shell, 1
+    while n:
+        out, n = IF_RE.subn(lambda mm: mm.group(2) if flags.get(mm.group(1)) else '', out)
+    return TOKEN_RE.sub(lambda mm: values.get(mm.group(1), ''), out)
+
+
 def _jsonld(lang, canonical, title, description, day, name=None, dated=None):
     """The page's structured data. With the section's ``name`` (a shell string) a breadcrumb
     trail is added: the site, the Hukamnama page and, on a dated page, that date."""
@@ -370,7 +452,7 @@ def _jsonld(lang, canonical, title, description, day, name=None, dated=None):
     return json.dumps(page, ensure_ascii=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
 
 
-def render(shell, strings, lang, *, view, day, today, hour_ist, path, asked=None, around=(None, None)):
+def render(shell, strings, lang, *, view, day, today, hour_ist, path, asked=None, around=(None, None), also=()):
     """The page. ``view`` is 'today' | 'latest' | 'none' | 'dated' | 'missing' | 'unavailable';
     ``asked`` is the date in the URL of a dated page; ``around`` is the published dates before and
     after the day shown (each a link to that day's own page, labelled with its date)."""
@@ -405,6 +487,25 @@ def render(shell, strings, lang, *, view, day, today, hour_ist, path, asked=None
     # was corrected on. A correction time that is not a time shows nothing.
     corrected = _corrected_on(day)
     flags['CORRECTED'] = corrected is not None
+    # Optional parts (a shell built before them lacks their strings, and simply does not show them):
+    # the earlier dates of the same shabad, the share controls and the link to the day's month.
+    also_html = ''
+    if day and also and strings.get('also_on'):
+        links = ', '.join(f'<a href="{e(f"/{lang}/hukamnama/{d.isoformat()}", quote=True)}">{e(_date_text(strings, d))}</a>'
+                          for d in also)
+        also_html = e(strings['also_on']).replace('{dates}', links)
+    flags['ALSO'] = bool(also_html)
+    share_url = f'{SITE}/{lang}/hukamnama/{day["date"].isoformat()}' if day else ''
+    share_heading = _fmt(strings['share_heading'], date=shown) if day and strings.get('share_heading') else ''
+    share_cite = _fmt(strings['citation'], ang=day['ang']) if day else ''
+    flags['SHARE'] = bool(share_heading)
+    wa = 'https://wa.me/?text=' + urllib.parse.quote('\n'.join([share_heading, share_cite, share_url]), safe='') \
+        if share_heading else ''
+    month_link = ''
+    if day and strings.get('month_link'):
+        d0 = day['date']
+        month_link = _fmt(strings['month_link'], month=strings['months'][d0.month - 1], y=d0.year)
+    flags['MONTHLINK'] = bool(month_link)
     step = {k: (f'/{lang}/hukamnama/{d.isoformat()}', _date_text(strings, d)) if d else ('', '')
             for k, d in zip(('PREV', 'NEXT'), around)}
     values = {
@@ -424,6 +525,11 @@ def render(shell, strings, lang, *, view, day, today, hour_ist, path, asked=None
         'CORRECTED_DATE': e(_date_text(strings, corrected)) if corrected else '',
         'PREV_HREF': e(step['PREV'][0], quote=True), 'PREV_DATE': e(step['PREV'][1]),
         'NEXT_HREF': e(step['NEXT'][0], quote=True), 'NEXT_DATE': e(step['NEXT'][1]),
+        'ALSO': also_html,
+        'SHARE_HEADING': e(share_heading, quote=True), 'SHARE_CITE': e(share_cite, quote=True),
+        'SHARE_URL': e(share_url, quote=True), 'SHARE_WA': e(wa[:WA_MAX], quote=True) if len(wa) <= WA_MAX else '',
+        'MONTH_LINK': e(month_link),
+        'MONTH_HREF': e(f'/{lang}/hukamnama/{day["date"].strftime("%Y-%m")}', quote=True) if day else '',
         'JSONLD': _jsonld(lang, canonical, title, description, day, name=strings.get('name'),
                           dated=_date_text(strings, asked) if asked else None),
     }
@@ -442,6 +548,8 @@ def _cache_for(view, now):
         return f'public, max-age={n}, s-maxage={n}'
     if view == 'dated':
         return 'public, max-age=300, s-maxage=86400'
+    if view == 'month':
+        return 'public, max-age=300, s-maxage=600'
     if view in ('latest', 'none', 'missing'):
         return 'public, max-age=20, s-maxage=20'
     return 'no-store'
@@ -463,11 +571,24 @@ def page_for(lang, day_arg, now):
 
     def out(status, view, day=None):
         around = neighbours(day['date'], today) if day else (None, None)
+        also = also_on(day, today) if day else ()
         body = render(shell, strings, lang, view=view, day=day, today=today, hour_ist=hour, path=path, asked=asked,
-                      around=around)
+                      around=around, also=also)
         return status, body, _cache_for(view, now) if status == 200 else 'no-store'
 
     try:
+        if day_arg and len(day_arg) == 7:                  # YYYY-MM: the month archive
+            if any(not strings.get(k) for k in MONTH_KEYS):
+                return 404, None, 'no-store'               # a shell built before month pages existed
+            try:
+                first = date.fromisoformat(day_arg + '-01')
+            except ValueError:
+                return 404, None, 'no-store'
+            if first > today or first < EARLIEST.replace(day=1):
+                return 404, None, 'no-store'
+            days, before, after = month_days(first, today)
+            body = render_month(shell, strings, lang, first=first, days=days, around=(before, after), path=path)
+            return 200, body, _cache_for('month', now)
         if day_arg:
             try:
                 want = date.fromisoformat(day_arg)

@@ -30,7 +30,11 @@ const STRING_KEYS = ["months", "date", "title_today", "title_dated", "h1_today",
 const REQUIRED = ["TITLE", "DESCRIPTION", "ROBOTS", "JSONLD", "H1", "LINES", "CITATION", "SUFFIX"];
 const KNOWN = new Set([...REQUIRED, "CANONICAL", "STATUS", "DATE", "DATE_ISO", "ANG", "RAAG", "AUTHOR",
   "READER_HREF", "PERMALINK", "RANGE_SHA", "TRANSLATION_LABEL", "PREV_HREF", "PREV_DATE", "NEXT_HREF", "NEXT_DATE", "CORRECTED_DATE", "ENDIF",
-  ...["SHABAD", "STATUS", "TODAY", "LATEST", "DATED", "MEANING", "UNAVAILABLE", "RAAG", "AUTHOR", "PREV", "NEXT", "DAYS", "CORRECTED"].map((f) => `IF_${f}`)]);
+  // "also the Hukamnama on", share, the link to the month, and the month archive itself
+  "ALSO", "SHARE_HEADING", "SHARE_CITE", "SHARE_URL", "SHARE_WA", "MONTH_LINK", "MONTH_HREF",
+  "MONTH_LIST", "MONTH_EMPTY", "MPREV_HREF", "MPREV_LABEL", "MNEXT_HREF", "MNEXT_LABEL",
+  ...["SHABAD", "STATUS", "TODAY", "LATEST", "DATED", "MEANING", "UNAVAILABLE", "RAAG", "AUTHOR", "PREV", "NEXT", "DAYS", "CORRECTED",
+      "ALSO", "SHARE", "MONTHLINK", "MONTH", "MONTH_DAYS", "MONTH_EMPTY", "MPREV", "MNEXT", "MONTHS"].map((f) => `IF_${f}`)]);
 
 const problems = [];
 let written = 0;

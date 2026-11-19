@@ -681,7 +681,19 @@
     "permalink": "Permanent link for this day",
     "sgpc": "Meaning, audio and katha on SGPC's page",
     "credit": "Located by Ang from the Hukamnama published by SGPC. Every line is from Sri Guru Granth Sahib Ji, verbatim. Gurbani Soul is not affiliated with SGPC.",
-    "verifyNote": "Each line is read from the same text as the Knowledge Base and checked against the published record before it is shown."
+    "verifyNote": "Each line is read from the same text as the Knowledge Base and checked against the published record before it is shown.",
+    "monthTitle": "Hukamnama, {month} {y} · Sri Harmandir Sahib (Golden Temple)",
+    "monthH1": "Hukamnama, {month} {y}",
+    "monthDescription": "Every Hukamnama from Sri Harmandir Sahib (Golden Temple), Amritsar, in {month} {y}, each cited by its Ang in Sri Guru Granth Sahib Ji.",
+    "monthEmpty": "No Hukamnama has been published for this month yet.",
+    "monthAng": "Ang {ang}",
+    "monthLink": "Every Hukamnama of {month} {y}",
+    "alsoOn": "This shabad was also the Hukamnama on {dates}.",
+    "share": "Share",
+    "shareWhatsApp": "Share on WhatsApp",
+    "shareCopy": "Copy the shabad",
+    "shareCopied": "Copied",
+    "shareHeading": "Hukamnama · Sri Harmandir Sahib, Amritsar · {date}"
   },
   "developers": {
     "metaTitle": "Hukamnama API for developers · Gurbani Soul",
