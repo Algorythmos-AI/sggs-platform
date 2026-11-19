@@ -241,6 +241,7 @@ def respond(handler, url_path, now=None):
     handler.send_header('Content-Type', TYPES[kind] if body is not None else 'text/plain; charset=utf-8')
     handler.send_header('Content-Length', str(len(raw)))
     handler.send_header('Cache-Control', cache)
+    handler.send_header('Vercel-Cache-Tag', hp.CACHE_TAG)
     handler.send_header('Access-Control-Allow-Origin', '*')      # a feed is public data for any reader
     if etag:
         handler.send_header('ETag', etag)

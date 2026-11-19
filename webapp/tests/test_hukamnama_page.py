@@ -405,6 +405,7 @@ class OverHttp(Base):
         etag = r.getheader('ETag')
         again, empty = self.get('/en/hukamnama', {'If-None-Match': etag})
         self.assertEqual((again.status, empty), (304, ''))
+        self.assertEqual(r.getheader('Vercel-Cache-Tag'), hp.CACHE_TAG)   # what a correction purges
         head, nothing = self.get('/en/hukamnama', method='HEAD')
         self.assertEqual((head.status, nothing), (200, ''))
 

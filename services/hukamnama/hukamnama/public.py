@@ -152,8 +152,10 @@ class DirSink:
 class Publisher:
     """Keeps the sink equal to the store's published days. ``sync`` is idempotent and cheap when
     nothing changed, so it runs after every poll and once, in full, at start."""
-    def __init__(self, store: Store, con: sqlite3.Connection, fingerprint: str, sink, *, meaning: bool = False) -> None:
+    def __init__(self, store: Store, con: sqlite3.Connection, fingerprint: str, sink, *, meaning: bool = False,
+                 purge=None) -> None:
         self.store, self.con, self.fingerprint, self.sink, self.meaning = store, con, fingerprint, sink, meaning
+        self.purge = purge                  # purge.VercelPurge or None: clears the site's CDN copy
         self._full_sync_due = True          # the first sync_safely rewrites everything (see there)
 
     def desired(self) -> tuple[dict[str, bytes], list[str]]:
@@ -186,26 +188,45 @@ class Publisher:
         """Write what changed, delete what is no longer published. ``force`` rewrites everything
         (used at start, so an emptied sink is refilled)."""
         objects, skipped = self.desired()
-        written, deleted = [], []
+        written, deleted, changed = [], [], []
         # day files first, the index last: a reader of the index never finds a day that is not there yet
         for key in sorted(objects, key=lambda k: (k == INDEX, k)):
             digest = hashlib.sha256(objects[key]).hexdigest()
-            if not force and self.store.get_meta(META + key) == digest:
+            prev = self.store.get_meta(META + key)
+            if not force and prev == digest:
                 continue
             self.sink.put(key, objects[key])
             self.store.set_meta(META + key, digest)
             written.append(key)
+            if key != INDEX and prev is not None and prev != digest:
+                changed.append(key)         # a day already out there now reads differently (corrected)
         for key in self.store.meta_keys(META):
             path = key[len(META):]
             if path not in objects:
                 self.sink.delete(path)
                 self.store.del_meta(key)
                 deleted.append(path)
+        if changed or deleted:
+            self._purge(changed + deleted)
         for s in skipped:
             log.error("public snapshot skipped, %s", s)
         if written or deleted:
             log.info("public snapshot: wrote %d, deleted %d", len(written), len(deleted))
         return {"written": written, "deleted": deleted, "skipped": skipped}
+
+    def _purge(self, paths: list[str]) -> None:
+        """A published day changed or was withdrawn: clear the site's cached copies (purge.py). New
+        days need nothing: the pages that show them are cached for seconds."""
+        if self.purge is None:
+            return
+        try:
+            self.purge()
+            log.info("CDN purge after %s", ", ".join(paths))
+        except Exception as e:                  # never stop publishing; the dead-man check reports it
+            log.exception("CDN purge failed")
+            now = clock.utcnow()            # filed under today: the dead-man check reads today's alerts
+            self.store.alert(clock.amritsar_date(now), "cdn_purge_failed",
+                             f"{', '.join(paths)[:120]}: {type(e).__name__}: {str(e)[:160]}", now)
 
     def sync_safely(self) -> None:
         """For the poll loop: publishing files must never stop polling or sending.

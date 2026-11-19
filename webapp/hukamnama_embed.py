@@ -163,6 +163,7 @@ def respond(handler, url_path, query='', now=None):
     handler.send_header('Content-Type', 'text/html; charset=utf-8')
     handler.send_header('Content-Length', str(len(raw)))
     handler.send_header('Cache-Control', cache)
+    handler.send_header('Vercel-Cache-Tag', hp.CACHE_TAG)
     handler.send_header('Content-Security-Policy', CSP)
     handler.send_header('X-Robots-Tag', 'noindex, nofollow')
     if etag:
