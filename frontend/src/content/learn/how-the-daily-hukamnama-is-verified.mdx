@@ -1,0 +1,72 @@
+---
+title: "How the daily Hukamnama is verified"
+description: "How Gurbani Soul finds each day's Hukamnama in its own verified text, proves it word for word, and holds what fails."
+pubDate: 2026-11-19
+tags: [hukamnama, verification]
+---
+
+The [Hukamnama page](/en/hukamnama) shows the Hukamnama from Sri Harmandir Sahib, Amritsar, for
+each day. This article sets out how a day gets there, so you can judge for yourself how much to
+trust it. The short version: the text you read is never copied from anywhere. It is the same
+verified text as the [Knowledge Base](/search), located by an exact match, and a day that cannot be
+proven is not published.
+
+## Where the day comes from
+
+The Shiromani Gurdwara Parbandhak Committee (SGPC) publishes the Hukamnama each morning on
+hs.sgpc.net, dated and with its Ang. Its main site, sgpc.net, shows the opening of the same
+Hukamnama separately. Our service reads both pages politely: every minute from 05:00 to 09:00 in
+Amritsar, then every ten minutes until 14:00. It never reads them more often than that.
+
+Every date here is the Amritsar date. A page is used only when its own date stamp is today's date
+in Amritsar.
+
+## How a day is located
+
+SGPC's page is used only to find *where* the Hukamnama is. Its words are compared with the lines of
+our text around the Ang it names, and the day resolves only when one run of whole lines matches
+**every word, in order**. There is no "close enough". The comparison ignores only what is not a
+word:
+
+- spaces, the dandas (॥ and ।) and verse numbers;
+- invisible formatting characters;
+- one character that SGPC's pages use for the subjoined ha (the sign U+0A51, where the printed
+  Granth has a virama and ha), a known legacy of font conversion. Our own text never contains
+  that character, so the mapping cannot join two different words.
+
+The run must also end where a shabad ends (or, in a Vaar, where a pauri ends), so a page saved
+half-way is not taken as complete. The page must then stay the same for two minutes. If sgpc.net
+already shows today's opening, it must agree with the match, on the Ang and on its opening words.
+
+The heading printed above the shabad (its raag, the Guru and the invocation, Ik Onkar) comes from
+our text, never from SGPC's page.
+
+## What is shown
+
+What you read are our own lines, exactly as stored and cited by Ang. Transliteration is a separate
+reading aid, and so is the English translation when it is shown. Neither is part of the Gurmukhi,
+and both are labelled.
+
+Each published day records two fingerprints: one for the whole text it was resolved in, and one
+for the exact lines of the day (a SHA-256 hash). The website reads the day's lines again from its
+own copy of the text and checks them against that hash before it renders the page, and the feeds
+and the embed do the same. The public API's files are written only after the same check. If the
+lines do not match, the day is not shown. The
+[developers page](/en/developers#verify) explains how anyone using the API can make the same check.
+
+## When a day cannot be proven
+
+If any of these steps fails, the day is **held**: nothing is published for it, and the page goes on
+showing the most recent Hukamnama under its own date, never as today's. A person then compares
+SGPC's page with the text by hand. If the difference is on SGPC's side, the day is approved by hand
+for the exact lines, and each approval is recorded. We would rather be late than wrong.
+
+Every held or corrected day is listed in the
+[corrections log](/en/learn/hukamnama-corrections-log).
+
+## If something is wrong
+
+If a published day turns out to be the wrong passage, or its lines are incomplete, it is corrected:
+the day keeps its first publication time, gains a "Corrected on" note on its page and in the API,
+and appears in the corrections log. To report an error, write to
+[support](/en/support#contact). A person reads every report.

@@ -38,6 +38,8 @@ export const LEARN_SLUGS: string[] = [
   "the-31-raags-and-the-watches-of-the-day",
   "what-is-an-ang",
   "how-gurbani-soul-verifies-scripture",
+  "how-the-daily-hukamnama-is-verified",
+  "hukamnama-corrections-log",
   "search-by-first-letters",
   "offline-and-private-by-design",
   "widgets-and-live-activity",
