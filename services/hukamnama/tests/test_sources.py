@@ -6,6 +6,7 @@ from tests.helpers import fixture
 
 HS = fixture("hs-2026-11-09.html")
 HOME = fixture("sgpc-home-2026-11-09.html")
+HOME_FRIDAY = fixture("sgpc-home-2026-11-20.html")   # a Friday: weekday written with U+0A36
 
 
 class HsParserTests(unittest.TestCase):
@@ -48,6 +49,19 @@ class MukhwakParserTests(unittest.TestCase):
         self.assertEqual((c.source, c.amritsar_date, c.ang), ("mukhwak", date(2026, 11, 9), 673))
         self.assertEqual(c.body_words[0], "ਪਾਨੀ")
         self.assertEqual(c.body_words[-1], "ਪਾਈ")
+
+    def test_cuts_every_weekday_in_either_spelling_of_shasha(self):
+        # sgpc.net writes ਸ਼ precomposed (U+0A36); our pattern is ਸ + nukta. Both must be cut.
+        for day in ("ਐਤਵਾਰ", "ਮੰਗਲਵਾਰ", "ਬੁੱਧਵਾਰ", "ਵੀਰਵਾਰ",
+                    "\u0a36ੁੱਕਰਵਾਰ", "\u0a38\u0a3cੁੱਕਰਵਾਰ", "\u0a36ਨਿੱਚਰਵਾਰ", "\u0a36ਨੀਵਾਰ"):
+            c = parse_mukhwak(HOME.replace("ਸੋਮਵਾਰ", day))
+            self.assertEqual(c.body_words[-1], "ਪਾਈ", msg=f"weekday {day!r} left in the opening")
+
+    def test_reads_a_friday_marquee(self):
+        c = parse_mukhwak(HOME_FRIDAY)
+        self.assertEqual((c.amritsar_date, c.ang), (date(2026, 11, 20), 696))
+        self.assertEqual(c.body_words[-1], "ਲਾਥਾ")
+        self.assertFalse(any("ਵਾਰ" == w[-3:] and w.startswith(("ਸ਼", "ਸ਼")) for w in c.body_words))
 
     def test_marquee_mutations(self):
         for bad, why in ((HOME.replace("(ਅੰਗ: ੬੭੩)", ""), "no Ang"),

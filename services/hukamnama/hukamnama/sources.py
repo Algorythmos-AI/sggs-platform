@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import unicodedata
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
@@ -183,7 +184,11 @@ def parse_mukhwak(html: str) -> Candidate:
     # first heading danda up to the date line, which starts with the weekday name
     after = s.split("ਸ੍ਰੀ ਅੰਮ੍ਰਿਤਸਰ", 1)[-1]
     head, _, rest = after.partition("॥")
-    opening = rest.split(",", 1)[0]
+    # NFC first: sgpc.net writes the weekday with the precomposed ਸ਼ (U+0A36), which NFC turns into
+    # ਸ + nukta, the form the pattern below is written in. Without it Friday (ਸ਼ੁੱਕਰਵਾਰ) and Saturday
+    # (ਸ਼ਨਿੱਚਰਵਾਰ) were never cut off, the weekday became the opening's last word, and the veto held
+    # every Friday and Saturday (13 and 20 Nov 2026, #406).
+    opening = unicodedata.normalize("NFC", rest.split(",", 1)[0])
     opening = re.split(r"(ਐਤਵਾਰ|ਸੋਮਵਾਰ|ਮੰਗਲਵਾਰ|ਬੁੱਧਵਾਰ|ਬੁਧਵਾਰ|ਵੀਰਵਾਰ|ਸ਼ੁੱਕਰਵਾਰ|ਸ਼ੁਕਰਵਾਰ|ਸ਼ਨਿੱਚਰਵਾਰ|ਸ਼ਨੀਵਾਰ)", opening)[0]
     body = tuple(words(opening))
     if len(body) < MIN_WORDS or not is_gurmukhi_text(opening):
