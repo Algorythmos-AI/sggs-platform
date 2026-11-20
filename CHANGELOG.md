@@ -3,6 +3,13 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.7.3] — 2026-11-20
+
+A fix for the daily Hukamnama: Fridays and Saturdays are no longer held by mistake. No scripture, corpus or dataset change.
+
+### Fixed
+- **Hukamnama held on Fridays and Saturdays** (#439): the service checks SGPC's Hukamnama page against the verse sgpc.net shows on its home page, whose date line starts with the weekday. The weekday was cut off with a pattern that spelled ਸ਼ as ਸ + nukta, while sgpc.net writes the single character U+0A36, so Friday (ਸ਼ੁੱਕਰਵਾਰ) and Saturday (ਸ਼ਨਿੱਚਰਵਾਰ) stayed in the text and the check failed. The text is now normalised before the cut. 13 and 20 November were held this way.
+
 ## [1.7.2] — 2026-11-20
 
 The Hukamnama gains a month archive, a share button and pages that explain how each day is found and checked. A Vaar day whose SGPC page prints its salok and pauri labels inside the verses is now resolved instead of held. No scripture, corpus or dataset change.
