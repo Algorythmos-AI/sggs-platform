@@ -87,6 +87,19 @@ class ResolverTests(unittest.TestCase):
         far = Candidate("mukhwak", day, 700, None, v.body_words, "x")
         self.assertEqual(disagreement(r, far, self.con), "hs Ang 849, sgpc.net Ang 700")
 
+    def test_the_21_november_saturday_veto_agrees_without_its_weekday(self):
+        """#445: Ang 706 held because the marquee's weekday (ਸ਼ਨਿਚਰਵਾਰ, no addak) stayed in the
+        opening as word 16. With the weekday cut, the 15 verse words equal corpus 30486-30487."""
+        r = resolution_for_range(self.con, 30485, 30495)
+        day = date(2026, 11, 21)
+        opening = "ਮਨ ਇਛਾ ਦਾਨ ਕਰਣੰ ਸਰਬਤ੍ਰ ਆਸਾ ਪੂਰਨਹ ॥ ਖੰਡਣੰ ਕਲਿ ਕਲੇਸਹ ਪ੍ਰਭ ਸਿਮਰਿ ਨਾਨਕ ਨਹ ਦੂਰਣਹ ॥੧॥"
+        good = Candidate("mukhwak", day, 706, None, tuple(words(opening)), "x")
+        self.assertTrue(agrees(r, good, self.con))
+        held = Candidate("mukhwak", day, 706, None, tuple(words(opening + " \u0a36ਨਿਚਰਵਾਰ")), "x")
+        self.assertFalse(agrees(r, held, self.con))
+        self.assertEqual(disagreement(r, held, self.con),       # the alert's words, exactly
+                         "same Ang 706; sgpc.net opening word 16/16 \u0a38\u0a3cਨਿਚਰਵਾਰ vs ਹਭਿ (corpus line 30486+)")  # NFC
+
     def test_one_changed_word_is_no_match(self):
         c = parse_hs(fixture("hs-2026-11-09.html"))
         body = list(c.body_words); body[5] = "ਗੁਨ"
