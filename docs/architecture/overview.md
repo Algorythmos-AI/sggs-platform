@@ -49,7 +49,7 @@ carries no API-base configuration. `gateway/routes.json` decides the routing per
 
 - **Staging** routes each of the <!--fact:contexts:words-->five<!--/fact--> bounded contexts (`reader`, `search`, `verify`, `insights`,
   `knowledge`) to its own function, with `all` — the whole API — as the catch-all.
-- **Production (every release so far; v1.7.3 was live on 2026-11-22)** answers every `/api`
+- **Production (every release so far; v1.7.4 went live on 2026-11-22)** answers every `/api`
   path with `all`: `production.services` in `gateway/routes.json` is empty.
 - **From a later release** production routes the five contexts the same way as staging, all five
   in that one release ([services-production](../process/runbooks/services-production.md), step 3).

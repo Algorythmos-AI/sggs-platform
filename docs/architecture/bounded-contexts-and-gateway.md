@@ -46,7 +46,7 @@ route outside the enabled set is a 404, and startup refuses a database missing a
 
 `gateway/routes.json` says per environment where `/api` goes. Staging lists all five contexts, so
 each has its own Vercel function (`api/svc/<context>`) and `all` catches the rest. Production's
-`services` list is empty, so production (every release so far; v1.7.3 was live on 2026-11-22)
+`services` list is empty, so production (every release so far; v1.7.4 went live on 2026-11-22)
 answers every path with `all`. The five contexts go live there together in a later release by listing them again
 (services-production step 3; held back from 1.4.0 by owner decision 2026-10-11). Setting
 `api_platform: render` proxies `/api` back to the Render single API — the rollback. `tools/gen_gateway.py`

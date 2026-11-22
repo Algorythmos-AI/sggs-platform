@@ -30,8 +30,9 @@ the public API is [the Hukamnama API](../api/hukamnama.md).
 
 The Hukamnama went public in **v1.7.0** (#418). The table says what the code does and, where it
 depends on the deployment, what answered when it was checked on **2026-11-22**. The code on
-`integration` is v1.7.4; both services and the production website were still on v1.7.3 that day,
-so the v1.7.4 fix (the marquee's weekday cut by position, #446) was merged but not yet running.
+`integration` is v1.7.4, and the website and scripture API were released as v1.7.4 that day; both
+Hukamnama services still ran v1.7.3 code, so the v1.7.4 fix (the marquee's weekday cut by
+position, #446) was released but not yet running in either service.
 
 | Part | State (checked 2026-11-22) |
 |---|---|
