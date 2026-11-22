@@ -5,7 +5,7 @@ covers: ".github/rulesets/*.json, scripts/gh/apply_rulesets.sh, scripts/gh/merge
 sidebar:
   order: 1
 verified:
-  commit: c5806fdd
+  commit: 861a8c79
   date: "2026-11-22"
 ---
 # Branching & Delivery Flow

@@ -5,7 +5,7 @@ covers: "webapp/serve.py#H, webapp/serve.py#BoundedThreadingHTTPServer, webapp/s
 sidebar:
   order: 8
 verified:
-  commit: 47a51a23
+  commit: 861a8c79
   date: "2026-11-22"
 ---
 # Security and privacy
@@ -150,8 +150,9 @@ Store Connect, redirects permanently to `/en/privacy`:
 These are open and tracked here so nobody mistakes them for guarantees:
 
 - **Static analysis does not block.** bandit runs with `|| true` and semgrep with
-  `continue-on-error`; of the scans only the secret scan (`secrets`) and `npm audit` (`deps`)
-  are required checks.
+  `continue-on-error`, so their findings never fail a check (the `static-analysis` check,
+  required on `main`, fails only on actionlint). The secret scan (`secrets`) and `npm audit`
+  (`deps`) are required checks.
 - **Not every Action is pinned to a SHA.** The deploy and docs workflows are; `web-ci`,
   `security`, `e2e` and several others use version tags. (gitleaks itself is a pinned release
   whose SHA-256 is checked before it runs.)
