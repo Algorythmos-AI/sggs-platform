@@ -50,12 +50,52 @@ class MukhwakParserTests(unittest.TestCase):
         self.assertEqual(c.body_words[0], "ਪਾਨੀ")
         self.assertEqual(c.body_words[-1], "ਪਾਈ")
 
-    def test_cuts_every_weekday_in_either_spelling_of_shasha(self):
-        # sgpc.net writes ਸ਼ precomposed (U+0A36); our pattern is ਸ + nukta. Both must be cut.
-        for day in ("ਐਤਵਾਰ", "ਮੰਗਲਵਾਰ", "ਬੁੱਧਵਾਰ", "ਵੀਰਵਾਰ",
-                    "\u0a36ੁੱਕਰਵਾਰ", "\u0a38\u0a3cੁੱਕਰਵਾਰ", "\u0a36ਨਿੱਚਰਵਾਰ", "\u0a36ਨੀਵਾਰ"):
-            c = parse_mukhwak(HOME.replace("ਸੋਮਵਾਰ", day))
-            self.assertEqual(c.body_words[-1], "ਪਾਈ", msg=f"weekday {day!r} left in the opening")
+    def test_cuts_every_weekday_in_every_spelling(self):
+        # The weekday is cut by position (after the last danda, before the first comma), so every
+        # spelling goes: with or without addak, ਸ਼ precomposed (U+0A36) or ਸ + nukta, long forms.
+        sha = ("\u0a36", "\u0a38\u0a3c")
+        days = ["ਐਤਵਾਰ", "ਸੋਮਵਾਰ", "ਮੰਗਲਵਾਰ", "ਬੁੱਧਵਾਰ", "ਬੁਧਵਾਰ", "ਵੀਰਵਾਰ", "ਬ੍ਰਹਸਪਤਿਵਾਰ", "ਬ੍ਰਹਸਪਤੀਵਾਰ",
+                "ਸਨਿੱਚਰਵਾਰ", "ਸਨਿਚਰਵਾਰ", "ਛਨਿੱਚਰਵਾਰ"]
+        for s in sha:
+            days += [s + "ੁੱਕਰਵਾਰ", s + "ੁਕਰਵਾਰ", s + "ਨਿੱਚਰਵਾਰ", s + "ਨਿਚਰਵਾਰ", s + "ਨੀਚਰਵਾਰ", s + "ਨੀਵਾਰ"]
+        for day in days:
+            for joiner in (" ", "", "\u200d "):          # a space, none, or a zero-width joiner
+                text = HOME.replace("॥੧॥\nਸੋਮਵਾਰ,", f"॥੧॥{joiner}{day},")
+                self.assertNotEqual(text, HOME)
+                c = parse_mukhwak(text)
+                self.assertEqual(c.body_words[-1], "ਪਾਈ", msg=f"weekday {day!r} left in the opening")
+                self.assertEqual(len(c.body_words), len(parse_mukhwak(HOME).body_words))
+
+    def test_reads_the_21_november_saturday_marquee(self):
+        # #445: sgpc.net wrote Saturday ਸ਼ਨਿਚਰਵਾਰ, without the addak, and the veto held Ang 706.
+        # The marquee text is rebuilt from the alert and corpus lines 30485-30487 (SGPC's page
+        # itself is only in the service's archive): the weekday must go, all 15 verse words stay.
+        opening = ("ਸਲੋਕ ॥ ਮਨ ਇਛਾ ਦਾਨ ਕਰਣੰ ਸਰਬਤ੍ਰ ਆਸਾ ਪੂਰਨਹ ॥ "
+                   "ਖੰਡਣੰ ਕਲਿ ਕਲੇਸਹ ਪ੍ਰਭ ਸਿਮਰਿ ਨਾਨਕ ਨਹ ਦੂਰਣਹ ॥੧॥ ")
+        friday = parse_mukhwak(HOME_FRIDAY)
+        html = HOME_FRIDAY
+        s = html.index("ਜੈਤਸਰੀ ਮਹਲਾ ੪ ਘਰੁ ੧")
+        e = html.index("(ਅੰਗ: ੬੯੬)")
+        self.assertGreater(e, s)
+        html = (html[:s] + opening + "\u0a36ਨਿਚਰਵਾਰ, ੬ ਮੱਘਰ (ਸੰਮਤ ੫੫੮ ਨਾਨਕਸ਼ਾਹੀ) ੨੧ ਨਵੰਬਰ, ੨੦੨੬ (ਅੰਗ: ੭੦੬)"
+                + html[e + len("(ਅੰਗ: ੬੯੬)"):])
+        c = parse_mukhwak(html)
+        self.assertEqual((c.amritsar_date, c.ang), (date(2026, 11, 21), 706))
+        self.assertEqual(c.body_words, tuple("ਮਨ ਇਛਾ ਦਾਨ ਕਰਣੰ ਸਰਬਤ੍ਰ ਆਸਾ ਪੂਰਨਹ ਖੰਡਣੰ ਕਲਿ ਕਲੇਸਹ ਪ੍ਰਭ ਸਿਮਰਿ "
+                                                "ਨਾਨਕ ਨਹ ਦੂਰਣਹ".split()))
+        self.assertNotEqual(c.body_words, friday.body_words)
+
+    def test_never_cuts_a_gurbani_word(self):
+        # Only one ਵਾਰ-word straight after a danda is the weekday. A verse word left before the date
+        # line (no danda after it, or two words) stays in the opening, so the veto compares it and
+        # holds the day rather than silently shortening what is compared.
+        for tail, kept in (("ਪਾਈ ਸੋਮਵਾਰ", "ਸੋਮਵਾਰ"),           # no danda after the verse word
+                           ("॥੧॥ ਗੁਰ ਸੋਮਵਾਰ", "ਸੋਮਵਾਰ"),       # two words after the danda
+                           ("॥੧॥ ਗਾਈ", "ਗਾਈ")):               # one word, not a weekday
+            text = HOME.replace("ਪਾਈ ॥੧॥\nਸੋਮਵਾਰ,", f"{tail},")
+            self.assertNotEqual(text, HOME)
+            c = parse_mukhwak(text)
+            self.assertEqual(c.body_words[-1], kept, msg=tail)
 
     def test_reads_a_friday_marquee(self):
         c = parse_mukhwak(HOME_FRIDAY)
