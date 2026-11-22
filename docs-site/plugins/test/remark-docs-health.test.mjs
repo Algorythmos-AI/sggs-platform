@@ -19,7 +19,13 @@ test('the health table shows each number', () => {
   assert.match(html, /^<sggs-docs-health><table class="docs-health">/);
   assert.match(html, /86\.6% \(58 of 67\)/);
   assert.match(html, /9 cited code changed since the stamp/);
-  assert.match(html, /28 of 59 merges/);
+  assert.match(html, /28 of 59 merges changed/);
+  assert.ok(!/upper bound/.test(html), 'not labelled without upper_bound');
+  const on = docsHealthHtml({ ...H, coupling_debt: { merges: 61, merges_with_debt: 31, page_flags: 63, branch: 'integration', upper_bound: false } });
+  assert.match(on, /31 of 61 merges into <code>integration<\/code> changed covered code without its page or a Docs-impact line \(63 page flags\)/);
+  assert.match(docsHealthHtml({ ...H, coupling_debt: { merges: 61, merges_with_debt: 38, page_flags: 80, branch: 'integration', upper_bound: true } }),
+    /an upper bound: the pull request descriptions could not be read/);
+  assert.ok(!docsHealthHtml({ ...H, coupling_debt: { merges: 1, merges_with_debt: 0, page_flags: 0, branch: '<b>' } }).includes('<b>'));
   assert.match(html, /47\.1% \(49 of 104\)/);
   assert.match(html, /<code>f8b2e506d8bc<\/code>/);
   assert.ok(!/Sibling pins/.test(html), 'no lag row without lag data');

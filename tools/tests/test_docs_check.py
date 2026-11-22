@@ -1,4 +1,5 @@
 """tools/docs_check.py — the rules, exercised on small fixture pages (stdlib unittest)."""
+import datetime as dt
 import importlib.util
 import json
 import sys
@@ -432,15 +433,30 @@ class Covers(Fixture):
 
 class Health(unittest.TestCase):
     def test_the_health_report_has_its_shape(self):
-        h = dc.health()
+        from unittest import mock
+        with mock.patch.object(dc, "fetch_pr_bodies", return_value=None):   # never the network
+            h = dc.health()
         for key in ("generated", "commit", "window_days", "pages", "stamped", "fresh", "fresh_pct", "stale_by_reason",
                     "median_stamp_age_days", "coupling_debt", "code_commits_with_docs"):
             self.assertIn(key, h)
         self.assertLessEqual(h["fresh"], h["stamped"])
         self.assertLessEqual(h["stamped"], h["pages"])
         self.assertEqual(sum(h["stale_by_reason"].values()), h["stamped"] - h["fresh"])
-        self.assertTrue(set(h["coupling_debt"]) >= {"merges", "merges_with_debt", "page_flags"})
+        self.assertTrue(set(h["coupling_debt"]) >= {"merges", "merges_with_debt", "page_flags", "branch",
+                                                    "attributed", "bodies_read", "upper_bound"})
         json.dumps(h)
+
+    def test_freshness_json_lists_the_stale_pages_code_changed_first(self):
+        today = dt.date(2026, 11, 22)
+        rows = [{"page": "docs/a.md", "commit": "aaaaaaa", "date": "2026-11-20", "behind": 2, "age": 2, "cited": ["x.py"], "changed": []},
+                {"page": "docs/b.md", "commit": "bbbbbbb", "date": "2026-01-01", "behind": 9, "age": 325, "cited": [], "changed": []},
+                {"page": "docs/c.md", "commit": "ccccccc", "date": "2026-11-01", "behind": 5, "age": 21, "cited": ["y.py"], "changed": ["y.py"]},
+                {"page": "docs/d.md", "commit": "ddddddd", "date": "2026-11-01", "behind": 5, "age": 21, "cited": ["y.py", "z.py"], "changed": ["y.py", "z.py"]}]
+        j = dc.freshness_json(rows, today=today)
+        self.assertEqual([r["page"] for r in j["stale"]], ["docs/d.md", "docs/c.md", "docs/b.md"])
+        self.assertEqual([r["reason"] for r in j["stale"]], ["code-changed", "code-changed", "old-no-code"])
+        self.assertEqual((j["stamped"], j["fresh"]), (4, 1))
+        json.dumps(j)
 
 
 class RouteCounts(unittest.TestCase):
