@@ -86,6 +86,19 @@ class Areas(unittest.TestCase):
         notes = [m for lvl, m in self.problems() if lvl == "notice"]
         self.assertTrue(any("backlog area `services/old` is covered now" in m for m in notes))
 
+    def test_prune_drops_only_covered_backlog_entries(self):
+        import json
+        cfg = {**CFG, "backlog": {**CFG["backlog"], "services/still": "no page for this one yet"}}
+        self.write("tools/docs_areas.json", json.dumps(cfg))
+        self.write("services/still/run.py", "pass\n")
+        self.write("docs/old.md", PAGE.format(title="Old service", extra='covers: "services/old/run.py"\n', body="Body."))
+        self.track()
+        self.assertEqual(dc.prune_backlog(), ["services/old"])
+        kept = json.loads((self.root / "tools/docs_areas.json").read_text())
+        self.assertEqual(kept["backlog"], {"services/still": "no page for this one yet"})
+        self.assertEqual(kept["exempt"], CFG["exempt"])
+        self.assertEqual(dc.prune_backlog(), [])
+
     def test_a_gone_entry_warns_and_a_short_reason_fails(self):
         cfg = {**CFG, "exempt": {**CFG["exempt"], "webapp/gone.py": "removed long ago, really"},
                "backlog": {"services/old": "short"}}

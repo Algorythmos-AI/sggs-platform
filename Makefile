@@ -68,6 +68,7 @@ docs-generators: ## print the wiki's page generators (one per line; read by docs
 	@for g in $(DOCS_GENERATORS); do echo "tools/$$g.py"; done
 docs-regen: ## rewrite every generated wiki page from its source (what the weekly refresh pull request commits)
 	@for g in $(DOCS_GENERATORS); do echo "python3 tools/$$g.py --write"; python3 tools/$$g.py --write || exit 1; done
+	python3 scripts/brand/contrast_report.py   # docs/brand/contrast-report.md (from docs/brand/tokens.json)
 docs: ## build the wiki (installs pinned sibling docs; renders every Mermaid fence; validates links)
 	python3 tools/fetch_sibling_docs.py
 	cd docs-site && npm ci && npm run test:unit && node scripts/build-posters.mjs --check && npm run build && npm run check:all

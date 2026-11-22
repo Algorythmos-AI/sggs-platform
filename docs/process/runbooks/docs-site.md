@@ -332,7 +332,8 @@ it cites), or be listed in the file:
 
 - `exempt`, with the reason it never needs a page (built output, tests);
 - `backlog`, the gap known when the gate was added (2026-11-12). It only shrinks: once a page
-  covers an area, the docs check asks for the entry to be removed.
+  covers an area, the docs check prints a notice, and the weekly `docs-freshness` pull request
+  removes the entry (`python3 tools/docs_check.py --areas --prune`), so covered entries do not pile up.
 
 A new area on no page fails `docs_check.py` (and so the `docs` check). The list:
 `python3 tools/docs_check.py --areas`; the count is on [Docs health](../../reference/docs-health.md)

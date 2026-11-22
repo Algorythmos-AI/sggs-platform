@@ -1,4 +1,6 @@
+import contextlib
 import importlib.util
+import io
 import subprocess
 import sys
 import tempfile
@@ -34,7 +36,12 @@ class ContrastReport(unittest.TestCase):
             contrast_report.OUT, root = out, contrast_report.ROOT
             contrast_report.ROOT = Path(d)
             try:
-                self.assertEqual(contrast_report.main(["--check"]), 1)
+                # captured: printed, its `::error` line became a false annotation in every
+                # `make docs-check` run and CI log while the real check passed
+                said = io.StringIO()
+                with contextlib.redirect_stdout(said):
+                    self.assertEqual(contrast_report.main(["--check"]), 1)
+                self.assertIn("stale — run: python3 scripts/brand/contrast_report.py", said.getvalue())
                 self.assertEqual(out.read_text(encoding="utf-8"), stale)
             finally:
                 contrast_report.OUT, contrast_report.ROOT = real, root

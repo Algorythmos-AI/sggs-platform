@@ -7,6 +7,7 @@
     python3 tools/docs_check.py --freshness --json [OUT]   # the same rows as JSON (docs-reread reads it)
     python3 tools/docs_check.py --health OUT.json   # the numbers on docs/reference/docs-health.md
     python3 tools/docs_check.py --areas [OUT]       # which code areas are on a wiki page (report only)
+    python3 tools/docs_check.py --areas --prune [OUT]   # first drop covered entries from the backlog
 
 Every published page (docs/**/*.md except docs/reports/archive and docs/design) must:
   1. carry frontmatter: `title` (8–120 chars, equal to the body's first H1 read as text) and
@@ -1090,7 +1091,8 @@ def check_areas(cfg: dict | None = None) -> list[Problem]:
                  kind="area") for a in r["missing"]]
     P += [Problem(where, 1, f"`{a}` in {AREAS_FILE} is not a code area any more: remove it", level="warning", kind="area")
           for a in r["stale_entries"]]
-    P += [Problem(where, 1, f"backlog area `{a}` is covered now ({', '.join(r['covered'][a][:2])}): remove it from the backlog",
+    P += [Problem(where, 1, f"backlog area `{a}` is covered now ({', '.join(r['covered'][a][:2])}): remove it from the backlog "
+                            "(the weekly docs-freshness pull request does: docs_check.py --areas --prune)",
                   level="notice", kind="area") for a in r["backlog_covered"]]
     P += [Problem(where, 1, f"`{a}` in {AREAS_FILE}: give a reason of {MIN_AREA_REASON} characters or more", kind="area")
           for a in r["short_reasons"]]
@@ -1098,6 +1100,19 @@ def check_areas(cfg: dict | None = None) -> list[Problem]:
         P.append(Problem(where, 1, f"{len(r['backlog'])} code area(s) have no wiki page yet ({AREAS_FILE} backlog); "
                                    "the list: python3 tools/docs_check.py --areas", level="notice", kind="area"))
     return P
+
+
+def prune_backlog(cfg: dict | None = None) -> list[str]:
+    """Remove from tools/docs_areas.json every backlog entry a page covers now, and return them. The
+    weekly docs-freshness run calls it (`--areas --prune`), so a covered entry is dropped by its pull
+    request instead of piling up as a notice nobody acts on."""
+    p = ROOT / AREAS_FILE
+    cfg = areas_config() if cfg is None else cfg
+    gone = area_coverage(cfg)["backlog_covered"]
+    if gone and p.exists():
+        cfg = {**cfg, "backlog": {a: why for a, why in cfg.get("backlog", {}).items() if a not in gone}}
+        p.write_text(json.dumps(cfg, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return gone
 
 
 def areas_markdown(r: dict | None = None) -> str:
@@ -1110,6 +1125,9 @@ def areas_markdown(r: dict | None = None) -> str:
         if r[key]:
             out += [f"## {title}", "", "| Area | Files |", "|---|---|"]
             out += [f"| `{a}` | {len(r['areas'][a])} |" for a in r[key]] + [""]
+    if r.get("backlog_covered"):
+        out += ["## Backlog entries covered now (the weekly refresh removes them: `--areas --prune`)", ""]
+        out += [f"- `{a}`: {', '.join(r['covered'][a][:2])}" for a in r["backlog_covered"]] + [""]
     return "\n".join(out)
 
 
@@ -1388,11 +1406,15 @@ def main(argv=None) -> int:
     ap.add_argument("--freshness", type=Path, metavar="OUT", nargs="?", const=Path("-"),
                     help="report (never fail) the stamped pages whose cited code changed since their stamp; OUT or stdout")
     ap.add_argument("--json", action="store_true", help="with --freshness: write the stale pages as JSON")
+    ap.add_argument("--prune", action="store_true", help=f"with --areas: first drop the backlog entries a page covers now from {AREAS_FILE}")
     ap.add_argument("--health", type=Path, metavar="OUT", help="write the docs-health numbers as JSON to OUT and exit 0")
     ap.add_argument("--areas", type=Path, metavar="OUT", nargs="?", const=Path("-"),
                     help="report (never fail) which code areas are on a wiki page (tools/docs_areas.json); OUT or stdout")
     a = ap.parse_args(argv)
     if a.areas is not None:
+        if a.prune:
+            for gone in prune_backlog():
+                print(f"areas: `{gone}` is covered now; removed from the backlog in {AREAS_FILE}")
         md = areas_markdown()
         if str(a.areas) == "-":
             print(md)

@@ -76,7 +76,8 @@ jobs:
         run: |
           python3 tools/docs_check.py --freshness "$RUNNER_TEMP/fresh.md"
           python3 tools/docs_check.py --health "$RUNNER_TEMP/health.json"
-          python3 tools/docs_check.py --areas "$RUNNER_TEMP/areas.md"
+          # a backlog area a page covers now is dropped from tools/docs_areas.json in this commit
+          python3 tools/docs_check.py --areas --prune "$RUNNER_TEMP/areas.md"
       - name: What changed
         id: state
         run: |
