@@ -127,7 +127,10 @@ The owner's tools are `python -m hukamnama approve | hold | show | resend`, run 
 `render ssh`. `approve` publishes a given line range for a date and `hold` withdraws a day; both
 overwrite the day's decision and are written to the `audit` table, and an automatic publish never
 replaces an owner decision. `resend` queues a day's push again for every device that already had
-it. Readers never see the word held: a held day is served as `pending`, and a held day has no
+it. A `held_veto` day can also be approved from the phone alert (`approve.py`, with
+`HUKAMNAMA_APPROVE_SECRET` set): only the exact run hs.sgpc.net resolved to, signed in the alert and
+re-proved against the corpus at the tap, and only while the day is still an automatic hold.
+Readers never see the word held: a held day is served as `pending`, and a held day has no
 snapshot file. When each tool is used is in [the runbook](../process/runbooks/hukamnama.md).
 
 ## Timing
