@@ -5,7 +5,7 @@ covers: ".github/workflows/*.yml"
 sidebar:
   order: 3
 verified:
-  commit: a4dd9ef0
+  commit: 5f43c4b0
   date: "2026-11-22"
 ---
 # CI Gates — what each check proves
