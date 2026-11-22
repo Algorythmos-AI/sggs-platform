@@ -143,8 +143,11 @@ start. `push.py`:
 - **What is sent** is built only from the published decision, so every Gurmukhi character is the
   corpus's. Its shape equals the app's `hukamnama.apns` fixture (`tests/fixtures/ios-hukamnama.apns`,
   copied from gurbani-soul-ios; `test_payload_equals_the_apps_fixture`).
-- **When:** only the current Amritsar day is ever pushed (a day approved after its Amritsar
-  midnight is not sent), and each device gets at most one push per day. `asap` devices are queued
+- **When:** the current Amritsar day is pushed, and each device gets at most one push per day.
+  One bounded exception: a day the owner approved after its Amritsar midnight is still pushed,
+  with its own date, until 05:00 IST and only while the new day is not yet published (`asap`
+  devices, and `scheduled` ones whose slot that day was within 6 h before the approval). No older
+  day is ever pushed. `asap` devices are queued
   the moment the day is published, or when they switch to `asap` later that day (a device first
   registered after the publish waits for tomorrow). `scheduled` devices at their own UTC slot on
   the Amritsar day, from the schedule entry in force then (the first entry counts from the
