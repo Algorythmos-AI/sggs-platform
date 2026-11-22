@@ -48,6 +48,9 @@
             "context": "secrets"
           },
           {
+            "context": "deps"
+          },
+          {
             "context": "static-analysis"
           },
           {
