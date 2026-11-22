@@ -45,7 +45,7 @@ position, #446) was released but not yet running in either service.
 | Website pages, feeds, sitemap and embed | In the code (#386–#391); **routed in production since v1.7.0** by `production.hukamnama_api` in `gateway/routes.json`. On gurbanisoul.com `/en/hukamnama`, the JSON feed, `/sitemap-hukamnama.xml` and `/embed/hukamnama` answered 200. Production pages read the public API (the Worker); staging pages read `api-staging.gurbanisoul.com`, the service itself ([the website](website.md)). |
 | Developers page and the OpenAPI spec | Public since v1.7.0 (#393, #394, #418): listed, indexed and linked from the footer; the spec is `contract/hukamnama.openapi.json`, generated. |
 | Website CDN purge | In the code (#432): after a published day is corrected, withdrawn or paused, the publisher deletes the `hukamnama` cache tag from Vercel's CDN, then once more 6 minutes later. On when `HUKAMNAMA_VERCEL_PURGE_TOKEN`, `HUKAMNAMA_VERCEL_PROJECT` and `HUKAMNAMA_VERCEL_TEAM` are set on the service; whether production has them is unconfirmed. |
-| Watching from outside | `hukamnama-deadman.yml` reads **staging's** `/health` only (`HUKAMNAMA_STAGING_URL`): no workflow is a dead-man check for the production service. `hukamnama-morning.yml` compares every website surface with the API (below); its production job runs only when `HUKAMNAMA_PROD_SITE_URL` and `HUKAMNAMA_PROD_API_URL` are set, which is unconfirmed. |
+| Watching from outside | Each service reads the other's `/health` every 5 minutes, 05:15–14:15 IST (`peer.py`, `HUKAMNAMA_PEER_URL`). `hukamnama-deadman.yml` is the backstop for both: staging through `HUKAMNAMA_STAGING_URL`, production through `HUKAMNAMA_PROD_URL` (each job is skipped while its variable is unset; whether `HUKAMNAMA_PROD_URL` is set is unconfirmed). `hukamnama-morning.yml` compares every website surface with the API (below); its production job runs only when `HUKAMNAMA_PROD_SITE_URL` and `HUKAMNAMA_PROD_API_URL` are set, which is unconfirmed. |
 | Planned, not built | The R2 copy of the fetch archive. |
 
 ## The flow
@@ -173,8 +173,9 @@ no time-zone database is needed, and a naive datetime is refused.
 |---|---|
 | 05:00–09:00 | poll every minute |
 | 05:30 | `expected_by`: SGPC stamps the Hukamnama 05:30 AM; a pending answer names this time |
-| 07:00 | `late` alert if nothing has resolved; the dead-man check reads staging's `/health` (also at 06:00 and 14:15) |
+| 07:00 | `late` alert if nothing has resolved |
 | 07:15, 10:00 | `hukamnama-morning.yml` reads each page, the JSON feed and the embed from outside and holds the Gurmukhi each shows to the API's `range_sha256`; a mismatch opens one issue per Amritsar date |
+| 05:15–14:15 | each service checks the other's `/health` every 5 minutes (`peer.py`, `HUKAMNAMA_PEER_URL`) |
 | 09:00–14:00 | poll every 10 minutes |
 | 14:00 | `not_published` alert if still nothing |
 | 04:30–10:00 | deploy freeze for both services (23:00–04:30 UTC in `hukamnama-deploy.yml` and `hukamnama-deploy-production.yml`) |
@@ -185,8 +186,9 @@ Every new alert (one per day and kind) is stored, shown on `/health`, and, when
 `HUKAMNAMA_ALERT_NTFY_URL` is set, posted at once to the owner's phone through ntfy (`alerts.py`):
 holds and lost mornings urgent, late or changed pages high. Besides the poller's alerts, the
 publisher raises `cdn_purge_failed` and the sender `push_breaker` (and the other push alerts) and
-`device_flood`. The external dead-man check posts to the same topic when the staging service is
-down; nothing outside watches the production service's `/health`. Setup: the [service runbook](../process/runbooks/hukamnama-service.md#phone-alerts-ntfy).
+`device_flood`. When a service itself is down, its sibling posts `peer_down` within about 15 minutes
+(`peer.py`), and the external dead-man check posts to the same topic as a backstop (GitHub runs it
+hours late). Setup: the [service runbook](../process/runbooks/hukamnama-service.md#phone-alerts-ntfy).
 
 ## Push
 
@@ -231,7 +233,7 @@ serves a future date, and answers 503 rather than another day's text. Device reg
 |---|---|---|
 | Service | Render `sggs-hukamnama-staging` (Singapore, Starter, 1 GB disk at `/var/data`), `api-staging.gurbanisoul.com` | Render `sggs-hukamnama-prod` (Singapore, Starter, 1 GB disk), created 2026-11-16; its own origin answers `/health` only, every `/v1` read goes through the Worker at `api.gurbanisoul.com` |
 | Deploys | `hukamnama-deploy.yml` on a push to `integration` touching the service, the dataset pin or the workflow, or by dispatch: tests on the exact commit, proves every published day in that commit's database (`hukamnama_preflight.py`), Render deploy hook with `ref=SHA`, then waits until `/health.commit` equals it | `hukamnama-deploy-production.yml`, **by dispatch only**, with a release tag that must be on `main`: tests on the tag, the same proof before the deploy (skipped only with `first_deploy`), Render deploy hook with `ref=SHA`, waits for `/health.commit`, and proves the published days again as served |
-| Watched by | `hukamnama-deadman.yml` at 06:00, 07:00 and 14:15 IST (one issue per Amritsar date); `hukamnama-morning.yml` when its staging variables are set | `hukamnama-morning.yml` when `HUKAMNAMA_PROD_SITE_URL` and `HUKAMNAMA_PROD_API_URL` are set; no dead-man check |
+| Watched by | the production service (`peer.py`, every 5 min); `hukamnama-deadman.yml` as a backstop (05:37, 07:17, 14:23 IST as scheduled): one issue per Amritsar date; `hukamnama-morning.yml` when its staging variables are set | the staging service (`peer.py`); `hukamnama-deadman.yml`, issues titled `[production]`; `hukamnama-morning.yml` when `HUKAMNAMA_PROD_SITE_URL` and `HUKAMNAMA_PROD_API_URL` are set |
 | Reached by | TestFlight builds; the staging website's Hukamnama pages | the production website's Hukamnama pages and the public API, both through the edge Worker; App Store builds once the feature is on in them |
 
 The service is not part of the website and API deployment of a release: `deploy-production.yml`

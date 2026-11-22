@@ -1,16 +1,21 @@
 name: hukamnama-deadman
 
-# The external dead-man check for the Hukamnama service. The service reports its own alerts on
-# /health; this notices when the service itself is down, asleep or wedged. Runs at 06:00, 07:00
-# and 14:15 IST, alerts the owner's phone (ntfy), and opens one issue per Amritsar date (later
-# runs comment on it). It never
-# restarts or redeploys anything. Silent until HUKAMNAMA_STAGING_URL is set.
+# The external dead-man check for the Hukamnama services (staging and production). Each service
+# reports its own alerts on /health; this notices when a service itself is down, asleep or wedged.
+# It alerts the owner's phone (ntfy) and opens one issue per Amritsar date and service (later runs
+# comment on it). It never restarts or redeploys anything. Silent for a service whose URL variable
+# is unset.
+#
+# It is the BACKSTOP. GitHub's cron started these runs 6-9 h late every day in November 2026
+# (00:30 UTC → 06:53-07:50 UTC; 08:45 UTC → 15:21-18:56 UTC), so the timely check is now the two
+# services watching each other (services/hukamnama/hukamnama/peer.py, HUKAMNAMA_PEER_URL). The
+# minutes below avoid :00/:30/:45, the busiest for GitHub's scheduler.
 
 on:
   schedule:
-    - cron: "30 0 * * *"    # 06:00 IST: polling must be live
-    - cron: "30 1 * * *"    # 07:00 IST: today's Hukamnama should have resolved
-    - cron: "45 8 * * *"    # 14:15 IST: the window has closed
+    - cron: "7 0 * * *"     # 05:37 IST: polling must be live
+    - cron: "47 1 * * *"    # 07:17 IST: today's Hukamnama should have resolved
+    - cron: "53 8 * * *"    # 14:23 IST: the window has closed
   workflow_dispatch:
 
 permissions:
@@ -25,8 +30,17 @@ jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - where: staging
+            url_var: HUKAMNAMA_STAGING_URL
+          - where: production
+            url_var: HUKAMNAMA_PROD_URL
     env:
-      URL: ${{ vars.HUKAMNAMA_STAGING_URL }}
+      URL: ${{ vars[matrix.url_var] }}
+      WHERE: ${{ matrix.where }}
     steps:
       - uses: actions/checkout@v5
         if: env.URL != ''
@@ -46,7 +60,7 @@ jobs:
         continue-on-error: true
         env:
           HUKAMNAMA_ALERT_NTFY_URL: ${{ secrets.HUKAMNAMA_ALERT_NTFY_URL }}
-          HUKAMNAMA_ENV: staging
+          HUKAMNAMA_ENV: ${{ matrix.where }}
           REPORT: ${{ steps.check.outputs.report }}
         run: |
           [ -n "$HUKAMNAMA_ALERT_NTFY_URL" ] || { echo "no HUKAMNAMA_ALERT_NTFY_URL; skipped"; exit 0; }
@@ -58,7 +72,8 @@ jobs:
           REPORT: ${{ steps.check.outputs.report }}
         run: |
           day="$(TZ=Asia/Kolkata date +%F)"
-          title="Hukamnama service: problem on $day (Amritsar)"
+          suffix=""; [ "$WHERE" = staging ] || suffix=" [$WHERE]"
+          title="Hukamnama service: problem on $day (Amritsar)$suffix"
           fence='```'
           body="Dead-man check at $(TZ=Asia/Kolkata date +%H:%M) IST against ${URL}:
 
@@ -67,7 +82,7 @@ jobs:
           ${fence}
 
           Runbook: docs/process/runbooks/hukamnama-service.md"
-          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$title\"" --json number --jq '.[0].number // empty')"
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$title\"" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)"
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$body"
           else
