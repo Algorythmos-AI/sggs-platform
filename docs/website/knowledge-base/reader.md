@@ -56,7 +56,7 @@ never paints over it.
 
 ## Reading options
 
-The "ਅA" button opens a small panel: text size (one step is 2 px, from 16 to 40), transliteration
+The reading-options button at the right of the toolbar opens a small panel: text size (one step is 2 px, from 16 to 40), transliteration
 on or off, the timing chip on or off, **Sehaj** focus mode (the chrome folds away, Escape leaves
 it), and **Share this Ang**, which shares or copies the `/ang/N` link (it unfurls as that Ang's own
 card; see [the website](../README.md)).
@@ -80,7 +80,7 @@ place kept in a long reading.
 
 Tapping a verse asks `/api/neighbors?line_id=…&limit=6` and opens a drawer under it with the
 closest verses, each with a relatedness band ("Strong echo", "Related", "Faint echo") rather than
-a raw percentage, and a "walk a trail" link to the [Verse trail](index-themes-trail.md#the-verse-trail).
+a raw percentage, and a "walk a trail" link to the [Verse trail](index-themes-trail.md#the-verse-trail-trail).
 The neighbours and their scores are built offline; see
 [the insights context](../../architecture/insights-context.md).
 

@@ -1,6 +1,6 @@
 ---
 title: "The API image"
-description: "What webapp/Dockerfile builds: the pinned database fetched and checked in the image, one image for every service through SGGS_MODULES, the baked commit, the health check, and the CI job that proves it."
+description: "What webapp/Dockerfile builds: the pinned database checked inside the image, one image for every service through SGGS_MODULES, the baked commit, the health check and its CI proof."
 covers: "webapp/Dockerfile"
 sidebar:
   order: 5
