@@ -72,7 +72,7 @@ poll interval.
 
 | Tool | Effect for readers | Effect on push |
 |---|---|---|
-| `approve` | the range is published at that moment, with its `range_sha256`; the snapshot file is written (or rewritten) | `asap` devices get it then, **only while it is still that Amritsar day**; a day approved after its Amritsar midnight is never pushed |
+| `approve` | the range is published at that moment, with its `range_sha256`; the snapshot file is written (or rewritten) | `asap` devices get it then. Approved after its Amritsar midnight, it is still pushed (with its own date) until **05:00 IST**, unless the new day is already published; later than that it is never pushed |
 | `hold` | the day reads as `pending`; its snapshot file is deleted | nothing new is queued; a notification already delivered stays on the phone |
 | `resend` | none | re-queues every device that already had (or failed) that day's push, and clears a tripped circuit breaker (audited); the same collapse id replaces the first notification on the phone |
 
@@ -99,7 +99,10 @@ Ang).
 5. If you are not certain, leave it held. Readers see `pending`, the website and the app show the
    most recent day under its own date, and nothing is wrong.
 
-For a `held_veto`, check which page is right first; approve that range, or leave the day held.
+For a `held_veto`, check which page is right first; approve that range, or leave the day held. With
+`HUKAMNAMA_APPROVE_SECRET` set, the alert names that range and has **Approve** and **Review**
+buttons that publish exactly it (re-checked against the corpus at the tap); see
+[the service runbook](hukamnama-service.md#one-tap-approve-from-the-alert-held_veto).
 
 ## After a day is published
 

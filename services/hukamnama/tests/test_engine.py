@@ -28,9 +28,11 @@ class EngineTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.store = Store(f"{self.tmp.name}/state.sqlite")
         self.alerts = []
+        self.approves = []
         self.fetch = FakeFetcher({HS_URL: HS, MUKHWAK_URL: HOME})
         self.engine = Engine(self.store, self.con, self.fp, self.fetch,
-                             alert_hook=lambda d, k, x: self.alerts.append(k))
+                             alert_hook=lambda d, k, x, approve=None: (self.alerts.append(k),
+                                                                        self.approves.append(approve)))
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -73,6 +75,18 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(self.store.decision(DAY)["status"], "held")
         self.assertIn("held_veto", self.alerts)
         self.assertEqual(self.run_minutes(T0 + timedelta(minutes=3), 5), ["decided"] * 5)   # owner decides
+
+    def test_a_veto_hold_keeps_the_resolved_range_for_the_alert(self):
+        """approve.py may publish exactly the run hs.sgpc.net resolved to, so the hold keeps it,
+        apart from the decision (a held day still has no resolution anyone reads)."""
+        self.fetch.pages[MUKHWAK_URL] = HOME.replace("ਪਾਨੀ ਪਖਾ", "ਪਾਨੀ ਪੰਖਾ")
+        self.assertEqual(self.run_minutes(T0, 3)[-1], "held")
+        self.assertIsNone(self.store.decision(DAY)["resolution"])
+        held = self.store.held_range(DAY)
+        self.assertEqual((held["first_line_id"], held["last_line_id"]), (29237, 29247))
+        ap = self.approves[self.alerts.index("held_veto")]
+        self.assertEqual((ap["first_line_id"], ap["last_line_id"], ap["range_sha256"], ap["fingerprint"]),
+                         (29237, 29247, held["range_sha256"], self.fp))
 
     def test_veto_still_on_yesterday_is_not_waited_for(self):
         self.fetch.pages[MUKHWAK_URL] = YESTERDAY_HOME

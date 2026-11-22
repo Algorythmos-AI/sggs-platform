@@ -18,7 +18,7 @@ from datetime import date, datetime, timezone
 from html.parser import HTMLParser
 
 from . import USER_AGENT
-from .locate import gurmukhi_int, is_gurmukhi_text, words
+from .locate import gurmukhi_int, is_gurmukhi_text, locate_text, words
 
 HS_URL = "https://hs.sgpc.net/"
 MUKHWAK_URL = "https://sgpc.net/"
@@ -160,6 +160,32 @@ def parse_hs(html: str) -> Candidate:
     return Candidate("hs", day, angs.pop(), title, body, _structure(t, [card, texts[0], *titles]))
 
 
+_VERSE_END = re.compile(r"[॥।|]+[੦-੯0-9]*[॥।|]*")
+
+
+def _cut_weekday(before_comma: str) -> str:
+    """The marquee's opening verse(s), without the date line's weekday.
+
+    The date line follows the last verse: ``… ॥੧॥ ਸ਼ਨਿਚਰਵਾਰ, ੬ ਮੱਘਰ …``. Its first word, the
+    weekday, is everything after the last verse-ending danda and before the first comma. That is a
+    rule about position, not a list of spellings: sgpc.net has written Saturday ਸ਼ਨਿੱਚਰਵਾਰ and
+    ਸ਼ਨਿਚਰਵਾਰ (no addak, 21 Nov 2026, #445), and ਸ਼ both precomposed (U+0A36) and as ਸ + nukta
+    (13 and 20 Nov, #406/#439); every spelling held the veto while the cut was a list.
+
+    It never cuts a Gurbani word: Gurbani has no commas, and the tail is cut only when it is one
+    word ending in ਵਾਰ (every weekday name does) that follows a danda. Anything else stays in the
+    opening, the comparison then fails on it word for word, and the day is held: the safe outcome.
+    """
+    s = locate_text(before_comma).rstrip()
+    ends = list(_VERSE_END.finditer(s))
+    if not ends:
+        return s
+    tail = s[ends[-1].end():].strip()
+    if tail and len(tail.split()) == 1 and tail.endswith("ਵਾਰ") and is_gurmukhi_text(tail):
+        return s[:ends[-1].end()]
+    return s
+
+
 def parse_mukhwak(html: str) -> Candidate:
     """sgpc.net: the Mukhwak marquee on every page — heading, opening verse(s), date, Ang.
 
@@ -184,12 +210,7 @@ def parse_mukhwak(html: str) -> Candidate:
     # first heading danda up to the date line, which starts with the weekday name
     after = s.split("ਸ੍ਰੀ ਅੰਮ੍ਰਿਤਸਰ", 1)[-1]
     head, _, rest = after.partition("॥")
-    # NFC first: sgpc.net writes the weekday with the precomposed ਸ਼ (U+0A36), which NFC turns into
-    # ਸ + nukta, the form the pattern below is written in. Without it Friday (ਸ਼ੁੱਕਰਵਾਰ) and Saturday
-    # (ਸ਼ਨਿੱਚਰਵਾਰ) were never cut off, the weekday became the opening's last word, and the veto held
-    # every Friday and Saturday (13 and 20 Nov 2026, #406).
-    opening = unicodedata.normalize("NFC", rest.split(",", 1)[0])
-    opening = re.split(r"(ਐਤਵਾਰ|ਸੋਮਵਾਰ|ਮੰਗਲਵਾਰ|ਬੁੱਧਵਾਰ|ਬੁਧਵਾਰ|ਵੀਰਵਾਰ|ਸ਼ੁੱਕਰਵਾਰ|ਸ਼ੁਕਰਵਾਰ|ਸ਼ਨਿੱਚਰਵਾਰ|ਸ਼ਨੀਵਾਰ)", opening)[0]
+    opening = _cut_weekday(rest.split(",", 1)[0])
     body = tuple(words(opening))
     if len(body) < MIN_WORDS or not is_gurmukhi_text(opening):
         raise ParseError("marquee opening verse missing or not Gurmukhi")

@@ -23,7 +23,7 @@ from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
-from . import __version__, clock
+from . import __version__, approve, clock
 from .devices import MAX_BODY, BadRequest, RateLimiter, parse_registration, valid_token
 from .push import plan_for_device
 from .store import Store
@@ -74,6 +74,10 @@ class State:
         # Only a request that carries it may say which address it is for (X-Client-IP).
         self.origin_secret = os.environ.get("HUKAMNAMA_ORIGIN_SECRET", "")
         self.origin_required = os.environ.get("HUKAMNAMA_ORIGIN_REQUIRED", "off") == "on"
+        # One-tap approve from the phone alert (approve.py): needs the corpus and the secret.
+        self.con = None                      # the read-only scripture DB, set by main
+        self.approve_secret = os.environ.get("HUKAMNAMA_APPROVE_SECRET", "").strip()
+        self.approvals = RateLimiter(per_minute=10)
 
 
 def make_handler(state: State):
@@ -103,6 +107,74 @@ def make_handler(state: State):
             if self.command != "HEAD":
                 self.wfile.write(raw)
 
+        def _send_html(self, code: int, page: str) -> None:
+            raw = page.encode("utf-8")
+            self.send_response(code)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(raw)))
+            self.send_header("Cache-Control", "no-store")
+            for k, v in SECURITY_HEADERS.items():
+                self.send_header(k, v)
+            self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; "
+                                                        "form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
+            self.end_headers()
+            if self.command != "HEAD":
+                self.wfile.write(raw)
+
+        def _approve_ready(self) -> bool:
+            """The approve route exists only with a secret and the corpus, and is rate-limited."""
+            if not state.approve_secret or state.con is None:
+                self._send(404, {"error": "not found"})
+                return False
+            if not state.approvals.allow(self._client()):
+                self._send(429, {"error": "slow down"}, headers={"Retry-After": "60"})
+                return False
+            return True
+
+        def _approve_get(self, query: str) -> None:
+            if not self._approve_ready():
+                return
+            fields = {k: v[0] for k, v in parse_qs(query).items()}
+            code, page = approve.confirm_page(state.store, state.con, state.fingerprint, state.approve_secret,
+                                              fields, state.now())
+            self._send_html(code, page)
+
+        def _approve_post(self) -> None:
+            if not self._approve_ready():
+                return
+            try:
+                n = int(self.headers.get("Content-Length") or "0")
+            except ValueError:
+                n = -1
+            if not 0 < n <= 4096:
+                self._send(400, {"error": "bad request"})
+                return
+            raw = self.rfile.read(n).decode("utf-8", "replace")
+            ctype = (self.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+            form = ctype == "application/x-www-form-urlencoded"
+            try:
+                fields = {k: v[0] for k, v in parse_qs(raw).items()} if form else json.loads(raw)
+                if not isinstance(fields, dict):
+                    raise ValueError
+            except ValueError:
+                self._send(400, {"error": "bad request"})
+                return
+            try:
+                result = approve.approve(state.store, state.con, state.fingerprint, state.approve_secret,
+                                         fields, state.now())
+            except approve.Refused as e:
+                logging.getLogger("hukamnama").warning("approve from alert refused (%s): %s", e.code, e)
+                if form:
+                    self._send_html(e.code, approve.result_page(e.code, None, str(e)))
+                else:
+                    self._send(e.code, {"error": str(e)})
+                return
+            logging.getLogger("hukamnama").info("approved from alert: %s", result)
+            if form:
+                self._send_html(200, approve.result_page(200, result, None))
+            else:
+                self._send(200, result, cache="no-store")
+
         def do_HEAD(self):
             self.do_GET()
 
@@ -117,6 +189,9 @@ def make_handler(state: State):
             now = state.now()
             today = clock.amritsar_date(now)
             paused = state.store.paused() is not None
+            if u.path == approve.PATH:              # the owner's phone, straight to this host
+                self._approve_get(u.query)
+                return
             if u.path != "/health":
                 if not self._allowed():
                     return
@@ -229,7 +304,14 @@ def make_handler(state: State):
                 self._send(500, {"error": "internal error"})
 
         def do_POST(self):
-            self._send(405, {"error": "method not allowed"})
+            try:
+                if urlsplit(self.path).path == approve.PATH and not urlsplit(self.path).query:
+                    self._approve_post()
+                else:
+                    self._send(405, {"error": "method not allowed"})
+            except Exception:
+                logging.getLogger("hukamnama").exception("POST failed")
+                self._send(500, {"error": "internal error"})
 
         def _put(self):
             token = self._device_token()

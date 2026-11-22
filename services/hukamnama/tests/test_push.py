@@ -268,19 +268,54 @@ class PushTests(unittest.TestCase):
     def collapse_ids(self, tok):
         return [r.headers["apns-collapse-id"] for r in self.fake.requests if r.url.path.endswith(tok)]
 
-    def test_yesterday_is_never_pushed_on_todays_date(self):
-        """A day approved late (or SGPC late) must not be pushed on the next Amritsar date, and
-        then today's as a second push: only the current Amritsar day is ever sent."""
+    def test_a_day_approved_after_midnight_is_still_pushed_until_05_ist(self):
+        """A held day the owner approves after its Amritsar midnight is pushed (with its own date)
+        until 05:00 IST; then today's Hukamnama is pushed as usual, once."""
         d0 = DAY - timedelta(days=1)
-        self.register([TOK[0]], "scheduled", [{"from_utc": 0, "slot_utc_min": 180}], at=utc(2026, 11, 1))
+        self.register([TOK[0]], "scheduled", [{"from_utc": 0, "slot_utc_min": 180}], at=utc(2026, 11, 1))  # 08:30 IST
         self.register([TOK[1]], at=utc(2026, 11, 1))
+        self.register([TOK[2]], "scheduled", [{"from_utc": 0, "slot_utc_min": 15 * 60}], at=utc(2026, 11, 1))  # 20:30 IST
+        self.register([TOK[3]], at=utc(2026, 11, 8, 19, 30))      # registered after the approval
         self.publish(day=d0, at=utc(2026, 11, 8, 19, 0))         # owner approves 11-08 at 00:30 IST 11-09
         self.drain(utc(2026, 11, 8, 19, 0, 30))
-        self.drain(utc(2026, 11, 9, 3, 0, 30))                    # TOK[0]'s slot; today not yet published
-        self.assertEqual(self.fake.requests, [])
-        self.publish(at=utc(2026, 11, 9, 4, 0))                    # today, late
+        self.drain(utc(2026, 11, 8, 23, 0))                      # 04:30 IST: nothing twice
+        self.assertEqual(self.collapse_ids(TOK[1]), ["hukamnama-2026-11-08"])     # asap
+        self.assertEqual(self.collapse_ids(TOK[2]), ["hukamnama-2026-11-08"])     # slot 4 h before
+        self.assertEqual(self.collapse_ids(TOK[0]), [])          # its slot was 16 h before: as on the day
+        self.assertEqual(self.collapse_ids(TOK[3]), [])
+        sub = [json.loads(r.content)["aps"]["alert"]["subtitle"] for r in self.fake.requests]
+        self.assertEqual(set(sub), {date_label(d0)})              # it says which day it is
+        self.publish(at=utc(2026, 11, 9, 4, 0))                    # today
         self.drain(utc(2026, 11, 9, 4, 0, 30))
+        self.assertEqual(self.collapse_ids(TOK[1]), ["hukamnama-2026-11-08", "hukamnama-2026-11-09"])
         self.assertEqual(self.collapse_ids(TOK[0]), ["hukamnama-2026-11-09"])
+
+    def test_a_late_approve_after_05_ist_is_not_pushed(self):
+        d0 = DAY - timedelta(days=1)
+        self.register([TOK[1]], at=utc(2026, 11, 1))
+        self.publish(day=d0, at=utc(2026, 11, 8, 23, 31))        # 05:01 IST
+        self.drain(utc(2026, 11, 8, 23, 31, 30))
+        self.assertEqual(self.fake.requests, [])
+        self.assertIsNone(due_tokens(self.store, utc(2026, 11, 8, 23, 32)))
+
+    def test_a_day_decided_on_its_own_date_is_not_pushed_again_after_midnight(self):
+        d0 = DAY - timedelta(days=1)
+        self.register([TOK[1]], at=utc(2026, 11, 9, 0, 0))      # registered after the publish
+        self.publish(day=d0, at=utc(2026, 11, 8, 2, 0))          # published on 11-08 itself
+        self.assertIsNone(due_tokens(self.store, utc(2026, 11, 8, 19, 0)))
+
+    def test_older_days_are_never_pushed(self):
+        self.register([TOK[1]], at=utc(2026, 11, 1))
+        self.publish(day=DAY - timedelta(days=2), at=utc(2026, 11, 8, 19, 0))
+        self.drain(utc(2026, 11, 8, 19, 0, 30))
+        self.assertEqual(self.fake.requests, [])
+
+    def test_once_today_is_published_yesterday_is_not_sent(self):
+        d0 = DAY - timedelta(days=1)
+        self.register([TOK[1]], at=utc(2026, 11, 1))
+        self.publish(day=d0, at=utc(2026, 11, 8, 19, 0))
+        self.publish(at=utc(2026, 11, 8, 19, 1))                  # (an owner approve of today, say)
+        self.drain(utc(2026, 11, 8, 19, 2))
         self.assertEqual(self.collapse_ids(TOK[1]), ["hukamnama-2026-11-09"])
 
     def test_moving_the_time_earlier_keeps_todays_push(self):
