@@ -162,7 +162,9 @@ text is the corpus's, and its shape is pinned to the app's fixture by a test. Be
 a day records its ਰਹਾਉ couplet (`rahao_gurmukhi`, from `corpus.rahao_block`: the one line marked
 rahao plus the verse lines before it back to a numbered verse end or a heading, at most 3), which
 the read API and the push carry for the large widget; a shabad with no ਰਹਾਉ or several gets none. Only the **current
-Amritsar day** is ever pushed, at most once per device per day: `asap` devices when the day
+Amritsar day** is pushed (one bounded exception: a day the owner approved after its Amritsar
+midnight is pushed with its own date until 05:00 IST, while the new day is unpublished), at most
+once per device per day: `asap` devices when the day
 publishes, `scheduled` devices at their own UTC slot. Sends are durable rows that survive a restart;
 a circuit breaker stops a day's run when more than 5% of its first results are 4xx, and deletes
 nothing until a run finishes untripped. The device routes are `PUT` and `DELETE /v1/devices/<token>`;
