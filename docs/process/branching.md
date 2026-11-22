@@ -1,11 +1,12 @@
 ---
 title: "Branching & Delivery Flow"
 description: "The branch model: feature branches into integration, release pull requests into main, required checks and pull-request hygiene."
+covers: ".github/rulesets/*.json, scripts/gh/apply_rulesets.sh, scripts/gh/merge_ruleset.py, .github/workflows/version-consistency.yml, .github/workflows/deploy-production.yml, .github/workflows/deploy-staging.yml, scripts/ci/wait_for_checks.py"
 sidebar:
   order: 1
 verified:
-  commit: d2b39998
-  date: "2026-09-26"
+  commit: 861a8c79
+  date: "2026-11-22"
 ---
 # Branching & Delivery Flow
 
@@ -37,13 +38,21 @@ gitGraph
 ```
 
 ## Rules
-- **`integration` is the trunk.** Branch `feature/*` or `fix/*` from it; open a PR
+- **`integration` is the trunk.** Branch from it with a conventional prefix (`feat/*`, `fix/*`,
+  `docs/*`, `ci/*`, `release/*` for a version bump; `bot/*` is the automation's); open a PR
   back into `integration`. Merging to `integration` deploys **staging** (the web with
-  the API as Vercel functions inside it, ADR-0011). TestFlight uploads are **manual** and happen in the app
-  repository (gurbani-soul-ios) — no merge here uploads a build.
+  the API as Vercel functions inside it, ADR-0011) once `python`, `frontend`, `integrity` and
+  `playwright` are green on that commit. A change to the Hukamnama service also redeploys the
+  staging Hukamnama service (`hukamnama-deploy.yml`). TestFlight uploads are **manual** and happen
+  in the app repository (gurbani-soul-ios) — no merge here uploads a build.
 - **`main` is production.** It only ever receives a **release PR from `integration`**
   (or `hotfix/*`). The `version-consistency` gate enforces the source branch.
-  Merging to `main` tags `vX.Y.Z`, cuts a GitHub Release, and deploys production.
+  Merging to `main` runs `deploy-production`: it waits for the required checks and `playwright`,
+  passes the `production-approval` environment (a click only when reviewers are set on it),
+  deploys and verifies the API and the website, promotes, and only then tags `vX.Y.Z`, cuts the
+  GitHub Release and refreshes the wiki's sibling pins. It does not deploy the production
+  Hukamnama service: the owner dispatches `hukamnama-deploy-production.yml` with the tag
+  ([Hukamnama runbook](runbooks/hukamnama.md#deploys-and-the-freeze)).
 - **`hotfix/*`** branches from `main` for urgent production fixes, then is
   back-merged into `integration`.
 
@@ -64,12 +73,12 @@ source of truth — keep this list in step with them). The script **merges** eac
 ruleset (`scripts/gh/merge_ruleset.py`): keys GitHub added that the file does not mention are kept,
 never reset to a weaker default. Run it with `--dry-run` first; it prints exactly what would change.
 - `main`: PR + 1 approval + CODEOWNERS + resolved threads + strict status checks `python`,
-  `frontend`, `integrity`, `versions`, `secrets`, `static-analysis`, `docs`; no deletion or force-push.
+  `frontend`, `integrity`, `versions`, `secrets`, `deps`, `static-analysis`, `docs`; no deletion or force-push.
   `docs` gates the **merge** only: `deploy-production` waits on every other required check but not
   on the wiki's (`wait_for_checks.py --exclude docs`), which deploys the wiki on its own.
   **No linear-history rule** (see Merge strategy).
-- `integration`: PR + CODEOWNERS + checks `python`, `frontend`, `integrity`, `secrets`, `docs` (the
-  wiki job, ADR-0012); no deletion or force-push.
+- `integration`: PR + CODEOWNERS + checks `python`, `frontend`, `integrity`, `secrets`, `deps` (the npm audit
+  gate), `docs` (the wiki job, ADR-0012); no deletion or force-push.
 - Tags `v*`: no deletion or force-push.
 - `playwright` and the iOS jobs are not required checks, but `deploy-staging` /
   `deploy-production` wait for `playwright` on the exact commit before deploying.

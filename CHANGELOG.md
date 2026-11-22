@@ -3,6 +3,18 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.7.5] — 2026-11-22
+
+The daily Hukamnama gets faster recovery when a day is held: a held day can be approved from the alert on the owner's phone, a day approved just after midnight still reaches readers' phones, and a stopped service is noticed within minutes. No scripture, corpus or dataset change.
+
+### Added
+- **Approve from the alert** (#448): when the sgpc.net cross-check alone holds a day, the alert offers Approve and Review buttons. Approving publishes exactly the range the exact resolver found, re-proved against the corpus at the tap and signed for that day and range. Off until `HUKAMNAMA_APPROVE_SECRET` is set on the service.
+- **The services watch each other** (#450): with `HUKAMNAMA_PEER_URL` set, staging and production check each other's health every five minutes during the morning window and raise one urgent alert if the other is down. The scheduled dead-man check also watches production now, with cron times moved off the busiest minutes; GitHub had been starting it 6–9 hours late.
+- **Knowledge Base tool pages** (#452): a wiki page for every Knowledge Base tool, and one for the API image.
+
+### Fixed
+- **A late approval still notifies** (#449): a day approved after its Amritsar midnight, and before 05:00 IST, is still pushed to phones, labelled with its own date, as long as the new day is not yet published.
+
 ## [1.7.4] — 2026-11-22
 
 A fix for the daily Hukamnama: a day is no longer held because sgpc.net spells the weekday differently. No scripture, corpus or dataset change.

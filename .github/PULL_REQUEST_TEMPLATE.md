@@ -14,8 +14,12 @@
 - [ ] Verified on staging (attach a note/screenshot) before the release PR to `main`.
 
 ## Docs impact
-<!-- The docs-coupling check comments on this pull request with the wiki pages whose code it changes
-     (their `covers:` or the files they cite). Update each listed page, or move its `verified` stamp
-     after re-reading it against the code. If no page needs changing, keep one line below, starting
-     at the beginning of the line, with a reason of ten characters or more. Delete it otherwise. -->
-Docs-impact: none — <reason>
+<!-- Before opening this pull request run:  python3 tools/docs_coupling.py origin/integration..HEAD
+     It lists the wiki pages whose code this change touches (their `covers:` or the files they cite)
+     and prints the lines to add. For each listed page: update it, or move its `verified` stamp after
+     re-reading it, or keep one line for that page below, starting at the beginning of the line,
+     with a reason of ten characters or more:
+       Docs-impact: docs/<page>.md — <why this change alters nothing the page says>
+     A page that declares `covers:` needs its own line (the docs-coupling check fails otherwise).
+     One blanket line `Docs-impact: none — <reason>` excuses only pages covered through the files
+     they cite. Delete this section's lines when every listed page was updated. -->

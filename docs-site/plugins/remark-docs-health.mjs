@@ -16,6 +16,15 @@ export function readHealth(file) {
   try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return null; }
 }
 
+// Measured on integration, one merge per pull request, with each pull request's final description read
+// (its Docs-impact lines). Without a token the descriptions are not read: then every flag counts and
+// the number is labelled an upper bound. Older .health.json files carry no `branch`.
+export function debtText(debt) {
+  const on = debt.branch ? ` into <code>${esc(debt.branch)}</code>` : '';
+  const base = `${debt.merges_with_debt ?? 0} of ${debt.merges ?? 0} merges${on} changed covered code without its page or a Docs-impact line (${debt.page_flags ?? 0} page flags)`;
+  return debt.upper_bound ? `${base}; an upper bound: the pull request descriptions could not be read in this build` : base;
+}
+
 function pct(v) { return v === null || v === undefined ? '—' : `${v}%`; }
 
 export function docsHealthHtml(h) {
@@ -30,7 +39,7 @@ export function docsHealthHtml(h) {
     ['Stamps that are fresh', `${pct(h.fresh_pct)} (${h.fresh} of ${h.stamped})`],
     ['Stale stamps, by reason', stale.length ? stale.map(([k, n]) => `${n} ${esc(REASONS[k] ?? k)}`).join('; ') : 'none'],
     ['Median stamp age', h.median_stamp_age_days === null || h.median_stamp_age_days === undefined ? '—' : `${h.median_stamp_age_days} days`],
-    [`Coupling debt, last ${h.window_days} days`, `${debt.merges_with_debt ?? 0} of ${debt.merges ?? 0} merges changed covered code without its page (${debt.page_flags ?? 0} page flags)`],
+    [`Coupling debt, last ${h.window_days} days`, debtText(debt)],
     [`Code commits that also changed docs/, last ${h.window_days} days`, `${pct(share.pct)} (${share.with_docs ?? 0} of ${share.code_commits ?? 0})`],
   ];
   if (h.code_areas) {

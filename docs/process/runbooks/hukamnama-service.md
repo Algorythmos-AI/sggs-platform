@@ -129,8 +129,13 @@ without a secret refuses everyone.
 ## Every morning (automatic)
 
 - The poller runs every minute 05:00–09:00 IST, then every 10 minutes until 14:00 IST.
-- `hukamnama-deadman.yml` checks `/health` at 06:00, 07:00 and 14:15 IST. On a problem it opens
-  one issue per Amritsar date (later runs comment on it). It never restarts anything.
+- The two services watch each other (`HUKAMNAMA_PEER_URL`, `peer.py`): every 5 minutes from
+  05:15 to 14:15 IST each reads the other's `/health`, and after 3 failed checks in a row it sends
+  a `peer_down` phone alert, once a day. This is the timely dead-man check.
+- `hukamnama-deadman.yml` is the backstop, for staging and production: it checks `/health` at
+  05:37, 07:17 and 14:23 IST *as scheduled*. GitHub's cron ran it 6-9 h late every day in
+  November 2026, so do not rely on its times. On a problem it opens one issue per Amritsar date
+  and service (later runs comment on it). It never restarts anything.
 - Each distinct page fetched is kept at `/var/data/archive/<amritsar date>/` (gzip) with an
   `index.ndjson` of every fetch. Day folders older than 60 days are pruned.
 
@@ -214,6 +219,29 @@ Setup, once per environment:
    should ring within seconds.
 
 Unset, the service runs as before, without phone alerts; the dead-man issue stays the record.
+
+## One-tap approve from the alert (held_veto)
+
+A `held_veto` day is one where hs.sgpc.net's page already equals an exact run of corpus lines and
+only sgpc.net's home-page marquee disagreed (13, 20 and 21 Nov 2026 were held because of how
+sgpc.net spelled the weekday). With `HUKAMNAMA_APPROVE_SECRET` set on the service, its phone alert
+names that run (lines, Ang, line count) and carries two buttons:
+
+- **Approve**: an ntfy `http` action that POSTs the signed request to `<service>/owner/approve`.
+- **Review**: opens the same request as a page showing the corpus opening line and one
+  "Approve and publish" button (use it where the ntfy app does not run `http` actions).
+
+At the tap the service re-proves everything: the HMAC signature (over the day, the range, its
+`range_sha256` and the corpus fingerprint), that the day is still held by `auto`, that the range
+is the one stored with the hold, and that the range rebuilt from the corpus has the same
+`range_sha256`. Only then does it publish, audited as `owner (phone alert)`, and the push follows.
+A `held_no_match` day never gets a button, and nor does a day the owner already decided, a day
+older than 2 days, or a range from before a dataset bump. Use the shell for those.
+
+Setup (owner, once per service): Render → Environment → add `HUKAMNAMA_APPROVE_SECRET` with a long
+random value (for example the output of `openssl rand -hex 32`, pasted straight into the dashboard,
+never into a chat or a file). Choose **Save only**, then deploy. The buttons call the service's own
+Render URL (`RENDER_EXTERNAL_URL`), not the edge.
 
 ## When a morning goes wrong
 

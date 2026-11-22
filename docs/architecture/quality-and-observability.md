@@ -102,5 +102,5 @@ service.
   functions. The canary's byte comparison does cover the production site.
 - **The website has no Lighthouse run and no page budget** beyond the repository gates' weight
   limits for the Gurbani Soul pages; the wiki has both.
-- **`api-image` and `deps` are not required checks**, and `playwright` is required only by the
+- **`api-image` is not a required check**, and `playwright` is required only by the
   deploy workflows, which wait for it.

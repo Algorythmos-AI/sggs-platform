@@ -11,6 +11,13 @@ server). The topic name is the secret: anyone who knows it can read the alerts, 
 random string kept in Render's environment and the GitHub ``staging``/``production`` environments,
 never in a tracked file. Unset, the service runs without phone alerts, as before.
 
+One-tap approve (``approve.py``): with ``HUKAMNAMA_APPROVE_SECRET`` set, a ``held_veto`` alert also
+carries two buttons for the exact run hs.sgpc.net resolved to: "Approve" (an ntfy ``http`` action:
+a POST of the signed fields to this service) and "Review" (opens a confirmation page with the same
+fields, for ntfy clients that do not run ``http`` actions). The base URL is
+``HUKAMNAMA_APPROVE_BASE_URL``, else Render's own ``RENDER_EXTERNAL_URL``. The secret itself is
+never sent, only an HMAC over the day and the range.
+
 What is sent: the environment, the Amritsar date, the alert kind and its detail (an Ang, a reason,
 at most the differing words of a source page), and what to do. Never a device token, never any
 reader data. Delivery is best effort: a failure is logged and never stops polling or sending.
@@ -23,7 +30,9 @@ import re
 import urllib.request
 from datetime import date
 from typing import Callable
-from urllib.parse import urlsplit
+from urllib.parse import urlencode, urlsplit
+
+from . import approve as approve_mod
 
 log = logging.getLogger("hukamnama")
 
@@ -31,7 +40,7 @@ RUNBOOK = ("https://github.com/Algorythmos-AI/sggs-platform/blob/integration/"
            "docs/process/runbooks/hukamnama-service.md#when-a-morning-goes-wrong")
 
 # ntfy priorities: 5 urgent (long vibration, through the lock screen), 4 high, 3 default.
-URGENT = {"held_no_match", "held_veto", "not_published", "push_breaker", "push_auth_failed", "deadman"}
+URGENT = {"held_no_match", "held_veto", "not_published", "push_breaker", "push_auth_failed", "deadman", "peer_down"}
 HIGH = {"late", "changed_after_publish", "veto_after_publish", "push_payload_too_large", "device_flood",
         "hs_parse_failing", "hs_layout_changed", "mukhwak_parse_failing", "mukhwak_layout_changed"}
 
@@ -47,6 +56,7 @@ HEADLINES = {
     "veto_after_publish": "sgpc.net disagrees after publishing",
     "device_flood": "new-device cap reached",
     "deadman": "dead-man check failed",
+    "peer_down": "the other Hukamnama service is down",
 }
 
 TODO = {
@@ -62,6 +72,8 @@ TODO = {
     "changed_after_publish": "Compare the page with the published range; correct only if certain.",
     "veto_after_publish": "Compare sgpc.net with the published range; correct only if certain.",
     "deadman": "The service may be down or asleep. Open /health and the Render dashboard.",
+    "peer_down": "Sent by the sibling service (staging watches production and the reverse). Open the named "
+                 "service's /health and its Render dashboard (Events, Logs); it never restarts anything.",
 }
 
 _TOPIC = re.compile(r"^[A-Za-z0-9_-]{16,64}$")
@@ -79,8 +91,10 @@ def parse_url(url: str) -> tuple[str, str]:
     return f"https://{parts.netloc}", topic
 
 
-def message(where: str, day: str, kind: str, detail: str) -> dict:
-    """The ntfy JSON publish body for one alert."""
+def message(where: str, day: str, kind: str, detail: str, approve: dict | None = None) -> dict:
+    """The ntfy JSON publish body for one alert. ``approve`` (held_veto only): ``url`` (the
+    service's approve route), ``fields`` (the signed request) and the range's ``ang`` and
+    ``line_count``, shown so the owner sees what a tap publishes."""
     try:
         label = date.fromisoformat(day).strftime("%a %-d %b")
     except ValueError:
@@ -88,25 +102,46 @@ def message(where: str, day: str, kind: str, detail: str) -> dict:
     head = HEADLINES.get(kind, kind.replace("_", " "))
     todo = TODO.get(kind, "See the runbook.").format(day=day)
     priority = 5 if kind in URGENT else 4 if kind in HIGH else 3
+    actions = [{"action": "view", "label": "Runbook", "url": RUNBOOK}]
+    if approve:
+        f = approve["fields"]
+        todo = (f"hs.sgpc.net resolved exactly to corpus lines {f['first_line']}-{f['last_line']} "
+                f"(Ang {approve['ang']}, {approve['line_count']} lines). If hs.sgpc.net is right, tap Approve "
+                f"(or Review, to see the opening line first). The service re-checks the range against the "
+                f"corpus before publishing, then pushes.\n\n{todo}")
+        actions = [{"action": "http", "label": "Approve", "url": approve["url"], "method": "POST",
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps(f, separators=(",", ":")), "clear": True},
+                   {"action": "view", "label": "Review", "url": f"{approve['url']}?{urlencode(f)}"},
+                   *actions]
     return {
         "title": f"Hukamnama ({where}) {label}: {head}",
         "message": f"{detail}\n\n{todo}",
         "priority": priority,
         "tags": ["rotating_light" if priority == 5 else "warning"],
         "click": RUNBOOK,
-        "actions": [{"action": "view", "label": "Runbook", "url": RUNBOOK}],
+        "actions": actions,
     }
 
 
 class NtfyAlerts:
     """``alert_hook(day, kind, detail)`` for the engine and the sender."""
 
-    def __init__(self, url: str, where: str, opener: Callable = urllib.request.urlopen, timeout: float = 10) -> None:
+    def __init__(self, url: str, where: str, opener: Callable = urllib.request.urlopen, timeout: float = 10,
+                 approve_secret: str = "", approve_base: str = "") -> None:
         self.server, self.topic = parse_url(url)
         self.where, self.opener, self.timeout = where, opener, timeout
+        self.approve_secret, self.approve_base = approve_secret, approve_base.rstrip("/")
 
-    def __call__(self, day: str, kind: str, detail: str) -> None:
-        body = {"topic": self.topic, **message(self.where, day, kind, detail)}
+    def __call__(self, day: str, kind: str, detail: str, approve: dict | None = None) -> None:
+        button = None
+        if approve and kind == "held_veto" and self.approve_secret and self.approve_base:
+            button = {"url": self.approve_base + approve_mod.PATH, "ang": approve["ang"],
+                      "line_count": approve["line_count"],
+                      "fields": approve_mod.fields_for(self.approve_secret, day, approve["first_line_id"],
+                                                       approve["last_line_id"], approve["range_sha256"],
+                                                       approve["fingerprint"])}
+        body = {"topic": self.topic, **message(self.where, day, kind, detail, button)}
         req = urllib.request.Request(self.server, data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
                                      headers={"Content-Type": "application/json",
                                               "User-Agent": "GurbaniSoul-Hukamnama/1.0"}, method="POST")
@@ -121,7 +156,11 @@ def from_env(env) -> NtfyAlerts | None:
     url = (env.get("HUKAMNAMA_ALERT_NTFY_URL") or "").strip()
     if not url:
         return None
-    return NtfyAlerts(url, (env.get("HUKAMNAMA_ENV") or "staging").strip() or "staging")
+    base = (env.get("HUKAMNAMA_APPROVE_BASE_URL") or env.get("RENDER_EXTERNAL_URL") or "").strip()
+    if base and not base.startswith("https://"):
+        raise ValueError("HUKAMNAMA_APPROVE_BASE_URL must be an https:// URL")
+    return NtfyAlerts(url, (env.get("HUKAMNAMA_ENV") or "staging").strip() or "staging",
+                      approve_secret=(env.get("HUKAMNAMA_APPROVE_SECRET") or "").strip(), approve_base=base)
 
 
 def main(argv: list[str]) -> int:

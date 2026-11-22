@@ -1,17 +1,19 @@
 ---
 title: "Security and privacy"
-description: "The defences at each layer — browser headers, a read-only API with bounded input, an immutable database, gated CI — what is and is not collected about readers, and the known gaps."
+description: "The defences at each layer — browser headers, a read-only API with bounded input, an immutable database, the Hukamnama service, CI — what is and is not collected about readers, and the known gaps."
+covers: "webapp/serve.py#H, webapp/serve.py#BoundedThreadingHTTPServer, webapp/sggs/core.py#db, webapp/sggs/core.py#_int_str, frontend/vercel.json, frontend/src/pages/[lang]/privacy.astro, .github/workflows/security.yml, services/hukamnama/hukamnama/api.py, services/hukamnama/hukamnama/devices.py, services/hukamnama/hukamnama/approve.py, services/hukamnama-edge/wrangler.toml"
 sidebar:
   order: 8
 verified:
-  commit: 26d86be7
-  date: "2026-11-08"
+  commit: 861a8c79
+  date: "2026-11-22"
 ---
 # Security and privacy
 
-The system has an unusually small attack surface, by design. It has no accounts, no logins, no
-user data, no request bodies and no writes: the API answers `GET` requests from a database it
-opens read-only. What it must protect is **the integrity of the text** and **the privacy of the
+The system has an unusually small attack surface, by design. It has no accounts and no logins,
+and the scripture API takes no request bodies and makes no writes: it answers `GET` requests from
+a database it opens read-only. The one part that accepts writes is the Hukamnama service, which
+stores a device token for the optional Hukamnama notification ([below](#the-hukamnama-service)). What it must protect is **the integrity of the text** and **the privacy of the
 people reading it**. This page lists the defences at each layer, what is collected, and the gaps
 that are known and open. To report a vulnerability, follow [SECURITY.md](../../SECURITY.md)
 (email, not a public issue).
@@ -43,6 +45,21 @@ The same handler serves every host (`serve.py`, and each Vercel function subclas
 | No leaks on error | a bad parameter is a 400 with a message the code wrote; anything unexpected is a 500 with the fixed body `{"error": "internal server error"}` and the traceback only in the log | `serve.py` |
 | Slow clients | 15-second socket timeout; at most 48 worker threads and a backlog of 128 | `serve.py` |
 | Response headers | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, HSTS, `X-Request-Id`, `X-Service` on every response; one exception, the Hukamnama embed (`/embed/hukamnama`), omits `X-Frame-Options` and sends its own strict CSP | `serve.py` `_sec_headers` |
+
+## The Hukamnama service
+
+The [Hukamnama service](hukamnama.md) (`services/hukamnama/`) is a separate process with its own
+state, and its HTTP surface is different from the scripture API's:
+
+| Defence | How | Where |
+|---|---|---|
+| A small write surface | the reader-facing writes are `PUT` and `DELETE /v1/devices/<token>`; any other `POST` is a 405. The one other write is the owner's one-tap approve (`POST /owner/approve`, `approve.py`): it exists only when `HUKAMNAMA_APPROVE_SECRET` is set (otherwise 404), is rate-limited, accepts only an HMAC-signed request for the exact range the `held_veto` alert carried, re-proves it against the corpus, and only for a day still held automatically within 2 days; its `GET` changes nothing. A registration body is at most 1,024 bytes and is parsed into a fixed shape (APNs environment, mode, schedule, corpus fingerprint, the token it replaces); nothing else is accepted | `api.py`, `devices.py` |
+| Nothing about a reader beyond the token | no account, name, time zone, locale or IP address is stored; there is no access log; a token unused for 180 days is pruned | `devices.py`, `api.py`, `push.py` |
+| Rate limits | reads 120 a minute per client address (a backstop behind the edge), device writes 20 a minute per address; the counters are in memory for one minute. The edge Worker limits public reads to 120 a minute per address too | `api.py`, `devices.py`, `services/hukamnama-edge/wrangler.toml` |
+| Reached only through the edge | with `HUKAMNAMA_ORIGIN_REQUIRED=on`, `/v1` answers only requests that carry the edge's `X-Origin-Auth` secret (compared in constant time) and refuses others with 403; `/health` stays open. With a secret set, the client address is taken from the edge's `X-Client-IP` only, so a caller cannot choose its own rate-limit bucket | `api.py` |
+| No leaks on error | an unexpected error is a 500 with a fixed body | `api.py` |
+
+Which of these settings production runs with is in [the service runbook](../process/runbooks/hukamnama-service.md).
 
 ## The browser
 
@@ -82,8 +99,9 @@ Both sites send their headers from `vercel.json`:
 - **Least-privilege workflows.** Every workflow declares `permissions:`; most are
   `contents: read`, with `issues: write` only where a workflow files an issue, and
   `contents: write` only for tagging a release.
-- **Scans** (`security.yml`): gitleaks on every change (the required `secrets` check);
-  `npm audit --audit-level=high` for the website and the wiki (dated exceptions only for advisories with no fix, in `scripts/ci/npm-audit-exceptions.json`); bandit, semgrep and actionlint.
+- **Scans** (`security.yml`): gitleaks on every change (the required `secrets` check), and over
+  the whole git history every Monday (known non-secrets listed by fingerprint in `.gitleaksignore`);
+  the required `deps` check, `npm audit --audit-level=high` for the website and the wiki (dated exceptions only for advisories with no fix, in `scripts/ci/npm-audit-exceptions.json`); bandit, semgrep and actionlint.
   Dependabot proposes npm, Actions and Docker updates weekly.
 - **The dataset is fetched only by pin.** `fetch_dataset.py` downloads the exact object named in
   `dataset.lock.json` and checks its SHA-256 and size; `build_api_functions.py --verify-output`
@@ -96,9 +114,14 @@ states it (every statement there is checked against the code). The policy is ser
 `/en/privacy`, `/pa/privacy` and `/fr/privacy`; English governs, and `/privacy`, the URL in App
 Store Connect, redirects permanently to `/en/privacy`:
 
-- **The app** collects nothing: no accounts, no network connections, no analytics or third-party
-  SDKs. Its App Store label is "Data Not Collected". Location for the raag clock is rounded to
-  about 1 km and stays on the device.
+- **The app** collects nothing: no accounts, no analytics or third-party SDKs, and no network
+  connections except the optional Hukamnama notification, which is off by default. Its App Store
+  label is "Data Not Collected". Location for the raag clock is rounded to about 1 km and stays on
+  the device.
+- **The Hukamnama notification**, when a reader turns it on, registers with Apple's push service
+  and sends the Hukamnama service three things: the device token, when to notify, and which
+  edition of the text the app holds. Turning it off deletes the token; an unused token is deleted
+  after 180 days. The policy states this in its own item (`#hukamnama-notification`).
 - **The Knowledge Base pages** load no analytics and set no cookies. Preferences, reading
   positions, pins and a rounded location (about 1 km) stay in the browser's storage. The raag
   clock asks for location only when the reader presses "Use my location" in solar mode, and
@@ -127,15 +150,16 @@ Store Connect, redirects permanently to `/en/privacy`:
 These are open and tracked here so nobody mistakes them for guarantees:
 
 - **Static analysis does not block.** bandit runs with `|| true` and semgrep with
-  `continue-on-error`; only the secret scan is a required check. `npm audit` fails its job but
-  is not in the branch rulesets.
+  `continue-on-error`, so their findings never fail a check (the `static-analysis` check,
+  required on `main`, fails only on actionlint). The secret scan (`secrets`) and `npm audit`
+  (`deps`) are required checks.
 - **Not every Action is pinned to a SHA.** The deploy and docs workflows are; `web-ci`,
-  `security`, `e2e` and several others use version tags. gitleaks is downloaded without a
-  checksum check.
+  `security`, `e2e` and several others use version tags. (gitleaks itself is a pinned release
+  whose SHA-256 is checked before it runs.)
 - **The website's CSP allows inline script** (`'unsafe-inline'`), unlike the wiki's hash-based
   policy.
-- **No application rate limiting.** The API relies on its bounded input and the platform's own
-  protection.
+- **No application rate limiting on the scripture API.** It relies on its bounded input and the
+  platform's own protection. (The Hukamnama service and its edge Worker do limit, above.)
 - **The API container runs as the image's default user** (no `USER` line in the Dockerfile).
   Production runs as Vercel functions; the container is the Render standby.
 - **`frontend/e2e/headers.spec.ts` never runs in CI.** It needs `SMOKE_BASE_URL`, which no

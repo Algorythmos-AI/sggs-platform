@@ -15,8 +15,12 @@ by ``apns-collapse-id``. Two modes, as the app registers them:
   now" keeps today's slot). If the slot came before the day was published, it gets it at publish
   time when that is within ``LATE_WINDOW`` of the slot.
 
-Only the CURRENT Amritsar day is ever pushed (a late approval of yesterday is not sent on today's
-date), and a device gets at most one push per Amritsar day (one ``sends`` row). ``plan_for_device``
+Normally only the CURRENT Amritsar day is pushed, and a device gets at most one push per Amritsar
+day (one ``sends`` row). One bounded exception, ``late_day``: a day the owner approved after its
+Amritsar midnight (a held day, approved late at night in Sydney) is still pushed until
+``LATE_APPROVE_UNTIL`` (05:00 IST, when APNs would expire it anyway and the new day's Hukamnama is
+on its way), unless the new day is already published. The push carries its own date (subtitle,
+``amritsar_date``, the deep link), so it never reads as the new day's Hukamnama. ``plan_for_device``
 is the single statement of these rules: the sender queues from it and ``PUT /v1/devices`` reports
 it back to the app.
 
@@ -35,6 +39,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
+from datetime import time as dtime
 
 from . import clock
 from .store import Store
@@ -45,6 +50,7 @@ TOPIC = "org.sggs.app"
 HOSTS = {"production": "https://api.push.apple.com", "development": "https://api.sandbox.push.apple.com"}
 TITLE = "Hukamnama · Sri Harmandir Sahib"
 LATE_WINDOW = timedelta(hours=6)
+LATE_APPROVE_UNTIL = dtime(5, 0)  # IST: a day approved after its midnight is pushed until then (late_day)
 SLOT_WINDOW = timedelta(hours=24)
 STALE_INFLIGHT = timedelta(minutes=2)
 STOP_FOR = timedelta(minutes=20)  # a 403/413 pauses the day this long (Apple: 1 new token per 20 min)
@@ -272,10 +278,50 @@ def plan_for_device(store: Store, dev: dict, now: datetime, decision: dict | Non
     return plan("not_today", "slot_passed")
 
 
+def late_day(store: Store, now: datetime) -> tuple[date, dict] | None:
+    """Yesterday's Amritsar day, when the owner approved it after its midnight and it is still
+    before ``LATE_APPROVE_UNTIL`` today and today is not published. Else None."""
+    today = clock.amritsar_date(now)
+    midnight = clock.at_ist(today, dtime(0))
+    if not midnight <= now < clock.at_ist(today, LATE_APPROVE_UNTIL):
+        return None
+    t = store.decision(today)
+    if t is not None and t["status"] == "published":
+        return None                                     # the new day wins: never two days at once
+    day = today - timedelta(days=1)
+    d = store.decision(day)
+    if d is None or d["status"] != "published":
+        return None
+    if not midnight <= datetime.fromisoformat(d["decided_at"]) <= now:
+        return None                                     # decided on its own day: the normal rules ran
+    return day, d
+
+
+def _late_due(store: Store, dev: dict, day: date, decided_at: datetime) -> bool:
+    """Who gets a late-approved day: any device that existed at the approval and has no row for
+    the day; an asap device always, a scheduled one when the approval is within ``LATE_WINDOW`` of
+    its slot on that day (the same rule as a late publish on the day itself)."""
+    if dev["created_at"] > decided_at or store.has_send(dev["token"], day):
+        return False
+    if dev["mode"] == "asap":
+        return True
+    sched = dev["schedule"] or []
+    start = clock.at_ist(day, datetime.min.time())
+    end = start + timedelta(days=1)
+    utc_days = {start.astimezone(timezone.utc).date(), (end - timedelta(seconds=1)).astimezone(timezone.utc).date()}
+    slots = [i for i in _slots(sched, sorted(utc_days)) if start <= i < end] if sched else []
+    return any(i <= decided_at <= i + LATE_WINDOW for i in slots)
+
+
 def due_tokens(store: Store, now: datetime) -> tuple[date, list[str]] | None:
-    """Which devices to queue today's Hukamnama for at ``now``. Only the current Amritsar day is
-    ever pushed: a day approved late (or a late SGPC page for yesterday) is not sent on today's
-    date, and a future-dated row never is."""
+    """Which devices to queue at ``now``, and for which Amritsar day: today's Hukamnama by
+    ``plan_for_device``, or (``late_day``) yesterday's when the owner approved it after midnight.
+    A future-dated row is never sent, and no day older than yesterday ever is."""
+    late = late_day(store, now)
+    if late is not None:
+        day, decision = late
+        at = datetime.fromisoformat(decision["decided_at"])
+        return day, [dev["token"] for dev in store.devices() if _late_due(store, dev, day, at)]
     day = clock.amritsar_date(now)
     decision = store.decision(day)
     if decision is None or decision["status"] != "published" or datetime.fromisoformat(decision["decided_at"]) > now:

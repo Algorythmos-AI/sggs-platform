@@ -45,6 +45,9 @@
             "context": "secrets"
           },
           {
+            "context": "deps"
+          },
+          {
             "context": "docs"
           }
         ]

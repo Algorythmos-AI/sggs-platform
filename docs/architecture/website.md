@@ -1,17 +1,18 @@
 ---
 title: "The website"
 description: "How gurbanisoul.com is built: a static Astro site with no framework runtime, two layouts, plain TypeScript page scripts, and the API on the same origin through generated rewrites."
-covers: "frontend/src/layouts/*.astro, frontend/src/pages/[lang]/privacy.astro, frontend/src/pages/[lang]/developers.astro, frontend/src/pages/[lang]/hukamnama/**, frontend/src/pages/ang/**, frontend/src/pages/og/**, webapp/hukamnama_page.py, webapp/hukamnama_feed.py, webapp/hukamnama_sitemap.py, webapp/hukamnama_embed.py"
+covers: "frontend/src/layouts/*.astro, frontend/src/hukamnama.ts, frontend/src/components/MarketingNav.astro, frontend/src/components/MarketingFooter.astro, frontend/src/pages/[lang]/privacy.astro, frontend/src/pages/[lang]/developers.astro, frontend/src/pages/[lang]/hukamnama/**, frontend/src/pages/ang/**, frontend/src/pages/og/**, webapp/hukamnama_page.py, webapp/hukamnama_feed.py, webapp/hukamnama_sitemap.py, webapp/hukamnama_embed.py"
 sidebar:
   order: 7
 verified:
-  commit: 26d86be7
-  date: "2026-11-08"
+  commit: c5806fdd
+  date: "2026-11-22"
 ---
 # The website
 
-`gurbanisoul.com` is one static site, built with Astro from `frontend/`. Every page is plain HTML
-built ahead of time; there is no server rendering, no client framework and no service worker.
+`gurbanisoul.com` is one static site, built with Astro from `frontend/`. Every page but the
+Hukamnama pages ([below](#the-hukamnama-pages-filled-by-the-server)) is plain HTML built ahead of
+time; there is no client framework and no service worker.
 Each page loads a few small TypeScript modules that call the read-only API on the same origin,
 `/api/…`, so the browser never talks to another host for scripture. This page explains how
 those pieces fit. The operational details (domains, SEO, images, the App Store switch) are in
@@ -39,8 +40,8 @@ The build holds two properties that are deliberately kept apart
 
 | | Layout | Pages | Scripts it loads |
 |---|---|---|---|
-| **Gurbani Soul** (the app's home) | `Marketing.astro` | under each enabled language: `/en`, `/en/features`, `/en/watch`, `/en/learn/*`, `/en/contribute`, `/en/privacy`, `/en/support`, and the same under `/pa` and `/fr` | `landing.ts` only (it never imports the Knowledge Base code), Vercel Web Analytics on `gurbanisoul.com` |
-| **Sri Guru Granth Sahib Ji Knowledge Base** | `Base.astro` | `/library` (its home), `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`, `/trail`, `/analytics`, `/constellation`, `/raag-clock`, `/divergence`, `/404` | `core`, `panel`, `studytrail`, `saroop` on every page, plus the page's own controller; no analytics |
+| **Gurbani Soul** (the app's home) | `Marketing.astro` | under each enabled language: `/en`, `/en/features`, `/en/watch`, `/en/learn/*`, `/en/contribute`, `/en/developers`, `/en/privacy`, `/en/support`, and the same under `/pa` and `/fr`; `/en/hukamnama` and its dated pages are filled by the server | `landing.ts` only (it never imports the Knowledge Base code), Vercel Web Analytics on `gurbanisoul.com` |
+| **Sri Guru Granth Sahib Ji Knowledge Base** | `Base.astro` | `/library` (its home), `/search`, `/reader`, `/nitnem`, `/browse`, `/themes`, `/lineage`, `/trail`, `/analytics`, `/constellation`, `/raag-clock`, `/divergence`, `/404` | `core`, `panel`, `studytrail`, `saroop` on every page, plus the page's own controller; no analytics. Since the Hukamnama launch its Read row and footer also link `/en/hukamnama` |
 
 The marketing pages are `frontend/src/pages/[lang]/*.astro`, built once per enabled language; the
 bare `/` is a `noindex` language chooser, and the pre-1.6.0 URLs (`/privacy`, `/support`, …)
@@ -102,7 +103,7 @@ function ([bounded contexts and the gateway](bounded-contexts-and-gateway.md)).
 
 The Gurbani Soul pages make no API calls.
 
-### The Hukamnama pages: filled by the server (staging only)
+### The Hukamnama pages: filled by the server
 
 `/{lang}/hukamnama`, `/{lang}/hukamnama/YYYY-MM-DD` and the month archive `/{lang}/hukamnama/YYYY-MM` are the one exception to "every page is a
 static file". The day's shabad has to be in the first bytes a crawler or a share card reads, and it
@@ -120,10 +121,13 @@ refuses a deploy whose static output still holds a shell.
 
 On Vercel the pages are answered by the `all` API function, per environment:
 
-- **Routing.** An environment that names `hukamnama_api` in `gateway/routes.json` gets two
-  generated rewrites, `/(en|pa|fr)/hukamnama` and the dated form, to `/api/svc/all`. Staging names
-  it (`https://api-staging.gurbanisoul.com`). Production does not yet, so on gurbanisoul.com the
-  paths are still a 404 until launch; turning them on is that one line plus `gen_gateway.py`.
+- **Routing.** An environment that names `hukamnama_api` in `gateway/routes.json` gets generated
+  rewrites to `/api/svc/all` for `/(en|pa|fr)/hukamnama`, the dated form, the month form, the two
+  feeds, the Hukamnama sitemap and the embed. Both environments name it: staging
+  `https://api-staging.gurbanisoul.com`, production `https://api.gurbanisoul.com` since the 1.7.0
+  launch (#418). On 2026-11-22 (checked) gurbanisoul.com answered `/en/hukamnama`, a month page,
+  both feeds, the sitemap and the embed with 200. Removing that key and re-running
+  `gen_gateway.py` returns the paths to the static site.
 - **Which API.** The generated `all` entry sets `HUKAMNAMA_API` from that file, chosen by Vercel's
   `VERCEL_ENV` (staging is a preview deployment), so a production deployment can never read
   staging's API. A `HUKAMNAMA_API` set on the Vercel project wins; an empty value there turns the
@@ -140,11 +144,38 @@ On Vercel the pages are answered by the `all` API function, per environment:
 A date in the future or an unknown path under these routes is a plain-text 404 from the function,
 not the site's styled 404 page (the function does not bundle the static site).
 
+A day whose range was corrected after publication (`corrected_at` in the API record) shows a
+short notice under its date, "Corrected on …", with the Amritsar date of the correction; a
+correction time that is not a time shows nothing. The page's action list also links to the
+support page's contact section to report a text error.
+
+What the renderer guarantees:
+
+- It asks the API for one **date** (the Amritsar date it computes itself), never "today", and
+  refuses an answer that names another date.
+- From the API it uses only the line-id range and `range_sha256`. Every Gurmukhi line, its
+  transliteration and (when the meaning layer is on upstream) its English come from the server's
+  own corpus, and the page is rendered only after those lines hash to `range_sha256`. Otherwise it
+  answers 503 with no text.
+- Nothing is called "today" unless its date is the Amritsar date at that moment. Before the
+  morning's publication the page shows the most recent Hukamnama under that Hukamnama's own date.
+- Every value is HTML-escaped; the JSON-LD cannot close its `<script>`.
+- Today's page is never cached past Amritsar midnight; a dated page is cached for a day; a page
+  with no Hukamnama is `noindex`.
+- Every Hukamnama response (pages, feeds, embed, sitemap) carries `Vercel-Cache-Tag: hukamnama`.
+  When a published day is corrected or withdrawn, the Hukamnama service deletes that tag from the
+  CDN (and again 6 minutes later, after a warm function's 5-minute memo of a past day has expired).
+- If the API is unreachable, a day already proven on this server is still served; anything else
+  is 503 with `Retry-After`, and the API is not asked again for 10 seconds.
+
+The shell contract (tokens, conditional blocks, the language's words) is documented at the top of
+`webapp/hukamnama_page.py`; `webapp/tests/fixtures/hukamnama-shell.html` is a minimal shell.
+
 ### The Hukamnama feeds
 
 `/feeds/hukamnama.xml` (Atom) and `/feeds/hukamnama.json` (JSON Feed 1.1) list the most recent
 published days, newest first, up to 30. `webapp/hukamnama_feed.py` builds them in the same `all`
-function, under the same switch and routing as the pages (`hukamnama_api`; staging only so far),
+function, under the same switch and routing as the pages (`hukamnama_api`),
 and each page's `<head>` links both. The paths sit outside the language tree on purpose: a feed is
 one document, and `/feeds/…` is not caught by the generated language redirects.
 
@@ -244,40 +275,30 @@ of its own.
   it is `"…"`: no line of Gurbani is typed into the page or shown in a code font.
 - **One switch for launch.** `HUKAMNAMA_LIVE` in `hukamnama.ts` is true when
   `gateway/routes.json` gives `production` a `hukamnama_api`, the same key that turns on the
-  pages, feeds, sitemap and embed there. Until then the page is built but `noindex`, absent from
-  `sitemap.xml` and linked from nowhere; from then it is indexed, listed and linked from the
-  footer. It is read from the file, never from the build's environment, so the committed
+  pages, feeds, sitemap and embed there. Without it the page is built but `noindex`, absent from
+  `sitemap.xml` and linked from nowhere; with it (so since 1.7.0) it is indexed, listed and linked.
+  It is read from the file, never from the build's environment, so the committed
   `webapp/static`, staging and production are the same build. The documented API origin is that
-  key's value, or `https://api.gurbanisoul.com` before it is set.
+  key's value, or `https://api.gurbanisoul.com` when it is not set.
 - Messages with code in them use `<c>…</c>`, rendered by `CodeText.astro`; literal values with a
   colon (`UTC+05:30`) are passed as values so French spacing never touches them.
 
-A day whose range was corrected after publication (`corrected_at` in the API record) shows a
-short notice under its date, "Corrected on …", with the Amritsar date of the correction; a
-correction time that is not a time shows nothing. The page's action list also links to the
-support page's contact section to report a text error.
+### Where the Hukamnama is linked from
 
-What the renderer guarantees:
+All of these follow `HUKAMNAMA_LIVE` (`frontend/src/hukamnama.ts`), so none appears before launch:
 
-- It asks the API for one **date** (the Amritsar date it computes itself), never "today", and
-  refuses an answer that names another date.
-- From the API it uses only the line-id range and `range_sha256`. Every Gurmukhi line, its
-  transliteration and (when the meaning layer is on upstream) its English come from the server's
-  own corpus, and the page is rendered only after those lines hash to `range_sha256`. Otherwise it
-  answers 503 with no text.
-- Nothing is called "today" unless its date is the Amritsar date at that moment. Before the
-  morning's publication the page shows the most recent Hukamnama under that Hukamnama's own date.
-- Every value is HTML-escaped; the JSON-LD cannot close its `<script>`.
-- Today's page is never cached past Amritsar midnight; a dated page is cached for a day; a page
-  with no Hukamnama is `noindex`.
-- Every Hukamnama response (pages, feeds, embed, sitemap) carries `Vercel-Cache-Tag: hukamnama`.
-  When a published day is corrected or withdrawn, the Hukamnama service deletes that tag from the
-  CDN (and again 6 minutes later, after a warm function's 5-minute memo of a past day has expired).
-- If the API is unreachable, a day already proven on this server is still served; anything else
-  is 503 with `Retry-After`, and the API is not asked again for 10 seconds.
-
-The shell contract (tokens, conditional blocks, the language's words) is documented at the top of
-`webapp/hukamnama_page.py`; `webapp/tests/fixtures/hukamnama-shell.html` is a minimal shell.
+- **The marketing site** (#423): a "Hukamnama" item in the top bar and the menu sheet
+  (`MarketingNav.astro`), the Hukamnama page and the Developers page in the footer's Product column
+  (`MarketingFooter.astro`), and one card on the home page (`[lang]/index.astro`) that also links
+  the Developers page. These links carry no prefetch: the page is rendered per request.
+- **The Knowledge Base** (#431): a "Hukamnama" page in the Read row (Reader, Nitnem, Index,
+  Hukamnama) and a link in the footer beside Support and Privacy (`Base.astro`). The Knowledge Base
+  is English only, so both open `/en/hukamnama`, without prefetch.
+- **Learn** (#433): two English articles, `how-the-daily-hukamnama-is-verified` (where the day
+  comes from, how it is located, the checks before it is shown, holds and corrections) and
+  `hukamnama-corrections-log` (every corrected or held production day). The Hukamnama page's
+  verification note links to the first.
+- `robots.txt` and `llms.txt` (above) and the Developers page, on the same switch.
 
 ## Rules the scripts keep
 
