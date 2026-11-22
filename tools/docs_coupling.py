@@ -16,12 +16,20 @@ A page covers code in one of two ways:
 
 The range is diffed from the merge base of BASE and HEAD. A page whose covered code changed is
 satisfied when the page itself changed, when its `verified` stamp moved, or when the pull request
-body has a line `Docs-impact: none — <reason>` (a reason of 10 characters or more). Noise is not
-counted: tests, lockfiles, webapp/static/, docs-site/dist/, CHANGELOG.md, and the generators of
-the generated pages (their own --check gates cover those).
+body excuses it:
+  - `Docs-impact: docs/<page>.md — <reason>`: one line per page, naming that page (a reason of 10
+    characters or more). This is the only excuse a page with `covers:` accepts;
+  - `Docs-impact: none — <reason>`: one blanket line. It excuses only pages covered implicitly,
+    through the files they cite; never a page that declares `covers:`.
+(Until 2026-11-22 the blanket line excused every page at once: 42 of the 66 pages flagged across the
+34 pull requests merged after 12 Nov were waved through by it, including the pages that claim the
+code they changed.) Noise is not counted: tests, lockfiles, webapp/static/, docs-site/dist/,
+CHANGELOG.md, and the generators of the generated pages (their own --check gates cover those).
 
-Report only: the exit code is 0, unless COUPLING_ENFORCE is on (1/true/on), when an unsatisfied
-page that declares `covers:` fails the run. Default coverage never fails. Stdlib only.
+The exit code is 0, unless COUPLING_ENFORCE is on (1/true/on), when an unsatisfied page that
+declares `covers:` fails the run. Default coverage never fails. `--skip-reason TEXT` reports the
+range without ever failing (a release pull request integration→main, whose pull requests were
+judged when they merged; a bot's branch). Stdlib only.
 """
 from __future__ import annotations
 
@@ -39,6 +47,9 @@ import docs_check as dc  # noqa: E402
 
 MARKER = "<!-- docs-coupling-report -->"
 IMPACT_RE = re.compile(r"^\s*Docs-impact:\s*none\s*[—–-]+\s*(.+?)\s*$", re.M | re.I)
+# a page path ends in .md/.mdx and is separated from its reason by whitespace and a dash, so the
+# hyphens inside a path (ci-gates.md, docs-site.md) never split it
+IMPACT_PAGE_RE = re.compile(r"^\s*Docs-impact:\s*`?(docs/\S+?\.mdx?)`?\s+[—–-]+\s*(.+?)\s*$", re.M | re.I)
 MIN_REASON = 10
 NOISE_RE = re.compile(r"(^|/)(tests?|__tests__|e2e)/|(^|/)test_[^/]*\.py$|_test\.py$|\.(test|spec)\.[cm]?[jt]sx?$"
                       r"|(^|/)(package-lock\.json|pnpm-lock\.yaml|yarn\.lock|uv\.lock|poetry\.lock|Cargo\.lock)$"
@@ -157,14 +168,31 @@ def stamp(rev: str, page: str) -> str:
     return str(v.get("commit", "")) if isinstance(v, dict) else ""
 
 
+def _strip_comments(body: str) -> str:
+    return re.sub(r"<!--.*?-->", "", body or "", flags=re.S)
+
+
+def _good_reason(reason: str) -> bool:
+    reason = reason.strip()
+    return len(reason) >= MIN_REASON and not reason.startswith("<")
+
+
 def docs_impact(body: str) -> str | None:
-    """The reason of a `Docs-impact: none — <reason>` line (HTML comments ignored), if long enough."""
-    body = re.sub(r"<!--.*?-->", "", body or "", flags=re.S)
-    for m in IMPACT_RE.finditer(body):
-        reason = m.group(1).strip()
-        if len(reason) >= MIN_REASON and not reason.startswith("<"):
-            return reason
+    """The reason of a blanket `Docs-impact: none — <reason>` line (HTML comments ignored), if long enough."""
+    for m in IMPACT_RE.finditer(_strip_comments(body)):
+        if _good_reason(m.group(1)):
+            return m.group(1).strip()
     return None
+
+
+def docs_impact_pages(body: str) -> dict[str, str]:
+    """Per-page excuses: `Docs-impact: docs/<page>.md — <reason>`, one line per page, page -> reason.
+    A placeholder (`<reason>`) or a reason under 10 characters excuses nothing."""
+    out: dict[str, str] = {}
+    for m in IMPACT_PAGE_RE.finditer(_strip_comments(body)):
+        if _good_reason(m.group(2)):
+            out.setdefault(m.group(1), m.group(2).strip())
+    return out
 
 
 def couple(base: str, head: str, body: str = "", specs: list[PageSpec] | None = None) -> dict:
@@ -173,6 +201,7 @@ def couple(base: str, head: str, body: str = "", specs: list[PageSpec] | None = 
     ch = changes(mb, head)
     code = {p: c for p, c in ch.items() if not is_noise(p)}
     reason = docs_impact(body)
+    per_page = docs_impact_pages(body)
     pages = []
     for spec in specs if specs is not None else page_specs():
         hit: list[str] = []
@@ -191,20 +220,35 @@ def couple(base: str, head: str, body: str = "", specs: list[PageSpec] | None = 
         hit = sorted(set(hit))
         if spec.page in ch:      # the stamp lives in the page: name the stronger signal when it moved
             by = "stamp-moved" if stamp(mb, spec.page) != stamp(head, spec.page) else "page-changed"
-        elif reason:
+        elif spec.page in per_page:
+            by = "docs-impact-page"
+        elif reason and not spec.explicit:   # the blanket line never excuses a page that claims the code
             by = "docs-impact"
         else:
             by = None
         pages.append({"page": spec.page, "explicit": spec.explicit, "changed": hit, "satisfied_by": by})
     flagged = [p for p in pages if p["satisfied_by"] is None]
+    hit_pages = {p["page"] for p in pages}
     return {"range": f"{base}..{head}", "merge_base": mb[:12], "docs_impact": reason,
+            "docs_impact_pages": per_page,
+            "unused_impacts": sorted(set(per_page) - hit_pages),
+            "blanket_refused": [p["page"] for p in flagged if p["explicit"] and reason],
             "code_files": sorted({c.new or c.old for c in code.values()}), "pages": pages,
             "flagged": [p["page"] for p in flagged],
             "flagged_explicit": [p["page"] for p in flagged if p["explicit"]]}
 
 
-def markdown(r: dict, enforced: bool = False) -> str:
+def impact_lines(r: dict) -> list[str]:
+    """The lines to paste into the pull request description, one per unsatisfied page; the reason is
+    left as a placeholder, which excuses nothing until it is replaced."""
+    flagged = [p for p in r["pages"] if p["satisfied_by"] is None]
+    return [f"Docs-impact: {p['page']} — <why this change alters nothing the page says>" for p in flagged]
+
+
+def markdown(r: dict, enforced: bool = False, skip_reason: str = "") -> str:
     out = [MARKER, "### Docs impact", ""]
+    if skip_reason:
+        out += [f"Not enforced on this pull request: {skip_reason}", ""]
     flagged = [p for p in r["pages"] if p["satisfied_by"] is None]
     done = [p for p in r["pages"] if p["satisfied_by"]]
     if not r["pages"]:
@@ -212,19 +256,34 @@ def markdown(r: dict, enforced: bool = False) -> str:
     elif not flagged:
         out.append(f"Every page whose code changed in `{r['range']}` is accounted for.")
     else:
-        mode = "**enforced** for pages that declare `covers:`" if enforced else "report only"
+        mode = ("report only" if skip_reason or not enforced
+                else "**enforced** for pages that declare `covers:`")
         out += [f"{len(flagged)} page(s) describe code this change touches, and neither the page nor its "
-                f"`verified` stamp changed ({mode}). Re-read each against the code and update it, or add a line "
-                "`Docs-impact: none — <reason>` to the pull request description.", "",
+                f"`verified` stamp changed ({mode}). Re-read each against the code and update it (or move its "
+                "stamp once the whole page is re-read). For a page that needs no change, add its line below to "
+                "the pull request description, on a line of its own, with the placeholder replaced by a reason "
+                "of ten characters or more.", "",
                 "| Page | Coverage | Changed code |", "|---|---|---|"]
         for p in flagged:
             shown = ", ".join(f"`{c}`" for c in p["changed"][:5]) + (" …" if len(p["changed"]) > 5 else "")
             out.append(f"| `{p['page']}` | {'covers:' if p['explicit'] else 'cited files'} | {shown} |")
+        out += ["", "Lines to add (one per page):", "", "```text", *impact_lines(r), "```"]
+        if not any(p["explicit"] for p in flagged):
+            out += ["", "Every page left is covered only through the files it cites, so one line "
+                    "`Docs-impact: none — <reason>` would also do."]
+        if r.get("blanket_refused"):
+            out += ["", "The `Docs-impact: none — …` line in the description does not excuse a page that "
+                    "declares `covers:`: " + ", ".join(f"`{x}`" for x in r["blanket_refused"])
+                    + ". Each needs its own line."]
     if done:
-        why = {"page-changed": "page changed", "stamp-moved": "stamp moved", "docs-impact": "Docs-impact line"}
+        why = {"page-changed": "page changed", "stamp-moved": "stamp moved",
+               "docs-impact-page": "its Docs-impact line", "docs-impact": "the Docs-impact: none line"}
         out += ["", "<details><summary>Accounted for (" + str(len(done)) + ")</summary>", ""]
         out += [f"- `{p['page']}`: {why[p['satisfied_by']]}" for p in done]
         out += ["", "</details>"]
+    if r.get("unused_impacts"):
+        out += ["", "Docs-impact lines naming a page this change does not flag (they excuse nothing): "
+                + ", ".join(f"`{x}`" for x in r["unused_impacts"])]
     if r["docs_impact"]:
         out += ["", f"Docs-impact recorded: {r['docs_impact']}"]
     out += ["", "_`python3 tools/docs_coupling.py " + r["range"] + "` · see docs/contributing/writing-docs.md_"]
@@ -241,6 +300,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json", action="store_true", help="print the result as JSON")
     ap.add_argument("--pr-body", type=Path, metavar="FILE", help="the pull request description (for the Docs-impact line)")
     ap.add_argument("--summary", type=Path, metavar="OUT", help="also write the Markdown report to OUT")
+    ap.add_argument("--skip-reason", default="", metavar="TEXT",
+                    help="report the range but never fail, saying why (a release pull request, a bot branch)")
     a = ap.parse_args(argv)
     base, sep, head = a.range.partition("..")
     if not sep or not base:
@@ -248,8 +309,8 @@ def main(argv: list[str] | None = None) -> int:
     head = head.lstrip(".") or "HEAD"
     body = a.pr_body.read_text(encoding="utf-8") if a.pr_body and a.pr_body.exists() else ""
     r = couple(base, head, body)
-    enforced = enforce_on()
-    md = markdown(r, enforced)
+    enforced = enforce_on() and not a.skip_reason
+    md = markdown(r, enforce_on(), a.skip_reason)
     if a.summary:
         a.summary.write_text(md, encoding="utf-8")
     print(json.dumps(r, indent=2, ensure_ascii=False) if a.json else md, end="" if not a.json else "\n")

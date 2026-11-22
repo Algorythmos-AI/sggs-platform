@@ -1,6 +1,7 @@
 {
-  "COUPLING_ENFORCE": "Turns the docs-impact check (tools/docs_coupling.py) from report-only into a gate: when 1/true/on, a page that declares `covers:` and was not updated fails the run. Off by default.",
+  "COUPLING_ENFORCE": "Turns the docs-impact check (tools/docs_coupling.py) into a gate: when 1/true/on, a page that declares `covers:` and was neither updated, re-stamped nor named on its own `Docs-impact: docs/<page>.md — <reason>` line fails the run. On in docs-coupling.yml since 2026-11-22; release pull requests and bot branches are reported but never fail.",
   "DOCS_API": "Where the wiki's visual review script sends `/api` requests so live widgets show real data (default: production).",
+  "DOCS_HEALTH_TOKEN": "A GitHub token that can read this repository's pull requests. `docs_check.py --health` reads each merged pull request's description with it (its Docs-impact lines) to measure the coupling debt; falls back to GH_TOKEN/GITHUB_TOKEN, and without any token the debt is labelled an upper bound.",
   "DOCS_PAGE_ACTIONS": "`0` builds the wiki without the page menu (copy, view as Markdown, assistant links, print), should it misbehave in production.",
   "DOCS_PDF": "`1` also builds a PDF of every page; CI sets it for every build it tests or deploys, a local build is quicker without.",
   "GH_TOKEN": "A GitHub token for reading the private sibling repositories and their releases: the dataset download, the pinned sibling docs, the repository-map check, the release-complete check and the sibling pin lag on the docs-health page. Preferred over `GITHUB_TOKEN`.",

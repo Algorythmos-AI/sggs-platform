@@ -4,6 +4,7 @@
     python3 tools/docs_check.py            # check docs/ (+ pinned sibling docs when installed)
     python3 tools/docs_check.py --db PATH  # also verify cited scripture against the pinned database
     python3 tools/docs_check.py --freshness [OUT]   # the full list of stamps to re-read (report only)
+    python3 tools/docs_check.py --freshness --json [OUT]   # the same rows as JSON (docs-reread reads it)
     python3 tools/docs_check.py --health OUT.json   # the numbers on docs/reference/docs-health.md
     python3 tools/docs_check.py --areas [OUT]       # which code areas are on a wiki page (report only)
 
@@ -1067,6 +1068,16 @@ def freshness_markdown(rows: list[dict], stale_days: int = STALE_UNTRACKED_DAYS,
     return "\n".join(out)
 
 
+def freshness_json(rows: list[dict], stale_days: int = STALE_UNTRACKED_DAYS, today: dt.date | None = None) -> dict:
+    """The freshness rows as data: every stale page with its reason, the code-changed ones first (most
+    changed files first), as freshness_markdown orders them. Read by docs-reread.yml."""
+    stale = [{**r, "reason": stale_reason(r, stale_days, today)} for r in rows]
+    stale = [r for r in stale if r["reason"]]
+    stale.sort(key=lambda r: (r["reason"] != "code-changed", -len(r["changed"]), -r["behind"], r["page"]))
+    return {"commit": _git("rev-parse", "HEAD").strip(), "stamped": len(rows),
+            "fresh": len(rows) - len(stale), "stale": stale}
+
+
 # ── docs health (docs/reference/docs-health.md): a few numbers, measured at build time ─────────
 HEALTH_DAYS = 30
 
@@ -1125,19 +1136,87 @@ def code_commit_docs_share(days: int = HEALTH_DAYS) -> dict:
             "pct": round(100 * with_docs / code, 1) if code else None}
 
 
-def coupling_debt(days: int = HEALTH_DAYS) -> dict:
-    """First-parent merges of the last `days` that changed code a page covers without the page or its
-    stamp (the Docs-impact line is not in history, so this counts it as debt: an upper bound)."""
+MERGE_PR_RE = re.compile(r"^Merge pull request #(\d+) from \S+")
+HEALTH_BRANCH = "integration"
+
+
+def health_ref(branch: str = HEALTH_BRANCH) -> tuple[str, str]:
+    """The ref whose first-parent merges the coupling debt walks, and the branch it names. On `main`
+    every first-parent merge is a release bundling many pull requests (the public page said "15 of 15
+    merges" for that reason), so the debt is measured on integration, one merge per pull request:
+    `origin/integration` (a `fetch-depth: 0` checkout has it), else a local `integration`, else HEAD."""
+    for ref in (f"origin/{branch}", branch):
+        if _git("rev-parse", "-q", "--verify", f"{ref}^{{commit}}").strip():
+            return ref, branch
+    return "HEAD", _git("rev-parse", "--abbrev-ref", "HEAD").strip() or "HEAD"
+
+
+def github_repo() -> str | None:
+    """owner/name: GITHUB_REPOSITORY in CI, else parsed from the origin remote."""
+    if os.environ.get("GITHUB_REPOSITORY"):
+        return os.environ["GITHUB_REPOSITORY"]
+    m = re.search(r"github\.com[:/]([^/\s]+/[^/\s]+?)(?:\.git)?\s*$", _git("remote", "get-url", "origin"))
+    return m.group(1) if m else None
+
+
+def fetch_pr_bodies(numbers: list[int]) -> dict[int, str] | None:
+    """The final description of each pull request, by one GraphQL call per 50 numbers (`gh api
+    graphql`). None without a token or on any failure: the caller then labels the debt an upper bound.
+    DOCS_HEALTH_TOKEN wins over GH_TOKEN, so CI can read this repository's pull requests with the
+    workflow's own token while GH_TOKEN stays the sibling-repository reader."""
+    token = os.environ.get("DOCS_HEALTH_TOKEN") or os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    repo = github_repo()
+    if not token or not repo or not numbers:
+        return None if numbers else {}
+    owner, name = repo.split("/", 1)
+    out: dict[int, str] = {}
+    env = {**os.environ, "GH_TOKEN": token}
+    for i in range(0, len(numbers), 50):
+        chunk = numbers[i:i + 50]
+        fields = " ".join(f"p{n}: pullRequest(number: {n}) {{ body }}" for n in chunk)
+        query = f'query {{ repository(owner: "{owner}", name: "{name}") {{ {fields} }} }}'
+        try:
+            r = subprocess.run(["gh", "api", "graphql", "-f", f"query={query}"], capture_output=True, text=True,
+                               timeout=60, env=env)
+            repo_data = json.loads(r.stdout)["data"]["repository"] if r.returncode == 0 else None
+        except (OSError, subprocess.TimeoutExpired, ValueError, KeyError, TypeError):
+            repo_data = None
+        if not isinstance(repo_data, dict):
+            return None
+        for n in chunk:
+            pr = repo_data.get(f"p{n}")
+            if isinstance(pr, dict):
+                out[n] = pr.get("body") or ""
+    return out
+
+
+def coupling_debt(days: int = HEALTH_DAYS, fetch=None, ref: str | None = None, branch: str | None = None) -> dict:
+    """First-parent merges into integration over the last `days` (one per pull request) that changed code
+    a page covers without that page, its stamp, or a Docs-impact line in the pull request's final
+    description excusing it (the rule of tools/docs_coupling.py as it stands today). The description
+    is read from GitHub (`fetch`, default fetch_pr_bodies); without a token the excuses cannot be
+    seen, every flag counts, and the result says `upper_bound: true`."""
     cpl = _coupling()
     specs = cpl.page_specs()
-    merges = _git("log", "--first-parent", "--merges", f"--since={days}.days", "--format=%H", "HEAD").split()
+    if ref is None:
+        ref, branch = health_ref()
+    merges = []
+    for row in _git("log", "--first-parent", "--merges", f"--since={days}.days", "--format=%H%x09%s", ref).splitlines():
+        sha, _, subject = row.partition("\t")
+        m = MERGE_PR_RE.match(subject)
+        merges.append((sha, int(m.group(1)) if m else None))
+    numbers = sorted({n for _, n in merges if n is not None})
+    bodies = (fetch or fetch_pr_bodies)(numbers) if numbers else {}
     with_debt, pages = 0, 0
-    for m in merges:
-        r = cpl.couple(f"{m}^1", m, "", specs)
+    for sha, n in merges:
+        body = (bodies or {}).get(n, "") if n is not None else ""
+        r = cpl.couple(f"{sha}^1", sha, body, specs)
         if r["flagged"]:
             with_debt += 1
             pages += len(r["flagged"])
-    return {"merges": len(merges), "merges_with_debt": with_debt, "page_flags": pages}
+    return {"merges": len(merges), "merges_with_debt": with_debt, "page_flags": pages,
+            "branch": branch or ref, "attributed": sum(n is not None for _, n in merges),
+            "bodies_read": len(bodies or {}), "upper_bound": bodies is None and bool(numbers)}
 
 
 def health(today: dt.date | None = None) -> dict:
@@ -1204,6 +1283,7 @@ def main(argv=None) -> int:
     ap.add_argument("--db", type=Path, default=ROOT / "db" / "sggs.sqlite", help="pinned database (verifies cited scripture)")
     ap.add_argument("--freshness", type=Path, metavar="OUT", nargs="?", const=Path("-"),
                     help="report (never fail) the stamped pages whose cited code changed since their stamp; OUT or stdout")
+    ap.add_argument("--json", action="store_true", help="with --freshness: write the stale pages as JSON")
     ap.add_argument("--health", type=Path, metavar="OUT", help="write the docs-health numbers as JSON to OUT and exit 0")
     ap.add_argument("--areas", type=Path, metavar="OUT", nargs="?", const=Path("-"),
                     help="report (never fail) which code areas are on a wiki page (tools/docs_areas.json); OUT or stdout")
@@ -1219,7 +1299,18 @@ def main(argv=None) -> int:
     if a.health is not None:
         h = health()
         a.health.write_text(json.dumps(h, indent=2) + "\n", encoding="utf-8")
-        print(f"health: {h['fresh_pct']}% of {h['stamped']} stamped pages fresh -> {a.health}")
+        d = h["coupling_debt"]
+        print(f"health: {h['fresh_pct']}% of {h['stamped']} stamped pages fresh; coupling debt "
+              f"{d['merges_with_debt']} of {d['merges']} merges on {d['branch']}"
+              f"{' (upper bound: no pull request descriptions read)' if d['upper_bound'] else ''} -> {a.health}")
+        return 0
+    if a.freshness is not None and a.json:
+        data = json.dumps(freshness_json(freshness()), indent=2, ensure_ascii=False) + "\n"
+        if str(a.freshness) == "-":
+            print(data, end="")
+        else:
+            a.freshness.write_text(data, encoding="utf-8")
+            print(f"freshness: JSON written to {a.freshness}")
         return 0
     if a.freshness is not None:
         md = freshness_markdown(freshness())

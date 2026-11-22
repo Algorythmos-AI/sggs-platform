@@ -1,0 +1,309 @@
+name: docs-reread
+# Weekly, after docs-freshness: give each stamped page whose cited code changed since its `verified`
+# stamp to an agent that re-reads it against that code, corrects what drifted and moves the stamp,
+# then open ONE pull request, `bot/docs-reread` into integration, for a person to review.
+#
+# Until 2026-11-22 re-reading had no actor: docs-freshness listed the pages (#415 "12 pages to
+# re-read" was an empty commit), and nobody re-read them. Runbook: docs/process/runbooks/docs-site.md
+# (#the-re-read-bot): the key, the cost, how to pause it.
+#
+# Guard rails, enforced here and in tools/docs_reread.py rather than trusted to the prompt:
+#   - the whole workflow does nothing but write a summary until the secret ANTHROPIC_API_KEY exists,
+#     or while the repository variable DOCS_REREAD_PAUSED is "1";
+#   - at most 8 pages a run (docs_reread.MAX_PAGES), one agent job per page, --max-turns 40 and a
+#     25-minute timeout each; no run while an earlier bot/docs-reread pull request is open; pages an
+#     open pull request edits, scripture pages, generated pages and the site are never selected;
+#   - the agent has read tools, edits under docs/ only, and runs only the docs tools and read-only
+#     git (--permission-mode default: anything not allowed is denied). Its checkout has no
+#     credentials and its GitHub token is read-only. It never commits;
+#   - after it, the working tree must change only that page, a moved stamp must name the commit read
+#     and today's date, and no changed line may add or remove a Gurmukhi, danda or joiner code point
+#     (tools/gurmukhi_diff.py) — any breach drops the page from the pull request;
+#   - this workflow makes the commit (no AI trailer), runs docs_check.py and gurmukhi_diff.py on it,
+#     and pushes with DOCS_BOT_TOKEN only after a dry-run push; scripture-diff-guard is enforced on
+#     the bot/ branch again. Nothing merges without a person.
+on:
+  schedule:
+    - cron: "7 9 * * 1"   # Monday 09:07 UTC, two hours after docs-freshness (07:07)
+  workflow_dispatch:
+    inputs:
+      max_pages:
+        description: "Pages to re-read this run (1-8)"
+        required: false
+        default: "8"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-reread
+  cancel-in-progress: false
+
+env:
+  BRANCH: bot/docs-reread
+  MARKER: "Reread-by: docs-reread"
+
+jobs:
+  plan:
+    name: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read   # which pages open pull requests already edit
+    outputs:
+      run: ${{ steps.pick.outputs.run }}
+      base: ${{ steps.pick.outputs.base }}
+      today: ${{ steps.pick.outputs.today }}
+      matrix: ${{ steps.pick.outputs.matrix }}
+    env:
+      HAVE_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+      HAVE_BOT: ${{ secrets.DOCS_BOT_TOKEN != '' }}
+      PAUSED: ${{ vars.DOCS_REREAD_PAUSED == '1' }}
+      # every later step of this job runs only when GO is true
+      GO: ${{ secrets.ANTHROPIC_API_KEY != '' && secrets.DOCS_BOT_TOKEN != '' && vars.DOCS_REREAD_PAUSED != '1' }}
+    steps:
+      - name: Waiting for the key, or paused
+        if: env.GO != 'true'
+        run: |
+          # a summary, never a failure: without the key the job costs nothing and changes nothing
+          if [ "$PAUSED" = "true" ]; then
+            echo "The re-read bot is paused (repository variable DOCS_REREAD_PAUSED=1). Nothing was re-read." >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$HAVE_KEY" != "true" ]; then
+            echo "The re-read is waiting for the key: add the repository secret ANTHROPIC_API_KEY (docs/process/runbooks/docs-site.md#the-re-read-bot). Nothing was re-read; the weekly docs-freshness pull request still lists the pages." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "The re-read is waiting for DOCS_BOT_TOKEN, which opens its pull request (docs/process/runbooks/docs-site.md#the-pin-bots-token-docs_bot_token). Nothing was re-read, so no tokens were spent on work that could not be delivered." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        if: env.GO == 'true'
+        with: { ref: integration, fetch-depth: 0, persist-credentials: false }
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        if: env.GO == 'true'
+        with: { python-version-file: ".python-version" }
+      - name: The pages to re-read
+        id: pick
+        if: env.GO == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MAX: ${{ inputs.max_pages || '8' }}
+        run: |
+          set -euo pipefail
+          open="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [ -n "$open" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "The re-read pull request #$open is still open: review and merge or close it, and the next run re-reads what is still stale." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # pages an open pull request already edits are left to that pull request
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --json files \
+            --jq '.[].files[].path' | sort -u > "$RUNNER_TEMP/busy.txt"
+          python3 tools/docs_check.py --freshness "$RUNNER_TEMP/fresh.json" --json
+          python3 tools/docs_reread.py select "$RUNNER_TEMP/fresh.json" --busy "$RUNNER_TEMP/busy.txt" --max "$MAX" > "$RUNNER_TEMP/plan.json"
+          python3 - "$RUNNER_TEMP/plan.json" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          plan = json.load(open(sys.argv[1]))
+          with open(sys.argv[2], "a") as out:
+              out.write(f"## Re-reading {len(plan['pages'])} page(s) at {plan['commit'][:12]}\n\n")
+              out.writelines(f"- `{p['page']}` ({len(p['changed'])} changed file(s))\n" for p in plan["pages"])
+              if plan["skipped"]:
+                  out.write("\nLeft out:\n\n")
+                  out.writelines(f"- `{s['page']}`: {s['why']}\n" for s in plan["skipped"])
+          PY
+          {
+            echo "base=$(git rev-parse HEAD)"
+            echo "today=$(date -u +%F)"
+            echo "matrix=$(python3 -c 'import json,sys; print(json.dumps([p["page"] for p in json.load(open(sys.argv[1]))["pages"]]))' "$RUNNER_TEMP/plan.json")"
+            echo "run=$(python3 -c 'import json,sys; print("true" if json.load(open(sys.argv[1]))["pages"] else "false")' "$RUNNER_TEMP/plan.json")"
+          } >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: steps.pick.outputs.run == 'true'
+        with: { name: reread-plan, path: "${{ runner.temp }}/plan.json", retention-days: 7 }
+
+  reread:
+    # One agent per page, so one page's failure or turn budget never costs another.
+    name: reread
+    needs: plan
+    if: needs.plan.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read        # the agent's token can read, never write
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        page: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      BASE: ${{ needs.plan.outputs.base }}
+      TODAY: ${{ needs.plan.outputs.today }}
+      PAGE: ${{ matrix.page }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { ref: "${{ needs.plan.outputs.base }}", fetch-depth: 0, persist-credentials: false }
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with: { python-version-file: ".python-version" }
+      - name: Sibling docs installed at their pins (docs_check reads them)
+        env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
+        run: python3 tools/fetch_sibling_docs.py
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with: { name: reread-plan, path: "${{ runner.temp }}" }
+      - name: The instructions for this page
+        id: prompt
+        run: |
+          {
+            echo "text<<SGGS_REREAD_PROMPT_END"
+            python3 tools/docs_reread.py prompt "$PAGE" --row-file "$RUNNER_TEMP/plan.json" --base "$BASE" --today "$TODAY"
+            echo "SGGS_REREAD_PROMPT_END"
+          } >> "$GITHUB_OUTPUT"
+      - name: Re-read the page against the code
+        id: agent
+        uses: anthropics/claude-code-action@acfe7992852970efb4fee683d63d628e3e52df67 # v1.0.286
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}   # read-only: the job grants contents: read and nothing else
+          prompt: ${{ steps.prompt.outputs.text }}
+          settings: '{"includeCoAuthoredBy": false}'
+          claude_args: >-
+            --permission-mode default
+            --max-turns 40
+            --allowedTools "Read,Glob,Grep,Edit(docs/**),Bash(python3 tools/docs_check.py),Bash(python3 tools/docs_check.py:*),Bash(python3 tools/docs_coupling.py:*),Bash(python3 tools/gurmukhi_diff.py:*),Bash(git log:*),Bash(git diff:*),Bash(git show:*)"
+            --disallowedTools "Write,NotebookEdit,WebFetch,WebSearch,Edit(docs/scripture/**),Bash(git commit:*),Bash(git push:*),Bash(git checkout:*),Bash(git reset:*),Bash(git switch:*)"
+      - name: The agent kept to its page (else this page is dropped)
+        env: { EXECUTION_FILE: "${{ steps.agent.outputs.execution_file }}" }
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/out"
+          slug="$(printf '%s' "$PAGE" | tr '/.' '__')"
+          python3 tools/docs_reread.py validate --base "$BASE" --today "$TODAY" "$PAGE"
+          git diff --no-ext-diff --binary "$BASE" -- "$PAGE" > "$RUNNER_TEMP/out/$slug.patch"
+          # the agent's closing summary, for the pull request description
+          python3 - "$EXECUTION_FILE" "$RUNNER_TEMP/out/$slug.md" "$PAGE" <<'PY'
+          import json, sys
+          text = ""
+          try:
+              msgs = json.load(open(sys.argv[1]))
+              text = next((m.get("result", "") for m in reversed(msgs) if m.get("type") == "result"), "")
+          except Exception:
+              text = "(no summary)"
+          open(sys.argv[2], "w").write(f"### `{sys.argv[3]}`\n\n{(text or '(no summary)').strip()[:4000]}\n")
+          PY
+          echo "slug=$slug" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with: { name: "reread-${{ env.slug }}", path: "${{ runner.temp }}/out/", retention-days: 7 }
+
+  pull-request:
+    name: pull-request
+    needs: [plan, reread]
+    # a page that failed its job is simply not in the pull request
+    if: always() && needs.plan.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      BASE: ${{ needs.plan.outputs.base }}
+      TODAY: ${{ needs.plan.outputs.today }}
+      HAVE_BOT: ${{ secrets.DOCS_BOT_TOKEN != '' }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { ref: integration, fetch-depth: 0, persist-credentials: false }
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with: { python-version-file: ".python-version" }
+      - name: Sibling docs installed at their pins
+        env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
+        run: python3 tools/fetch_sibling_docs.py
+      - name: The pinned database (docs_check verifies the cited scripture)
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .dataset-cache
+          key: dataset-${{ hashFiles('dataset.lock.json') }}
+      - env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
+        run: python3 scripts/data/fetch_dataset.py --cache-dir .dataset-cache
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with: { pattern: "reread-*", path: "${{ runner.temp }}/in", merge-multiple: true }
+      - name: Apply the re-read pages, commit, and check again
+        id: commit
+        run: |
+          set -euo pipefail
+          # integration may have moved since the plan: the patches are made against BASE, and a page
+          # changed on integration since then is skipped rather than merged by hand
+          git switch -q -c "$BRANCH"
+          applied=()
+          : > "$RUNNER_TEMP/notes.md"
+          for patch in "$RUNNER_TEMP"/in/*.patch; do
+            [ -e "$patch" ] || continue
+            [ -s "$patch" ] || continue
+            page="$(sed -n 's#^+++ b/##p' "$patch" | head -n1)"
+            if [ -n "$(git diff --name-only "$BASE" HEAD -- "$page")" ]; then
+              echo "::warning::$page changed on integration since $BASE; left for the next run"; continue
+            fi
+            if git apply --index "$patch"; then applied+=("$page"); cat "${patch%.patch}.md" >> "$RUNNER_TEMP/notes.md" 2>/dev/null || true; echo >> "$RUNNER_TEMP/notes.md"
+            else echo "::warning::$page: the patch did not apply"; fi
+          done
+          if [ "${#applied[@]}" -eq 0 ] || git diff --cached --quiet; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"; echo "No page changed; nothing to review." >> "$GITHUB_STEP_SUMMARY"; exit 0
+          fi
+          # the same guard over all pages together: against integration now, stamps naming the commit read
+          python3 tools/docs_reread.py validate --base HEAD --stamp "$BASE" --today "$TODAY" "${applied[@]}"
+          python3 tools/docs_check.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898213+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "docs(wiki): re-read ${#applied[@]} page(s) against the code" -m "$(printf -- '- %s\n' "${applied[@]}")" -m "$MARKER"
+          python3 tools/gurmukhi_diff.py --summary "$GITHUB_STEP_SUMMARY" origin/integration...HEAD
+          if [ -n "$(git diff --name-only origin/integration...HEAD | grep -v '^docs/' || true)" ]; then
+            echo "::error::the re-read commit touches files outside docs/"; exit 1
+          fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          echo "pages=${#applied[@]}" >> "$GITHUB_OUTPUT"
+      - name: Can DOCS_BOT_TOKEN push here? (a dry-run push; nothing is written)
+        id: bot
+        if: steps.commit.outputs.ok == 'true' && env.HAVE_BOT == 'true'
+        env: { BOT: "${{ secrets.DOCS_BOT_TOKEN }}" }
+        run: |
+          if git push --dry-run --force -q "https://x-access-token:${BOT}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH" 2> "$RUNNER_TEMP/push.err"; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::DOCS_BOT_TOKEN cannot push: $(grep -E '^(remote:|fatal:)' "$RUNNER_TEMP/push.err" | sed -E 's#https://[^ ]*@#https://#g' | head -3 | tr '\n' ' ')"
+          fi
+      - name: Open the pull request (as the token's owner)
+        if: steps.commit.outputs.ok == 'true' && steps.bot.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_BOT_TOKEN }}
+          BOT: ${{ secrets.DOCS_BOT_TOKEN }}
+          PAGES: ${{ steps.commit.outputs.pages }}
+        run: |
+          set -euo pipefail
+          # a branch left with commits the bot did not make is a person's work: never force over it
+          if git ls-remote --exit-code -q "https://x-access-token:${BOT}@github.com/${GITHUB_REPOSITORY}.git" "refs/heads/$BRANCH" > /dev/null 2>&1; then
+            git fetch -q "https://x-access-token:${BOT}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH:refs/remotes/origin/$BRANCH"
+            total="$(git rev-list --count "origin/integration..origin/$BRANCH")"
+            mine="$(git rev-list --count --fixed-strings --grep="$MARKER" "origin/integration..origin/$BRANCH")"
+            if [ "$total" -gt "$mine" ]; then
+              echo "::error::$BRANCH holds commits the bot did not make; merge or delete it, then re-run"; exit 1
+            fi
+          fi
+          login="$(gh api user --jq .login)"; id="$(gh api user --jq .id)"; name="$(gh api user --jq '.name // .login')"
+          git -c user.name="$name" -c user.email="${id}+${login}@users.noreply.github.com" commit -q --amend --no-edit --reset-author
+          git push -q --force "https://x-access-token:${BOT}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH"
+          {
+            echo "An agent re-read each page below against the code that changed since its \`verified\` stamp, corrected what drifted and moved the stamp to the commit it read (\`${BASE:0:8}\`, ${TODAY}). **Review every hunk against the code before merging**: the stamp says a person agrees the page is true."
+            echo
+            echo "## Pages"; echo
+            cat "$RUNNER_TEMP/notes.md"
+            echo "## Checks already run"; echo
+            echo "- only the listed pages changed; no file outside \`docs/\`; nothing under \`docs/scripture/\`, no generated page"
+            echo "- \`tools/gurmukhi_diff.py\`: no Gurmukhi, danda or joiner code point added or removed (\`scripture-diff-guard\` enforces it again on this \`bot/\` branch)"
+            echo "- \`tools/docs_check.py\` with the pinned database: 0 errors"
+            echo
+            echo "Fix anything wrong with commits on \`$BRANCH\` (the bot will not overwrite them), or close the pull request. Merge with \`--merge\`: the stamps point at integration commits."
+            echo; echo "Run: $RUN_URL"
+          } > "$RUNNER_TEMP/body.md"
+          gh pr create --repo "$GITHUB_REPOSITORY" --base integration --head "$BRANCH" \
+            --title "docs(wiki): re-read ${PAGES} page(s) against the code" --body-file "$RUNNER_TEMP/body.md"
+      - name: Or say why there is no pull request
+        if: always() && steps.commit.outputs.ok == 'true' && (env.HAVE_BOT != 'true' || steps.bot.outputs.ok != 'true')
+        run: |
+          echo "The re-read pages are committed in this run but no pull request was opened: DOCS_BOT_TOKEN is missing or cannot push (docs/process/runbooks/docs-site.md#the-pin-bots-token-docs_bot_token)." >> "$GITHUB_STEP_SUMMARY"
+          exit 1

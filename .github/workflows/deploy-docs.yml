@@ -22,6 +22,7 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: read   # docs health reads each merged pull request's description (the coupling debt)
 
 env:
   VERCEL_CLI: vercel@59.7.0
@@ -84,7 +85,9 @@ jobs:
         working-directory: docs-site
         run: npm run typecheck
       - name: Docs health (the numbers on reference/docs-health; git-ignored, read by the build)
-        env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
+        # DOCS_HEALTH_TOKEN reads this repository's pull request descriptions (pull-requests: read);
+        # GH_TOKEN stays the sibling-repository reader for the pin lag
+        env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}", DOCS_HEALTH_TOKEN: "${{ github.token }}" }
         run: python3 tools/docs_check.py --health docs-site/.health.json
       - name: Build (every Mermaid fence rendered, every page exported as Markdown and as a PDF)
         working-directory: docs-site
@@ -225,7 +228,9 @@ jobs:
       - name: Docs health for this build (the deploy builds again; without this the page says "not measured")
         # docs.gurbanisoul.com/reference/docs-health showed "Docs health was not measured in this build"
         # through 1.6.4: only the docs job wrote the file, and this job builds the site afresh
-        env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
+        # DOCS_HEALTH_TOKEN reads this repository's pull request descriptions (pull-requests: read);
+        # GH_TOKEN stays the sibling-repository reader for the pin lag
+        env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}", DOCS_HEALTH_TOKEN: "${{ github.token }}" }
         run: python3 tools/docs_check.py --health docs-site/.health.json
       - name: Build, deploy (preview) and alias to the docs staging domain
         working-directory: docs-site
@@ -267,6 +272,7 @@ jobs:
     permissions:
       contents: read
       issues: write
+      pull-requests: read   # the docs-health coupling debt reads integration's pull request descriptions
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DOCS_PROJECT_ID }}
@@ -296,7 +302,9 @@ jobs:
       - name: Docs health for this build (the deploy builds again; without this the page says "not measured")
         # docs.gurbanisoul.com/reference/docs-health showed "Docs health was not measured in this build"
         # through 1.6.4: only the docs job wrote the file, and this job builds the site afresh
-        env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}" }
+        # DOCS_HEALTH_TOKEN reads this repository's pull request descriptions (pull-requests: read);
+        # GH_TOKEN stays the sibling-repository reader for the pin lag
+        env: { GH_TOKEN: "${{ secrets.SGGS_READ_TOKEN || github.token }}", DOCS_HEALTH_TOKEN: "${{ github.token }}" }
         run: python3 tools/docs_check.py --health docs-site/.health.json
       - name: Record the deployment serving docs.gurbanisoul.com (the rollback target)
         # the deployment the domain serves now, not the newest READY production deployment: a build
