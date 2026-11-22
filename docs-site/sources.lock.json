@@ -99,7 +99,7 @@
     "gurbani-soul-ios": {
       "repository": "Algorythmos-AI/gurbani-soul-ios",
       "ref": "main",
-      "commit": "c76d038387a07f93d522e7fd467ca419ae6ae0ea",
+      "commit": "76e9749e0e0f3cd9ddce67238624943b5136ec91",
       "alias": "ios",
       "include": [
         "docs/ios/*.md",
@@ -135,8 +135,8 @@
           "sha256": "e5cd7a34e20f905a6b4ca95883f15bf541f08e274f4788a2b2e89d407619e875"
         },
         "docs/ios/app-store-listing.md": {
-          "blob": "9632377e9e146908a6e67ff00785203932845d20",
-          "sha256": "36e83b492397db07908c7282369029958414d0b92af5dfd5c3369c17d6f87878"
+          "blob": "274724291c534b006c029c437cd11b0c50f92a4f",
+          "sha256": "27d5ae748e9834f5e039293cdddc3b2472fd85e6f23fb8efba862c2070b58d84"
         },
         "docs/ios/device-checklist-1.4.9.md": {
           "blob": "92ad3f95cdb620257ac9cfde22b60427ccf93b2f",
@@ -243,8 +243,8 @@
           "sha256": "2c059b035782151186942756e80112ea5d942747fed3d582a7ad84d7bc557c68"
         },
         "vendor.lock.json": {
-          "blob": "e32f16d69dee23f6660db3b9fea1773c6bda96d2",
-          "sha256": "f477b99f73981fc6f76f96c5f3327a26c93d013ace8e2e8f909b46aa8fd07111"
+          "blob": "1b5bf1688ec02ab042a02d3aac7fbf35779ab86a",
+          "sha256": "cdf790d1125cbdddf6874d474d5ba376bccae87fcd5a0788f394b1916e561567"
         }
       }
     }
