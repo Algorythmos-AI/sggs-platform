@@ -129,8 +129,13 @@ without a secret refuses everyone.
 ## Every morning (automatic)
 
 - The poller runs every minute 05:00–09:00 IST, then every 10 minutes until 14:00 IST.
-- `hukamnama-deadman.yml` checks `/health` at 06:00, 07:00 and 14:15 IST. On a problem it opens
-  one issue per Amritsar date (later runs comment on it). It never restarts anything.
+- The two services watch each other (`HUKAMNAMA_PEER_URL`, `peer.py`): every 5 minutes from
+  05:15 to 14:15 IST each reads the other's `/health`, and after 3 failed checks in a row it sends
+  a `peer_down` phone alert, once a day. This is the timely dead-man check.
+- `hukamnama-deadman.yml` is the backstop, for staging and production: it checks `/health` at
+  05:37, 07:17 and 14:23 IST *as scheduled*. GitHub's cron ran it 6-9 h late every day in
+  November 2026, so do not rely on its times. On a problem it opens one issue per Amritsar date
+  and service (later runs comment on it). It never restarts anything.
 - Each distinct page fetched is kept at `/var/data/archive/<amritsar date>/` (gzip) with an
   `index.ndjson` of every fetch. Day folders older than 60 days are pruned.
 

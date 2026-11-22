@@ -57,6 +57,8 @@ from .api import State, day_record, serve, tick_loop
 from .archive import Archive
 from .corpus import open_ro, resolution_for_range, scripture_sha256
 from .engine import Engine
+from .peer import from_env as peer_from_env
+from .peer import loop as peer_loop
 from .sources import fetch
 from .store import Store
 
@@ -146,6 +148,13 @@ def main(argv: list[str] | None = None) -> int:
             engine = Engine(store, con, fingerprint, fetcher=fetcher, alert_hook=alerts)
             threading.Thread(target=tick_loop, args=(state, engine, stop, publisher.sync_safely if publisher else None),
                              daemon=True).start()
+        try:
+            watch = peer_from_env(os.environ, store, alerts)
+        except ValueError as e:
+            print(f"peer watch: {e}", file=sys.stderr)            # half-configured: refuse, as for backups
+            return 2
+        if watch:
+            threading.Thread(target=peer_loop, args=(watch, stop), daemon=True).start()
         if os.environ.get("HUKAMNAMA_SEND", "off") == "on":
             apns = _apns_from_env()
             if apns is None:
@@ -155,9 +164,9 @@ def main(argv: list[str] | None = None) -> int:
             state.sending = True
         httpd = serve(state, args.host, args.port)
         signal.signal(signal.SIGTERM, lambda *_: (stop.set(), threading.Thread(target=httpd.shutdown).start()))
-        logging.info("hukamnama %s serving on %s:%s (scripture %s; phone alerts %s)",
+        logging.info("hukamnama %s serving on %s:%s (scripture %s; phone alerts %s; watching %s)",
                      "poll" if not args.no_poll else "read-only", args.host, args.port, fingerprint[:12],
-                     "on" if alerts else "off")
+                     "on" if alerts else "off", watch.url if watch else "no peer")
         httpd.serve_forever()
         return 0
     if args.cmd == "tick":

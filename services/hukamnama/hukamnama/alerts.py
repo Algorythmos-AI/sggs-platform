@@ -31,7 +31,7 @@ RUNBOOK = ("https://github.com/Algorythmos-AI/sggs-platform/blob/integration/"
            "docs/process/runbooks/hukamnama-service.md#when-a-morning-goes-wrong")
 
 # ntfy priorities: 5 urgent (long vibration, through the lock screen), 4 high, 3 default.
-URGENT = {"held_no_match", "held_veto", "not_published", "push_breaker", "push_auth_failed", "deadman"}
+URGENT = {"held_no_match", "held_veto", "not_published", "push_breaker", "push_auth_failed", "deadman", "peer_down"}
 HIGH = {"late", "changed_after_publish", "veto_after_publish", "push_payload_too_large", "device_flood",
         "hs_parse_failing", "hs_layout_changed", "mukhwak_parse_failing", "mukhwak_layout_changed"}
 
@@ -47,6 +47,7 @@ HEADLINES = {
     "veto_after_publish": "sgpc.net disagrees after publishing",
     "device_flood": "new-device cap reached",
     "deadman": "dead-man check failed",
+    "peer_down": "the other Hukamnama service is down",
 }
 
 TODO = {
@@ -62,6 +63,8 @@ TODO = {
     "changed_after_publish": "Compare the page with the published range; correct only if certain.",
     "veto_after_publish": "Compare sgpc.net with the published range; correct only if certain.",
     "deadman": "The service may be down or asleep. Open /health and the Render dashboard.",
+    "peer_down": "Sent by the sibling service (staging watches production and the reverse). Open the named "
+                 "service's /health and its Render dashboard (Events, Logs); it never restarts anything.",
 }
 
 _TOPIC = re.compile(r"^[A-Za-z0-9_-]{16,64}$")
