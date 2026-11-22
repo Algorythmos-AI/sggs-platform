@@ -133,6 +133,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         state = State(store, fingerprint)
         state.alert_hook = alerts
+        state.con = con
         stop = threading.Event()
         try:
             publisher = _publisher(store, con, fingerprint, args.public_dir)
