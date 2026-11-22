@@ -68,12 +68,12 @@ A person reviews everything you change before it merges.
 
 Page: {page}
 Its `verified` stamp: {row.get('stamp') or row.get('commit', '')}. The checkout is integration at {base}.
-Code the page cites that changed since the stamp:
+Code the page cites that changed since the stamp (`file#symbol`: only that definition changed):
 {changed}
 
 Do this:
 1. Read the whole page. Read each changed file, and `git diff {row.get('stamp') or row.get('commit', '')} {base} -- <file>` for
-   each, to see what moved. Read any other file the page cites when a claim depends on it.
+   each (the path before any `#`), to see what moved. Read any other file the page cites when a claim depends on it.
 2. Correct, in {page} only, every statement the code no longer supports: names, paths, numbers,
    flags, behaviour. Keep the page's structure, headings, voice and line wrapping. Do not restyle,
    reorder or expand anything that is still true, and do not add new sections.

@@ -39,7 +39,7 @@ import os
 import re
 import subprocess
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -70,68 +70,23 @@ def is_noise(path: str) -> bool:
     return bool(NOISE_RE.search(path)) or path in set(dc.GENERATED.values()) or path.startswith("docs/")
 
 
-@dataclass
-class Change:
-    """One changed file: its old/new paths and the changed line ranges on each side."""
-    old: str
-    new: str
-    old_ranges: list[tuple[int, int]] = field(default_factory=list)
-    new_ranges: list[tuple[int, int]] = field(default_factory=list)
+# The diff reading and the symbol test live in docs_check, shared with --freshness (one rule for
+# "did the code a page claims change", whichever tool asks).
+Change = dc.Change
+_path = dc._diff_path
+_hits = dc._hits
 
 
 def changes(base: str, head: str) -> dict[str, Change]:
-    """Files changed from base to head, keyed by both old and new path."""
-    diff = git("diff", "--no-color", "--no-ext-diff", "--unified=0", "--find-renames", base, head, "--")
-    out: dict[str, Change] = {}
-    cur: Change | None = None
-    for line in diff.splitlines():
-        if line.startswith("diff --git "):
-            cur = None
-        elif line.startswith("--- "):
-            cur = Change(_path(line[4:]), "")
-        elif line.startswith("+++ ") and cur is not None:
-            cur.new = _path(line[4:])
-            for p in {cur.old, cur.new} - {""}:
-                out[p] = cur
-        elif line.startswith("@@") and cur is not None:
-            m = re.match(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", line)
-            if m:
-                a, b = int(m.group(1)), int(m.group(2) if m.group(2) is not None else 1)
-                c, d = int(m.group(3)), int(m.group(4) if m.group(4) is not None else 1)
-                # a pure insertion (b == 0) sits between lines a and a+1: count it as touching both
-                cur.old_ranges.append((a, a + max(b, 1) - 1) if b else (a, a + 1))
-                cur.new_ranges.append((c, c + max(d, 1) - 1) if d else (c, c + 1))
-    # renames and mode-only changes have no ---/+++ lines; pick them up by name
-    for row in git("diff", "--name-status", "--find-renames", base, head, "--").splitlines():
-        parts = row.split("\t")
-        for p in parts[1:]:
-            out.setdefault(p, Change(parts[1], parts[-1]))
-    return out
-
-
-def _path(spec: str) -> str:
-    spec = spec.rstrip("\t")
-    return "" if spec == "/dev/null" else (spec[2:] if spec[:2] in ("a/", "b/") else spec)
+    return dc.diff_changes(base, head)
 
 
 def show(rev: str, path: str) -> str | None:
-    out = subprocess.run(["git", "show", f"{rev}:{path}"], cwd=dc.ROOT, capture_output=True)
-    return out.stdout.decode("utf-8", "replace") if out.returncode == 0 else None
-
-
-def _hits(rng: tuple[int, int] | None, hunks: list[tuple[int, int]]) -> bool:
-    return rng is not None and any(a <= rng[1] and b >= rng[0] for a, b in hunks)
+    return dc.show_at(rev, path)
 
 
 def symbol_changed(ch: Change, base: str, head: str, symbol: str) -> bool:
-    suffix = Path(ch.new or ch.old).suffix
-    old_src = show(base, ch.old) if ch.old else None
-    new_src = show(head, ch.new) if ch.new else None
-    old_rng = dc.symbol_range(old_src, suffix, symbol) if old_src is not None else None
-    new_rng = dc.symbol_range(new_src, suffix, symbol) if new_src is not None else None
-    if not ch.old_ranges and not ch.new_ranges:          # a pure rename: the symbol moved with its file
-        return False
-    return _hits(old_rng, ch.old_ranges) or _hits(new_rng, ch.new_ranges)
+    return dc.symbol_changed(ch, base, head, symbol)
 
 
 @dataclass

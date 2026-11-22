@@ -18,7 +18,7 @@ On the rendered wiki this is a table of the numbers below, measured at build. On
 
 - **Fresh stamps.** A page with a `verified: {commit, date}` stamp is fresh unless one of three
   things is true. The code it covers changed since the stamp (its `covers:`, or the files it
-  cites). It cites no code and the stamp is more than 60 days old. Or the stamp's commit is not in
+  cites; a `file#symbol` entry only when a change falls inside that definition). It cites no code and the stamp is more than 60 days old. Or the stamp's commit is not in
   the history. The full list is `python3 tools/docs_check.py --freshness`, and the weekly
   docs-freshness pull request carries it.
 - **Median stamp age.** The median number of days since each `verified.date`.

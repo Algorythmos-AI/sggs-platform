@@ -189,6 +189,36 @@ class Repo(unittest.TestCase):
             else:
                 os.environ["COUPLING_ENFORCE"] = env
 
+    def stale(self, page):
+        dc._TRACKED = None
+        path = self.root / page
+        return dc.code_changed_since(self.base, path, path.read_text(encoding="utf-8"))
+
+    def test_freshness_honours_a_symbol_like_the_coupling_check(self):
+        # a change outside alpha (a version bump elsewhere in the file) does not age the symbol page
+        self.write("app/core.py", SRC.replace("X = 1", "X = 2"))
+        self.commit("bump")
+        self.assertEqual(self.stale("docs/explicit.md"), [])                   # symbol miss
+        self.assertEqual(self.stale("docs/globbed.md"), ["app/core.py"])        # whole file: today's behaviour
+        self.write("app/core.py", SRC.replace("X = 1", "X = 2").replace("return 1", "return 10"))
+        self.commit("alpha")
+        self.assertEqual(self.stale("docs/explicit.md"), ["app/core.py#alpha"])  # symbol hit
+        self.assertEqual(self.stale("docs/cited.md"), [])                        # cited file untouched
+        self.write("app/other.py", "Y = 9\n")
+        self.commit("other")
+        self.assertEqual(self.stale("docs/cited.md"), ["app/other.py"])
+
+    def test_the_freshness_row_and_the_stamp_notice_use_the_symbol_rule(self):
+        self.write("app/core.py", SRC.replace("X = 1", "X = 2"))
+        self.commit("bump")
+        text = (self.root / "docs/explicit.md").read_text().replace("abcdef0", self.base[:8])
+        self.write("docs/explicit.md", text)
+        self.commit("stamp at base")
+        dc._TRACKED = None
+        rows = {r["page"]: r for r in dc.freshness()}
+        self.assertEqual(rows["docs/explicit.md"]["changed"], [])
+        self.assertEqual(dc.check_verified_commit(self.root / "docs/explicit.md", self.base, text), [])
+
     def merge_pr(self, number, branch, path, text):
         """A pull request merged with GitHub's merge-commit message, on main's first-parent line."""
         self.git("switch", "-q", "-c", branch)

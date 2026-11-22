@@ -48,7 +48,7 @@ import sqlite3
 import subprocess
 import sys
 import unicodedata
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -466,7 +466,7 @@ def check_verified_commit(path: Path, commit: str, text: str = "", date: str = "
         return [Problem(path, 1, f"verified commit {commit[:7]} is not in this repository's history", level="warning")]
     files = covered_files(path, text) if text else []
     if files:
-        changed = changed_since(commit, files)
+        changed = code_changed_since(commit, path, text)
         if changed:
             return [Problem(path, 1, f"code this page cites changed since its stamp {commit[:7]} ({', '.join(changed[:4])}"
                                      f"{' …' if len(changed) > 4 else ''}) — re-read it against the code and move the stamp",
@@ -479,8 +479,8 @@ def check_verified_commit(path: Path, commit: str, text: str = "", date: str = "
     return []
 
 
-def changed_since(commit: str, files: list[str]) -> list[str]:
-    out = subprocess.run(["git", "log", "--format=", "--name-only", f"{commit}..HEAD", "--", *files],
+def changed_since(commit: str, files: list[str], head: str = "HEAD") -> list[str]:
+    out = subprocess.run(["git", "log", "--format=", "--name-only", f"{commit}..{head}", "--", *files],
                          cwd=ROOT, capture_output=True, text=True).stdout
     return sorted({l for l in out.splitlines() if l.strip()})
 
@@ -883,9 +883,113 @@ def symbol_range(src: str, suffix: str, symbol: str) -> tuple[int, int] | None:
     return start + 1, end
 
 
+def _git_ok(*args: str) -> str:
+    out = subprocess.run(["git", "-c", "core.quotePath=false", *args], cwd=ROOT, capture_output=True, text=True)
+    if out.returncode != 0:
+        sys.stderr.write(out.stderr)
+        raise SystemExit(f"docs_check: git {' '.join(args)} failed")
+    return out.stdout
+
+
+@dataclass
+class Change:
+    """(docs_coupling and --freshness) One changed file: its old/new paths and the changed line ranges on each side."""
+    old: str
+    new: str
+    old_ranges: list[tuple[int, int]] = field(default_factory=list)
+    new_ranges: list[tuple[int, int]] = field(default_factory=list)
+
+
+def diff_changes(base: str, head: str) -> dict[str, Change]:
+    """Files changed from base to head, keyed by both old and new path."""
+    diff = _git_ok("diff", "--no-color", "--no-ext-diff", "--unified=0", "--find-renames", base, head, "--")
+    out: dict[str, Change] = {}
+    cur: Change | None = None
+    for line in diff.splitlines():
+        if line.startswith("diff --git "):
+            cur = None
+        elif line.startswith("--- "):
+            cur = Change(_diff_path(line[4:]), "")
+        elif line.startswith("+++ ") and cur is not None:
+            cur.new = _diff_path(line[4:])
+            for p in {cur.old, cur.new} - {""}:
+                out[p] = cur
+        elif line.startswith("@@") and cur is not None:
+            m = re.match(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", line)
+            if m:
+                a, b = int(m.group(1)), int(m.group(2) if m.group(2) is not None else 1)
+                c, d = int(m.group(3)), int(m.group(4) if m.group(4) is not None else 1)
+                # a pure insertion (b == 0) sits between lines a and a+1: count it as touching both
+                cur.old_ranges.append((a, a + max(b, 1) - 1) if b else (a, a + 1))
+                cur.new_ranges.append((c, c + max(d, 1) - 1) if d else (c, c + 1))
+    # renames and mode-only changes have no ---/+++ lines; pick them up by name
+    for row in _git_ok("diff", "--name-status", "--find-renames", base, head, "--").splitlines():
+        parts = row.split("\t")
+        for p in parts[1:]:
+            out.setdefault(p, Change(parts[1], parts[-1]))
+    return out
+
+
+def _diff_path(spec: str) -> str:
+    spec = spec.rstrip("\t")
+    return "" if spec == "/dev/null" else (spec[2:] if spec[:2] in ("a/", "b/") else spec)
+
+
+def show_at(rev: str, path: str) -> str | None:
+    out = subprocess.run(["git", "show", f"{rev}:{path}"], cwd=ROOT, capture_output=True)
+    return out.stdout.decode("utf-8", "replace") if out.returncode == 0 else None
+
+
+def _hits(rng: tuple[int, int] | None, hunks: list[tuple[int, int]]) -> bool:
+    return rng is not None and any(a <= rng[1] and b >= rng[0] for a, b in hunks)
+
+
+def symbol_changed(ch: Change, base: str, head: str, symbol: str) -> bool:
+    suffix = Path(ch.new or ch.old).suffix
+    old_src = show_at(base, ch.old) if ch.old else None
+    new_src = show_at(head, ch.new) if ch.new else None
+    old_rng = symbol_range(old_src, suffix, symbol) if old_src is not None else None
+    new_rng = symbol_range(new_src, suffix, symbol) if new_src is not None else None
+    if not ch.old_ranges and not ch.new_ranges:          # a pure rename: the symbol moved with its file
+        return False
+    return _hits(old_rng, ch.old_ranges) or _hits(new_rng, ch.new_ranges)
+
+
+def code_changed_since(commit: str, page: Path, text: str, head: str = "HEAD") -> list[str]:
+    """The entries of what a page covers that changed from `commit` to `head`: a whole file (a
+    `covers:` glob, or a cited file) when any commit touched it; a `file#symbol` only when a changed
+    hunk falls inside that symbol's line range at `commit` or at `head` — the rule of the docs-impact
+    check, so a version bump in webapp/serve.py does not age a page that claims one function of it."""
+    fm, _ = parse_frontmatter(text)
+    if isinstance(fm, dict) and isinstance(fm.get("covers"), str):
+        entries = covers_entries(fm["covers"])
+    else:
+        entries = cited_files(page, text)
+    whole: set[str] = set()
+    symbols: list[tuple[str, str]] = []
+    for e in entries:
+        path, _, sym = e.partition("#")
+        if sym:
+            symbols.append((path, sym))
+        elif isinstance(fm, dict) and isinstance(fm.get("covers"), str):
+            whole.update(glob_files(path))
+        else:
+            whole.add(path)
+    whole = {f for f in whole if (ROOT / f).is_file()}
+    out = set(changed_since(commit, sorted(whole), head)) if whole else set()
+    if symbols:
+        ch = diff_changes(commit, head)
+        for path, sym in symbols:
+            c = ch.get(path)
+            if c is not None and symbol_changed(c, commit, head, sym):
+                out.add(f"{path}#{sym}")
+    return sorted(out)
+
+
 def covered_files(page: Path, text: str) -> list[str]:
     """The repository files a page describes: its `covers:` entries expanded (a `file#symbol` counts
-    as the whole file here), or cited_files() when it declares none."""
+    as the whole file here: code areas, the `cited` list), or cited_files() when it declares none.
+    Whether that code *changed* is code_changed_since(), which honours the symbol."""
     fm, _ = parse_frontmatter(text)
     if isinstance(fm, dict) and isinstance(fm.get("covers"), str):
         out: set[str] = set()
@@ -1025,7 +1129,7 @@ def freshness() -> list[dict]:
         behind = int(subprocess.run(["git", "rev-list", "--count", f"{commit}..HEAD"], cwd=ROOT, capture_output=True,
                                     text=True).stdout.strip() or 0) if known else -1
         files = covered_files(page, text)
-        changed = changed_since(commit, files) if known and files else []
+        changed = code_changed_since(commit, page, text) if known and files else []
         rows.append({"page": _rel(page), "commit": commit[:7], "date": str(v.get("date", "")), "behind": behind,
                      "age": stamp_age(str(v.get("date", ""))), "cited": files, "changed": changed})
     return rows

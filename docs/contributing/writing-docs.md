@@ -13,7 +13,9 @@ first `# H1` equals the title (GitHub shows it; the site strips it). Pages under
 carry `verified: {commit, date}`, the commit you last read the page against. A stamp goes stale in
 two ways. The code the page covers can change after that commit: its `covers:` (see
 [Docs impact](#docs-impact)), or else the code it cites (a code excerpt, a linked source file, a
-poster's *Source of truth*). Or the page cites no code and its `date` is more than 60 days old.
+poster's *Source of truth*). A `covers:` entry `file#symbol` goes stale only when a change falls
+inside that definition, as in the docs-impact check, so a version bump elsewhere in
+`webapp/serve.py` does not age a page that claims one of its functions. Or the page cites no code and its `date` is more than 60 days old.
 `make docs-check` prints one notice that counts the stale stamps. The list is
 `python3 tools/docs_check.py --freshness`, and the weekly `docs-freshness` pull request carries
 the same list.
