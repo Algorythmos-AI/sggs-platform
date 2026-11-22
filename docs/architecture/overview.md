@@ -1,11 +1,12 @@
 ---
 title: "Architecture Overview"
 description: "The system in one page: who uses it, the containers across three repositories, production deployment and the five data layers."
+covers: "gateway/routes.json, .github/workflows/deploy-production.yml, dataset.lock.json, scripts/data/fetch_dataset.py, .github/workflows/hukamnama-deploy.yml, .github/workflows/hukamnama-deploy-production.yml"
 sidebar:
   order: 1
 verified:
-  commit: 14c89ad9
-  date: "2026-11-12"
+  commit: c5806fdd
+  date: "2026-11-22"
 ---
 # Architecture Overview
 
@@ -48,8 +49,8 @@ carries no API-base configuration. `gateway/routes.json` decides the routing per
 
 - **Staging** routes each of the <!--fact:contexts:words-->five<!--/fact--> bounded contexts (`reader`, `search`, `verify`, `insights`,
   `knowledge`) to its own function, with `all` — the whole API — as the catch-all.
-- **Production (every release so far, through v1.6.4)** answers every `/api` path with `all`:
-  `production.services` in `gateway/routes.json` is empty.
+- **Production (every release so far; v1.7.3 was live on 2026-11-22)** answers every `/api`
+  path with `all`: `production.services` in `gateway/routes.json` is empty.
 - **From a later release** production routes the five contexts the same way as staging, all five
   in that one release ([services-production](../process/runbooks/services-production.md), step 3).
   It is one line in `gateway/routes.json`; no release has listed them yet.
@@ -62,13 +63,17 @@ every release still deploys as the rollback target until it is retired. See
 
 One part of the system is not in the read-only API above. The
 [Hukamnama service](hukamnama.md) (`services/hukamnama/`) locates the daily Hukamnama · Sri
-Harmandir Sahib in the pinned corpus each morning, serves it by line range with a hash, and pushes
-it to TestFlight builds of the app. It is a long-running process with its own state, so it runs as
-its own Render service, deployed by its own workflow and watched by a dead-man check; today only
-on staging (`api-staging.gurbanisoul.com`). A Cloudflare Worker (`services/hukamnama-edge`) that
-will serve its published days as the public Hukamnama API is built and tested but not deployed.
-On staging the website's `all` function renders the Hukamnama pages, feeds, sitemap and embed
-from that service ([the website](website.md#the-hukamnama-pages-filled-by-the-server-staging-only)).
+Harmandir Sahib in the pinned corpus each morning, serves it by line range with a hash, and can
+push it to the app. It is a long-running process with its own state, so it runs as its own Render
+service in each environment, deployed by its own workflows and never by `deploy-production.yml`:
+staging (`api-staging.gurbanisoul.com`) from `integration` by `hukamnama-deploy.yml`, production
+from a release tag by `hukamnama-deploy-production.yml`, dispatched by the owner. Since v1.7.0 a
+Cloudflare Worker (`services/hukamnama-edge`) serves production's published days as the public
+Hukamnama API at `api.gurbanisoul.com`, and the website's `all` function renders the Hukamnama
+pages, feeds, sitemap and embed from it; on staging they read the staging service
+([the website](website.md#the-hukamnama-pages-filled-by-the-server)). On 2026-11-22 only the
+staging service was sending pushes, which reach TestFlight builds; what runs where is in
+[the Hukamnama service](hukamnama.md#what-runs-today-and-what-is-planned).
 
 ## The five layers
 1. **Scripture core** — `lines` (<!--fact:lines-->60,658<!--/fact--> verbatim rows), raags, sections, authors, vaars.

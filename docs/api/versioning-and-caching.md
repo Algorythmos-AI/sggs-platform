@@ -1,11 +1,12 @@
 ---
 title: "Versioning and caching"
 description: "The two API surfaces and their errors, request ids, which responses the browser and the CDN may cache and how ETags make revalidation cheap, the security headers, and X-Service."
+covers: "webapp/serve.py#_CACHEABLE, webapp/serve.py#_CACHE_IMMUTABLE, webapp/serve.py#_ACCESS_LOG, webapp/serve.py#_RID_OK, webapp/serve.py#H, webapp/serve.py#BoundedThreadingHTTPServer, webapp/sggs/core.py#_int_str, webapp/sggs/core.py#_int, webapp/sggs/search.py#do_search, webapp/sggs/search.py#_route_search, webapp/sggs/reader.py#_route_lines, webapp/sggs/reader.py#_route_shabad, webapp/sggs/verification.py#MAX_CLAIM_CHARS"
 sidebar:
   order: 3
 verified:
-  commit: 14c89ad9
-  date: "2026-11-12"
+  commit: c5806fdd
+  date: "2026-11-22"
 ---
 # Versioning and caching
 
@@ -75,9 +76,10 @@ no cached body outlives the database it came from.
 
 ## Limits a client will meet
 
-- `limit` ≤ 200 and `offset` ≤ 1,000,000 on search; `ids` lists read at most 300 ids; a query is
-  at most 300 characters; every integer is clamped rather than rejected, except where a value is
-  required.
+- `limit` ≤ 200 and `offset` ≤ 1,000,000 on search; `ids` lists read at most 300 ids; a search
+  query is at most 300 characters and a claim sent to `verify` at most 600. An integer outside its
+  range is clamped rather than rejected; a value that is not an integer, or longer than 12 digits,
+  is a `400`.
 - The server is bounded: a fixed worker pool, a 15-second socket timeout, idle clients dropped.
 - A composition id that is a permanent gap (see [the `comp_id` rule](../data/line-record.md)) is
   `404` on both surfaces.
