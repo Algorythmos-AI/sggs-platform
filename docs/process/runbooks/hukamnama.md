@@ -1,12 +1,12 @@
 ---
 title: "Runbook: the Hukamnama each morning"
 description: "The owner's decisions for Hukamnama · Sri Harmandir Sahib: reading /health, what to do on a held day, approve, hold and resend, correcting a day after it is published, and the deploy freeze."
-covers: "services/hukamnama/hukamnama/__main__.py, services/hukamnama/hukamnama/engine.py, services/hukamnama/hukamnama/store.py, services/hukamnama/hukamnama/api.py, services/hukamnama/hukamnama/push.py, services/hukamnama/hukamnama/purge.py, scripts/ci/hukamnama_watch.py, scripts/ci/hukamnama_preflight.py, .github/workflows/hukamnama-deploy.yml, .github/workflows/hukamnama-deploy-production.yml, .github/workflows/hukamnama-deadman.yml, .github/workflows/hukamnama-morning.yml"
+covers: "services/hukamnama/hukamnama/__main__.py, services/hukamnama/hukamnama/engine.py, services/hukamnama/hukamnama/store.py, services/hukamnama/hukamnama/api.py, services/hukamnama/hukamnama/push.py, services/hukamnama/hukamnama/purge.py, services/hukamnama/hukamnama/approve.py, scripts/ci/hukamnama_watch.py, scripts/ci/hukamnama_preflight.py, .github/workflows/hukamnama-deploy.yml, .github/workflows/hukamnama-deploy-production.yml, .github/workflows/hukamnama-deadman.yml, .github/workflows/hukamnama-morning.yml"
 sidebar:
   order: 7
   label: "Hukamnama: each morning"
 verified:
-  commit: c5806fdd
+  commit: 47a51a23
   date: "2026-11-22"
 ---
 # Runbook: the Hukamnama each morning
@@ -84,7 +84,7 @@ poll interval.
 
 | Tool | Effect for readers | Effect on push |
 |---|---|---|
-| `approve` | the range is published at that moment, with its `range_sha256`; the snapshot file is written (or rewritten) | `asap` devices get it then, **only while it is still that Amritsar day**; a day approved after its Amritsar midnight is never pushed |
+| `approve` | the range is published at that moment, with its `range_sha256`; the snapshot file is written (or rewritten) | `asap` devices get it then. Approved after its Amritsar midnight, it is still pushed (with its own date) until **05:00 IST**, unless the new day is already published; later than that it is never pushed |
 | `hold` | the day reads as `pending`; its snapshot file is deleted | nothing new is queued; a notification already delivered stays on the phone |
 | `correct` | the published range is replaced; the day keeps its first publication time and gains `corrected_at`; the snapshot is rewritten | nothing is queued by itself: follow it with `resend` the same Amritsar day |
 | `pause` | every day reads as `pending` everywhere and the snapshot drops every day file; `resume` restores them | nothing is sent while paused; queued sends wait |
@@ -117,7 +117,10 @@ Ang).
    most recent day under its own date, and nothing is wrong.
 
 For a `held_veto`, the alert names the Ang or the first opening word that differs; check which
-page is right first, then approve that range, or leave the day held.
+page is right first, then approve that range, or leave the day held. With
+`HUKAMNAMA_APPROVE_SECRET` set, the alert names that range and has **Approve** and **Review**
+buttons that publish exactly it (re-checked against the corpus at the tap); see
+[the service runbook](hukamnama-service.md#one-tap-approve-from-the-alert-held_veto).
 
 ## After a day is published
 

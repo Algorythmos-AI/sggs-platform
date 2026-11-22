@@ -55,12 +55,15 @@ class Engine:
         self._etag[url], self._body[url] = f.etag, f.body
         return f.body
 
-    def _alert(self, day, kind: str, detail: str, now: datetime) -> None:
+    def _alert(self, day, kind: str, detail: str, now: datetime, approve: dict | None = None) -> None:
         if self.store.alert(day, kind, detail, now):
             log.warning("ALERT %s %s: %s", day, kind, detail)
             if self.alert_hook:
                 try:
-                    self.alert_hook(day.isoformat(), kind, detail)
+                    if approve:
+                        self.alert_hook(day.isoformat(), kind, detail, approve=approve)
+                    else:
+                        self.alert_hook(day.isoformat(), kind, detail)
                 except Exception:                      # an alert channel must never stop polling
                     log.exception("alert hook failed")
 
@@ -135,8 +138,14 @@ class Engine:
             self.store.observe(day, "mukhwak", now, "candidate", cand_key=veto.key(), structure=veto.structure)
             if not agrees(res, veto, self.con):
                 reason = f"sgpc.net disagrees: {disagreement(res, veto, self.con)}"
-                self.store.hold(day, now, "auto", reason)
-                self._alert(day, "held_veto", reason, now)
+                if self.store.hold(day, now, "auto", reason):
+                    # hs.sgpc.net's page did resolve exactly: keep that run so the owner can approve
+                    # exactly it from the alert (approve.py re-proves it at the tap)
+                    self.store.set_held_range(day, res)
+                self._alert(day, "held_veto", reason, now, approve={
+                    "first_line_id": res.first_line_id, "last_line_id": res.last_line_id,
+                    "range_sha256": res.range_sha256, "fingerprint": self.fingerprint,
+                    "ang": res.ang, "line_count": res.line_count})
                 return TickResult("held", reason)
         if self.store.publish(day, res, self.fingerprint, now, "auto"):
             log.info("published %s: Ang %s lines %s-%s", day, res.ang, res.first_line_id, res.last_line_id)

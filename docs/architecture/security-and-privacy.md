@@ -1,11 +1,11 @@
 ---
 title: "Security and privacy"
 description: "The defences at each layer — browser headers, a read-only API with bounded input, an immutable database, the Hukamnama service, CI — what is and is not collected about readers, and the known gaps."
-covers: "webapp/serve.py#H, webapp/serve.py#BoundedThreadingHTTPServer, webapp/sggs/core.py#db, webapp/sggs/core.py#_int_str, frontend/vercel.json, frontend/src/pages/[lang]/privacy.astro, .github/workflows/security.yml, services/hukamnama/hukamnama/api.py, services/hukamnama/hukamnama/devices.py, services/hukamnama-edge/wrangler.toml"
+covers: "webapp/serve.py#H, webapp/serve.py#BoundedThreadingHTTPServer, webapp/sggs/core.py#db, webapp/sggs/core.py#_int_str, frontend/vercel.json, frontend/src/pages/[lang]/privacy.astro, .github/workflows/security.yml, services/hukamnama/hukamnama/api.py, services/hukamnama/hukamnama/devices.py, services/hukamnama/hukamnama/approve.py, services/hukamnama-edge/wrangler.toml"
 sidebar:
   order: 8
 verified:
-  commit: c5806fdd
+  commit: 47a51a23
   date: "2026-11-22"
 ---
 # Security and privacy
@@ -53,7 +53,7 @@ state, and its HTTP surface is different from the scripture API's:
 
 | Defence | How | Where |
 |---|---|---|
-| A small write surface | the only writes are `PUT` and `DELETE /v1/devices/<token>`; `POST` is a 405. A registration body is at most 1,024 bytes and is parsed into a fixed shape (APNs environment, mode, schedule, corpus fingerprint, the token it replaces); nothing else is accepted | `api.py`, `devices.py` |
+| A small write surface | the reader-facing writes are `PUT` and `DELETE /v1/devices/<token>`; any other `POST` is a 405. The one other write is the owner's one-tap approve (`POST /owner/approve`, `approve.py`): it exists only when `HUKAMNAMA_APPROVE_SECRET` is set (otherwise 404), is rate-limited, accepts only an HMAC-signed request for the exact range the `held_veto` alert carried, re-proves it against the corpus, and only for a day still held automatically within 2 days; its `GET` changes nothing. A registration body is at most 1,024 bytes and is parsed into a fixed shape (APNs environment, mode, schedule, corpus fingerprint, the token it replaces); nothing else is accepted | `api.py`, `devices.py` |
 | Nothing about a reader beyond the token | no account, name, time zone, locale or IP address is stored; there is no access log; a token unused for 180 days is pruned | `devices.py`, `api.py`, `push.py` |
 | Rate limits | reads 120 a minute per client address (a backstop behind the edge), device writes 20 a minute per address; the counters are in memory for one minute. The edge Worker limits public reads to 120 a minute per address too | `api.py`, `devices.py`, `services/hukamnama-edge/wrangler.toml` |
 | Reached only through the edge | with `HUKAMNAMA_ORIGIN_REQUIRED=on`, `/v1` answers only requests that carry the edge's `X-Origin-Auth` secret (compared in constant time) and refuses others with 403; `/health` stays open. With a secret set, the client address is taken from the edge's `X-Client-IP` only, so a caller cannot choose its own rate-limit bucket | `api.py` |
