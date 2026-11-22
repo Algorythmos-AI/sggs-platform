@@ -66,6 +66,8 @@ CREATE INDEX IF NOT EXISTS sends_due ON sends(state, next_at);
 
 CORRECTION = "correction:"          # meta key prefix: correction:<date> -> when, and the hashes before
 PAUSED = "paused"                   # meta key: present while the owner has paused serving and sending
+HELD_RANGE = "held_range:"          # meta key prefix: held_range:<date> -> the exact run a veto hold
+                                    # had resolved (approve.py); never served, never a decision
 
 
 def _iso(t: datetime) -> str:
@@ -131,6 +133,33 @@ class Store:
                 self._con.execute("INSERT INTO audit (at, actor, action, amritsar_date, detail) VALUES (?,?,?,?,?)",
                                   (_iso(now), by, "hold", day.isoformat(), reason))
         return changed
+
+    def set_held_range(self, day: date, res: Resolution) -> None:
+        """Keep the exact run hs.sgpc.net resolved to when the veto held the day, so the owner can
+        approve exactly it from the alert. It is kept apart from ``hukamnamas.resolution`` so no
+        reader of a decision (public snapshot, push, the watch) can ever mistake it for published."""
+        self.set_meta(HELD_RANGE + day.isoformat(), json.dumps(
+            {"first_line_id": res.first_line_id, "last_line_id": res.last_line_id, "range_sha256": res.range_sha256}))
+
+    def held_range(self, day: date) -> dict | None:
+        raw = self.get_meta(HELD_RANGE + day.isoformat())
+        return json.loads(raw) if raw else None
+
+    def publish_if_held(self, day: date, res: Resolution, fingerprint: str, now: datetime, by: str,
+                        reason: str) -> bool:
+        """Publish a day only while it is still an automatic hold (checked and written under one
+        lock, so a concurrent ``approve`` or ``hold`` from the shell wins and this returns False)."""
+        with self._lock:
+            row = self._con.execute("SELECT status, decided_by FROM hukamnamas WHERE amritsar_date = ?",
+                                    (day.isoformat(),)).fetchone()
+            if row != ("held", "auto"):
+                return False
+            self._con.execute("INSERT OR REPLACE INTO hukamnamas VALUES (?, 'published', ?, ?, ?, ?, ?)",
+                              (day.isoformat(), json.dumps(asdict(res), ensure_ascii=False), fingerprint,
+                               _iso(now), by, reason))
+            self._con.execute("INSERT INTO audit (at, actor, action, amritsar_date, detail) VALUES (?,?,?,?,?)",
+                              (_iso(now), by, "publish", day.isoformat(), res.key()))
+        return True
 
     def correct(self, day: date, res: Resolution, fingerprint: str, now: datetime, by: str, reason: str) -> bool:
         """Replace a published day's range with the right one. Returns False when the day is not
