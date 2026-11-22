@@ -118,17 +118,38 @@ touches while neither the page nor its `verified` stamp changes, and posts the l
 on the pull request, updated on each push and each edit of the description. Tests, lockfiles, built output, `CHANGELOG.md` and the
 generators of generated pages are not counted.
 
-For each listed page, re-read it against the code and either update it or move its stamp. When
-no page needs a change, say why in the pull request description, on a line of its own:
+For each listed page, re-read it against the code and either update it or move its stamp. When a
+listed page needs no change, say why in the pull request description, on a line of its own that
+names the page:
+
+```text
+Docs-impact: docs/architecture/search-waterfall.md — renames a private helper; no tier or weight moved
+```
+
+One line per page; the reason must be at least ten characters, and a line whose reason is still
+the `<…>` placeholder excuses nothing. The comment on the pull request prints the exact lines to
+fill in. A blanket line excuses only the pages covered through the files they cite:
 
 ```text
 Docs-impact: none — renames a private helper; no behaviour a page describes changed
 ```
 
-The reason must be at least ten characters. The check reports only for now; the runbook says how
-it is turned on ([Docs site](../process/runbooks/docs-site.md#the-docs-impact-check)).
+It never excuses a page that declares `covers:`. Until 2026-11-22 it did, and one blanket line
+waved through every flagged page of a pull request at once: replayed with today's `covers:`, 11 of
+the 33 pull requests merged from 12 to 22 November changed code a page explicitly claims without
+touching that page or naming it. Run
+`python3 tools/docs_coupling.py origin/integration..HEAD` before opening the pull request (the
+`sggs-docs-sync` skill does it for an agent).
+
+The check is **enforced** for `covers:` pages: such a page that is neither updated, re-stamped nor
+named on its own line fails the `docs-coupling` job. Pages covered only through cited files are
+reported, never failed. A release pull request (`integration` → `main`) and a bot's branch
+(`bot/…`) are reported but never fail. The runbook says how to switch enforcement off
+([Docs site](../process/runbooks/docs-site.md#the-docs-impact-check)).
 [Docs health](../reference/docs-health.md) shows the same numbers across the whole wiki: fresh
-stamps, coupling debt over 30 days, and how often code changes touch `docs/`.
+stamps, coupling debt over 30 days, and how often code changes touch `docs/`. Stale stamps are
+re-read by the weekly re-read bot, whose pull request a person reviews
+([the re-read bot](../process/runbooks/docs-site.md#the-re-read-bot)).
 
 ### New code needs a page
 
