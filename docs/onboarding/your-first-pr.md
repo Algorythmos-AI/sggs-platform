@@ -67,8 +67,8 @@ make pr-checks PR=<number>
 ```
 
 Every check is documented in [CI gates](../process/ci-gates.md). The ones that must be green to
-merge into `integration` are `python`, `frontend`, `integrity` and `secrets`; the others (`docs`,
-`playwright`, `static-analysis`, …) still run and the owner will not merge over a red one. A failing
+merge into `integration` are `python`, `frontend`, `integrity`, `secrets`, `deps` and `docs`; the others
+(`playwright`, `static-analysis`, …) still run and the owner will not merge over a red one. A failing
 check tells you the file and the line; fix it on the same branch and push again.
 
 ## 6. You cannot merge — and that is the design

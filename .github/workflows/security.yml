@@ -46,9 +46,21 @@ jobs:
           fi
           tar -xzf "$GITLEAKS_TARBALL" gitleaks
           ./gitleaks version
+      # Pull requests and pushes scan the working tree (--no-git). The Monday schedule scans the
+      # whole git history of the checked-out branch (fetch-depth 0 above); known historical
+      # findings that are not secrets are listed by fingerprint in .gitleaksignore.
       - name: gitleaks (open-source binary — no org license needed)
+        env:
+          GITLEAKS_MODE: ${{ github.event_name == 'schedule' && 'history' || 'tree' }}
         run: |
-          ./gitleaks detect --source . --no-git --redact --no-banner --config .gitleaks.toml --exit-code 1
+          set -euo pipefail
+          if [ "$GITLEAKS_MODE" = history ]; then
+            [ "$(git rev-parse --is-shallow-repository)" = false ] || { echo "::error::history scan needs a full clone"; exit 1; }
+            echo "scanning $(git rev-list --count HEAD) commits of history"
+            ./gitleaks detect --source . --gitleaks-ignore-path .gitleaksignore --redact --no-banner --config .gitleaks.toml --exit-code 1
+          else
+            ./gitleaks detect --source . --no-git --redact --no-banner --config .gitleaks.toml --exit-code 1
+          fi
   static-analysis:
     runs-on: ubuntu-latest
     steps:

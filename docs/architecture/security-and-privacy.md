@@ -82,8 +82,9 @@ Both sites send their headers from `vercel.json`:
 - **Least-privilege workflows.** Every workflow declares `permissions:`; most are
   `contents: read`, with `issues: write` only where a workflow files an issue, and
   `contents: write` only for tagging a release.
-- **Scans** (`security.yml`): gitleaks on every change (the required `secrets` check);
-  `npm audit --audit-level=high` for the website and the wiki (dated exceptions only for advisories with no fix, in `scripts/ci/npm-audit-exceptions.json`); bandit, semgrep and actionlint.
+- **Scans** (`security.yml`): gitleaks on every change (the required `secrets` check), and over
+  the whole git history every Monday (known non-secrets listed by fingerprint in `.gitleaksignore`);
+  the required `deps` check, `npm audit --audit-level=high` for the website and the wiki (dated exceptions only for advisories with no fix, in `scripts/ci/npm-audit-exceptions.json`); bandit, semgrep and actionlint.
   Dependabot proposes npm, Actions and Docker updates weekly.
 - **The dataset is fetched only by pin.** `fetch_dataset.py` downloads the exact object named in
   `dataset.lock.json` and checks its SHA-256 and size; `build_api_functions.py --verify-output`
@@ -127,11 +128,11 @@ Store Connect, redirects permanently to `/en/privacy`:
 These are open and tracked here so nobody mistakes them for guarantees:
 
 - **Static analysis does not block.** bandit runs with `|| true` and semgrep with
-  `continue-on-error`; only the secret scan is a required check. `npm audit` fails its job but
-  is not in the branch rulesets.
+  `continue-on-error`; of the scans only the secret scan (`secrets`) and `npm audit` (`deps`)
+  are required checks.
 - **Not every Action is pinned to a SHA.** The deploy and docs workflows are; `web-ci`,
-  `security`, `e2e` and several others use version tags. gitleaks is downloaded without a
-  checksum check.
+  `security`, `e2e` and several others use version tags (gitleaks itself is a pinned release
+  checked against its SHA-256).
 - **The website's CSP allows inline script** (`'unsafe-inline'`), unlike the wiki's hash-based
   policy.
 - **No application rate limiting.** The API relies on its bounded input and the platform's own

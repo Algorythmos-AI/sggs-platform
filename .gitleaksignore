@@ -1,0 +1,9 @@
+# Known historical gitleaks findings, one fingerprint per line (commit:file:rule:line).
+# Read only by the Monday history scan (.github/workflows/security.yml, job `secrets`);
+# pull-request and push runs scan the working tree with --no-git, where these never match.
+# Add a line only for a finding proven not to be a real secret, with the reason above it.
+# A real secret is never ignored: rotate it, then add its fingerprint.
+
+# Test canary, not a credential: test_token_is_never_printed passed a fake VERCEL_TOKEN literal to
+# prove vercel_api.py never prints it. Replaced by a run-time-built canary in 80cb73c0.
+df69071daee907fc8d35064669cab3b01984312b:webapp/tests/test_docs_deploy_scripts.py:generic-api-key:67

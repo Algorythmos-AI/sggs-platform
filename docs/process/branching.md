@@ -64,12 +64,12 @@ source of truth — keep this list in step with them). The script **merges** eac
 ruleset (`scripts/gh/merge_ruleset.py`): keys GitHub added that the file does not mention are kept,
 never reset to a weaker default. Run it with `--dry-run` first; it prints exactly what would change.
 - `main`: PR + 1 approval + CODEOWNERS + resolved threads + strict status checks `python`,
-  `frontend`, `integrity`, `versions`, `secrets`, `static-analysis`, `docs`; no deletion or force-push.
+  `frontend`, `integrity`, `versions`, `secrets`, `deps`, `static-analysis`, `docs`; no deletion or force-push.
   `docs` gates the **merge** only: `deploy-production` waits on every other required check but not
   on the wiki's (`wait_for_checks.py --exclude docs`), which deploys the wiki on its own.
   **No linear-history rule** (see Merge strategy).
-- `integration`: PR + CODEOWNERS + checks `python`, `frontend`, `integrity`, `secrets`, `docs` (the
-  wiki job, ADR-0012); no deletion or force-push.
+- `integration`: PR + CODEOWNERS + checks `python`, `frontend`, `integrity`, `secrets`, `deps` (the npm audit
+  gate), `docs` (the wiki job, ADR-0012); no deletion or force-push.
 - Tags `v*`: no deletion or force-push.
 - `playwright` and the iOS jobs are not required checks, but `deploy-staging` /
   `deploy-production` wait for `playwright` on the exact commit before deploying.
