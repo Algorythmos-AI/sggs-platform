@@ -30,7 +30,7 @@ REPO=Algorythmos-AI/sggs-platform bash scripts/gh/apply_rulesets.sh
 
 ### The pin bot's token (`DOCS_BOT_TOKEN`)
 
-`docs-pins` and `docs-freshness` open their pull requests with a fine-grained personal access
+`docs-pins`, `docs-freshness` and `docs-reread` open their pull requests with a fine-grained personal access
 token, so the required checks run on them (a pull request opened with the workflow's own token would trigger none). At
 <https://github.com/settings/personal-access-tokens/new>:
 
@@ -170,7 +170,9 @@ request).
 | every night | the `docs` job re-runs on `integration`; issue *docs: nightly wiki build failing* while red |
 | every day, and right after every release | `docs-pins` opens *docs(wiki): bump the sibling docs pins* when a sibling changed a published file (or issue *docs: the sibling docs changed — bump the pins* until `DOCS_BOT_TOKEN` exists); `deploy-production`'s `release` job dispatches it as its last step. It runs the source-level docs gates on the new pins first ([below](#the-pins-pull-request)) |
 | Mondays | `docs-links` checks every external link (issue *docs: broken external links*); `security` scans the history; `docs-freshness` opens or refreshes the pull request *docs(wiki): weekly refresh — N pages to re-read* (below), or rewrites issue *docs: wiki pages to re-verify* when it cannot |
-| a page is in the weekly refresh | re-read it against the code it cites, fix what drifted, move its `verified` stamp — in commits pushed to `bot/docs-refresh`; merge the pull request with `--merge`. The bot closes it itself when every page is fresh and nothing was regenerated |
+| Mondays, 09:07 UTC | `docs-reread` gives each page still stale to an agent that re-reads it and moves its stamp, and opens *docs(wiki): re-read N page(s) against the code* on `bot/docs-reread` ([below](#the-re-read-bot)); without `ANTHROPIC_API_KEY` it only writes a summary |
+| the re-read pull request is open | review every hunk against the code (the stamp says a person agrees), fix anything wrong in commits on `bot/docs-reread`, merge with `--merge` or close it. No new re-read run starts while it is open |
+| a page is in the weekly refresh and the re-read bot is off | re-read it against the code it cites, fix what drifted, move its `verified` stamp — in commits pushed to `bot/docs-refresh`; merge the pull request with `--merge`. The bot closes it itself when every page is fresh and nothing was regenerated |
 | a scholar review is due | `make review-pack` writes one PDF — Scripture 101, the glossary's scripture and script sections, the contributors — with a sign-off sheet |
 | a new page | frontmatter, links, the scripture rule and the fallback rule are gated; a poster or a widget follows [the contributing guides](../../contributing/README.md) |
 
@@ -192,14 +194,15 @@ went green. The generated pages stayed current only because the `docs` check fai
 whose generated page is stale; what the weekly run adds is a regeneration when an input changes
 outside a pull request (the pinned database or sibling docs).
 
-Merging the pull request does not re-read anything: it carries an empty commit. The pages it lists
-are fresh again only when someone re-reads each one and moves its stamp on `bot/docs-refresh`.
+Merging the pull request does not re-read anything: it carries an empty commit when only pages are
+stale. The pages it lists are fresh again only when each is re-read and its stamp moved: by the
+re-read bot two hours later ([below](#the-re-read-bot)), or by a person on `bot/docs-refresh`.
 
 What the bot will not do:
 
 - **Move a stamp.** A commit that changes a `verified:` block is refused, and the list arrives as
-  the issue instead. Re-reading a page and moving its stamp is a person's work, done on the same
-  branch.
+  the issue instead. Re-reading a page and moving its stamp is the re-read bot's proposal or a
+  person's work, never the refresh's.
 - **Overwrite a person's work.** Every bot commit carries the trailer `Refreshed-by: docs-freshness`;
   when `bot/docs-refresh` holds any other commit, the branch is left alone and only the pull
   request's title and body are refreshed.
@@ -249,19 +252,73 @@ cannot comment. To see the list locally, run
 `python3 tools/docs_coupling.py origin/integration..HEAD`. The rules are in
 [Writing a page](../../contributing/writing-docs.md#docs-impact).
 
-The check reports only and the job is always green. To make it a gate:
+Since 2026-11-22 the check is **enforced** (`COUPLING_ENFORCE: "1"` in the `docs-coupling` job):
+a page that declares `covers:` and was neither updated, re-stamped nor named on its own line
+`Docs-impact: docs/<page>.md — <reason>` fails the job. A blanket `Docs-impact: none — <reason>`
+excuses only pages covered through the files they cite, which are reported and never fail. Two
+kinds of pull request are reported with the reason and never fail: a release
+(`integration` → `main`; each of its pull requests was judged when it merged into `integration`)
+and a bot's branch (`bot/…`; the bot writes its own description, and a person reviews it). A
+pull request opened before the change with only a blanket line goes red on its next push or
+description edit: add the per-page lines the comment prints.
 
-1. Wait out at least two weeks of report-only. Read the comments it posted and the coupling debt
-   on [Docs health](../../reference/docs-health.md). Fix any `covers:` that flags changes the page
-   does not describe. The owner decides when the noise is low enough.
-2. In `.github/workflows/docs-coupling.yml`, set `COUPLING_ENFORCE: "1"` in the `docs-coupling`
-   job's `env`. From then on, a page that declares `covers:` and was neither updated, re-stamped
-   nor excused by a `Docs-impact: none — <reason>` line fails the job. Pages covered only through
-   the files they cite are still just reported.
-3. To make the check block merges, add `docs-coupling` to the required checks of `integration`.
-   That is a ruleset change for the owner.
+The job is **not a required check**: a red `docs-coupling` does not block a merge until the owner
+adds `docs-coupling` to the required checks of `integration` (`.github/rulesets/integration.json`,
+applied with `scripts/gh/apply_rulesets.sh`). That is a ruleset change for the owner.
 
-To turn it off again, set the value back to `"0"`.
+To switch enforcement off, set the value back to `"0"`: the job is green again and only reports.
+
+### The re-read bot
+
+`docs-reread` (`.github/workflows/docs-reread.yml`; Mondays 09:07 UTC, two hours after
+`docs-freshness`, or `gh workflow run docs-reread.yml --ref integration -f max_pages=3`) is the
+actor that re-reads the stale pages. Until it existed, the weekly refresh listed them and nobody
+re-read them.
+
+1. **plan** runs `python3 tools/docs_check.py --freshness --json` on `integration` and
+   `tools/docs_reread.py select`: the pages whose cited code changed since their stamp, at most
+   **8** a run (the dispatch input can ask for fewer), leaving out scripture pages, generated pages
+   and any page an open pull request already edits. It does nothing while an earlier
+   `bot/docs-reread` pull request is open.
+2. **reread** runs one job per page with
+   [`anthropics/claude-code-action`](https://github.com/anthropics/claude-code-action), pinned by
+   commit (v1.0.286). The prompt (`docs_reread.py prompt`) carries the `sggs-docs-sync` rules:
+   read the whole page and the changed code, correct only what the code no longer supports, keep
+   the page's structure, move the stamp to the commit read and today's date only after re-reading
+   the whole page, never touch a Gurmukhi, danda or joiner code point, never edit another file.
+   The agent may read anything, edit only under `docs/` (never `docs/scripture/`), and run only
+   `docs_check.py`, `docs_coupling.py`, `gurmukhi_diff.py` and read-only `git log/diff/show`;
+   `--permission-mode default` denies everything else. Its GitHub token can only read (the job
+   grants `contents: read`), so even a push would be refused; it never commits. Afterwards `docs_reread.py validate` drops the page
+   unless only that page changed, a moved stamp names the commit read and today, and no changed
+   line adds or removes a guarded code point.
+3. **pull-request** applies the surviving pages to `integration`, validates them together, runs
+   `docs_check.py` with the pinned database, commits (author: the bot token's owner, trailer
+   `Reread-by: docs-reread`; no other trailer), refuses the commit if `gurmukhi_diff.py` finds
+   anything or a file outside `docs/` changed, then pushes `bot/docs-reread` with `DOCS_BOT_TOKEN`
+   after a dry-run push and opens *docs(wiki): re-read N page(s) against the code*, with each
+   page's summary from the agent. `scripture-diff-guard` fails it again on any Gurmukhi change. A
+   branch holding a person's commits is never overwritten.
+
+**Review it as a person.** Read every hunk against the code; the stamp now says the page is true
+at that commit. Fix what is wrong in commits on `bot/docs-reread`, then merge with `--merge` (the
+stamps name integration commits), or close it. A page the agent could not verify keeps its old
+stamp and its summary says why.
+
+**The key.** Nothing runs until the repository secret `ANTHROPIC_API_KEY` exists (an Anthropic
+API key of the organization's account, ideally in a workspace with a spend limit):
+`gh secret set ANTHROPIC_API_KEY --repo Algorythmos-AI/sggs-platform` (a hidden prompt). Without
+it, or without `DOCS_BOT_TOKEN`, the run only writes a summary saying what it is waiting for and
+stays green.
+
+**Cost.** At most 8 pages a week, one agent each, `--max-turns 40` and a 25-minute timeout per
+page, four at a time; no run while the previous pull request is open. Set a monthly spend limit on
+the key's workspace in the Anthropic console; that is the hard cap.
+
+**Pause it.** Set the repository variable `DOCS_REREAD_PAUSED` to `1`
+(`gh variable set DOCS_REREAD_PAUSED --body 1 --repo Algorythmos-AI/sggs-platform`; delete it to
+resume), or disable the workflow (`gh workflow disable docs-reread.yml`). Revoking the key stops
+it too.
 
 ### Code areas with no page
 
@@ -275,7 +332,8 @@ it cites), or be listed in the file:
 
 - `exempt`, with the reason it never needs a page (built output, tests);
 - `backlog`, the gap known when the gate was added (2026-11-12). It only shrinks: once a page
-  covers an area, the docs check asks for the entry to be removed.
+  covers an area, the docs check prints a notice, and the weekly `docs-freshness` pull request
+  removes the entry (`python3 tools/docs_check.py --areas --prune`), so covered entries do not pile up.
 
 A new area on no page fails `docs_check.py` (and so the `docs` check). The list:
 `python3 tools/docs_check.py --areas`; the count is on [Docs health](../../reference/docs-health.md)

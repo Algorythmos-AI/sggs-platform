@@ -5,6 +5,15 @@ name: docs-coupling
 # usual answer to the report is a `Docs-impact: none — <reason>` line added to the description, and
 # while the job ran only on pushes, 4 of the 20 pull requests merged after 1.6.4 (#386 #388 #389
 # #394) kept a comment flagging pages their final description had accounted for.
+#
+# Enforced since 2026-11-22 for pages that declare `covers:`: such a page must change, have its stamp
+# moved, or be named on its own line `Docs-impact: docs/<page>.md — <reason>`. The blanket line
+# `Docs-impact: none — <reason>` excuses only pages covered through the files they cite. The job is
+# not a required check unless the owner adds `docs-coupling` to the integration ruleset; until then a
+# red run is a signal, not a merge block. Two kinds of pull request are reported but never fail:
+# a release (integration -> main: every pull request in it was judged when it merged into
+# integration) and a bot's branch (bot/…: the bot rewrites its own description, so no one can add a
+# line to it, and a person reviews it).
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
@@ -18,9 +27,10 @@ permissions:
 
 jobs:
   docs-coupling:
-    # Report only: the pages whose covered code this pull request changes while neither the page
-    # nor its `verified` stamp does (tools/docs_coupling.py; docs/contributing/writing-docs.md).
-    # Written to the job summary and to one sticky comment on the pull request.
+    # The pages whose covered code this pull request changes while neither the page nor its
+    # `verified` stamp does (tools/docs_coupling.py; docs/contributing/writing-docs.md). Written to
+    # the job summary and to one sticky comment on the pull request, which prints the exact
+    # Docs-impact lines to add.
     name: docs-coupling
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -28,9 +38,10 @@ jobs:
       contents: read
       pull-requests: write   # the sticky comment, on this job only
     env:
-      # Turn on after two weeks of report-only (the owner decides; docs/process/runbooks/docs-site.md).
-      # When "1", a page that declares `covers:` and was not updated fails this job.
-      COUPLING_ENFORCE: "0"
+      # "1": a page that declares `covers:` and was neither updated, re-stamped nor named on a
+      # Docs-impact line fails this job ("0" turns it back to report-only; the runbook
+      # docs/process/runbooks/docs-site.md#the-docs-impact-check).
+      COUPLING_ENFORCE: "1"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with: { fetch-depth: 0 }
@@ -41,13 +52,21 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           printf '%s\n' "$PR_BODY" > "$RUNNER_TEMP/body.md"
+          skip=""
+          if [ "$BASE_REF" = "main" ] && [ "$HEAD_REF" = "integration" ]; then
+            skip="a release pull request (integration → main); each pull request in it was judged when it merged into integration."
+          elif [ "${HEAD_REF#bot/}" != "$HEAD_REF" ]; then
+            skip="a bot's branch (${HEAD_REF}); the bot writes its own description and a person reviews the pull request."
+          fi
           rc=0
           python3 tools/docs_coupling.py "$BASE_SHA..$HEAD_SHA" --pr-body "$RUNNER_TEMP/body.md" \
-            --summary "$RUNNER_TEMP/coupling.md" > /dev/null || rc=$?
+            --summary "$RUNNER_TEMP/coupling.md" ${skip:+--skip-reason "$skip"} > /dev/null || rc=$?
           cat "$RUNNER_TEMP/coupling.md" >> "$GITHUB_STEP_SUMMARY"
-          exit "$rc"   # always 0 while COUPLING_ENFORCE is off
+          exit "$rc"   # 1 only when COUPLING_ENFORCE is on, there is no skip reason, and a covers: page is unexcused
       - name: One sticky comment on the pull request
         # a fork's pull request gets a read-only token: the summary above is the report there
         if: always() && github.event.pull_request.head.repo.full_name == github.repository

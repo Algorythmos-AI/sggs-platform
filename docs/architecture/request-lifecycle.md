@@ -1,12 +1,12 @@
 ---
 title: "Request lifecycle"
 description: "One request, GET /api/ang/712, followed from the browser through the host rewrite, the request handler, the dispatcher and the bounded context to SQLite and back, in the order the code does it."
-covers: "webapp/serve.py#api"
+covers: "webapp/serve.py#ROUTES, webapp/serve.py#api, webapp/serve.py#readiness, webapp/serve.py#_CACHEABLE, webapp/serve.py#_CACHE_IMMUTABLE, webapp/serve.py#_ACCESS_LOG, webapp/serve.py#_RID_OK, webapp/serve.py#H, webapp/serve.py#BoundedThreadingHTTPServer, webapp/sggs/core.py#db, webapp/sggs/core.py#_int_str, gateway/routes.json, tools/gen_gateway.py"
 sidebar:
   order: 4
 verified:
-  commit: 14c89ad9
-  date: "2026-11-12"
+  commit: c5806fdd
+  date: "2026-11-22"
 ---
 # Request lifecycle
 
@@ -25,7 +25,10 @@ the code named in its footer; the wiki gate keeps the footer honest.
    `/healthz` (liveness) and `/readyz` (every declared table present) before anything else.
 3. **Two API surfaces.** `/api/v1/*` is strict: unknown endpoint → 404; every error is
    `{error: {code, message, request_id}}`. `/api/*` is the legacy surface whose bodies the golden
-   contract pins byte for byte. Anything else is a static file from a realpath jail.
+   contract pins byte for byte. Any other path is offered in turn to the Hukamnama page, feed,
+   sitemap and embed renderers (each answers only when `HUKAMNAMA_API` is set; the pages and the embed also need the
+   language's built page shell), and
+   otherwise is a static file from a realpath jail.
 4. **Dispatch.** `api()` looks up `(first segment, second segment)` in `ROUTES` — <!--fact:routes-->29<!--/fact--> routes, each
    tagged with its bounded context. In split mode a route outside `ENABLED` is a 404.
 5. **The context reads SQLite.** The handler runs parameterised SQL on a connection opened

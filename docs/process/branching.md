@@ -1,11 +1,12 @@
 ---
 title: "Branching & Delivery Flow"
 description: "The branch model: feature branches into integration, release pull requests into main, required checks and pull-request hygiene."
+covers: ".github/rulesets/*.json, scripts/gh/apply_rulesets.sh, scripts/gh/merge_ruleset.py, .github/workflows/version-consistency.yml, .github/workflows/deploy-production.yml, .github/workflows/deploy-staging.yml, scripts/ci/wait_for_checks.py"
 sidebar:
   order: 1
 verified:
-  commit: d2b39998
-  date: "2026-09-26"
+  commit: c5806fdd
+  date: "2026-11-22"
 ---
 # Branching & Delivery Flow
 
@@ -37,13 +38,21 @@ gitGraph
 ```
 
 ## Rules
-- **`integration` is the trunk.** Branch `feature/*` or `fix/*` from it; open a PR
+- **`integration` is the trunk.** Branch from it with a conventional prefix (`feat/*`, `fix/*`,
+  `docs/*`, `ci/*`, `release/*` for a version bump; `bot/*` is the automation's); open a PR
   back into `integration`. Merging to `integration` deploys **staging** (the web with
-  the API as Vercel functions inside it, ADR-0011). TestFlight uploads are **manual** and happen in the app
-  repository (gurbani-soul-ios) — no merge here uploads a build.
+  the API as Vercel functions inside it, ADR-0011) once `python`, `frontend`, `integrity` and
+  `playwright` are green on that commit. A change to the Hukamnama service also redeploys the
+  staging Hukamnama service (`hukamnama-deploy.yml`). TestFlight uploads are **manual** and happen
+  in the app repository (gurbani-soul-ios) — no merge here uploads a build.
 - **`main` is production.** It only ever receives a **release PR from `integration`**
   (or `hotfix/*`). The `version-consistency` gate enforces the source branch.
-  Merging to `main` tags `vX.Y.Z`, cuts a GitHub Release, and deploys production.
+  Merging to `main` runs `deploy-production`: it waits for the required checks and `playwright`,
+  passes the `production-approval` environment (a click only when reviewers are set on it),
+  deploys and verifies the API and the website, promotes, and only then tags `vX.Y.Z`, cuts the
+  GitHub Release and refreshes the wiki's sibling pins. It does not deploy the production
+  Hukamnama service: the owner dispatches `hukamnama-deploy-production.yml` with the tag
+  ([Hukamnama runbook](runbooks/hukamnama.md#deploys-and-the-freeze)).
 - **`hotfix/*`** branches from `main` for urgent production fixes, then is
   back-merged into `integration`.
 

@@ -4,8 +4,10 @@
     python3 tools/docs_check.py            # check docs/ (+ pinned sibling docs when installed)
     python3 tools/docs_check.py --db PATH  # also verify cited scripture against the pinned database
     python3 tools/docs_check.py --freshness [OUT]   # the full list of stamps to re-read (report only)
+    python3 tools/docs_check.py --freshness --json [OUT]   # the same rows as JSON (docs-reread reads it)
     python3 tools/docs_check.py --health OUT.json   # the numbers on docs/reference/docs-health.md
     python3 tools/docs_check.py --areas [OUT]       # which code areas are on a wiki page (report only)
+    python3 tools/docs_check.py --areas --prune [OUT]   # first drop covered entries from the backlog
 
 Every published page (docs/**/*.md except docs/reports/archive and docs/design) must:
   1. carry frontmatter: `title` (8–120 chars, equal to the body's first H1 read as text) and
@@ -47,7 +49,7 @@ import sqlite3
 import subprocess
 import sys
 import unicodedata
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -465,7 +467,7 @@ def check_verified_commit(path: Path, commit: str, text: str = "", date: str = "
         return [Problem(path, 1, f"verified commit {commit[:7]} is not in this repository's history", level="warning")]
     files = covered_files(path, text) if text else []
     if files:
-        changed = changed_since(commit, files)
+        changed = code_changed_since(commit, path, text)
         if changed:
             return [Problem(path, 1, f"code this page cites changed since its stamp {commit[:7]} ({', '.join(changed[:4])}"
                                      f"{' …' if len(changed) > 4 else ''}) — re-read it against the code and move the stamp",
@@ -478,8 +480,8 @@ def check_verified_commit(path: Path, commit: str, text: str = "", date: str = "
     return []
 
 
-def changed_since(commit: str, files: list[str]) -> list[str]:
-    out = subprocess.run(["git", "log", "--format=", "--name-only", f"{commit}..HEAD", "--", *files],
+def changed_since(commit: str, files: list[str], head: str = "HEAD") -> list[str]:
+    out = subprocess.run(["git", "log", "--format=", "--name-only", f"{commit}..{head}", "--", *files],
                          cwd=ROOT, capture_output=True, text=True).stdout
     return sorted({l for l in out.splitlines() if l.strip()})
 
@@ -882,9 +884,113 @@ def symbol_range(src: str, suffix: str, symbol: str) -> tuple[int, int] | None:
     return start + 1, end
 
 
+def _git_ok(*args: str) -> str:
+    out = subprocess.run(["git", "-c", "core.quotePath=false", *args], cwd=ROOT, capture_output=True, text=True)
+    if out.returncode != 0:
+        sys.stderr.write(out.stderr)
+        raise SystemExit(f"docs_check: git {' '.join(args)} failed")
+    return out.stdout
+
+
+@dataclass
+class Change:
+    """(docs_coupling and --freshness) One changed file: its old/new paths and the changed line ranges on each side."""
+    old: str
+    new: str
+    old_ranges: list[tuple[int, int]] = field(default_factory=list)
+    new_ranges: list[tuple[int, int]] = field(default_factory=list)
+
+
+def diff_changes(base: str, head: str) -> dict[str, Change]:
+    """Files changed from base to head, keyed by both old and new path."""
+    diff = _git_ok("diff", "--no-color", "--no-ext-diff", "--unified=0", "--find-renames", base, head, "--")
+    out: dict[str, Change] = {}
+    cur: Change | None = None
+    for line in diff.splitlines():
+        if line.startswith("diff --git "):
+            cur = None
+        elif line.startswith("--- "):
+            cur = Change(_diff_path(line[4:]), "")
+        elif line.startswith("+++ ") and cur is not None:
+            cur.new = _diff_path(line[4:])
+            for p in {cur.old, cur.new} - {""}:
+                out[p] = cur
+        elif line.startswith("@@") and cur is not None:
+            m = re.match(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", line)
+            if m:
+                a, b = int(m.group(1)), int(m.group(2) if m.group(2) is not None else 1)
+                c, d = int(m.group(3)), int(m.group(4) if m.group(4) is not None else 1)
+                # a pure insertion (b == 0) sits between lines a and a+1: count it as touching both
+                cur.old_ranges.append((a, a + max(b, 1) - 1) if b else (a, a + 1))
+                cur.new_ranges.append((c, c + max(d, 1) - 1) if d else (c, c + 1))
+    # renames and mode-only changes have no ---/+++ lines; pick them up by name
+    for row in _git_ok("diff", "--name-status", "--find-renames", base, head, "--").splitlines():
+        parts = row.split("\t")
+        for p in parts[1:]:
+            out.setdefault(p, Change(parts[1], parts[-1]))
+    return out
+
+
+def _diff_path(spec: str) -> str:
+    spec = spec.rstrip("\t")
+    return "" if spec == "/dev/null" else (spec[2:] if spec[:2] in ("a/", "b/") else spec)
+
+
+def show_at(rev: str, path: str) -> str | None:
+    out = subprocess.run(["git", "show", f"{rev}:{path}"], cwd=ROOT, capture_output=True)
+    return out.stdout.decode("utf-8", "replace") if out.returncode == 0 else None
+
+
+def _hits(rng: tuple[int, int] | None, hunks: list[tuple[int, int]]) -> bool:
+    return rng is not None and any(a <= rng[1] and b >= rng[0] for a, b in hunks)
+
+
+def symbol_changed(ch: Change, base: str, head: str, symbol: str) -> bool:
+    suffix = Path(ch.new or ch.old).suffix
+    old_src = show_at(base, ch.old) if ch.old else None
+    new_src = show_at(head, ch.new) if ch.new else None
+    old_rng = symbol_range(old_src, suffix, symbol) if old_src is not None else None
+    new_rng = symbol_range(new_src, suffix, symbol) if new_src is not None else None
+    if not ch.old_ranges and not ch.new_ranges:          # a pure rename: the symbol moved with its file
+        return False
+    return _hits(old_rng, ch.old_ranges) or _hits(new_rng, ch.new_ranges)
+
+
+def code_changed_since(commit: str, page: Path, text: str, head: str = "HEAD") -> list[str]:
+    """The entries of what a page covers that changed from `commit` to `head`: a whole file (a
+    `covers:` glob, or a cited file) when any commit touched it; a `file#symbol` only when a changed
+    hunk falls inside that symbol's line range at `commit` or at `head` — the rule of the docs-impact
+    check, so a version bump in webapp/serve.py does not age a page that claims one function of it."""
+    fm, _ = parse_frontmatter(text)
+    if isinstance(fm, dict) and isinstance(fm.get("covers"), str):
+        entries = covers_entries(fm["covers"])
+    else:
+        entries = cited_files(page, text)
+    whole: set[str] = set()
+    symbols: list[tuple[str, str]] = []
+    for e in entries:
+        path, _, sym = e.partition("#")
+        if sym:
+            symbols.append((path, sym))
+        elif isinstance(fm, dict) and isinstance(fm.get("covers"), str):
+            whole.update(glob_files(path))
+        else:
+            whole.add(path)
+    whole = {f for f in whole if (ROOT / f).is_file()}
+    out = set(changed_since(commit, sorted(whole), head)) if whole else set()
+    if symbols:
+        ch = diff_changes(commit, head)
+        for path, sym in symbols:
+            c = ch.get(path)
+            if c is not None and symbol_changed(c, commit, head, sym):
+                out.add(f"{path}#{sym}")
+    return sorted(out)
+
+
 def covered_files(page: Path, text: str) -> list[str]:
     """The repository files a page describes: its `covers:` entries expanded (a `file#symbol` counts
-    as the whole file here), or cited_files() when it declares none."""
+    as the whole file here: code areas, the `cited` list), or cited_files() when it declares none.
+    Whether that code *changed* is code_changed_since(), which honours the symbol."""
     fm, _ = parse_frontmatter(text)
     if isinstance(fm, dict) and isinstance(fm.get("covers"), str):
         out: set[str] = set()
@@ -985,7 +1091,8 @@ def check_areas(cfg: dict | None = None) -> list[Problem]:
                  kind="area") for a in r["missing"]]
     P += [Problem(where, 1, f"`{a}` in {AREAS_FILE} is not a code area any more: remove it", level="warning", kind="area")
           for a in r["stale_entries"]]
-    P += [Problem(where, 1, f"backlog area `{a}` is covered now ({', '.join(r['covered'][a][:2])}): remove it from the backlog",
+    P += [Problem(where, 1, f"backlog area `{a}` is covered now ({', '.join(r['covered'][a][:2])}): remove it from the backlog "
+                            "(the weekly docs-freshness pull request does: docs_check.py --areas --prune)",
                   level="notice", kind="area") for a in r["backlog_covered"]]
     P += [Problem(where, 1, f"`{a}` in {AREAS_FILE}: give a reason of {MIN_AREA_REASON} characters or more", kind="area")
           for a in r["short_reasons"]]
@@ -993,6 +1100,19 @@ def check_areas(cfg: dict | None = None) -> list[Problem]:
         P.append(Problem(where, 1, f"{len(r['backlog'])} code area(s) have no wiki page yet ({AREAS_FILE} backlog); "
                                    "the list: python3 tools/docs_check.py --areas", level="notice", kind="area"))
     return P
+
+
+def prune_backlog(cfg: dict | None = None) -> list[str]:
+    """Remove from tools/docs_areas.json every backlog entry a page covers now, and return them. The
+    weekly docs-freshness run calls it (`--areas --prune`), so a covered entry is dropped by its pull
+    request instead of piling up as a notice nobody acts on."""
+    p = ROOT / AREAS_FILE
+    cfg = areas_config() if cfg is None else cfg
+    gone = area_coverage(cfg)["backlog_covered"]
+    if gone and p.exists():
+        cfg = {**cfg, "backlog": {a: why for a, why in cfg.get("backlog", {}).items() if a not in gone}}
+        p.write_text(json.dumps(cfg, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return gone
 
 
 def areas_markdown(r: dict | None = None) -> str:
@@ -1005,6 +1125,9 @@ def areas_markdown(r: dict | None = None) -> str:
         if r[key]:
             out += [f"## {title}", "", "| Area | Files |", "|---|---|"]
             out += [f"| `{a}` | {len(r['areas'][a])} |" for a in r[key]] + [""]
+    if r.get("backlog_covered"):
+        out += ["## Backlog entries covered now (the weekly refresh removes them: `--areas --prune`)", ""]
+        out += [f"- `{a}`: {', '.join(r['covered'][a][:2])}" for a in r["backlog_covered"]] + [""]
     return "\n".join(out)
 
 
@@ -1024,7 +1147,7 @@ def freshness() -> list[dict]:
         behind = int(subprocess.run(["git", "rev-list", "--count", f"{commit}..HEAD"], cwd=ROOT, capture_output=True,
                                     text=True).stdout.strip() or 0) if known else -1
         files = covered_files(page, text)
-        changed = changed_since(commit, files) if known and files else []
+        changed = code_changed_since(commit, page, text) if known and files else []
         rows.append({"page": _rel(page), "commit": commit[:7], "date": str(v.get("date", "")), "behind": behind,
                      "age": stamp_age(str(v.get("date", ""))), "cited": files, "changed": changed})
     return rows
@@ -1065,6 +1188,16 @@ def freshness_markdown(rows: list[dict], stale_days: int = STALE_UNTRACKED_DAYS,
                 f"{'not in history' if r['behind'] < 0 else stamp_age(r['date'], today)} |" for r in old]
         out.append("")
     return "\n".join(out)
+
+
+def freshness_json(rows: list[dict], stale_days: int = STALE_UNTRACKED_DAYS, today: dt.date | None = None) -> dict:
+    """The freshness rows as data: every stale page with its reason, the code-changed ones first (most
+    changed files first), as freshness_markdown orders them. Read by docs-reread.yml."""
+    stale = [{**r, "reason": stale_reason(r, stale_days, today)} for r in rows]
+    stale = [r for r in stale if r["reason"]]
+    stale.sort(key=lambda r: (r["reason"] != "code-changed", -len(r["changed"]), -r["behind"], r["page"]))
+    return {"commit": _git("rev-parse", "HEAD").strip(), "stamped": len(rows),
+            "fresh": len(rows) - len(stale), "stale": stale}
 
 
 # ── docs health (docs/reference/docs-health.md): a few numbers, measured at build time ─────────
@@ -1125,19 +1258,87 @@ def code_commit_docs_share(days: int = HEALTH_DAYS) -> dict:
             "pct": round(100 * with_docs / code, 1) if code else None}
 
 
-def coupling_debt(days: int = HEALTH_DAYS) -> dict:
-    """First-parent merges of the last `days` that changed code a page covers without the page or its
-    stamp (the Docs-impact line is not in history, so this counts it as debt: an upper bound)."""
+MERGE_PR_RE = re.compile(r"^Merge pull request #(\d+) from \S+")
+HEALTH_BRANCH = "integration"
+
+
+def health_ref(branch: str = HEALTH_BRANCH) -> tuple[str, str]:
+    """The ref whose first-parent merges the coupling debt walks, and the branch it names. On `main`
+    every first-parent merge is a release bundling many pull requests (the public page said "15 of 15
+    merges" for that reason), so the debt is measured on integration, one merge per pull request:
+    `origin/integration` (a `fetch-depth: 0` checkout has it), else a local `integration`, else HEAD."""
+    for ref in (f"origin/{branch}", branch):
+        if _git("rev-parse", "-q", "--verify", f"{ref}^{{commit}}").strip():
+            return ref, branch
+    return "HEAD", _git("rev-parse", "--abbrev-ref", "HEAD").strip() or "HEAD"
+
+
+def github_repo() -> str | None:
+    """owner/name: GITHUB_REPOSITORY in CI, else parsed from the origin remote."""
+    if os.environ.get("GITHUB_REPOSITORY"):
+        return os.environ["GITHUB_REPOSITORY"]
+    m = re.search(r"github\.com[:/]([^/\s]+/[^/\s]+?)(?:\.git)?\s*$", _git("remote", "get-url", "origin"))
+    return m.group(1) if m else None
+
+
+def fetch_pr_bodies(numbers: list[int]) -> dict[int, str] | None:
+    """The final description of each pull request, by one GraphQL call per 50 numbers (`gh api
+    graphql`). None without a token or on any failure: the caller then labels the debt an upper bound.
+    DOCS_HEALTH_TOKEN wins over GH_TOKEN, so CI can read this repository's pull requests with the
+    workflow's own token while GH_TOKEN stays the sibling-repository reader."""
+    token = os.environ.get("DOCS_HEALTH_TOKEN") or os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    repo = github_repo()
+    if not token or not repo or not numbers:
+        return None if numbers else {}
+    owner, name = repo.split("/", 1)
+    out: dict[int, str] = {}
+    env = {**os.environ, "GH_TOKEN": token}
+    for i in range(0, len(numbers), 50):
+        chunk = numbers[i:i + 50]
+        fields = " ".join(f"p{n}: pullRequest(number: {n}) {{ body }}" for n in chunk)
+        query = f'query {{ repository(owner: "{owner}", name: "{name}") {{ {fields} }} }}'
+        try:
+            r = subprocess.run(["gh", "api", "graphql", "-f", f"query={query}"], capture_output=True, text=True,
+                               timeout=60, env=env)
+            repo_data = json.loads(r.stdout)["data"]["repository"] if r.returncode == 0 else None
+        except (OSError, subprocess.TimeoutExpired, ValueError, KeyError, TypeError):
+            repo_data = None
+        if not isinstance(repo_data, dict):
+            return None
+        for n in chunk:
+            pr = repo_data.get(f"p{n}")
+            if isinstance(pr, dict):
+                out[n] = pr.get("body") or ""
+    return out
+
+
+def coupling_debt(days: int = HEALTH_DAYS, fetch=None, ref: str | None = None, branch: str | None = None) -> dict:
+    """First-parent merges into integration over the last `days` (one per pull request) that changed code
+    a page covers without that page, its stamp, or a Docs-impact line in the pull request's final
+    description excusing it (the rule of tools/docs_coupling.py as it stands today). The description
+    is read from GitHub (`fetch`, default fetch_pr_bodies); without a token the excuses cannot be
+    seen, every flag counts, and the result says `upper_bound: true`."""
     cpl = _coupling()
     specs = cpl.page_specs()
-    merges = _git("log", "--first-parent", "--merges", f"--since={days}.days", "--format=%H", "HEAD").split()
+    if ref is None:
+        ref, branch = health_ref()
+    merges = []
+    for row in _git("log", "--first-parent", "--merges", f"--since={days}.days", "--format=%H%x09%s", ref).splitlines():
+        sha, _, subject = row.partition("\t")
+        m = MERGE_PR_RE.match(subject)
+        merges.append((sha, int(m.group(1)) if m else None))
+    numbers = sorted({n for _, n in merges if n is not None})
+    bodies = (fetch or fetch_pr_bodies)(numbers) if numbers else {}
     with_debt, pages = 0, 0
-    for m in merges:
-        r = cpl.couple(f"{m}^1", m, "", specs)
+    for sha, n in merges:
+        body = (bodies or {}).get(n, "") if n is not None else ""
+        r = cpl.couple(f"{sha}^1", sha, body, specs)
         if r["flagged"]:
             with_debt += 1
             pages += len(r["flagged"])
-    return {"merges": len(merges), "merges_with_debt": with_debt, "page_flags": pages}
+    return {"merges": len(merges), "merges_with_debt": with_debt, "page_flags": pages,
+            "branch": branch or ref, "attributed": sum(n is not None for _, n in merges),
+            "bodies_read": len(bodies or {}), "upper_bound": bodies is None and bool(numbers)}
 
 
 def health(today: dt.date | None = None) -> dict:
@@ -1204,11 +1405,16 @@ def main(argv=None) -> int:
     ap.add_argument("--db", type=Path, default=ROOT / "db" / "sggs.sqlite", help="pinned database (verifies cited scripture)")
     ap.add_argument("--freshness", type=Path, metavar="OUT", nargs="?", const=Path("-"),
                     help="report (never fail) the stamped pages whose cited code changed since their stamp; OUT or stdout")
+    ap.add_argument("--json", action="store_true", help="with --freshness: write the stale pages as JSON")
+    ap.add_argument("--prune", action="store_true", help=f"with --areas: first drop the backlog entries a page covers now from {AREAS_FILE}")
     ap.add_argument("--health", type=Path, metavar="OUT", help="write the docs-health numbers as JSON to OUT and exit 0")
     ap.add_argument("--areas", type=Path, metavar="OUT", nargs="?", const=Path("-"),
                     help="report (never fail) which code areas are on a wiki page (tools/docs_areas.json); OUT or stdout")
     a = ap.parse_args(argv)
     if a.areas is not None:
+        if a.prune:
+            for gone in prune_backlog():
+                print(f"areas: `{gone}` is covered now; removed from the backlog in {AREAS_FILE}")
         md = areas_markdown()
         if str(a.areas) == "-":
             print(md)
@@ -1219,7 +1425,18 @@ def main(argv=None) -> int:
     if a.health is not None:
         h = health()
         a.health.write_text(json.dumps(h, indent=2) + "\n", encoding="utf-8")
-        print(f"health: {h['fresh_pct']}% of {h['stamped']} stamped pages fresh -> {a.health}")
+        d = h["coupling_debt"]
+        print(f"health: {h['fresh_pct']}% of {h['stamped']} stamped pages fresh; coupling debt "
+              f"{d['merges_with_debt']} of {d['merges']} merges on {d['branch']}"
+              f"{' (upper bound: no pull request descriptions read)' if d['upper_bound'] else ''} -> {a.health}")
+        return 0
+    if a.freshness is not None and a.json:
+        data = json.dumps(freshness_json(freshness()), indent=2, ensure_ascii=False) + "\n"
+        if str(a.freshness) == "-":
+            print(data, end="")
+        else:
+            a.freshness.write_text(data, encoding="utf-8")
+            print(f"freshness: JSON written to {a.freshness}")
         return 0
     if a.freshness is not None:
         md = freshness_markdown(freshness())

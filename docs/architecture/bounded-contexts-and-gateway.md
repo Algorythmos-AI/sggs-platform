@@ -1,11 +1,12 @@
 ---
 title: "Bounded contexts and the gateway"
 description: "How one codebase runs as five contexts, how a process is sliced with SGGS_MODULES, and how the /api routing is generated from the route table and proven on every staging deploy."
+covers: "webapp/serve.py#CONTEXT_TABLES, webapp/serve.py#parse_modules, webapp/serve.py#split_mode, webapp/serve.py#readiness, webapp/serve.py#ROUTES, webapp/serve.py#api, webapp/sggs/reader.py#TABLES, webapp/sggs/search.py#TABLES, webapp/sggs/verification.py#TABLES, webapp/sggs/insights.py#TABLES, webapp/sggs/knowledge.py#TABLES, gateway/routes.json, tools/gen_gateway.py, tools/build_api_functions.py, tools/slice_db.py, scripts/ci/verify_functions.py"
 sidebar:
   order: 5
 verified:
-  commit: 14c89ad9
-  date: "2026-11-12"
+  commit: c5806fdd
+  date: "2026-11-22"
 ---
 # Bounded contexts and the gateway
 
@@ -45,24 +46,30 @@ route outside the enabled set is a 404, and startup refuses a database missing a
 
 `gateway/routes.json` says per environment where `/api` goes. Staging lists all five contexts, so
 each has its own Vercel function (`api/svc/<context>`) and `all` catches the rest. Production's
-`services` list is empty, so production (every release so far, through v1.5.2) answers every path
-with `all`. The five contexts go live there together in a later release by listing them again
+`services` list is empty, so production (every release so far; v1.7.4 went live on 2026-11-22)
+answers every path with `all`. The five contexts go live there together in a later release by listing them again
 (services-production step 3; held back from 1.4.0 by owner decision 2026-10-11). Setting
 `api_platform: render` proxies `/api` back to the Render single API — the rollback. `tools/gen_gateway.py`
 combines it with `serve.ROUTES` and writes the rewrites in `frontend/vercel.json`: every prefix of
 a routed context and its `/api/v1` twin to its function, everything else to `all` — staging's rules
 first, host-conditioned, then production's, host-less. An environment that names `hukamnama_api`
-(staging, and production since 1.7.0) also gets the two Hukamnama page routes, the two feed routes, the Hukamnama sitemap and the embed, sent to `all`: the only pages a
-function renders ([the website](website.md)). At deploy time `tools/build_api_functions.py` generates the functions themselves;
+(staging, and production since 1.7.0) also gets seven Hukamnama routes sent to `all`: the
+day page, a dated day and a month archive (`/{lang}/hukamnama`, `/{lang}/hukamnama/YYYY-MM-DD`,
+`/{lang}/hukamnama/YYYY-MM`), the two feeds, the Hukamnama sitemap and the embed. They are the
+only pages a function renders ([the website](website.md)), and `all` is told that environment's
+`hukamnama_api` origin. At deploy time `tools/build_api_functions.py` generates the functions themselves;
 nothing generated is committed.
 
 ## What CI proves
 
-- `gen_gateway.py --check`: the committed rewrites equal what the code generates.
+- `gen_gateway.py --check`, run by `webapp/tests/test_gateway.py` in the web tests: the committed
+  rewrites equal what the code generates, and the Hukamnama rules match exactly the paths the
+  renderers serve.
 - `build_api_functions.py --verify-output`: each function bundles only its entry, the API code and
   its own database slice; `all` also holds the Hukamnama page shell of every language, and no
   other function does.
-- `X-Service` probes: each routed context answers its own routes; `/api/nope` falls through to `all`.
+- `X-Service` probes on every staging deploy (`gen_gateway.py --probes staging`): each routed
+  context answers its own routes; `/api/nope` falls through to `all`.
 - The whole golden contract (<!--fact:contract_records-->311<!--/fact--> records: the seven suites `tools/contract_http.py` replays) replays through the gateway on the staging site.
 
 Reversal is one line: remove a context from `gateway/routes.json` and `all` answers it again on the

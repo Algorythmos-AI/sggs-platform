@@ -1,11 +1,12 @@
 ---
 title: "Architecture"
 description: "How the SGGS Knowledge Base is built: three repositories, one read-only API in five bounded contexts, a pinned database, and the surfaces that show the verbatim text."
+covers: "webapp/serve.py#CONTEXT_TABLES, webapp/sggs/core.py#db, gateway/routes.json, docs-site/vercel.json, .github/workflows/data-canary.yml"
 sidebar:
   order: 0
 verified:
-  commit: 14c89ad9
-  date: "2026-11-12"
+  commit: c5806fdd
+  date: "2026-11-22"
 ---
 # Architecture
 
@@ -20,9 +21,10 @@ In three sentences:
   Gurbani Soul app pins the same database and this repository's golden contract.
 - **One read-only API, <!--fact:contexts:words-->five<!--/fact--> bounded contexts.** Reader, search, verify, insights and knowledge — each
   declares the tables it reads, runs as its own Vercel function (or all together), and opens SQLite
-  read-only and immutable. The website and the wiki call it on the same origin.
+  read-only and immutable. The website calls it on its own origin, and the wiki forwards its
+  `/api` to the website's.
 - **Every deploy is gated and proven by commit.** Nothing reaches production except through CI, and
-  production is re-checked against the pin every six hours.
+  production is re-checked against the pin every six hours (the `data-canary` workflow).
 
 ![Poster 01 — the system landscape: the people, the three surfaces, the one read-only API, the pinned database, and where the verbatim text comes from](../diagrams/posters/01-system-landscape.svg)
 
@@ -37,7 +39,8 @@ In three sentences:
 - [The insights context](insights-context.md) — theme networks, author and raag emphasis, Vaars and related verses: every number precomputed, descriptive only.
 - [The knowledge context](knowledge-context.md) — raag-timing claims credited to their sources, disagreement kept, and forms taken only from headings.
 - [The website](website.md) — a static Astro site with no framework runtime, two layouts, and the API on the same origin.
-- [The Hukamnama service](hukamnama.md) — the daily Hukamnama · Sri Harmandir Sahib: SGPC used only to locate, an exact-match resolver, the owner's hold and approve, push, and what runs today.
+- [Internationalisation](i18n.md) — the trilingual marketing site: locales, language-prefixed pages and redirects, message catalogs, hreflang and the checks.
+- [The Hukamnama service](hukamnama.md) — the daily Hukamnama · Sri Harmandir Sahib: SGPC used only to locate, an exact-match resolver, the owner's tools, push, the public API at the edge, and what runs today in staging and production.
 - [Security and privacy](security-and-privacy.md) — the defences at each layer, what is collected about readers, and the known gaps.
 - [Quality and observability](quality-and-observability.md) — each quality, how it is measured and gated, how production is watched, and what is not yet wired.
 - [Microservices roadmap](microservices-roadmap.md) — how the monolith became modules, then functions, and what is left.
