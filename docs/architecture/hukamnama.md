@@ -5,7 +5,7 @@ covers: "services/hukamnama/**, services/hukamnama-edge/**, scripts/ci/hukamnama
 sidebar:
   order: 10
 verified:
-  commit: 47a51a23
+  commit: a16ec9ad
   date: "2026-11-22"
 ---
 # The Hukamnama service

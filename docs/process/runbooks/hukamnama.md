@@ -1,12 +1,12 @@
 ---
 title: "Runbook: the Hukamnama each morning"
 description: "The owner's decisions for Hukamnama · Sri Harmandir Sahib: reading /health, what to do on a held day, approve, hold and resend, correcting a day after it is published, and the deploy freeze."
-covers: "services/hukamnama/hukamnama/__main__.py, services/hukamnama/hukamnama/engine.py, services/hukamnama/hukamnama/store.py, services/hukamnama/hukamnama/api.py, services/hukamnama/hukamnama/push.py, services/hukamnama/hukamnama/purge.py, services/hukamnama/hukamnama/approve.py, scripts/ci/hukamnama_watch.py, scripts/ci/hukamnama_preflight.py, .github/workflows/hukamnama-deploy.yml, .github/workflows/hukamnama-deploy-production.yml, .github/workflows/hukamnama-deadman.yml, .github/workflows/hukamnama-morning.yml"
+covers: "services/hukamnama/hukamnama/__main__.py, services/hukamnama/hukamnama/engine.py, services/hukamnama/hukamnama/store.py, services/hukamnama/hukamnama/api.py, services/hukamnama/hukamnama/push.py, services/hukamnama/hukamnama/purge.py, services/hukamnama/hukamnama/approve.py, services/hukamnama/hukamnama/peer.py, scripts/ci/hukamnama_watch.py, scripts/ci/hukamnama_preflight.py, .github/workflows/hukamnama-deploy.yml, .github/workflows/hukamnama-deploy-production.yml, .github/workflows/hukamnama-deadman.yml, .github/workflows/hukamnama-morning.yml"
 sidebar:
   order: 7
   label: "Hukamnama: each morning"
 verified:
-  commit: 47a51a23
+  commit: a16ec9ad
   date: "2026-11-22"
 ---
 # Runbook: the Hukamnama each morning
@@ -46,8 +46,8 @@ The rule behind every step: **late is acceptable, wrong is not.** A held day is 
   one issue titled "Hukamnama service: problem on <date> (Amritsar)" (with ` [production]` for
   production), and later runs comment on it.
   It also posts to your phone (the same topic), which covers the service being down. It never
-  restarts or redeploys anything. Nothing watches the production service from outside this way:
-  read its `/health` yourself on a morning that worries you.
+  restarts or redeploys anything. Each environment's job is skipped while its URL variable
+  (`HUKAMNAMA_STAGING_URL`, `HUKAMNAMA_PROD_URL`) is unset.
 - **The morning check.** `hukamnama-morning.yml` reads each website page, the JSON feed and the
   embed at 07:15 and 10:00 IST and compares the Gurmukhi each shows with the API's `range_sha256`
   for the date shown; a mismatch opens one issue per Amritsar date. Each environment's job runs
