@@ -3,6 +3,16 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.7.4] — 2026-11-22
+
+A fix for the daily Hukamnama: a day is no longer held because sgpc.net spells the weekday differently. No scripture, corpus or dataset change.
+
+### Fixed
+- **Hukamnama held when sgpc.net spells the weekday differently** (#446, issue #445): on Saturday 21 November sgpc.net wrote ਸ਼ਨਿਚਰਵਾਰ without the addak, the weekday stayed in the verse the service compares, and the day was held. The weekday is now found by its place, not its spelling: it is the date line's first word, after the verse's closing danda and before the first comma. It is removed only when it is a single word ending in ਵਾਰ. No Gurbani word can be removed this way, and the comparison is as strict as before. 21 November was approved by hand.
+
+### Changed
+- **Wiki** (#442): sibling docs pins bumped.
+
 ## [1.7.3] — 2026-11-20
 
 A fix for the daily Hukamnama: Fridays and Saturdays are no longer held by mistake. No scripture, corpus or dataset change.
