@@ -64,6 +64,7 @@ export const LAYOUT = [
     page('website'),
     page('website/constellation'),
     page('website/contribute'),
+    group('Knowledge Base tools', [pages('website/knowledge-base')]),
     group('Translating the site', [
       page('website/translation'),
       page('website/translation-style-guide'),
