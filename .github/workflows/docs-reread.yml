@@ -14,8 +14,8 @@ name: docs-reread
 #     25-minute timeout each; no run while an earlier bot/docs-reread pull request is open; pages an
 #     open pull request edits, scripture pages, generated pages and the site are never selected;
 #   - the agent has read tools, edits under docs/ only, and runs only the docs tools and read-only
-#     git (--permission-mode default: anything not allowed is denied). Its checkout has no
-#     credentials and its GitHub token is read-only. It never commits;
+#     git (--permission-mode default: anything not allowed is denied). Its GitHub token can only
+#     read (contents: read), so even a push would be refused. It never commits;
 #   - after it, the working tree must change only that page, a moved stamp must name the commit read
 #     and today's date, and no changed line may add or remove a Gurmukhi, danda or joiner code point
 #     (tools/gurmukhi_diff.py) — any breach drops the page from the pull request;

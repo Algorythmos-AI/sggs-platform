@@ -21,9 +21,9 @@ body excuses it:
     characters or more). This is the only excuse a page with `covers:` accepts;
   - `Docs-impact: none — <reason>`: one blanket line. It excuses only pages covered implicitly,
     through the files they cite; never a page that declares `covers:`.
-(Until 2026-11-22 the blanket line excused every page at once: 42 of the 66 pages flagged across the
-34 pull requests merged after 12 Nov were waved through by it, including the pages that claim the
-code they changed.) Noise is not counted: tests, lockfiles, webapp/static/, docs-site/dist/,
+(Until 2026-11-22 the blanket line excused every page at once, including the pages that claim the
+code they changed: replayed with today's `covers:`, 11 of the 33 pull requests merged from 12 to
+22 Nov would fail the per-page rule.) Noise is not counted: tests, lockfiles, webapp/static/, docs-site/dist/,
 CHANGELOG.md, and the generators of the generated pages (their own --check gates cover those).
 
 The exit code is 0, unless COUPLING_ENFORCE is on (1/true/on), when an unsatisfied page that
