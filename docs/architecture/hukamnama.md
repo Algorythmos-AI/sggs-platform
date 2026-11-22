@@ -139,7 +139,8 @@ no time-zone database is needed, and a naive datetime is refused.
 |---|---|
 | 05:00–09:00 | poll every minute |
 | 05:30 | `expected_by`: SGPC stamps the Hukamnama 05:30 AM; a pending answer names this time |
-| 07:00 | `late` alert if nothing has resolved; the dead-man check runs (also at 06:00 and 14:15) |
+| 07:00 | `late` alert if nothing has resolved |
+| 05:15–14:15 | each service checks the other's `/health` every 5 minutes (`peer.py`, `HUKAMNAMA_PEER_URL`) |
 | 09:00–14:00 | poll every 10 minutes |
 | 14:00 | `not_published` alert if still nothing |
 | 04:30–10:00 | deploy freeze for the service (23:00–04:30 UTC in `hukamnama-deploy.yml`) |
@@ -148,8 +149,9 @@ no time-zone database is needed, and a naive datetime is refused.
 
 Every new alert (one per day and kind) is stored, shown on `/health`, and, when
 `HUKAMNAMA_ALERT_NTFY_URL` is set, posted at once to the owner's phone through ntfy (`alerts.py`):
-holds and lost mornings urgent, late or changed pages high. The external dead-man check posts to the
-same topic when the service itself is down. Setup: the [service runbook](../process/runbooks/hukamnama-service.md#phone-alerts-ntfy).
+holds and lost mornings urgent, late or changed pages high. When a service itself is down, its sibling
+posts `peer_down` within about 15 minutes (`peer.py`), and the external dead-man check posts to the
+same topic as a backstop (GitHub runs it hours late). Setup: the [service runbook](../process/runbooks/hukamnama-service.md#phone-alerts-ntfy).
 
 ## Push
 
@@ -189,7 +191,7 @@ serves a future date, and answers 503 rather than another day's text. Device reg
 |---|---|---|
 | Service | Render `sggs-hukamnama-staging` (Singapore, Starter, 1 GB disk at `/var/data`), `api-staging.gurbanisoul.com` | not created |
 | Deploys | `hukamnama-deploy.yml` on a push to `integration` touching the service or the dataset pin, or by dispatch; tests on the exact commit, Render deploy hook with `ref=SHA`, then waits until `/health.commit` equals it | — |
-| Watched by | `hukamnama-deadman.yml` at 06:00, 07:00 and 14:15 IST: one issue per Amritsar date | — |
+| Watched by | the production service (`peer.py`, every 5 min); `hukamnama-deadman.yml` as a backstop (05:37, 07:17, 14:23 IST as scheduled): one issue per Amritsar date | the staging service (`peer.py`); `hukamnama-deadman.yml`, issues titled `[production]` |
 | Reached by | TestFlight builds; the staging website's Hukamnama pages | App Store builds (once the feature is on); the public API through the edge Worker |
 
 The service is not part of the website and API deployment of a release: `deploy-production.yml`
