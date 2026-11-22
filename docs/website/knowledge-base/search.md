@@ -66,6 +66,8 @@ contributor profiles and the Insights network link here with `mode=theme`.
 
 ## Accessibility
 
+- Languages: English only, with Gurmukhi marked `lang="pa"`; see
+  [languages and accessibility](README.md#languages-and-accessibility).
 - The mode chips are `role="radio"` in a `radiogroup`; the arrow keys move between them and Enter
   or Space chooses one.
 - The results region is `aria-live="polite"`. Result cards are focusable and open with Enter or

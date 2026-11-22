@@ -45,6 +45,8 @@ compare reliably; names are said as on [the Contributors page](contributors.md) 
 
 ## Accessibility
 
+- Languages: English only, with Gurmukhi marked `lang="pa"`; see
+  [languages and accessibility](README.md#languages-and-accessibility).
 - The network, resonance and progression charts each have a **data table** after them, closed by
   default (a `details` element), rebuilt whenever the chart is: the 50 strongest co-occurrences,
   the resonances, and the progression.

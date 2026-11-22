@@ -101,7 +101,7 @@ Everything below is in the reader's own browser and is never sent anywhere.
 - a search box that submits to `/search` as a plain form;
 - the current watch of the day (pahar) and the raags the timing layer records for it, each a
   button into the Reader at that raag; a watch with no raag says so;
-- "Continue reading" tiles: the Ang the Reader last turned to, and up to two more for banis read
+- "Continue reading" tiles, at most three: the Ang the Reader last turned to, then the banis read
   part of the way (with the percentage), from the keys above;
 - the "Hukam-style random" button;
 - a door into each tool.
@@ -119,7 +119,7 @@ timing cache (`timing.ts`); see [the Raag Clock](raag-clock.md#fixed-and-solar-w
   languages of the marketing site are on [internationalisation](../../architecture/i18n.md).
 - The tests that walk these pages are in `frontend/e2e/` (`kb-shell*.spec.ts`,
   `kb-reflow.spec.ts` at 320 and 375 px, `kb-contrast.spec.ts`, `kb-motion.spec.ts`,
-  `library.spec.ts` and one spec per tool, named on each tool's page).
+  `library.spec.ts`, and the specs named on each tool's page).
 - D3 and canvas charts honour `prefers-reduced-motion` through `prefersReducedMotion()` in
   `core.ts`; the CSS rule covers only CSS transitions.
 

@@ -58,6 +58,8 @@ digits or `_`, at most 32 characters. The address follows the bani open.
 
 ## Accessibility
 
+- Languages: English only, with Gurmukhi marked `lang="pa"`; see
+  [languages and accessibility](README.md#languages-and-accessibility).
 - Each bani row is a button whose label includes the percentage read; the progress rings are
   decorative and hidden from screen readers, and the day arc is one image with a spoken label.
 - The reading options panel is a modal dialog handled by the overlay stack, as in the Reader.

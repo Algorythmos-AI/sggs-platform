@@ -70,6 +70,8 @@ name with the Mahala as a small badge where it helps; the stored author strings 
 
 ## Accessibility
 
+- Languages: English only, with Gurmukhi marked `lang="pa"`; see
+  [languages and accessibility](README.md#languages-and-accessibility).
 - The filter chips and view buttons are toggle buttons with `aria-pressed`; each voice is a button
   with a spoken label. The medallions and bars are decorative and hidden from screen readers.
 - The compare tray is a `status` region.

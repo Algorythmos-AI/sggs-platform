@@ -86,6 +86,8 @@ The neighbours and their scores are built offline; see
 
 ## Accessibility
 
+- Languages: English only, with Gurmukhi marked `lang="pa"`; see
+  [languages and accessibility](README.md#languages-and-accessibility).
 - The Go to sheet and the reading options are modal dialogs with `inert` while closed; the
   overlay stack (`overlay.ts`) traps Tab, closes the top one on Escape, and returns focus to the
   control that opened it. While anything is open the arrow keys stop turning pages.
@@ -97,5 +99,5 @@ The neighbours and their scores are built offline; see
 ## Known limits
 
 - The place is per browser (see [what a browser keeps](README.md#what-a-browser-keeps)).
-- Related verses are measured on the English translation, so a verse with no translation span has
-  weaker neighbours; a verse with none above the floor shows "No related verses found."
+- Related verses are measured on the English translation; a verse with none above the floor shows
+  "No related verses found."

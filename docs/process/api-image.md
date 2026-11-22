@@ -13,7 +13,8 @@ verified:
 `webapp/Dockerfile` builds the container that runs the API server (`webapp/serve.py`) with its
 database. Render builds it for the `sggs-knowledge-base` service, which is kept as the API's
 rollback target ([environments](environments.md)); CI builds the same image on every pull request
-so a broken Dockerfile or dataset pin fails there first. The Hukamnama service has its own image,
+and every push to `integration` and `main` (`web-ci.yml`, job `api-image`), so a broken Dockerfile
+or dataset pin fails there first. The Hukamnama service has its own image,
 `services/hukamnama/Dockerfile` ([runbook: Hukamnama service](runbooks/hukamnama-service.md)).
 
 ```bash
@@ -37,7 +38,8 @@ relative to `webapp/`, and the image needs `dataset.lock.json` and the fetch scr
    (Why the database comes by pin: [ADR-0008](../adr/0008-dataset-by-pin.md).)
 3. **The server**: `webapp/` and `tools/slice_db.py`, laid out as `serve.py` expects.
 4. **One image, any service.** The build argument and environment variable `SGGS_MODULES`
-   defaults to `all`, every bounded context from the full database (production today). Given one
+   defaults to `all`, every bounded context from the full database, which is what the Render
+   rollback service runs. Given one
    or more contexts (for example `knowledge`), the build cuts that service's slice with
    `tools/slice_db.py`, which proves every kept table equal to the full database and every kept FTS
    index whole, and puts the slice in place of the database at the same path. Render passes a
@@ -78,7 +80,7 @@ The `api-image` job in `.github/workflows/web-ci.yml`:
 ## Changing it
 
 - A new table a context reads must be declared in `CONTEXT_TABLES` (`webapp/serve.py`), or the
-  slice drops it and that service will not start.
+  slice drops it.
 - Keep the database layer before `COPY webapp/`: moving the code above it would make every code
   change download the database again.
 - The repository's `.dockerignore` is an allowlist: only `webapp/`, `dataset.lock.json`, the

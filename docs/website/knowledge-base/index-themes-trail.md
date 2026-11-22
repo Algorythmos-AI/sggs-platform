@@ -28,8 +28,9 @@ a section at its first Ang. The tabs follow focus: the arrow keys move and switc
 only a display toggle), and Enter or Space works on a tile.
 
 **Known limit.** The quick-access list is written by hand in `browse.ts`. Its comment says each Ang
-was checked against the section-header line in the corpus; nothing checks it again when the
-dataset changes, so a dataset that moved a heading would need the list updated.
+was checked against the section-header line in the corpus. The end-to-end suite only checks that
+the tiles render (`frontend/e2e/kb-states.ts`), not their Angs, so a dataset that moved a heading
+would need the list updated by hand.
 
 ## Themes (`/themes`)
 
@@ -71,6 +72,8 @@ cosine over the English, headings left out, verbatim twins removed, a floor of 0
 
 ## Accessibility
 
+- Languages: English only, with Gurmukhi marked `lang="pa"`; see
+  [languages and accessibility](README.md#languages-and-accessibility).
 - The Index tabs are a `tablist` with `aria-selected` and roving `tabindex`; tiles are focusable
   buttons with spoken labels.
 - Theme group titles are headings (`role="heading"`, level 3).

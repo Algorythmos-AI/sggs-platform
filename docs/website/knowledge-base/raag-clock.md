@@ -79,6 +79,8 @@ from the same `pahar.js`, the vectors the app's Swift port asserts against.
 
 ## Accessibility
 
+- Languages: English only, with Gurmukhi marked `lang="pa"`; see
+  [languages and accessibility](README.md#languages-and-accessibility).
 - The dial is a group with a spoken label naming the half of the day it shows; each watch on it is
   a button. The face and its hands are decoration, hidden from screen readers: the time is in words
   under the dial, and the lists below carry the whole content for a keyboard or a screen reader.
