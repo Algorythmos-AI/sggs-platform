@@ -9,8 +9,7 @@ name: docs-coupling
 # Enforced since 2026-11-22 for pages that declare `covers:`: such a page must change, have its stamp
 # moved, or be named on its own line `Docs-impact: docs/<page>.md — <reason>`. The blanket line
 # `Docs-impact: none — <reason>` excuses only pages covered through the files they cite. The job is
-# not a required check unless the owner adds `docs-coupling` to the integration ruleset; until then a
-# red run is a signal, not a merge block. Two kinds of pull request are reported but never fail:
+# a required check on integration (.github/rulesets/integration.json): a red run blocks the merge. Two kinds of pull request are reported but never fail:
 # a release (integration -> main: every pull request in it was judged when it merged into
 # integration) and a bot's branch (bot/…: the bot rewrites its own description, so no one can add a
 # line to it, and a person reviews it).

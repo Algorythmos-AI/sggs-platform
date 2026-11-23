@@ -78,7 +78,9 @@ never reset to a weaker default. Run it with `--dry-run` first; it prints exactl
   on the wiki's (`wait_for_checks.py --exclude docs`), which deploys the wiki on its own.
   **No linear-history rule** (see Merge strategy).
 - `integration`: PR + CODEOWNERS + checks `python`, `frontend`, `integrity`, `secrets`, `deps` (the npm audit
-  gate), `docs` (the wiki job, ADR-0012); no deletion or force-push.
+  gate), `docs` (the wiki job, ADR-0012), `docs-coupling` (the docs-impact check: a page that declares
+  `covers:` must change, move its stamp, or be named on its own `Docs-impact:` line); no deletion or
+  force-push. `docs-coupling` is not required on `main`: a release PR is reported, never failed.
 - Tags `v*`: no deletion or force-push.
 - `playwright` and the iOS jobs are not required checks, but `deploy-staging` /
   `deploy-production` wait for `playwright` on the exact commit before deploying.
