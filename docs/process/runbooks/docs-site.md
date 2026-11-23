@@ -262,9 +262,9 @@ and a bot's branch (`bot/…`; the bot writes its own description, and a person 
 pull request opened before the change with only a blanket line goes red on its next push or
 description edit: add the per-page lines the comment prints.
 
-The job is **not a required check**: a red `docs-coupling` does not block a merge until the owner
-adds `docs-coupling` to the required checks of `integration` (`.github/rulesets/integration.json`,
-applied with `scripts/gh/apply_rulesets.sh`). That is a ruleset change for the owner.
+The job is a **required check** on `integration` (`.github/rulesets/integration.json`, applied by the
+owner with `scripts/gh/apply_rulesets.sh`): a red `docs-coupling` blocks the merge. It runs on every
+pull request, never path-filtered, so it can never sit at "Expected".
 
 To switch enforcement off, set the value back to `"0"`: the job is green again and only reports.
 
