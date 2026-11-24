@@ -7,7 +7,7 @@ import fr from '../src/i18n/messages/fr.json' with { type: 'json' };
 // The one-day Gurpurab banner (components/GurpurabBanner.astro + the decision script in
 // layouts/Marketing.astro). It shows only on the reader's own 24 Nov 2026, inside the hard UTC
 // window [2026-11-23T10:00Z, 2026-11-25T10:00Z), unless dismissed. Under automation it stays hidden
-// unless gp557_force is set, so every other suite sees the page unchanged; this spec sets it.
+// unless window.__gp557force is set, so every other suite sees the page unchanged; this spec sets it.
 // Remove this spec with the banner.
 
 const BANNER = '[data-gp-banner]';
