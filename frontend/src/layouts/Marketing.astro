@@ -7,7 +7,6 @@
 import { ClientRouter } from "astro:transitions";
 import Seo from "../components/Seo.astro";
 import Analytics from "../components/Analytics.astro";
-import GurpurabBanner from "../components/GurpurabBanner.astro";
 import "../styles/marketing.css";
 import { LOCALES } from "../i18n/locales";
 import { localeOf } from "../i18n/paths";
@@ -24,15 +23,6 @@ const { title, description, path = "/", ogImage, noindex = false } = Astro.props
 const lang = localeOf(Astro.url.pathname);
 const locale = LOCALES[lang];
 const { t } = useT(lang);
-// Gurpurab banner (components/GurpurabBanner.astro), decided by the compact inline <head> script
-// below before first paint, so nothing shifts. It sets html[data-gp557] only when all hold: the
-// reader's local date is 24 Nov 2026; now is inside the hard UTC window [2026-11-23T10:00Z,
-// 2026-11-25T10:00Z) (the 24th from UTC+14 to UTC-10); it was not dismissed (window.__gp557hide for
-// the visit, localStorage gp557_dismissed when storage works); and the page is not under automation
-// (navigator.webdriver) unless a test sets window.__gp557force, so other suites and Lighthouse see
-// the page as it is. ClientRouter copies the new page's <html> attributes on a swap, so
-// astro:after-swap decides again. Kept as one line (and this note here, not in the HTML) because the
-// marketing pages have a 60 KB HTML budget (webapp/tests/test_repo_gates.py). Remove with the banner.
 ---
 <!DOCTYPE html>
 <html lang={locale.htmlLang} data-intl={intlTag(lang)}>
@@ -60,7 +50,6 @@ const { t } = useT(lang);
       } catch (e) {}
     })();
   </script>
-  <script is:inline>(function(){var h=document.documentElement;function g(){try{return localStorage.getItem('gp557_dismissed')}catch(e){return null}}function f(){var o=false;try{var n=Date.now(),d=new Date(n);o=d.getFullYear()*1e4+(d.getMonth()+1)*100+d.getDate()===20261124&&n>=Date.UTC(2026,10,23,10)&&n<Date.UTC(2026,10,25,10)&&!window.__gp557hide&&g()!=='1'&&(!navigator.webdriver||!!window.__gp557force)}catch(e){o=false}h=document.documentElement;o?h.setAttribute('data-gp557',''):h.removeAttribute('data-gp557')}f();if(!window.__gp557bound){window.__gp557bound=true;document.addEventListener('astro:after-swap',f)}})();</script>
   <link rel="preload" href="/fonts/SantLipi-VF.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/SourceSerif4-latin.woff2" as="font" type="font/woff2" crossorigin />
   <ClientRouter />
@@ -68,7 +57,6 @@ const { t } = useT(lang);
 </head>
 <body>
   <a href="#main" class="lp-skip">{t("shell.skipToContent")}</a>
-  <GurpurabBanner />
   <main id="main"><slot /></main>
   <Analytics />
   <script>

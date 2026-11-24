@@ -763,13 +763,5 @@
   "language": {
     "choose": "Langue : en choisir une autre",
     "label": "Langue"
-  },
-  "gurpurab": {
-    "label": "Gurpurab",
-    "fateh": "Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh !",
-    "title": "Le 557ᵉ Parkash Gurpurab de Guru Nanak Dev Ji",
-    "body": "Aujourd’hui, la Sangat célèbre la Lumière de notre premier Guru et son message : le Naam, la seva et l’égalité de tous.",
-    "readAng": "Lire l’Ang {ang}",
-    "dismiss": "Fermer le message du Gurpurab"
   }
 }
