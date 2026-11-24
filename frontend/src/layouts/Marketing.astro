@@ -7,6 +7,7 @@
 import { ClientRouter } from "astro:transitions";
 import Seo from "../components/Seo.astro";
 import Analytics from "../components/Analytics.astro";
+import GurpurabBanner from "../components/GurpurabBanner.astro";
 import "../styles/marketing.css";
 import { LOCALES } from "../i18n/locales";
 import { localeOf } from "../i18n/paths";
@@ -50,6 +51,33 @@ const { t } = useT(lang);
       } catch (e) {}
     })();
   </script>
+  <!-- Gurpurab banner (components/GurpurabBanner.astro): decided before first paint so nothing
+       shifts. Shown only on the reader's own 24 Nov 2026, inside a hard UTC window (the 24th from
+       UTC+14 to UTC-10), unless dismissed. Hidden under automation (navigator.webdriver) unless a
+       test sets gp557_force, so other suites and Lighthouse see the page as it is. ClientRouter
+       copies the new page's <html> attributes on a swap, so astro:after-swap decides again. -->
+  <script is:inline>
+    (function () {
+      function get(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
+      function decide() {
+        var on = false;
+        try {
+          var now = Date.now(), d = new Date(now);
+          var day = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+          on = day === 20261124 && now >= Date.UTC(2026, 10, 23, 10) && now < Date.UTC(2026, 10, 25, 10);
+          if (on && (window.__gp557hide || get('gp557_dismissed') === '1')) on = false;
+          if (on && navigator.webdriver && !window.__gp557force && get('gp557_force') !== '1') on = false;
+        } catch (e) { on = false; }
+        if (on) document.documentElement.setAttribute('data-gp557', '');
+        else document.documentElement.removeAttribute('data-gp557');
+      }
+      decide();
+      if (!window.__gp557bound) {
+        window.__gp557bound = true;
+        document.addEventListener('astro:after-swap', decide);
+      }
+    })();
+  </script>
   <link rel="preload" href="/fonts/SantLipi-VF.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/SourceSerif4-latin.woff2" as="font" type="font/woff2" crossorigin />
   <ClientRouter />
@@ -57,6 +85,7 @@ const { t } = useT(lang);
 </head>
 <body>
   <a href="#main" class="lp-skip">{t("shell.skipToContent")}</a>
+  <GurpurabBanner />
   <main id="main"><slot /></main>
   <Analytics />
   <script>
