@@ -3,6 +3,17 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [1.7.6] — 2026-11-24
+
+A one-day greeting for Guru Nanak Dev Ji's 557th Parkash Gurpurab on gurbanisoul.com. No scripture, corpus or dataset change.
+
+### Added
+- **Gurpurab banner** (#463): on 24 November 2026, every marketing page (en/pa/fr) opens with the Fateh, "Guru Nanak Dev Ji's 557th Parkash Gurpurab", one line on the day, and ਜੋਤਿ ਰੂਪਿ ਹਰਿ ਆਪਿ ਗੁਰੂ ਨਾਨਕੁ ਕਹਾਯਉ ॥ (Sri Guru Granth Sahib Ji · Ang 1408, read from the database), with a link to Ang 1408 and a close button. It shows only on the reader's own 24 November, inside a hard UTC window that ends 25 November 10:00 UTC, so it switches itself off without a redeploy. The Punjabi and French strings were approved by the owner. It is removed in the next release.
+
+### Changed
+- **Privacy** (#463): the local-storage list names one more item, whether you closed a seasonal greeting.
+- **Wiki** (#458, #462): sibling docs pins bumped; docs-coupling is now a required check on integration (#459).
+
 ## [1.7.5] — 2026-11-22
 
 The daily Hukamnama gets faster recovery when a day is held: a held day can be approved from the alert on the owner's phone, a day approved just after midnight still reaches readers' phones, and a stopped service is noticed within minutes. No scripture, corpus or dataset change.

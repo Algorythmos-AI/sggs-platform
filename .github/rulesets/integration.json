@@ -49,6 +49,9 @@
           },
           {
             "context": "docs"
+          },
+          {
+            "context": "docs-coupling"
           }
         ]
       }
