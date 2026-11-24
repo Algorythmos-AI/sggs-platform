@@ -3,6 +3,11 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
+## [Unreleased]
+
+### Removed
+- **Gurpurab banner**: the one-day greeting from 1.7.6 is gone, with its inline head script, its strings (en/pa/fr), its Ang 1408 quote entry and its test. It had switched itself off on 25 November 10:00 UTC. The Privacy wording about a closed seasonal greeting stays, since browsers that closed it still hold `gp557_dismissed`.
+
 ## [1.7.6] — 2026-11-24
 
 A one-day greeting for Guru Nanak Dev Ji's 557th Parkash Gurpurab on gurbanisoul.com. No scripture, corpus or dataset change.
