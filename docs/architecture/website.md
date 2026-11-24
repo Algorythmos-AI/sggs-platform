@@ -312,7 +312,10 @@ All of these follow `HUKAMNAMA_LIVE` (`frontend/src/hukamnama.ts`), so none appe
 - **State stays in the browser.** Preferences (theme, colour theme, paper tone, transliteration, text size, saroop, raag
   clock mode), reading positions and pinned verses (at most 500) live in `localStorage`, as does
   the marketing site's language choice (`gs_lang`, written by the language switcher in
-  `landing.ts`); the
+  `landing.ts`) and, on 24 Nov 2026 only, whether the reader closed the Gurpurab greeting
+  (`gp557_dismissed`, written by `components/GurpurabBanner.astro`; an inline script in
+  `Marketing.astro`'s head decides before first paint whether that one-day banner shows, and the
+  banner goes in the release after); the
   `meta` and timing responses and the Semantic Trail path live in `sessionStorage`. There are no
   cookies and no accounts; the [privacy policy](../../frontend/src/pages/[lang]/privacy.astro) describes
   the same set.

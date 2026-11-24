@@ -480,7 +480,7 @@
     "thisWebsite": "Ce site web",
     "theSiteIsStatic": "Le site est statique, ne contient aucune publicité et ne dépose aucun cookie.",
     "theKnowledgeBasePages": "Les pages de la Base de connaissances (recherche, lecteur et outils d’étude) ne chargent aucun outil de mesure d’audience.",
-    "yourBrowserKeepsYour": "Votre navigateur conserve vos réglages pour ce site dans son stockage local : le thème (clair ou sombre, thème de couleur et teinte du papier), la taille du texte, la translittération, le bouton de tracé traditionnel, l’étiquette d’horaire des raags et le mode concentration. Il conserve aussi l’Ang que vous avez lu en dernier dans le Reader, vos positions de lecture du Nitnem et votre choix de Rehras, les vers que vous épinglez au Study Trail, votre réglage de l’Horloge des raags, et la langue que vous avez choisie pour ce site, si vous en avez choisi une. Pendant votre navigation, le stockage de session garde le chemin que vous suivez dans le Semantic Trail, et l’onglet l’efface quand vous le fermez. Tout cela réside dans votre navigateur ; effacer les données du site le supprime.",
+    "yourBrowserKeepsYour": "Votre navigateur conserve vos réglages pour ce site dans son stockage local : le thème (clair ou sombre, thème de couleur et teinte du papier), la taille du texte, la translittération, le bouton de tracé traditionnel, l’étiquette d’horaire des raags et le mode concentration. Il conserve aussi l’Ang que vous avez lu en dernier dans le Reader, vos positions de lecture du Nitnem et votre choix de Rehras, les vers que vous épinglez au Study Trail, votre réglage de l’Horloge des raags, la langue que vous avez choisie pour ce site, si vous en avez choisi une, et le fait que vous ayez fermé un message de circonstance comme celui du Gurpurab. Pendant votre navigation, le stockage de session garde le chemin que vous suivez dans le Semantic Trail, et l’onglet l’efface quand vous le fermez. Tout cela réside dans votre navigateur ; effacer les données du site le supprime.",
     "theEngineeringWikiAt": "Le wiki technique docs.gurbanisoul.com propose des liens qui ouvrent ChatGPT ou Claude avec l’adresse de la page que vous lisez. Les suivre vous mène à ce service, selon sa propre politique de confidentialité ; le wiki n’enregistre rien.",
     "searchesAndPageRequests": "Les recherches et les demandes de pages sont traitées par notre API. Les hébergeurs que nous utilisons (Vercel pour le site, Render pour l’API) conservent des journaux de serveur standard — adresse IP, agent utilisateur, chemin de la requête et heure — pour la sécurité et l’exploitation, selon leurs propres règles de conservation. Nous n’ajoutons aucun pistage à ces journaux, n’en tirons aucun profil et ne les partageons pas.",
     "contributions": "Contributions",
@@ -763,5 +763,13 @@
   "language": {
     "choose": "Langue : en choisir une autre",
     "label": "Langue"
+  },
+  "gurpurab": {
+    "label": "Gurpurab",
+    "fateh": "Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh !",
+    "title": "Le 557ᵉ Parkash Gurpurab de Guru Nanak Dev Ji",
+    "body": "Aujourd’hui, la Sangat célèbre la Lumière de notre premier Guru et son message : le Naam, la seva et l’égalité de tous.",
+    "readAng": "Lire l’Ang {ang}",
+    "dismiss": "Fermer le message du Gurpurab"
   }
 }

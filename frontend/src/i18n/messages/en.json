@@ -480,7 +480,7 @@
     "thisWebsite": "This website",
     "theSiteIsStatic": "The site is static, carries no advertising, and sets no cookies.",
     "theKnowledgeBasePages": "The Knowledge Base pages (search, reader and the study tools) load no analytics.",
-    "yourBrowserKeepsYour": "Your browser keeps your settings for this site in its local storage: theme (light or dark, colour theme and paper tone), text size, transliteration, the traditional-rendering toggle, the raag-timing label and focus mode. It also keeps the Ang you last read in the Reader, your Nitnem reading positions and Rehras choice, the verses you pin to the Study Trail, your Raag Clock setting, and the language you chose for this site, if you chose one. While you browse, session storage holds the path you walk on the Semantic Trail, and the tab clears it when you close it. All of this lives in your browser; clearing site data removes it.",
+    "yourBrowserKeepsYour": "Your browser keeps your settings for this site in its local storage: theme (light or dark, colour theme and paper tone), text size, transliteration, the traditional-rendering toggle, the raag-timing label and focus mode. It also keeps the Ang you last read in the Reader, your Nitnem reading positions and Rehras choice, the verses you pin to the Study Trail, your Raag Clock setting, the language you chose for this site, if you chose one, and whether you closed a seasonal greeting such as the Gurpurab message. While you browse, session storage holds the path you walk on the Semantic Trail, and the tab clears it when you close it. All of this lives in your browser; clearing site data removes it.",
     "theEngineeringWikiAt": "The engineering wiki at docs.gurbanisoul.com offers links that open ChatGPT or Claude with the address of the page you are reading. Following one takes you to that service, under its own privacy policy; the wiki records nothing.",
     "searchesAndPageRequests": "Searches and page requests are answered by our API. The hosting providers we use (Vercel for the site, Render for the API) keep standard server logs — IP address, user agent, request path and time — for security and operations, under their own retention rules. We do not add tracking to those logs, do not build profiles from them, and do not share them.",
     "contributions": "Contributions",
@@ -763,5 +763,13 @@
   "language": {
     "choose": "Language: choose another",
     "label": "Language"
+  },
+  "gurpurab": {
+    "label": "Gurpurab",
+    "fateh": "Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh!",
+    "title": "Guru Nanak Dev Ji’s 557th Parkash Gurpurab",
+    "body": "Today the Sangat celebrates the Light of our first Guru, and his message of Naam, seva and the equality of all.",
+    "readAng": "Read Ang {ang}",
+    "dismiss": "Dismiss the Gurpurab message"
   }
 }

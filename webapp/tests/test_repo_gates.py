@@ -486,6 +486,7 @@ class StoredKeysAreDisclosed(unittest.TestCase):
         "sggs_pins": "pin", "pahar_mode": "Raag Clock setting", "pahar_loc": "Location",
         "sggs_trail": "Semantic Trail",
         "gs_lang": "language you chose",
+        "gp557_dismissed": "seasonal greeting",  # the one-day Gurpurab banner (24 Nov 2026); remove with it
         "sggs_meta": None, "sggs_timing_v": None,
     }
     PATTERNS = (

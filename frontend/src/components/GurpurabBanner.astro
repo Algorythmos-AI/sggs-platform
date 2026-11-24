@@ -1,0 +1,110 @@
+---
+// GurpurabBanner.astro — a one-day greeting for Guru Nanak Dev Ji's 557th Parkash Gurpurab
+// (24 November 2026). Remove it, its gurpurab.* strings and SITE_QUOTES in
+// scripts/gen_landing_verse.py in the next release; from 25 November it is inert anyway.
+//
+// It is always in the HTML and always hidden by CSS. The inline script in Marketing.astro's <head>
+// decides before first paint whether to show it (html[data-gp557]): the reader's own date must be
+// 24 Nov 2026, inside a hard UTC window, and not dismissed. Without JavaScript it never shows, so
+// it cannot get stuck on. No network calls, no cookies, no analytics; the only state is one
+// localStorage flag for Dismiss.
+//
+// The verse is read from generated/quotes.json (built from db/sggs.sqlite by
+// scripts/gen_landing_verse.py, SITE_QUOTES), never typed; the build throws if the id is missing.
+// It does not use <Verse>: its own class names keep a hidden banner out of every selector that looks
+// for the page's verse (.verse, .cite, [data-line-id]).
+import data from "../generated/quotes.json";
+import { localeOf } from "../i18n/paths";
+import { useT } from "../i18n/t";
+
+const lang = localeOf(Astro.url.pathname);
+const { t } = useT(lang);
+const ANG = 1408;
+const LINE_ID = 59822;
+const q = (data as { quotes: Record<string, { ang: number; author: string | null; gurmukhi: string }> }).quotes[String(LINE_ID)];
+if (!q || q.ang !== ANG) {
+  throw new Error(`GurpurabBanner: line ${LINE_ID} (Ang ${ANG}) is not in generated/quotes.json; run scripts/gen_landing_verse.py.`);
+}
+const cite = t("scripture.cite", { ang: String(q.ang) }) + (q.author ? ` · ${q.author}` : "");
+---
+<aside class="gp-banner" aria-labelledby="gp-title" data-gp-banner>
+  <div class="gp-in">
+    <div class="gp-text">
+      <p class="gp-label">{t("gurpurab.label")}</p>
+      <p class="gp-fateh">{t("gurpurab.fateh")}</p>
+      <p class="gp-title" id="gp-title">{t("gurpurab.title")}</p>
+      <p class="gp-body">{t("gurpurab.body")}</p>
+      <figure class="gp-verse-fig">
+        <p class="gp-verse gm" lang="pa" data-gp-line={LINE_ID}>{q.gurmukhi}</p>
+        <figcaption class="gp-cite">{cite}</figcaption>
+      </figure>
+      <a class="gp-link" href={`/ang/${ANG}`}>{t("gurpurab.readAng", { ang: String(ANG) })}</a>
+    </div>
+    <button type="button" class="gp-close" data-gp-dismiss aria-label={t("gurpurab.dismiss")}>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" />
+      </svg>
+    </button>
+  </div>
+</aside>
+
+<script>
+  // Dismiss: remembered in localStorage when it is available, and for the rest of this window's
+  // visit (window.__gp557hide, read by the head script after each ClientRouter swap) when not.
+  function bind() {
+    const btn = document.querySelector<HTMLButtonElement>("[data-gp-dismiss]");
+    if (!btn || btn.dataset.gpBound) return;
+    btn.dataset.gpBound = "1";
+    btn.addEventListener("click", () => {
+      (window as unknown as { __gp557hide?: boolean }).__gp557hide = true;
+      try { localStorage.setItem("gp557_dismissed", "1"); } catch { /* storage blocked: session-only */ }
+      document.documentElement.removeAttribute("data-gp557");
+      // The focused button just disappeared: hand focus to the page's main landmark.
+      const main = document.getElementById("main");
+      if (main) {
+        if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
+        main.focus({ preventScroll: true });
+      }
+    });
+  }
+  document.addEventListener("astro:page-load", bind);
+</script>
+
+<style>
+  .gp-banner { display: none; background: var(--paper-2); border-bottom: 1px solid var(--line); color: var(--ink); }
+  :global(html[data-gp557]) .gp-banner { display: block; }
+  .gp-in {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start;
+    max-width: 1100px; margin: 0 auto; padding: 22px 20px 24px;
+  }
+  .gp-text { min-width: 0; padding-left: 16px; border-left: 3px solid var(--accent); }
+  .gp-label {
+    margin: 0 0 6px; color: var(--accent-text); font-weight: 700; font-size: 12.5px;
+    letter-spacing: .08em; text-transform: uppercase;
+  }
+  .gp-fateh { margin: 0; color: var(--ink-soft); font-size: 15px; overflow-wrap: anywhere; }
+  .gp-title {
+    margin: 4px 0 6px; font-family: var(--serif-display, "Source Serif 4", Georgia, serif);
+    font-size: clamp(21px, 2.6vw, 28px); line-height: 1.2; font-weight: 600; color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+  .gp-body { margin: 0; font-size: 16px; line-height: 1.55; color: var(--ink); max-width: 62ch; }
+  .gp-verse-fig { margin: 14px 0 10px; }
+  .gp-verse { margin: 0; font-size: clamp(19px, 2.4vw, 24px); line-height: 1.8; color: var(--ink); overflow-wrap: anywhere; }
+  .gp-cite { margin: 6px 0 0; color: var(--accent-text); font-weight: 600; font-size: 13.5px; letter-spacing: .01em; }
+  .gp-link {
+    display: inline-block; color: var(--accent-text); font-weight: 600; font-size: 15px;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .gp-close {
+    display: inline-grid; place-items: center; width: 44px; height: 44px; margin: -6px -8px 0 0;
+    border: 0; border-radius: 999px; background: transparent; color: var(--ink-soft); cursor: pointer;
+  }
+  .gp-close:hover { color: var(--ink); background: var(--line); }
+  .gp-link:focus-visible, .gp-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  :global(:lang(pa)) .gp-label { font-size: 14px; letter-spacing: 0; text-transform: none; }
+  @media (max-width: 767px) {
+    .gp-in { padding: 16px 14px 18px; gap: 6px; }
+    .gp-text { padding-left: 12px; }
+  }
+</style>
