@@ -3,10 +3,15 @@
 The format below (newest first) follows [Keep a Changelog](https://keepachangelog.com);
 entries prior to v1.1.0 are the project's original prose style and are preserved verbatim.
 
-## [Unreleased]
+## [1.7.7] — 2026-11-25
+
+The release that brings the daily Hukamnama from Sri Harmandir Sahib to every Gurbani Soul reader on the App Store: iOS 1.7.7 turns the feature on in App Store builds (G3 copy review signed by the owner 2026-11-25), and they register with this release's production Hukamnama service. No scripture, corpus or dataset change.
 
 ### Removed
-- **Gurpurab banner**: the one-day greeting from 1.7.6 is gone, with its inline head script, its strings (en/pa/fr), its Ang 1408 quote entry and its test. It had switched itself off on 25 November 10:00 UTC. The Privacy wording about a closed seasonal greeting stays, since browsers that closed it still hold `gp557_dismissed`.
+- **Gurpurab banner** (#468): the one-day greeting from 1.7.6 is gone, with its inline head script, its strings (en/pa/fr), its Ang 1408 quote entry and its test. It had switched itself off on 25 November 10:00 UTC. The Privacy wording about a closed seasonal greeting stays, since browsers that closed it still hold `gp557_dismissed`.
+
+### Changed
+- **Wiki** (#466, #467): sibling docs pins bumped.
 
 ## [1.7.6] — 2026-11-24
 
