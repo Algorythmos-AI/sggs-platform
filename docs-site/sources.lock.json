@@ -99,7 +99,7 @@
     "gurbani-soul-ios": {
       "repository": "Algorythmos-AI/gurbani-soul-ios",
       "ref": "main",
-      "commit": "7f4c2188ef932123d93a9f57ef4bdc4d2e4e5e85",
+      "commit": "ac5471e87b55e95d82593e3f0241734f43203083",
       "alias": "ios",
       "include": [
         "docs/ios/*.md",
@@ -135,8 +135,8 @@
           "sha256": "e5cd7a34e20f905a6b4ca95883f15bf541f08e274f4788a2b2e89d407619e875"
         },
         "docs/ios/app-store-listing.md": {
-          "blob": "5cd6bafc32e20d863d6250d1f04fc71b35a97dce",
-          "sha256": "ebf97f90159edbe67ed59465437b34e2020188c551535e8a95692c6ef8c0b239"
+          "blob": "8022f20d17f0e241761695b3866d8b0add65ce26",
+          "sha256": "01b015a9860be441be6f18714f4e9a60a6cd21972276a1d05891a568c4e4f28d"
         },
         "docs/ios/device-checklist-1.4.9.md": {
           "blob": "92ad3f95cdb620257ac9cfde22b60427ccf93b2f",
@@ -155,8 +155,8 @@
           "sha256": "be9c7b4808c07a32838e52d6d47f4b76f7e80567928ed7023f52c90fb8ba767d"
         },
         "docs/ios/production-readiness-audit.md": {
-          "blob": "7c781377ec5e917dcc1511ab9cd475f98975a63e",
-          "sha256": "53fb53c25fb41a5314bc7bf9613293a647496daa91ce83709ba75e1272193029"
+          "blob": "817960cae8ccbbde7dbd7101b4ce35acb399e7bf",
+          "sha256": "8d952b649ae4bd9d8e4456606934def4eae99a41b2a6d7b1735e1dfae17e7a8a"
         },
         "docs/ios/testflight-launch-plan.md": {
           "blob": "0c1c92eaf400284de20e90ca0600347058434b23",
@@ -171,8 +171,8 @@
           "sha256": "0c80116c063464b683cab177a529d21440e894b29bfae8b2ee35bbee484a3630"
         },
         "docs/process/runbooks/app-store-submission.md": {
-          "blob": "c4f1d7a260622043958a044ab76659d8c3d52666",
-          "sha256": "1fa64366b460920e9f7d6e0fb2705709bff468c554ddac83a5979713ea47f78a"
+          "blob": "75168ce1e47bf28033e4e3213a854f653766e70a",
+          "sha256": "8c3c9a70d4c45ed7621bd678e915e59ddbd5068b92123d2869f668ccaf024daf"
         },
         "docs/process/runbooks/ios-hotfix.md": {
           "blob": "0da7e67b7eaff14cb28d349281553dda6066defe",
@@ -211,20 +211,20 @@
           "sha256": "cee1944242c0d2575f21967b3d05f31953e239c1b00c465f629f74f572699a28"
         },
         "ios/testflight-builds.json": {
-          "blob": "4ff4c5fa76000279e45c4355d7683a7ea49f7a0a",
-          "sha256": "da279d14fe5f9b0330e75774227d6f35348166186211ee3c26bc88527341f2a0"
+          "blob": "f3aae80502d36f610715809bec83800cfd1beea1",
+          "sha256": "fb46b81998ac12211463815a30718e434ae9e6bc97dbee7a3da2234d9958a9d2"
         },
         "ios/tests/test_ios_gates.py": {
           "blob": "5fdaf586fabf51c235c6fadbb98873ee400894c6",
           "sha256": "35f09aafb9b4090639459b283a251889f7adb905e13957e7362507ec66c46371"
         },
         "ios/tools/appstore_preflight.py": {
-          "blob": "4f703129b9eb0f009031eaf6deb7a34a2e4179d0",
-          "sha256": "4674077876e5b7257ded7510a505a802db2407520416827eeacc559e1210488c"
+          "blob": "9ea43fc389596d3a4ad8010e29a75b23412f3986",
+          "sha256": "7ebc4b99f9cfdeb805ac082897518c35467fddeffc6e6fbe5cecc291258f64be"
         },
         "ios/tools/testflight_archive.sh": {
-          "blob": "70ff9a3effe992e73646bb4a58d553ffd488c54b",
-          "sha256": "3f0c0fe64cd079d7aa8b7321caaedeedcbc77a9572a628a5893d17a79be85a68"
+          "blob": "74a743dddcd697b05e75d99ddcd214fbba3b921d",
+          "sha256": "3b8967490af4a0fc94b8789585004e332288f0b919d9d3c7e86320373895e618"
         },
         "ios/tools/testflight_ledger.py": {
           "blob": "7d1d6a6ed45ca73d8b7c9345b7b1b8a16b1281fc",
@@ -243,8 +243,8 @@
           "sha256": "2c059b035782151186942756e80112ea5d942747fed3d582a7ad84d7bc557c68"
         },
         "vendor.lock.json": {
-          "blob": "68ef6217ae7a5622f15b5e976bef0b1887f82878",
-          "sha256": "0b64b397aa8b2f59edcb992a91a1063d04db8fce0640a7d72e888f9bb5cd17fa"
+          "blob": "314dd39214e4b32d451cb1d4384cbdea20261535",
+          "sha256": "7b3519077150496771daa0d13a8a93607db8a52b3d2751081151cf09da3f4943"
         }
       }
     }

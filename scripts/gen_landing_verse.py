@@ -77,11 +77,6 @@ if learn_dir.is_dir():
                      f"frontmatter `quotes:` — declare every quoted id.")
         wanted |= declared | body_ids
 
-# Verses quoted by site components outside Learn (each one named, so a stale id is easy to find).
-# GurpurabBanner: the 24 Nov 2026 Gurpurab greeting; remove with the banner in the next release.
-SITE_QUOTES = {59822: "components/GurpurabBanner.astro"}
-wanted |= set(SITE_QUOTES)
-
 quotes = {}
 for lid in sorted(wanted):
     row = conn.execute(

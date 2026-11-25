@@ -83,9 +83,9 @@
       "angs": "Angs — the complete Granth",
       "lines": "lines, each cited by Ang",
       "characters": "characters, zero loss",
-      "networkCalls": "network calls in the app",
+      "networkCalls": "analytics or tracking calls in the app",
       "none": "None",
-      "dataCollected": "data collected — the App Store label is “Data Not Collected”"
+      "dataCollected": "data about what you read, search for or save"
     },
     "verse": {
       "cite": "Sri Guru Granth Sahib Ji · Ang {ang}",
@@ -212,13 +212,13 @@
     },
     "private": {
       "chapter": "Private",
-      "statement": "Nothing leaves your device.",
-      "body": "No account. No network connections — the app works in Airplane Mode. The app has no analytics, no tracking and no third-party code. Its App Store privacy label is ‘Data Not Collected’.",
+      "statement": "What you read never leaves your device.",
+      "body": "No account. Nothing you read, search for or save leaves the device, and the Granth works in Airplane Mode. The app has no analytics, no tracking and no third-party code. Its one online feature is the daily Hukamnama from Sri Harmandir Sahib; turning on its optional notification sends a device token, the single item on its App Store privacy label.",
       "facts": {
         "accounts": "No accounts",
-        "network": "No network",
+        "network": "Works offline",
         "tracking": "No tracking",
-        "dataNotCollected": "Data Not Collected"
+        "dataNotCollected": "Reading stays private"
       },
       "cta": "Read the privacy policy",
       "alt": "About screen on iPhone, version 1.4.9: the four scripture integrity checks, all passed"
@@ -448,9 +448,9 @@
   "privacy": {
     "privacyPolicyGurbaniSoul": "Privacy Policy — Gurbani Soul",
     "privacyPolicy": "Privacy Policy",
-    "theAppCollectsNothing": "The app collects nothing. Here is exactly what that means.",
+    "theAppCollectsNothing": "The app collects one thing, and only if you turn on the Hukamnama notification. Here is exactly what that means.",
     "appliesToTheGurbani": "Applies to the <strong1>Gurbani Soul</strong1> app for iPhone and iPad (bundle <code1>org.sggs.app</code1>, including its widgets and Live Activity) and to this website.",
-    "theAppMakesNo": "The app makes <strong1>no network connections</strong1> and works fully in Airplane Mode. The one exception is the Hukamnama notification, which is optional and off by default; it is described below.",
+    "theAppMakesNo": "The app makes <strong1>no network connections</strong1> and works fully in Airplane Mode, with one exception: the daily Hukamnama from Sri Harmandir Sahib. To show its card, page and widget, the app asks our Hukamnama service which shabad is the day's Hukamnama. That request carries no token, no identifier and nothing about you, and the text itself always comes from the copy of Sri Guru Granth Sahib Ji inside the app. Its notification is optional and off by default; it is described below.",
     "noAnalyticsNoAdvertising": "No analytics, no advertising, no tracking, no third-party SDKs in the app. This website counts page views anonymously, without cookies; see <link1>This website</link1>.",
     "savedVersesAreStored": "<strong1>Saved verses</strong1> are stored in the app's own database on your device. If you save a verse, it is also added to your device's Spotlight index so you can find it from the Home Screen search; unsaving removes it. Spotlight data stays on your device.",
     "themesInSpotlightThe": "<strong1>Themes in Spotlight</strong1>: the app also adds the {themes} theme names, with their Gurmukhi words and verse counts, to Spotlight so a theme can be opened from the Home Screen search. These entries hold nothing about you.",
@@ -461,11 +461,11 @@
     "remindersAreOptionalLocal": "<strong1>Nitnem reminders</strong1> are optional local notifications. The app asks for notification permission only when you turn a reminder on, and schedules them on your device at the times you choose. No reminder comes from a server.",
     "hukamnamaNotification": "<strong1>The Hukamnama notification</strong1> is optional and off by default. If you turn it on, the app asks for notification permission and registers with Apple's push notification service. It then sends our Hukamnama service three things: the device token Apple issues, when you asked to be notified, and which edition of the text the app holds. Nothing else is sent: no account, no name, no location and nothing about what you read. The service stores no IP address and keeps no access log. The token is used only to send that one daily notification. Turning the notification off deletes the token from our service, and a token that has not been used for 180 days is deleted as well. The service runs on Render, and Apple delivers the notification under its own privacy policy.",
     "liveActivityIsOptional": "<strong1>Live Activity</strong1> is optional and off by default. When you turn it on, a reading session shows its progress on your Lock Screen and in the Dynamic Island. It is driven entirely on your device (no push updates) and never shows a verse.",
-    "widgetsReadASmall": "<strong1>Widgets</strong1> read a small snapshot the app writes into its own App Group container on your device: the raag watch, the Hukam of the day for the next two weeks with their Angs, today's Nitnem progress, and — if you use solar mode — your clock-mode choice and the same ~1 km rounded coordinates. Nothing leaves the device.",
+    "widgetsReadASmall": "<strong1>Widgets</strong1> read a small snapshot the app writes into its own App Group container on your device: the raag watch, the Hukam of the day for the next two weeks with their Angs, today's Nitnem progress, and — if you use solar mode — your clock-mode choice and the same ~1 km rounded coordinates. Nothing about you leaves the device. The Hukamnama widget, if you add it, reads the day's Hukamnama the same way the app does.",
     "locationIsUsedOnly": "<strong1>Location</strong1> is used only by the Raag Clock's optional solar mode to compute local sunrise and sunset. It is requested only when you tap “Use my location” in solar mode. The fix is rounded to two decimal places (about 1 km) before it is stored in the app's own App Group container — shared only with the app's widgets on the same device — and the raw position is never kept. You can enter a location manually instead, or deny the permission; the clock still works.",
     "integrityChecksReadThe": "<strong1>Integrity checks</strong1> read the bundled scripture database's size and modification date to decide whether its checksum needs re-verifying. This is why the app's privacy manifest declares the \"file timestamp\" and \"user defaults\" API reasons. Nothing is displayed or transmitted.",
     "diagnosticsIfTheApp": "<strong1>Diagnostics</strong1>: if the app ever crashes or hangs, iOS may hand it a diagnostic report. The app writes that report to its own local folder; it is never uploaded. You can see how many there are, share them via the system share sheet to a destination you choose, or delete them under More → About & credits → Integrity — nothing leaves the device unless you send it. Separately, Apple may share crash reports with us through App Store Connect <em1>only</em1> if you have enabled \"Share with App Developers\" in your iOS Privacy & Security → Analytics settings. Those reports are governed by Apple's privacy policy and contain no account or identity information.",
-    "becauseTheAppCollects": "Because the app collects no data, its App Store privacy label is <strong1>\"Data Not Collected\"</strong1>.",
+    "becauseTheAppCollects": "The app's App Store privacy label lists one item, <strong1>Device ID</strong1>: the notification token, collected only if you turn the Hukamnama notification on, used only to deliver it, not linked to you and never used for tracking.",
     "theGurbaniSoulPages": "The Gurbani Soul pages (the home page, Features, The watch, Learn, Support, Contribute and this policy) count page views with <strong1>Vercel Web Analytics</strong1>, and only when served from gurbanisoul.com. It uses no cookies and does not follow you across other sites. It records the page, the referring site, and your country, browser, operating system and device type as anonymous totals; visitors are counted with a short-lived hash that is discarded after a day. We do not build profiles from it or share it.",
     "ifYouAskTo": "If you ask to be told when the app is on the App Store, the email address you type is sent to <strong1>Buttondown</strong1>, which sends that one email. Nothing else is sent with it, and you can unsubscribe from the email itself.",
     "locationIsUsedOn": "<strong1>Location</strong1> is used on this website only if you switch the Raag Clock to solar mode, to work out local sunrise and sunset. Switching the mode on asks for nothing: your browser asks your permission only when you press “Use my location”, or you can type coordinates in yourself. The position is rounded to two decimal places (about 1 km) and kept in your browser's local storage; it is never sent to us or anyone else, and “Forget location” removes it. Without a location, the clock stays on fixed hours.",
@@ -476,7 +476,7 @@
     "everythingYouDoIn": "Everything you do in the app (saved verses, settings, reading position, Nitnem progress and reminders) stays on your device.",
     "locationIsOptionalUsed": "Location is optional, used only on your device, and never transmitted.",
     "theApp": "The app",
-    "theAppBundlesThe": "The app bundles the complete text of Sri Guru Granth Sahib Ji, plus the Nitnem banis as a separate, labelled layer, and searches it locally. It never sends a request to any server, so we cannot see what you read, search for or save. Specifically:",
+    "theAppBundlesThe": "The app bundles the complete text of Sri Guru Granth Sahib Ji, plus the Nitnem banis as a separate, labelled layer, and searches it locally. Nothing you read, search for or save is ever sent to a server, so we cannot see it. Specifically:",
     "thisWebsite": "This website",
     "theSiteIsStatic": "The site is static, carries no advertising, and sets no cookies.",
     "theKnowledgeBasePages": "The Knowledge Base pages (search, reader and the study tools) load no analytics.",
@@ -487,7 +487,7 @@
     "children": "Children",
     "theAppIsRated": "The app is rated 4+ and collects no personal information from anyone, of any age.",
     "yourDataYourControl": "Your data, your control",
-    "weHoldNoData": "We hold no data about you, so there is nothing for us to export, correct or delete. Everything the app stores is on your device: deleting the app removes it. Everything the site stores is in your browser: clearing site data removes it.",
+    "weHoldNoData": "We hold no data about you. The only thing our service holds is the device token of a phone that turned the Hukamnama notification on, and turning it off deletes it. Everything the app stores is on your device: deleting the app removes it. Everything the site stores is in your browser: clearing site data removes it.",
     "changes": "Changes",
     "ifThisPolicyEver": "If this policy ever changes, the date at the top changes with it and the new text is published here before it takes effect. The app will not start collecting data without a new version, a new policy, and a new App Store privacy label.",
     "contact": "Contact",
@@ -499,7 +499,7 @@
     "yourDataYourControl2": "Your data, your control",
     "changes2": "Changes",
     "contact2": "Contact",
-    "theGurbaniSoulApp": "The Gurbani Soul app collects nothing: no accounts, no network connections, no analytics. Exactly what stays on your device, and what this website does."
+    "theGurbaniSoulApp": "The Gurbani Soul app collects nothing about you: no accounts, no analytics. Only the optional Hukamnama notification sends a device token. Exactly what stays on your device, and what this website does."
   },
   "contributeTiers": {
     "once": "{amount}",
@@ -763,13 +763,5 @@
   "language": {
     "choose": "Language: choose another",
     "label": "Language"
-  },
-  "gurpurab": {
-    "label": "Gurpurab",
-    "fateh": "Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh!",
-    "title": "Guru Nanak Dev Ji’s 557th Parkash Gurpurab",
-    "body": "Today the Sangat celebrates the Light of our first Guru, and his message of Naam, seva and the equality of all.",
-    "readAng": "Read Ang {ang}",
-    "dismiss": "Dismiss the Gurpurab message"
   }
 }

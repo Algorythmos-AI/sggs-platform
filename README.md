@@ -9,7 +9,7 @@ One corpus powers two things people can use today:
 
 The website and the app keep separate names and identities on purpose — see [Brand & domains](docs/engineering/brand.md) and [`docs/website/README.md`](docs/website/README.md).
 
-![version](https://img.shields.io/badge/version-1.7.6-1a3a6b)
+![version](https://img.shields.io/badge/version-1.7.7-1a3a6b)
 ![python](https://img.shields.io/badge/python-3.8%2B%20·%20stdlib%20only-3776ab)
 ![dependencies](https://img.shields.io/badge/dependencies-none-2e7d32)
 ![corpus](https://img.shields.io/badge/corpus-60%2C658%20lines%20·%201%2C430%20Angs-9a3412)
@@ -141,7 +141,8 @@ The same offline app runs unchanged in the cloud. The browser only ever calls `/
      (/api/search /ang /shabad /verify /health …). Rollback: set production.api_platform
      to "render" in gateway/routes.json, regenerate and release (runbooks/services-production.md).
 
-     Gurbani Soul (iOS) — no network at all: the DB ships inside the app.
+     Gurbani Soul (iOS) — the DB ships inside the app; its only network use is the daily
+     Hukamnama (api.gurbanisoul.com) and its opt-in notification.
 ```
 
 | | Local | Staging | Production |
@@ -172,7 +173,7 @@ Five views, all keyboard-friendly, with a labeled transliteration toggle, adjust
 
 ### Gurbani Soul (iOS / iPadOS)
 
-The native SwiftUI app (repository [`Algorythmos-AI/gurbani-soul-ios`](https://github.com/Algorythmos-AI/gurbani-soul-ios), Swift package `GurbaniSearchKit`) ships the **same verified corpus inside the binary** and makes **no network requests at all** — it works in Airplane Mode, with no account and no tracking (App Store privacy label: *Data Not Collected*). Beyond reader and search it adds **Nitnem** (daily banis by time of day, place kept, optional gentle reminders), **Hukam**, the **Raag Clock** (optional solar mode), **widgets + a Live Activity**, App Intents/Siri and Spotlight. The Gurmukhi engine is pinned to this Python source of truth by golden vectors in `contract/`. Distribution, gates, the store listing and its runbooks live in that repository.
+The native SwiftUI app (repository [`Algorythmos-AI/gurbani-soul-ios`](https://github.com/Algorythmos-AI/gurbani-soul-ios), Swift package `GurbaniSearchKit`) ships the **same verified corpus inside the binary** and works in Airplane Mode, with no account and no tracking. Its one online feature, since 1.7.7, is the daily **Hukamnama from Sri Harmandir Sahib**: the app reads the day's record with no token or identifier, and its optional notification sends a device token, the single item on the App Store privacy label (*Device ID*, App Functionality, not linked, not tracking). Beyond reader and search it adds **Nitnem** (daily banis by time of day, place kept, optional gentle reminders), **Hukam**, the **Raag Clock** (optional solar mode), **widgets + a Live Activity**, App Intents/Siri and Spotlight. The Gurmukhi engine is pinned to this Python source of truth by golden vectors in `contract/`. Distribution, gates, the store listing and its runbooks live in that repository.
 
 ---
 
@@ -332,7 +333,7 @@ The corpus and database are rebuilt from the source edition in [`Algorythmos-AI/
 
 ## Versioning
 
-Current release: **v1.7.6**. The running build is stamped in the footer and at `/api/health`. Every change — search-logic, data, or UI — is recorded in `CHANGELOG.md` with its before/after metrics and whether the DB changed. The dataset versions separately (sggs-data `data-vX.Y.Z`); `dataset.lock.json` names the exact database every build serves.
+Current release: **v1.7.7**. The running build is stamped in the footer and at `/api/health`. Every change — search-logic, data, or UI — is recorded in `CHANGELOG.md` with its before/after metrics and whether the DB changed. The dataset versions separately (sggs-data `data-vX.Y.Z`); `dataset.lock.json` names the exact database every build serves.
 
 ---
 
