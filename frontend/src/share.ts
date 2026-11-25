@@ -41,9 +41,9 @@ export const SHARE: Record<string, Share> = {
   },
   "privacy": {
     eyebrow: "Privacy",
-    title: "The Gurbani Soul app collects nothing",
-    sub: "No account · no network · no analytics",
-    social: "No accounts, no network connections, no analytics. What stays on your device, and what this website does.",
+    title: "The Gurbani Soul app collects nothing about you",
+    sub: "No account · no analytics · no tracking",
+    social: "No accounts, no analytics. Only the optional Hukamnama notification sends a device token. What stays on your device, and what this website does.",
   },
   "support": {
     eyebrow: "Support",
