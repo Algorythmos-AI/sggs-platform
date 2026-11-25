@@ -8,8 +8,10 @@ test('privacy policy names the app and covers every on-device feature @smoke', a
   expect(res?.status()).toBe(200);
   const body = page.locator('#v-privacy');
   await expect(body).toContainText('Gurbani Soul');
-  await expect(body).toContainText('Data Not Collected');
-  for (const topic of ['Location', 'Reminders', 'Live Activity', 'Nitnem', 'Widgets', 'Diagnostics']) {
+  // the App Store label since 1.7.7: one item, the optional Hukamnama notification's token
+  await expect(body).toContainText('Device ID');
+  await expect(body).not.toContainText('Data Not Collected');
+  for (const topic of ['Location', 'Reminders', 'Live Activity', 'Nitnem', 'Widgets', 'Diagnostics', 'The Hukamnama notification']) {
     await expect(body.locator('strong', { hasText: topic }).first()).toBeVisible();
   }
 });

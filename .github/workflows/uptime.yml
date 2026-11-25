@@ -53,7 +53,8 @@ jobs:
           fi
 
           if page="$(fetch "$SITE/privacy")"; then
-            echo "$page" | grep -q "Data Not Collected" || fail="$fail /privacy(content)"
+            # the disclosure App Review reads (since 1.7.7 the label is Device ID, not Data Not Collected)
+            echo "$page" | grep -q "The Hukamnama notification" || fail="$fail /privacy(content)"
           else
             fail="$fail /privacy(unreachable)"
           fi

@@ -83,9 +83,9 @@
       "angs": "Angs — le Granth complet",
       "lines": "lignes, chacune citée par Ang",
       "characters": "caractères, sans aucune perte",
-      "networkCalls": "connexion réseau dans l’app",
+      "networkCalls": "appel d’analyse ou de pistage dans l’app",
       "none": "Aucune",
-      "dataCollected": "donnée collectée — l’App Store indique « Données non collectées »"
+      "dataCollected": "donnée sur ce que vous lisez, recherchez ou enregistrez"
     },
     "verse": {
       "cite": "Sri Guru Granth Sahib Ji · Ang {ang}",
@@ -212,13 +212,13 @@
     },
     "private": {
       "chapter": "Privé",
-      "statement": "Rien ne quitte votre appareil.",
-      "body": "Pas de compte. Aucune connexion réseau — l’app fonctionne en mode Avion. L’app n’a ni statistiques, ni pistage, ni code tiers. Son étiquette de confidentialité dans l’App Store est « Données non collectées ».",
+      "statement": "Ce que vous lisez ne quitte jamais votre appareil.",
+      "body": "Pas de compte. Rien de ce que vous lisez, recherchez ou enregistrez ne quitte l’appareil, et le Granth fonctionne en mode Avion. L’app n’a ni statistiques, ni pistage, ni code tiers. Sa seule fonction en ligne est le Hukamnama quotidien de Sri Harmandir Sahib ; activer sa notification facultative envoie un jeton d’appareil, le seul élément de son étiquette de confidentialité dans l’App Store.",
       "facts": {
         "accounts": "Sans compte",
-        "network": "Sans réseau",
+        "network": "Fonctionne hors ligne",
         "tracking": "Sans pistage",
-        "dataNotCollected": "Données non collectées"
+        "dataNotCollected": "Votre lecture reste privée"
       },
       "cta": "Lire la politique de confidentialité",
       "alt": "L’écran About sur iPhone, version 1.4.9 : les quatre contrôles d’intégrité du texte, tous réussis"
@@ -448,9 +448,9 @@
   "privacy": {
     "privacyPolicyGurbaniSoul": "Politique de confidentialité — Gurbani Soul",
     "privacyPolicy": "Politique de confidentialité",
-    "theAppCollectsNothing": "L’app ne collecte rien. Voici exactement ce que cela signifie.",
+    "theAppCollectsNothing": "L’app ne collecte qu’une seule chose, et seulement si vous activez la notification du Hukamnama. Voici exactement ce que cela signifie.",
     "appliesToTheGurbani": "S’applique à l’app <strong1>Gurbani Soul</strong1> pour iPhone et iPad (bundle <code1>org.sggs.app</code1>, y compris ses widgets et son Activité en direct) et à ce site web.",
-    "theAppMakesNo": "L’app n’établit <strong1>aucune connexion réseau</strong1> et fonctionne entièrement en mode Avion. La seule exception est la notification du Hukamnama, facultative et désactivée par défaut ; elle est décrite plus bas.",
+    "theAppMakesNo": "L’app n’établit <strong1>aucune connexion réseau</strong1> et fonctionne entièrement en mode Avion, à une exception près : le Hukamnama quotidien de Sri Harmandir Sahib. Pour afficher sa carte, sa page et son widget, l’app demande à notre service Hukamnama quel shabad est le Hukamnama du jour. Cette requête ne contient ni jeton, ni identifiant, ni rien qui vous concerne, et le texte vient toujours de l’exemplaire de Sri Guru Granth Sahib Ji contenu dans l’app. Sa notification est facultative et désactivée par défaut ; elle est décrite plus bas.",
     "noAnalyticsNoAdvertising": "Pas de mesure d’audience, pas de publicité, pas de pistage, pas de SDK tiers dans l’app. Ce site compte les pages vues de façon anonyme, sans cookies ; voir <link1>Ce site web</link1>.",
     "savedVersesAreStored": "Les <strong1>vers enregistrés</strong1> sont stockés dans la base de données propre à l’app, sur votre appareil. Lorsque vous enregistrez un vers, il est aussi ajouté à l’index Spotlight de votre appareil pour que vous le retrouviez depuis la recherche de l’écran d’accueil ; le retirer l’en supprime. Les données Spotlight restent sur votre appareil.",
     "themesInSpotlightThe": "<strong1>Thèmes dans Spotlight</strong1> : l’app ajoute aussi à Spotlight les noms des {themes} thèmes, avec leurs mots en gurmukhi et leur nombre de vers, pour qu’un thème puisse s’ouvrir depuis la recherche de l’écran d’accueil. Ces entrées ne contiennent rien à votre sujet.",
@@ -461,11 +461,11 @@
     "remindersAreOptionalLocal": "Les <strong1>rappels du Nitnem</strong1> sont des notifications locales facultatives. L’app ne demande l’autorisation de notification que lorsque vous activez un rappel, et les programme sur votre appareil aux heures que vous choisissez. Aucun rappel ne provient d’un serveur.",
     "hukamnamaNotification": "La <strong1>notification du Hukamnama</strong1> est facultative et désactivée par défaut. Si vous l’activez, l’app demande l’autorisation de notification et s’enregistre auprès du service de notifications push d’Apple. Elle envoie ensuite trois choses à notre service Hukamnama : le jeton d’appareil délivré par Apple, le moment où vous souhaitez être averti, et l’édition du texte que contient l’app. Rien d’autre n’est envoyé : ni compte, ni nom, ni position, ni rien de ce que vous lisez. Le service ne conserve aucune adresse IP et ne tient aucun journal des requêtes. Le jeton ne sert qu’à envoyer cette seule notification quotidienne. Désactiver la notification supprime le jeton de notre service, et un jeton resté inutilisé pendant 180 jours est supprimé lui aussi. Le service est hébergé chez Render, et Apple achemine la notification selon sa propre politique de confidentialité.",
     "liveActivityIsOptional": "L’<strong1>Activité en direct</strong1> est facultative et désactivée par défaut. Lorsque vous l’activez, une séance de lecture affiche sa progression sur votre écran verrouillé et dans la Dynamic Island. Elle fonctionne entièrement sur votre appareil (sans mise à jour push) et n’affiche jamais de vers.",
-    "widgetsReadASmall": "Les <strong1>widgets</strong1> lisent un petit instantané que l’app écrit dans son propre conteneur App Group, sur votre appareil : la veille du raag, le Hukam du jour pour les deux semaines à venir avec leurs Angs, la progression du Nitnem du jour et — si vous utilisez le mode solaire — votre choix de mode d’horloge et les mêmes coordonnées arrondies à environ 1 km. Rien ne quitte l’appareil.",
+    "widgetsReadASmall": "Les <strong1>widgets</strong1> lisent un petit instantané que l’app écrit dans son propre conteneur App Group, sur votre appareil : la veille du raag, le Hukam du jour pour les deux semaines à venir avec leurs Angs, la progression du Nitnem du jour et — si vous utilisez le mode solaire — votre choix de mode d’horloge et les mêmes coordonnées arrondies à environ 1 km. Rien de ce qui vous concerne ne quitte l’appareil. Le widget du Hukamnama, si vous l’ajoutez, lit le Hukamnama du jour de la même façon que l’app.",
     "locationIsUsedOnly": "La <strong1>localisation</strong1> sert uniquement au mode solaire facultatif de l’Horloge des raags, pour calculer le lever et le coucher du soleil chez vous. Elle n’est demandée que lorsque vous touchez « Use my location » en mode solaire. La position est arrondie à deux décimales (environ 1 km) avant d’être stockée dans le conteneur App Group propre à l’app — partagé uniquement avec les widgets de l’app sur le même appareil — et la position brute n’est jamais conservée. Vous pouvez aussi saisir un lieu vous-même ou refuser l’autorisation ; l’horloge fonctionne quand même.",
     "integrityChecksReadThe": "Les <strong1>contrôles d’intégrité</strong1> lisent la taille et la date de modification de la base de données embarquée qui contient le texte du Granth, pour savoir si son empreinte doit être revérifiée. C’est pourquoi le manifeste de confidentialité de l’app déclare les motifs d’API « file timestamp » et « user defaults ». Rien n’est affiché ni transmis.",
     "diagnosticsIfTheApp": "<strong1>Diagnostics</strong1> : si l’app plante ou se fige, iOS peut lui remettre un rapport de diagnostic. L’app écrit ce rapport dans son propre dossier local ; il n’est jamais téléversé. Vous pouvez voir combien il y en a, les partager via la feuille de partage du système vers la destination de votre choix, ou les supprimer dans More → About & credits → Integrity — rien ne quitte l’appareil à moins que vous ne l’envoyiez. Par ailleurs, Apple peut nous transmettre des rapports de plantage via App Store Connect <em1>uniquement</em1> si vous avez activé « Partager avec les développeurs d’apps » dans Réglages iOS → Confidentialité et sécurité → Analyse et améliorations. Ces rapports relèvent de la politique de confidentialité d’Apple et ne contiennent aucune information de compte ni d’identité.",
-    "becauseTheAppCollects": "Comme l’app ne collecte aucune donnée, son étiquette de confidentialité dans l’App Store est <strong1>« Données non collectées »</strong1>.",
+    "becauseTheAppCollects": "L’étiquette de confidentialité de l’app dans l’App Store ne mentionne qu’un élément, <strong1>Device ID</strong1> : le jeton de notification, collecté seulement si vous activez la notification du Hukamnama, utilisé uniquement pour l’envoyer, non lié à vous et jamais utilisé pour le suivi.",
     "theGurbaniSoulPages": "Les pages Gurbani Soul (l’accueil, Fonctionnalités, Les veilles, Comprendre, Assistance, Contribuer et cette politique) comptent les pages vues avec <strong1>Vercel Web Analytics</strong1>, et seulement lorsqu’elles sont servies depuis gurbanisoul.com. Cet outil n’utilise aucun cookie et ne vous suit pas sur d’autres sites. Il enregistre la page, le site d’origine, ainsi que votre pays, votre navigateur, votre système d’exploitation et votre type d’appareil, sous forme de totaux anonymes ; les visiteurs sont comptés à l’aide d’une empreinte éphémère effacée au bout d’un jour. Nous n’en tirons aucun profil et ne le partageons pas.",
     "ifYouAskTo": "Si vous demandez à être prévenu de l’arrivée de l’app sur l’App Store, l’adresse e-mail que vous saisissez est envoyée à <strong1>Buttondown</strong1>, qui envoie ce seul e-mail (en anglais). Rien d’autre n’est envoyé avec elle, et vous pouvez vous désabonner depuis l’e-mail lui-même.",
     "locationIsUsedOn": "La <strong1>localisation</strong1> n’est utilisée sur ce site que si vous passez l’Horloge des raags en mode solaire, pour calculer le lever et le coucher du soleil chez vous. Activer ce mode ne demande rien : votre navigateur ne demande votre autorisation que lorsque vous appuyez sur « Use my location », ou vous pouvez saisir vous-même des coordonnées. La position est arrondie à deux décimales (environ 1 km) et conservée dans le stockage local de votre navigateur ; elle n’est jamais envoyée, ni à nous ni à personne, et « Forget location » la supprime. Sans position, l’horloge reste sur les heures fixes.",
@@ -476,7 +476,7 @@
     "everythingYouDoIn": "Tout ce que vous faites dans l’app (vers enregistrés, réglages, position de lecture, progression du Nitnem et rappels) reste sur votre appareil.",
     "locationIsOptionalUsed": "La localisation est facultative, utilisée uniquement sur votre appareil et jamais transmise.",
     "theApp": "L’app",
-    "theAppBundlesThe": "L’app embarque le texte complet de Sri Guru Granth Sahib Ji, ainsi que les banis du Nitnem dans une couche distincte et signalée, et y effectue ses recherches localement. Elle n’envoie jamais de requête à un serveur ; nous ne pouvons donc pas voir ce que vous lisez, recherchez ou enregistrez. Plus précisément :",
+    "theAppBundlesThe": "L’app embarque le texte complet de Sri Guru Granth Sahib Ji, ainsi que les banis du Nitnem dans une couche distincte et signalée, et y effectue ses recherches localement. Rien de ce que vous lisez, recherchez ou enregistrez n’est jamais envoyé à un serveur ; nous ne pouvons donc pas le voir. Plus précisément :",
     "thisWebsite": "Ce site web",
     "theSiteIsStatic": "Le site est statique, ne contient aucune publicité et ne dépose aucun cookie.",
     "theKnowledgeBasePages": "Les pages de la Base de connaissances (recherche, lecteur et outils d’étude) ne chargent aucun outil de mesure d’audience.",
@@ -487,7 +487,7 @@
     "children": "Enfants",
     "theAppIsRated": "L’app est classée 4+ et ne collecte aucune information personnelle, auprès de personne, quel que soit son âge.",
     "yourDataYourControl": "Vos données, votre contrôle",
-    "weHoldNoData": "Nous ne détenons aucune donnée vous concernant ; il n’y a donc rien que nous puissions exporter, corriger ou supprimer. Tout ce que l’app stocke se trouve sur votre appareil : supprimer l’app le supprime. Tout ce que le site stocke se trouve dans votre navigateur : effacer les données du site le supprime.",
+    "weHoldNoData": "Nous ne détenons aucune donnée sur vous. Notre service ne conserve que le jeton d’appareil d’un téléphone qui a activé la notification du Hukamnama, et la désactiver le supprime. Tout ce que l’app enregistre se trouve sur votre appareil : supprimer l’app l’efface. Tout ce que le site enregistre se trouve dans votre navigateur : effacer les données du site l’efface.",
     "changes": "Modifications",
     "ifThisPolicyEver": "Si cette politique change un jour, la date en haut de page change avec elle et le nouveau texte est publié ici avant de prendre effet. L’app ne commencera pas à collecter des données sans nouvelle version, nouvelle politique et nouvelle étiquette de confidentialité dans l’App Store.",
     "contact": "Contact",
@@ -499,7 +499,7 @@
     "yourDataYourControl2": "Vos données, votre contrôle",
     "changes2": "Modifications",
     "contact2": "Contact",
-    "theGurbaniSoulApp": "L’app Gurbani Soul ne collecte rien : pas de compte, aucune connexion réseau, aucune mesure d’audience. Exactement ce qui reste sur votre appareil, et ce que fait ce site web."
+    "theGurbaniSoulApp": "L’app Gurbani Soul ne collecte rien sur vous : pas de compte, aucune mesure d’audience. Seule la notification facultative du Hukamnama envoie un jeton d’appareil. Exactement ce qui reste sur votre appareil, et ce que fait ce site web."
   },
   "contributeTiers": {
     "once": "{amount}",
