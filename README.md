@@ -141,7 +141,8 @@ The same offline app runs unchanged in the cloud. The browser only ever calls `/
      (/api/search /ang /shabad /verify /health …). Rollback: set production.api_platform
      to "render" in gateway/routes.json, regenerate and release (runbooks/services-production.md).
 
-     Gurbani Soul (iOS) — no network at all: the DB ships inside the app.
+     Gurbani Soul (iOS) — the DB ships inside the app; its only network use is the daily
+     Hukamnama (api.gurbanisoul.com) and its opt-in notification.
 ```
 
 | | Local | Staging | Production |
@@ -172,7 +173,7 @@ Five views, all keyboard-friendly, with a labeled transliteration toggle, adjust
 
 ### Gurbani Soul (iOS / iPadOS)
 
-The native SwiftUI app (repository [`Algorythmos-AI/gurbani-soul-ios`](https://github.com/Algorythmos-AI/gurbani-soul-ios), Swift package `GurbaniSearchKit`) ships the **same verified corpus inside the binary** and makes **no network requests at all** — it works in Airplane Mode, with no account and no tracking (App Store privacy label: *Data Not Collected*). Beyond reader and search it adds **Nitnem** (daily banis by time of day, place kept, optional gentle reminders), **Hukam**, the **Raag Clock** (optional solar mode), **widgets + a Live Activity**, App Intents/Siri and Spotlight. The Gurmukhi engine is pinned to this Python source of truth by golden vectors in `contract/`. Distribution, gates, the store listing and its runbooks live in that repository.
+The native SwiftUI app (repository [`Algorythmos-AI/gurbani-soul-ios`](https://github.com/Algorythmos-AI/gurbani-soul-ios), Swift package `GurbaniSearchKit`) ships the **same verified corpus inside the binary** and works in Airplane Mode, with no account and no tracking. Its one online feature, since 1.7.7, is the daily **Hukamnama from Sri Harmandir Sahib**: the app reads the day's record with no token or identifier, and its optional notification sends a device token, the single item on the App Store privacy label (*Device ID*, App Functionality, not linked, not tracking). Beyond reader and search it adds **Nitnem** (daily banis by time of day, place kept, optional gentle reminders), **Hukam**, the **Raag Clock** (optional solar mode), **widgets + a Live Activity**, App Intents/Siri and Spotlight. The Gurmukhi engine is pinned to this Python source of truth by golden vectors in `contract/`. Distribution, gates, the store listing and its runbooks live in that repository.
 
 ---
 
