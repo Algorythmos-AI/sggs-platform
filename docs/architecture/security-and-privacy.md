@@ -114,10 +114,11 @@ states it (every statement there is checked against the code). The policy is ser
 `/en/privacy`, `/pa/privacy` and `/fr/privacy`; English governs, and `/privacy`, the URL in App
 Store Connect, redirects permanently to `/en/privacy`:
 
-- **The app** collects nothing: no accounts, no analytics or third-party SDKs, and no network
-  connections except the optional Hukamnama notification, which is off by default. Its App Store
-  label is "Data Not Collected". Location for the raag clock is rounded to about 1 km and stays on
-  the device.
+- **The app** collects nothing about the reader: no accounts, no analytics or third-party SDKs, and
+  no network connections except the daily Hukamnama (a token-free read of the day's record) and its
+  optional notification, which is off by default. Since 1.7.7 its App Store label lists one item,
+  Device ID (the notification token; App Functionality, not linked, not tracking). Location for the
+  raag clock is rounded to about 1 km and stays on the device.
 - **The Hukamnama notification**, when a reader turns it on, registers with Apple's push service
   and sends the Hukamnama service three things: the device token, when to notify, and which
   edition of the text the app holds. Turning it off deletes the token; an unused token is deleted

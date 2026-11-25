@@ -1,6 +1,6 @@
 ---
 title: "Privacy and on-device data"
-description: "What the app stores and where, what the widgets see, why it makes no network request, the TestFlight-only Hukamnama exception, and the tests behind 'Data Not Collected'."
+description: "What the app stores and where, what the widgets see, the one network exception (the Hukamnama), and the tests behind its one-item privacy label."
 sidebar:
   order: 3
 verified:
@@ -9,19 +9,22 @@ verified:
 ---
 # Privacy and on-device data
 
-The App Store privacy label for Gurbani Soul is **Data Not Collected**. This page shows what that
-rests on in the code of `gurbani-soul-ios` at the pinned commit: what the app keeps, where, and the
+The App Store privacy label for Gurbani Soul lists one item since 1.7.7: **Device ID**, the
+Hukamnama notification's token, collected only when the reader turns that notification on (App
+Functionality, not linked, not tracking). Before 1.7.7 it was **Data Not Collected**. This page shows
+what that rests on in the code of `gurbani-soul-ios` at the pinned commit: what the app keeps, where, and the
 tests that fail if it starts to do more.
 
 ## Nothing leaves the device on its own
 
-- **No network code** outside the two Hukamnama files [below](#the-testflight-only-exception-the-hukamnama).
+- **No network code** outside the two Hukamnama files [below](#the-one-exception-the-hukamnama).
   The app contains no other `URLSession`, `URLRequest`, web view or network connection, and a
   source gate fails the build if one appears. It has no third-party packages and
   no analytics or crash-reporting SDK.
 - **No accounts, no tracking.** The privacy manifest declares no tracking, no tracking domains
-  and no collected data types. The entitlements are the App Group the widgets share and, since
-  1.6.4, `aps-environment` for the Hukamnama push, which only TestFlight builds use.
+  and, since 1.7.7, one collected data type: Device ID, not linked, not tracking, App
+  Functionality. The entitlements are the App Group the widgets share and, since 1.6.4,
+  `aps-environment` for the Hukamnama push.
 - **Two links out.** The privacy policy and support pages (`gurbanisoul.com/privacy`,
   `/support`) open in Safari, outside the app, only when tapped. A reminders screen can open the
   system Settings app. Every other link is an internal `sggs://` link.
@@ -32,13 +35,14 @@ tests that fail if it starts to do more.
 <!-- sggs:code file="ios/tests/test_ios_gates.py" symbol="test_no_network_code" repo="gurbani-soul-ios" -->
 Source: `ios/tests/test_ios_gates.py` in gurbani-soul-ios, read at the pinned commit.
 
-## The TestFlight-only exception: the Hukamnama
+## The one exception: the Hukamnama
 
-TestFlight builds since 1.6.4 carry the opt-in Hukamnama from Sri Harmandir Sahib
-([what the app does](what-the-app-does.md#hukamnama--sri-harmandir-sahib-testflight-only)), and
-with it the one exception to the rules above. App Store builds compile it out, and the label stays
-**Data Not Collected** until the G4 review changes the privacy text, the label and the privacy
-manifest; only then may the feature be switched on there.
+The Hukamnama from Sri Harmandir Sahib
+([what the app does](what-the-app-does.md#hukamnama--sri-harmandir-sahib-testflight-only)) is the one
+exception to the rules above. TestFlight builds carried it from 1.6.4; App Store builds compiled it
+out until 1.7.7, when the G3 copy review and the G4 privacy review were signed (2026-11-25) and the
+privacy text, the label and the privacy manifest changed together. The card, page and widget read
+the day's public record with no token or identifier; only the opt-in notification sends a token.
 
 - **Two network files.** The gate's allow-list is exactly `HukamnamaAPI.swift`, one client of one
   service, and `HukamnamaWidgetProvider.swift`, whose only request is an ephemeral

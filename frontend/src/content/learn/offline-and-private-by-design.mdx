@@ -1,7 +1,8 @@
 ---
 title: "Offline and private by design"
-description: "Why Gurbani Soul works fully offline, keeps no account, collects no data, and is labelled Data Not Collected."
+description: "Why Gurbani Soul works offline, keeps no account, never sees what you read, and collects one thing only if you ask."
 pubDate: 2026-09-22
+updatedDate: 2026-11-25
 tags: [privacy]
 quotes: []
 ---
@@ -12,9 +13,13 @@ how the app is made.
 ## Everything is on your device
 
 The complete Granth, the search index, Nitnem, the Hukam, the Raag Clock and the widgets all run from
-data bundled inside the app. There is no server to call. The app works in Airplane Mode, on a plane,
-in a Gurdwara basement, or anywhere with no signal at all — because it never needed a connection in
-the first place.
+data bundled inside the app. The app works in Airplane Mode, on a plane, in a Gurdwara basement, or
+anywhere with no signal at all — because the Granth never needed a connection in the first place.
+
+The one exception is the daily Hukamnama from Sri Harmandir Sahib. To show its card, page and widget,
+the app asks our Hukamnama service which shabad is the day's Hukamnama. That request carries no token,
+no identifier and nothing about you, and the text itself always comes from the copy of Sri Guru Granth
+Sahib Ji inside the app.
 
 ## No account, no tracking
 
@@ -22,18 +27,20 @@ There is nothing to sign up for and no profile to create. The app keeps no analy
 third-party tracking SDKs, and sends nothing about your reading anywhere. Your place in each bani,
 the days you have read, and anything you save stay on your device.
 
-## "Data Not Collected"
+## One item on the label
 
 Apple asks every app to declare what it collects, on the App Store privacy label. Gurbani Soul's
-answer is **Data Not Collected** — the plainest answer there is. The app's bundled privacy manifest
-records no tracking and no collected data types, so the claim on the listing and the behaviour of the
-app are the same thing.
+label lists one item, **Device ID**: the notification token, collected only if you turn the Hukamnama
+notification on, used only to deliver it, not linked to you and never used for tracking. Turning the
+notification off deletes it. The app's bundled privacy manifest declares exactly that and nothing
+else, so the claim on the listing and the behaviour of the app are the same thing.
 
 ## Why it matters for scripture
 
 Reading Gurbani is a personal act, and it should not be watched, scored, or turned into a data trail.
 Keeping everything on the device is also what lets the app verify the text offline: the scripture,
-its checksum and its citations all travel together, with nothing added over a network.
+its checksum and its citations all travel together, and nothing you read, search for or save is ever
+sent to a server.
 
 You can read the full policy on the [privacy page](/en/privacy), and if you ever have a question or spot
 something to correct, [support](/en/support) is a person, not a form that feeds a database. The same

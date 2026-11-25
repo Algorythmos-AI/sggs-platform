@@ -59,7 +59,7 @@ test('landing renders the brand, the verse and the CTAs @smoke', async ({ page }
   expect(await page.locator('[data-chapter]').count()).toBeGreaterThanOrEqual(6);
   expect(await page.locator('.photo-band').count()).toBeGreaterThanOrEqual(1);
   await expect(page.locator('ul.proof > li')).toHaveCount(5);
-  await expect(page.locator('ul.proof')).toContainText('network calls in the app');
+  await expect(page.locator('ul.proof')).toContainText('analytics or tracking calls in the app');
   // the story links on to the sub-pages
   for (const href of ['/en/watch', '/en/learn', '/en/privacy', '/search']) {
     expect(await page.locator(`main a[href="${href}"]`).count()).toBeGreaterThanOrEqual(1);

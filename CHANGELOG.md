@@ -11,6 +11,8 @@ The release that brings the daily Hukamnama from Sri Harmandir Sahib to every Gu
 - **Gurpurab banner** (#468): the one-day greeting from 1.7.6 is gone, with its inline head script, its strings (en/pa/fr), its Ang 1408 quote entry and its test. It had switched itself off on 25 November 10:00 UTC. The Privacy wording about a closed seasonal greeting stays, since browsers that closed it still hold `gp557_dismissed`.
 
 ### Changed
+- **Privacy, home page and Learn** (en/pa/fr, approved by the owner 2026-11-25): the app's App Store privacy label is now **Device ID** (the Hukamnama notification's token, collected only when a reader turns it on; App Functionality, not linked, not tracking), not "Data Not Collected". The privacy policy (dated 25 November 2026), the home page's privacy chapter and proof strip, and the "Offline and private by design" article say so, and say that the Hukamnama card, page and widget read the day's record with no token or identifier. Nothing you read, search for or save is ever sent.
+- **Uptime** checks `/privacy` for the Hukamnama disclosure instead of "Data Not Collected"; the store-pages smoke test checks for Device ID.
 - **Wiki** (#466, #467): sibling docs pins bumped.
 
 ## [1.7.6] — 2026-11-24

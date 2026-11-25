@@ -59,8 +59,10 @@ naming the canonical file; edit them there:
   number of.
 - **One number.** `MARKETING_VERSION` equals the platform release whose contract is vendored;
   every platform release is re-archived as `X.Y.Z (1)`, so the App Store always equals the site.
-- **Nothing collected.** No accounts, no network at runtime, no tracking; the privacy manifest
-  declares only what the app stores on the device.
+- **Nothing collected about you.** No accounts, no tracking. The only network use is the daily
+  Hukamnama (a token-free read of the day's record) and its opt-in notification, whose device
+  token is the one item on the privacy label (Device ID, since 1.7.7); the privacy manifest
+  declares exactly that ([privacy and on-device data](privacy-and-on-device-data.md)).
 
 Identifiers are stable through the brand: bundle ids `org.sggs.*`, the App Group
 `group.org.sggs`, the URL scheme `sggs://` ([Brand & domains](../engineering/brand.md)).

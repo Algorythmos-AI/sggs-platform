@@ -475,7 +475,7 @@ the iOS app. How it works and how to switch modes: [Contribute and Stripe](contr
   `https://gurbanisoul.com`): landing renders, verse present, exactly one App-Store slot, canonical
   host, axe serious/critical = 0.
 - **`uptime.yml`** (every 15 minutes): `/api/health` all-true, `/` ("Gurbani Soul"), `/privacy`
-  ("Data Not Collected") and `/support` (a `mailto:` link) on the canonical host, following their
+  ("The Hukamnama notification") and `/support` (a `mailto:` link) on the canonical host, following their
   redirects to the English pages, plus the wiki.
 - **`sggs-verify-prod`** (`scripts/ops/verify_prod.py`): after each release, proves the running
   commit and the redirects: `/privacy` and `/support` reach their `/en` page in exactly one
