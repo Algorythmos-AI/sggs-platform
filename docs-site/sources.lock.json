@@ -99,7 +99,7 @@
     "gurbani-soul-ios": {
       "repository": "Algorythmos-AI/gurbani-soul-ios",
       "ref": "main",
-      "commit": "ac5471e87b55e95d82593e3f0241734f43203083",
+      "commit": "25da14caaaa6c075372c9297a7ddc22baf1be51a",
       "alias": "ios",
       "include": [
         "docs/ios/*.md",
@@ -135,8 +135,8 @@
           "sha256": "e5cd7a34e20f905a6b4ca95883f15bf541f08e274f4788a2b2e89d407619e875"
         },
         "docs/ios/app-store-listing.md": {
-          "blob": "8022f20d17f0e241761695b3866d8b0add65ce26",
-          "sha256": "01b015a9860be441be6f18714f4e9a60a6cd21972276a1d05891a568c4e4f28d"
+          "blob": "ec526821c08a9d2ba2c0625e158a3cef9c4ca229",
+          "sha256": "a1db38534f717411197f997f171c24e78e2d1ded74b5e76d5f0835789deccee2"
         },
         "docs/ios/device-checklist-1.4.9.md": {
           "blob": "92ad3f95cdb620257ac9cfde22b60427ccf93b2f",
@@ -171,16 +171,16 @@
           "sha256": "0c80116c063464b683cab177a529d21440e894b29bfae8b2ee35bbee484a3630"
         },
         "docs/process/runbooks/app-store-submission.md": {
-          "blob": "75168ce1e47bf28033e4e3213a854f653766e70a",
-          "sha256": "8c3c9a70d4c45ed7621bd678e915e59ddbd5068b92123d2869f668ccaf024daf"
+          "blob": "321a42531e3a61de8cb80d7ee13a184fb71ce71e",
+          "sha256": "93c9279c7734e88b1670f1c8b46e326c7a9910a70efd3d7c31e7efd12f3fb059"
         },
         "docs/process/runbooks/ios-hotfix.md": {
-          "blob": "0da7e67b7eaff14cb28d349281553dda6066defe",
-          "sha256": "19a778f4fc9c7341b8fddf619dec18e5497b1550e9155e0551c71b728bad54a9"
+          "blob": "ec1824dc16fd3a5bb2ac4ff588a401fa95c2d43b",
+          "sha256": "693d0ad7ab6a51cbdbf9b2f044f6b6b2b2c17129c8ad28dd243242b2f377f685"
         },
         "ios/App/Resources/PrivacyInfo.xcprivacy": {
-          "blob": "a0c644c41144a27e6f8686f17551b7dea8ce0e2d",
-          "sha256": "6ee12603431633dee35f4c47e6e64688d607346f8c8a3ff7acc4ca883cbb287a"
+          "blob": "3815ad935987eff7145477014fd2cc180e66e6be",
+          "sha256": "6a92e8556b8dd85ec365c9bf5ccda1664fe7fe9d5fa2ec05f2be49a734bc2be2"
         },
         "ios/App/Sources/Data/CorpusActor.swift": {
           "blob": "235d2119f86d81fc824f81dc32255f348d4a9f00",
@@ -211,24 +211,24 @@
           "sha256": "cee1944242c0d2575f21967b3d05f31953e239c1b00c465f629f74f572699a28"
         },
         "ios/testflight-builds.json": {
-          "blob": "f3aae80502d36f610715809bec83800cfd1beea1",
-          "sha256": "fb46b81998ac12211463815a30718e434ae9e6bc97dbee7a3da2234d9958a9d2"
+          "blob": "dfbbfeabf663323fd01392329da7416ee80e9167",
+          "sha256": "0c18b274537d94703837774cf75c01e77bd1c55bde0c3dd920534856cd2644d0"
         },
         "ios/tests/test_ios_gates.py": {
-          "blob": "5fdaf586fabf51c235c6fadbb98873ee400894c6",
-          "sha256": "35f09aafb9b4090639459b283a251889f7adb905e13957e7362507ec66c46371"
+          "blob": "80e3f3973f9eb071a5ce355ce0d572e97347af85",
+          "sha256": "4152457218d8b06c0b5fb5302ab8ae7c635d16bc7ff83869cffad8f88a4b8256"
         },
         "ios/tools/appstore_preflight.py": {
-          "blob": "9ea43fc389596d3a4ad8010e29a75b23412f3986",
-          "sha256": "7ebc4b99f9cfdeb805ac082897518c35467fddeffc6e6fbe5cecc291258f64be"
+          "blob": "d7c19b7546824d058fa8f557920681491ae49707",
+          "sha256": "bda33008cd0e7ee79fcd63144dddeb303d61f36c9b9aae66e5ecdf72fa0e35a9"
         },
         "ios/tools/testflight_archive.sh": {
-          "blob": "74a743dddcd697b05e75d99ddcd214fbba3b921d",
-          "sha256": "3b8967490af4a0fc94b8789585004e332288f0b919d9d3c7e86320373895e618"
+          "blob": "e2e9af38811f40d3ac1ce589b72d37808f3dde0a",
+          "sha256": "831cf2233c7fd533a0416b746df1a96531a7be9c9a94b63e8cdad8940a4b6b3a"
         },
         "ios/tools/testflight_ledger.py": {
-          "blob": "7d1d6a6ed45ca73d8b7c9345b7b1b8a16b1281fc",
-          "sha256": "14e003c4c1165df41e0e3fa06a32e91c8f37e5fd69286c9273e4a699c913fb58"
+          "blob": "ecca190eef0a19b916c925c1cd6e8066b82a670c",
+          "sha256": "af18562c048b495cce2646b209026bbc9689e724de5d5b3fdeb16a16ef15b975"
         },
         "pipeline/check_ios_db_pair.py": {
           "blob": "ac2054df9cab0166d73462b104c6c406fd43accc",
